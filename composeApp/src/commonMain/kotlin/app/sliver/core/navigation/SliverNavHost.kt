@@ -50,6 +50,7 @@ import app.sliver.feature.trim.UNDO_WINDOW_MS
 import androidx.compose.runtime.produceState
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.onboarding.OnboardingScreen
+import app.sliver.feature.settings.SettingsScreen
 import kotlinx.coroutines.flow.first
 import org.koin.mp.KoinPlatform
 
@@ -127,7 +128,8 @@ fun SliverNavHost() {
                             onEdit = { go(Route.FilmBuilder) },
                         )
                         Route.YearInSeconds -> YearInSecondsScreen(::go, onBack = { nav.popBackStack() })
-                        Route.Notifications -> NotificationsScreen(onBack = { nav.popBackStack() })
+                        Route.Settings -> SettingsScreen(::go)
+                        Route.Notifications ->NotificationsScreen(onBack = { nav.popBackStack() })
                         Route.Onboarding -> OnboardingScreen(onFinished = {
                             nav.navigate(Route.Camera.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
                         })

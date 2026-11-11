@@ -26,7 +26,7 @@
 - [x] T26
 - [x] T27 (Google step hidden until T33)
 - [x] T28 (alarms not device-tested, see HANDOFF)
-- [ ] T29
+- [x] T29 (Account/Backup rows route to Backup placeholder until T33)
 - [ ] T30
 - [ ] T31
 - [ ] T32
