@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.sp
 import app.sliver.core.designsystem.Glow
 import app.sliver.core.designsystem.glow
 import app.sliver.core.icons.HubIcons
+import app.sliver.core.icons.SliverIcons
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.navigation.Route
 import app.sliver.core.permissions.PermissionKind
@@ -256,6 +257,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 onRename = { menuOpen = false; projectAction = ProjectAction.Rename },
                 onShape = { menuOpen = false; projectAction = ProjectAction.Format },
                 onFill = { menuOpen = false; onNavigate(Route.FillThePast) },
+                onYear = { menuOpen = false; onNavigate(Route.YearInClips) },
                 onArchive = {
                     menuOpen = false
                     project?.let { p -> scope.launch { koin.get<ProjectRepository>().setArchived(p.id, true) } }
@@ -549,8 +551,9 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
 @Composable
 private fun ProjectMenu(
     canLeave: Boolean,
-    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
+    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onYear: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
 ) {
+    app.sliver.core.ui.BackHandler(onBack = onDismiss)
     Box(Modifier.fillMaxSize().clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss))
     val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 11.dp + 48.dp
     Box(Modifier.fillMaxSize().padding(top = top, end = 12.dp), Alignment.TopEnd) {
@@ -566,8 +569,13 @@ private fun ProjectMenu(
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
             MenuItem(HubIcons.Shape, "Change shape", SliverColors.TextPrimary, onShape)
             MenuItem(HubIcons.FillDays, "Fill empty days", SliverColors.TextPrimary, onFill)
+            MenuItem(SliverIcons.Calendar, "Year in clips", SliverColors.TextPrimary, onYear)
             MenuItem(HubIcons.Archive, "Archive project", SliverColors.TextPrimary, onArchive, canLeave)
             MenuItem(HubIcons.Trash, "Delete project", SliverColors.Error, onDelete, canLeave)
+            if (!canLeave) SliverText(
+                "Keep at least one open project.", SliverType.Caption, Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                color = SliverColors.TextTertiary,
+            )
         }
     }
 }

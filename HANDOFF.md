@@ -204,3 +204,11 @@ Device: Samsung (1080x2340 @420dpi). Shots in docs/qa/project/ (clip cells maske
   - [ ] Dropped from Project screen vs v1.1: backfilled-cell badge, reminder-permission card variants, "Your year in clips" teaser card (not on boards; Year-in-clips route is now unreachable from here).
   - Camera calendar chip now always opens Project (board: opened from the chip); Day detail is reached from the grid.
   - No new tables; one new DataStore flag nudgeDismissed.
+
+## Fix round: camera chip, menu back, projects meta, year entry
+- Camera project chip sizes to content (max 220dp, one line, ellipsis); no longer shares weight with a spacer.
+- Project screen ⋯ menu: BackHandler closes only the menu (scrim tap already did). Sheets already use PredictiveBackHandler (Overlays.kt).
+- Projects sheet meta line may wrap to 2 lines (no truncation).
+- "Year in clips" added as a plain item in the Project ⋯ menu (no board shows an entry; DECISION).
+- Archive/Delete stay disabled with one project (rule kept); one-line reason "Keep at least one open project." shown under them (the board shows them enabled; DECISION: rule wins, reason added).
+- Verified on Samsung (no screenshots taken): chip text "My 2026", menu lists Year in clips, Back closes menu only.

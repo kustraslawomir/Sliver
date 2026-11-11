@@ -254,12 +254,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
                     TimerPill(formatTimer(elapsedMs), long, Modifier.align(Alignment.CenterVertically))
                 } else {
-                    CameraChip(
-                        project?.name ?: "My ${today.year}",
-                        onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    Spacer(Modifier.weight(1f))
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        CameraChip(
+                            project?.name ?: "My ${today.year}",
+                            onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
+                            modifier = Modifier.widthIn(max = 220.dp),
+                        )
+                    }
                     CameraChip(
                         "Today", leading = SliverIcons.Calendar,
                         onClick = { onNavigate(Route.Project) },

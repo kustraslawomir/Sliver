@@ -207,7 +207,7 @@ private fun ProjectRow(
         }
         Column(Modifier.weight(1f)) {
             SliverText(project.name, SliverType.DisplayS, maxLines = 1)
-            SliverText(projectMeta(project, stats), SliverType.MonoS, color = SliverColors.TextTertiary, maxLines = 1)
+            SliverText(projectMeta(project, stats), SliverType.MonoS, color = SliverColors.TextTertiary, maxLines = 2)
         }
         if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary)
         IconButton44({ onMenu(project) }, "Project options") { SliverIcon(SliverIcons.More, SliverColors.TextSecondary) }
