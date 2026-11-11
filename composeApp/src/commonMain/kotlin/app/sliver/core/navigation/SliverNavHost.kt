@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import app.sliver.core.ui.UndoToastHost
 import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.archive.DayDetailScreen
+import app.sliver.feature.backfill.BackfillScreen
 import app.sliver.feature.camera.CameraScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.looks.LooksScreen
@@ -66,6 +67,7 @@ fun SliverNavHost() {
                         Route.Looks -> LooksScreen(onBack = { nav.popBackStack() })
                         Route.Archive -> ArchiveScreen(::go)
                         Route.DayDetail -> DayDetailScreen(::go, onBack = { nav.popBackStack() })
+                        Route.FillThePast -> BackfillScreen(onBack = { nav.popBackStack() })
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }

@@ -43,6 +43,7 @@ data class SaveSecondRequest(
     val motion: Motion = Motion.STILL,
     val keepAudio: Boolean = true,
     val color: Int = 0,
+    val isPhoto: Boolean = daySource == DaySource.PHOTO,
 )
 
 interface FilmRepository {
@@ -64,7 +65,7 @@ class DayRepositoryImpl(
         val tmpVideo = files.newTmpPath(stamp)
         val tmpThumb = "$tmpVideo.jpg"
         try {
-            val clip = if (daySource == DaySource.PHOTO) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
+            val clip = if (isPhoto) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
             else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val file = files.dayPath(date)
             val thumb = files.thumbPath(date)
