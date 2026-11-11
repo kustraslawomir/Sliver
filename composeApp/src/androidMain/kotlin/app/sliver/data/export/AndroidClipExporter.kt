@@ -195,7 +195,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
                 val rate = sampleRates[track]
                 if (rate == null || AudioFit.keep(extractor.sampleTime, rate)) {
                     info.presentationTimeUs = extractor.sampleTime
-                    info.flags = extractor.sampleFlags
+                    info.flags = if (extractor.sampleFlags and MediaExtractor.SAMPLE_FLAG_SYNC != 0) MediaCodec.BUFFER_FLAG_KEY_FRAME else 0
                     info.offset = 0
                     muxer.writeSampleData(outTracks.getValue(track), buffer, info)
                 }
