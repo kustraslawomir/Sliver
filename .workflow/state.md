@@ -24,7 +24,7 @@
 - [x] T24 (not device-tested, see HANDOFF)
 - [x] T25 (not device-tested, see HANDOFF)
 - [x] T26
-- [ ] T27
+- [x] T27 (Google step hidden until T33)
 - [x] T28 (alarms not device-tested, see HANDOFF)
 - [ ] T29
 - [ ] T30

@@ -27,8 +27,3 @@ enum class Route(val path: String, val title: String, val tabBar: Boolean = fals
         fun start(onboardingDone: Boolean): Route = if (onboardingDone) Camera else Onboarding
     }
 }
-
-/** In-memory until the settings store lands (T05). */
-object OnboardingFlag {
-    var done: Boolean = false
-}

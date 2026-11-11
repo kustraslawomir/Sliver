@@ -47,6 +47,10 @@ import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.trim.PhotoTrimScreen
 import app.sliver.feature.trim.TrimScreen
 import app.sliver.feature.trim.UNDO_WINDOW_MS
+import androidx.compose.runtime.produceState
+import app.sliver.data.settings.SettingsRepository
+import app.sliver.feature.onboarding.OnboardingScreen
+import kotlinx.coroutines.flow.first
 import org.koin.mp.KoinPlatform
 
 @Composable
@@ -85,8 +89,13 @@ fun SliverNavHost() {
         DeepLink.target.value = null
     }
 
+    val onboardingDone by produceState<Boolean?>(null) {
+        value = KoinPlatform.getKoin().get<SettingsRepository>().settings.first().onboardingDone
+    }
+    val done = onboardingDone ?: return Box(Modifier.fillMaxSize().background(SliverColors.BgBase))
+
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        NavHost(nav, startDestination = Route.start(OnboardingFlag.done).path) {
+        NavHost(nav, startDestination = Route.start(done).path) {
             Route.entries.forEach { route ->
                 composable(route.path) {
                     when (route) {
@@ -119,6 +128,9 @@ fun SliverNavHost() {
                         )
                         Route.YearInSeconds -> YearInSecondsScreen(::go, onBack = { nav.popBackStack() })
                         Route.Notifications -> NotificationsScreen(onBack = { nav.popBackStack() })
+                        Route.Onboarding -> OnboardingScreen(onFinished = {
+                            nav.navigate(Route.Camera.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
+                        })
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }
@@ -144,12 +156,6 @@ private fun PlaceholderScreen(route: Route, onGo: (Route) -> Unit) {
     ) {
         SliverText(route.title, SliverType.DisplayM)
         Column(Modifier.padding(top = SliverSpace.S6)) {
-            if (route == Route.Onboarding) {
-                GhostButton("Finish onboarding", onClick = {
-                    OnboardingFlag.done = true
-                    onGo(Route.Camera)
-                })
-            }
             Route.entries.filter { it != route }.forEach { target ->
                 GhostButton(target.title, onClick = { onGo(target) })
             }

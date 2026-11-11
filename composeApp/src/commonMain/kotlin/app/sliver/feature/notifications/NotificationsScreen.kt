@@ -43,13 +43,13 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.koin.mp.KoinPlatform
 
-private val FixedTimes = listOf(LocalTime(9, 0), LocalTime(13, 0), LocalTime(19, 30), LocalTime(21, 30))
+internal val FixedTimes = listOf(LocalTime(9, 0), LocalTime(13, 0), LocalTime(19, 30), LocalTime(21, 30))
 private val WindowStarts = listOf(LocalTime(8, 0), LocalTime(10, 0), LocalTime(12, 0))
 private val WindowEnds = listOf(LocalTime(18, 0), LocalTime(20, 0), LocalTime(22, 0))
 private val DayLetters = listOf("M", "T", "W", "T", "F", "S", "S")
 private val Modes = listOf(ReminderMode.FIXED, ReminderMode.RANDOM, ReminderMode.OFF)
 
-private fun LocalTime.label() = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+internal fun LocalTime.label() = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
 
 @Composable
 fun NotificationsScreen(onBack: () -> Unit) {
@@ -129,7 +129,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
                     })
                 }
             }
-            Preview(
+            NotifPreview(
                 reminderCopy(if (s.reminder.mode == ReminderMode.RANDOM) NotifKind.RANDOM else NotifKind.REMINDER, LocalDate(2000, 1, 1)),
                 Modifier.padding(top = SliverSpace.S5),
             )
@@ -152,7 +152,7 @@ private fun Label(text: String) {
 }
 
 @Composable
-private fun Preview(copy: NotifCopy, modifier: Modifier = Modifier) {
+internal fun NotifPreview(copy: NotifCopy, modifier: Modifier = Modifier) {
     Column(
         modifier.fillMaxWidth().clip(SliverShapes.M).background(SliverColors.Surface2)
             .border(1.dp, SliverColors.LineHairline, SliverShapes.M).padding(SliverSpace.S4),
