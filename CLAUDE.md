@@ -10,44 +10,37 @@
 - Verify with real commands (the Build/Tests/Lint commands in the product rules below), not by assumption. Max 2 fix attempts per failure, then mark task BLOCKED in `HANDOFF.md` and move on.
 - Code style: minimal, idiomatic, no speculative abstractions, no comments restating code. Match UI tokens from `docs/UI.md` exactly.
 
-# ---- Product rules (from input plan) — override stack line above ----
-# SLIVER — rules for agents
+# ---- Product rules v1.1 (from fix pack) — override stack line above ----
+# SLIVER — rules for agents (v1.1)
 
-Product: one-second-a-day video diary. Read before coding:
-`docs/SPEC.md` (behavior), `docs/DESIGN.md` (look), `docs/DATA.md` (data + file rules), `docs/ARCHITECTURE.md` (code layout).
+Product: one-clip-a-day video diary, organised in projects. Read before coding:
+`docs/SPEC.md`, `docs/DESIGN.md`, `docs/DATA.md`, `docs/ARCHITECTURE.md`, and the v1.1 docs: `docs/NAVIGATION.md`, `docs/TERMS.md`, `docs/PROJECTS.md`, `docs/UI-RULES.md`. **When v1.1 docs and older docs disagree, v1.1 wins.**
 
 ## Scope discipline
-- Implement exactly the task you were given. No extra features, no speculative abstractions, no "for later" layers.
-- If the spec is silent, pick the simplest option, leave a `// DECISION: …` comment and list it in your summary.
-- Don't add dependencies that aren't in ARCHITECTURE.md unless you must — then say why in the summary.
-- Don't refactor code outside the task unless it blocks you.
-- Unsure about a library API? Check the real docs/source. Never invent API names.
+- Implement exactly the task you were given. No extra features, no speculative abstractions.
+- Spec silent → simplest option, `// DECISION: …` comment, list it in your summary.
+- No new dependencies unless needed — say why in the summary.
+- Never invent API names; check real docs/source.
 
 ## Platforms
-- KMP project. **Android is the only target we build, run and test.**
-- iOS: `iosMain` gets `actual` stubs that `TODO("iOS later")`. Never try to build or test iOS.
-- Pure logic (dates, scoring, scheduling rules, film plans, Drive REST calls, state machines) goes in `commonMain` with unit tests.
-- Platform work (CameraX, Media3, WorkManager, notifications, Glance, MediaStore, Google auth, haptics) goes in `androidMain` behind the small interfaces listed in ARCHITECTURE.md.
+- KMP. Android is the only target we build, run and test. iOS = `TODO("iOS later")` stubs, never built.
+- Pure logic in `commonMain` with unit tests; platform work in `androidMain` behind interfaces.
 
 ## Commands
-- Build: `./gradlew :composeApp:assembleDebug`
-- Tests: `./gradlew :composeApp:testDebugUnitTest`
-- Lint: `./gradlew :composeApp:lintDebug` — fix warnings you introduced.
-A task is done only when build + tests pass.
+- Build `./gradlew :composeApp:assembleDebug` · Tests `./gradlew :composeApp:testDebugUnitTest` · Lint `./gradlew :composeApp:lintDebug`
+- Done = build + tests pass.
 
-## Code style
-- Kotlin, Compose Multiplatform, Koin, coroutines/Flow, kotlinx-datetime, kotlinx-serialization.
-- Per feature: `feature/<name>/` with `XScreen.kt` (Composable), `XViewModel.kt` (StateFlow<XUiState>), plus repository use. Keep it flat.
-- No hardcoded colors/dimens in screens — use `SliverTheme` tokens.
-- User-facing strings in English, in compose resources `strings.xml`.
-- Tests: `kotlin.test` in `commonTest` for logic. No UI/instrumented tests unless the task says so.
-- Small files, clear names, no comments that restate the code.
+## UI rules (see docs/UI-RULES.md)
+- Icons are vector icons from `core/icons/SliverIcons` — never letters or words pretending to be icons ("X", "v", "SND", "GRID" in a circle).
+- Fonts come from `SliverTheme.typography` only. No `FontFamily.Default`, no `MaterialTheme.typography` in screens.
+- Geist Mono only for dates, timecodes and counters. Buttons, chips and menus use Geist.
+- Every primary action is single-flight: disabled + progress while running, can't fire twice.
+- Every screen that loads media shows a loading state within 100 ms.
+- Words: follow `docs/TERMS.md` ("clip", never "second" as a noun in UI; "Filters", never "Looks").
 
-## Product rules — never break these
-- Dark only. One accent: ember `#FF8A3D`. Ember is a fill only on the primary button and the record dot.
-- No streaks, no guilt copy, no day notes, no mood tags, no paywall, no ads, no analytics, no tracking.
-- Works fully offline. Network is used only for the user's own Google Drive backup.
-- We never upload video anywhere except the user's own Drive.
-- Gallery originals are read-only: never modify or delete them.
-- In-app recordings live in `tmp/` and are deleted after the chosen second is saved (unless "Also save full recordings to Photos" is on).
-- Look and date stamp are never burned into day files — only into exports.
+## Product rules — never break
+- Dark only, one accent ember `#FF8A3D` (fill only on the primary button and record dot).
+- No streaks, no notes, no mood, no paywall, no ads, no analytics.
+- Offline-first; network only for the user's own Google Drive backup.
+- Gallery originals are read-only. In-app recordings live in `tmp/` and are deleted after the clip is saved (unless "Also save full recordings to Photos").
+- Filters and date stamp are never burned into stored clips — only into exports.
