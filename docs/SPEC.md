@@ -52,7 +52,7 @@ Steps 1–3 have Skip. No backfill step (Fill the past is never suggested).
 Recents / Favorites, filter All / Videos / Photos, "FOR <date>" chip. Video → Trim. Photo (single select) → Photo → 1 s.
 
 ### Photo → 1 s
-Looping preview, motion chips Still / Slow zoom (1.00 → 1.08, eased). Use this second / Retake / Looks.
+Looping preview, motion chips Still (default) / Slow zoom (opt-in, 1.00 → 1.08, eased). Use this second / Retake / Looks.
 
 ### Looks editor
 Preview (hold to compare with original), tabs LOOKS / ADJUST.

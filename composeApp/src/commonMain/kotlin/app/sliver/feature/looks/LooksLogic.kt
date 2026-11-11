@@ -75,6 +75,6 @@ object LookSession {
         val audio: Boolean = true,
         val shortMode: ShortMode = ShortMode.SLOW_TO_FIT,
         val day: LocalDate? = null,
-        val motion: Motion = Motion.ZOOM,
+        val motion: Motion = Motion.STILL,
     )
 }

@@ -89,7 +89,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val today = remember { todayLocal() }
     val resume = remember { LookSession.takeResume() }
     val day = remember { resume?.day ?: CaptureSession.forDate ?: today }
-    var motion by remember { mutableStateOf(resume?.motion ?: Motion.ZOOM) }
+    var motion by remember { mutableStateOf(resume?.motion ?: Motion.STILL) }
     var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
     var saving by remember { mutableStateOf(false) }
     val project by remember { projects.active }.collectAsState(null)
