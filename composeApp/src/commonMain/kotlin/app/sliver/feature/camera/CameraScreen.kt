@@ -113,6 +113,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         holding = false
         result.onSuccess {
             CaptureSession.path = it
+            CaptureSession.source = app.sliver.data.DaySource.CAMERA
+            CaptureSession.forDate = null
             onNavigate(route)
         }
     }

@@ -110,7 +110,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     var speed by remember { mutableStateOf(1f) }
     var audio by remember { mutableStateOf(true) }
     var shortMode by remember { mutableStateOf(ShortMode.SLOW_TO_FIT) }
-    var day by remember { mutableStateOf(today) }
+    var day by remember { mutableStateOf(CaptureSession.forDate ?: today) }
+    val daySource = remember { CaptureSession.source }
     var sheet by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
@@ -158,7 +159,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
             val format = settings.settings.first().newFilmFormat
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = startMs, speed = speed, cropY = null, format = format,
-                daySource = DaySource.CAMERA, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = audio,
+                daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = audio,
             )
             val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
             saving = false
@@ -350,7 +351,7 @@ private fun Minimap(startMs: Long, windowMs: Long, durationMs: Long, onJump: (Fl
     }
 }
 
-private fun dayLabel(date: LocalDate, today: LocalDate): String {
+internal fun dayLabel(date: LocalDate, today: LocalDate): String {
     return when ((today.toEpochDays() - date.toEpochDays()).toLong()) {
         0L -> "Today"
         1L -> "Yesterday"

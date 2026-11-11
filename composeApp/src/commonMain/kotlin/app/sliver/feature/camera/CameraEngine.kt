@@ -34,4 +34,6 @@ expect fun rememberLatestGalleryThumb(): ImageBitmap?
 /** Hand-off from capture to Trim / PhotoTrim until those screens take a route argument. */
 object CaptureSession {
     var path: String? = null
+    var forDate: kotlinx.datetime.LocalDate? = null
+    var source: app.sliver.data.DaySource = app.sliver.data.DaySource.CAMERA
 }
