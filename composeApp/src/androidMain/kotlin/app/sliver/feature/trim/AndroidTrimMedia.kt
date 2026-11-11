@@ -19,6 +19,20 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
         }
     }
 
+    override suspend fun aspect(path: String): Float = withContext(Dispatchers.IO) {
+        val r = MediaMetadataRetriever()
+        try {
+            r.setDataSource(path)
+            fun key(k: Int) = r.extractMetadata(k)?.toFloatOrNull() ?: 0f
+            val w = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+            val h = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+            val rot = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION).toInt()
+            if (w <= 0f || h <= 0f) 1f else if (rot % 180 != 0) h / w else w / h
+        } finally {
+            r.release()
+        }
+    }
+
     override suspend fun autoPickMs(path: String, durationMs: Long): Long =
         if (durationMs <= 1000) 0L else runCatching { sampler.pickBestSecondMs(path, durationMs) }.getOrDefault(0L)
 

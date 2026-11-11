@@ -32,7 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.foundation.layout.height
+import app.sliver.core.ui.Chip
+import app.sliver.core.ui.SliverBottomSheet
+import app.sliver.data.FilmFormat
+import app.sliver.data.repo.FilmRepository
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -97,6 +103,23 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
     var replacing by remember { mutableStateOf(false) }
+    val filmRepo = remember { koin.get<FilmRepository>() }
+    val films by remember { filmRepo.observeAll() }.collectAsState(emptyList())
+    val film = activeFilm(films, cam.activeFilmId)
+    val format = film?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
+    var filmMenu by remember { mutableStateOf(false) }
+    val rotation = rememberDeviceRotation()
+    val iconRot = iconRotation(rotation)
+    val bandActive = format == FilmFormat.CINEMA && isUpright(rotation)
+    var turnHint by remember { mutableStateOf(false) }
+    LaunchedEffect(bandActive) {
+        if (bandActive && !TurnHintSession.shown) {
+            TurnHintSession.shown = true
+            turnHint = true
+            delay(TURN_HINT_MS)
+            turnHint = false
+        }
+    }
 
     var ready by remember { mutableStateOf(false) }
     var recording by remember { mutableStateOf(false) }
@@ -174,6 +197,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
         Box(Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 168.dp).clip(RoundedCornerShape(24.dp))) {
             CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
+            if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
             countdown?.let {
                 SliverText(it.toString(), SliverType.DisplayXL, Modifier.align(Alignment.Center))
@@ -185,7 +209,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ControlButton("Grid", "Grid", cam.grid) { update { it.copy(grid = !it.grid) } }
+            ControlButton("Grid", "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
             if (recording) {
                 SliverText(
                     formatTimer(elapsedMs), SliverType.MonoL,
@@ -194,17 +218,60 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     SliverColors.Accent,
                 )
             }
-            ControlButton(if (timerSec == 0) "Timer" else "${timerSec}s", "Self-timer", timerSec != 0) {
+            ControlButton(if (timerSec == 0) "Timer" else "${timerSec}s", "Self-timer", timerSec != 0, iconRot) {
                 if (!recording) timerSec = nextSelfTimer(timerSec)
             }
-            ControlButton("Flash", "Flash", cam.flash) { update { it.copy(flash = !it.flash) } }
-            ControlButton("Flip", "Flip camera", false) {
+            ControlButton("Flash", "Flash", cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
+            ControlButton("Flip", "Flip camera", false, iconRot) {
                 if (!recording) update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
             }
         }
 
-        todayDay?.takeIf { !replacing && !recording }?.let { day ->
-            TodayCard(day, { replacing = true }, Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 64.dp))
+        Column(
+            Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 64.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+        ) {
+            if (!recording) {
+                Chip(cameraChipLabel(film, format).uppercase() + " v", selected = false, onClick = { filmMenu = true })
+            }
+            if (turnHint && bandActive) {
+                SliverText(
+                    "Turn sideways for the full frame", SliverType.BodySmall,
+                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                        .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
+                    SliverColors.TextPrimary,
+                )
+            }
+            todayDay?.takeIf { !replacing && !recording }?.let { day -> TodayCard(day, { replacing = true }) }
+        }
+
+        SliverBottomSheet(filmMenu, { filmMenu = false }) {
+            Column {
+                SliverText("Shoot for which film", SliverType.Headline, color = SliverColors.TextPrimary)
+                films.filter { it.live }.forEach { f ->
+                    Row(
+                        Modifier.fillMaxWidth().height(56.dp).clickable {
+                            update { it.copy(activeFilmId = f.id) }
+                            filmMenu = false
+                        },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        SliverText(f.name, SliverType.Body, color = if (f.id == film?.id) SliverColors.Accent else SliverColors.TextPrimary)
+                        SliverText(f.format.label().uppercase(), SliverType.MonoS, color = SliverColors.TextTertiary)
+                    }
+                }
+                Row(
+                    Modifier.fillMaxWidth().height(56.dp).clickable {
+                        filmMenu = false
+                        onNavigate(Route.FilmBuilder)
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SliverText("+ New film", SliverType.Body, color = SliverColors.Accent)
+                }
+            }
         }
 
         Column(
@@ -267,9 +334,23 @@ private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modi
 }
 
 @Composable
-private fun ControlButton(label: String, description: String, active: Boolean, onClick: () -> Unit) {
+private fun ControlButton(label: String, description: String, active: Boolean, rotation: Float, onClick: () -> Unit) {
     IconButton44(onClick, description, overCamera = true) {
-        SliverText(label.uppercase(), SliverType.MonoS, color = if (active) SliverColors.Accent else SliverColors.TextPrimary)
+        SliverText(
+            label.uppercase(), SliverType.MonoS, Modifier.rotate(rotation),
+            if (active) SliverColors.Accent else SliverColors.TextPrimary,
+        )
+    }
+}
+
+@Composable
+private fun CinemaBandDim() {
+    Canvas(Modifier.fillMaxSize()) {
+        val band = cinemaBandFraction(size.width, size.height) * size.height
+        val edge = (size.height - band) / 2f
+        val dim = Color.Black.copy(alpha = 0.55f)
+        drawRect(dim, Offset.Zero, androidx.compose.ui.geometry.Size(size.width, edge))
+        drawRect(dim, Offset(0f, size.height - edge), androidx.compose.ui.geometry.Size(size.width, edge))
     }
 }
 

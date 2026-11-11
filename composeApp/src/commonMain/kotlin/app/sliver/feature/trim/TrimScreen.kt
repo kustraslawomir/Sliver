@@ -5,6 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.graphics.Color
+import app.sliver.data.FilmFormat
+import app.sliver.data.db.Film
+import app.sliver.data.repo.FilmRepository
+import app.sliver.feature.camera.activeFilm
+import app.sliver.feature.camera.cinemaBandFraction
+import app.sliver.feature.camera.cropYFromTop
+import app.sliver.feature.camera.topFromCropY
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -94,6 +103,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val files = remember { koin.get<FileStore>() }
     val settings = remember { koin.get<SettingsRepository>() }
+    val filmRepo = remember { koin.get<FilmRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -118,6 +128,9 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
     var day by remember { mutableStateOf(resume?.day ?: CaptureSession.forDate ?: today) }
     val daySource = remember { CaptureSession.source }
+    var film by remember { mutableStateOf<Film?>(null) }
+    var clipAspect by remember { mutableStateOf(1f) }
+    var cropY by remember { mutableStateOf(0.5f) }
     var sheet by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
@@ -128,6 +141,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
 
     LaunchedEffect(path) {
         if (look == null) look = settings.settings.first().defaultLook.toParams()
+        film = activeFilm(filmRepo.observeAll().first(), settings.settings.first().camera.activeFilmId)
+        clipAspect = media.aspect(path)
         val d = media.durationMs(path)
         if (resume == null) {
             val pick = media.autoPickMs(path, d)
@@ -147,7 +162,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val duration = durationMs
     val short = duration != null && isShortClip(duration)
     val windowMs = if (short) duration ?: 0 else (SECOND_MS * speed).toLong()
-    val coach = saved?.coachTrimSeen == false && duration != null && !short
+    val reframe = film?.format == FilmFormat.CINEMA && clipAspect < 1f
+    val coach =saved?.coachTrimSeen == false && duration != null && !short
 
     fun release(to: Long) {
         startMs = to
@@ -177,9 +193,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
         if (saving || duration == null) return
         saving = true
         scope.launch {
-            val format = settings.settings.first().newFilmFormat
+            val format = film?.format ?: settings.settings.first().newFilmFormat
             val request = SaveSecondRequest(
-                date = day, source = path, startMs = startMs, speed = speed, cropY = null, format = format,
+                date = day, source = path, startMs = startMs, speed = speed,
+                cropY = cropY.takeIf { reframe }, format = format,
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = audio,
                 look = look ?: settings.settings.first().defaultLook.toParams(),
             )
@@ -212,6 +229,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
             ) {
                 if (duration != null) {
                     TrimPlayer(path, committedMs, windowMs, speed, audio, dragging, Modifier.fillMaxSize(), look ?: LookParams())
+                    if (reframe) ReframeBand(cropY, { cropY = it })
                     Badge(
                         if (custom) "Custom" else "✦ Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),
@@ -352,6 +370,33 @@ private fun Filmstrip(
             frameState,
             Modifier.width(with(density) { frameW.toDp() }).fillMaxHeight()
                 .offset { IntOffset(frameLeft.roundToInt(), 0) },
+        )
+    }
+}
+
+/** Draggable 16:9 band over a portrait preview; everything outside is dimmed. */
+@Composable
+private fun ReframeBand(cropY: Float, onCropY: (Float) -> Unit) {
+    val update by rememberUpdatedState(onCropY)
+    val current by rememberUpdatedState(cropY)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val band = cinemaBandFraction(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
+        val top = topFromCropY(cropY, band)
+        val h = maxHeight
+        val bandH = h * band
+        val topDp = h * top
+        StripDim(Modifier.fillMaxWidth().height(topDp), Color.Black.copy(alpha = 0.55f))
+        StripDim(Modifier.fillMaxWidth().height(h - topDp - bandH).align(Alignment.BottomStart), Color.Black.copy(alpha = 0.55f))
+        Box(
+            Modifier.fillMaxWidth().height(bandH).offset(y = topDp)
+                .border(1.5.dp, SliverColors.Accent)
+                .pointerInput(band) {
+                    detectVerticalDragGestures { change, dy ->
+                        change.consume()
+                        val t = (topFromCropY(current, band) + dy / constraints.maxHeight).coerceIn(0f, 1f - band)
+                        update(cropYFromTop(t, band))
+                    }
+                },
         )
     }
 }

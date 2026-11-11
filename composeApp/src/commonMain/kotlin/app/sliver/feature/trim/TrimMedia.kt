@@ -7,6 +7,8 @@ import app.sliver.data.LookParams
 
 interface TrimMedia {
     suspend fun durationMs(path: String): Long
+    /** Displayed width / height of the clip (rotation applied); 1 when unknown. */
+    suspend fun aspect(path: String): Float
     suspend fun autoPickMs(path: String, durationMs: Long): Long
     suspend fun thumbnails(path: String, durationMs: Long, count: Int): List<ImageBitmap>
 }
