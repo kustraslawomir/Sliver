@@ -40,6 +40,10 @@ private object FakeExporter : ClipExporter {
         File(thumbPath).writeText("t")
         return ExportedClip(videoPath, thumbPath, 1000)
     }
+
+    override suspend fun photoToSecond(
+        source: String, motion: app.sliver.data.Motion, format: FilmFormat, videoPath: String, thumbPath: String,
+    ) = exportSecond(source, 0, 1f, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
 }
 
 @RunWith(RobolectricTestRunner::class)

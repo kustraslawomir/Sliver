@@ -27,6 +27,7 @@ import app.sliver.core.ui.UndoToastHost
 import app.sliver.feature.camera.CameraScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.trim.SaveUndo
+import app.sliver.feature.trim.PhotoTrimScreen
 import app.sliver.feature.trim.TrimScreen
 import app.sliver.feature.trim.UNDO_WINDOW_MS
 import org.koin.mp.KoinPlatform
@@ -57,6 +58,7 @@ fun SliverNavHost() {
                     when (route) {
                         Route.Camera -> CameraScreen(::go)
                         Route.Trim -> TrimScreen(::go)
+                        Route.PhotoTrim -> PhotoTrimScreen(::go)
                         Route.GalleryPicker -> GalleryScreen(::go)
                         else -> PlaceholderScreen(route, ::go)
                     }

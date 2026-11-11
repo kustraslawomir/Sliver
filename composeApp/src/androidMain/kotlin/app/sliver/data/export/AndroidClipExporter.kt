@@ -2,6 +2,7 @@ package app.sliver.data.export
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.media3.common.Effect
@@ -11,6 +12,7 @@ import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.SonicAudioProcessor
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.effect.Crop
+import androidx.media3.effect.MatrixTransformation
 import androidx.media3.effect.Presentation
 import androidx.media3.effect.SpeedChangeEffect
 import androidx.media3.transformer.Composition
@@ -21,6 +23,7 @@ import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
 import app.sliver.data.FilmFormat
+import app.sliver.data.Motion
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -100,6 +103,41 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         } finally {
             holdFrame?.delete()
         }
+        val duration = withContext(Dispatchers.IO) {
+            writeThumbnail(videoPath, thumbPath)
+            probe(Uri.fromFile(File(videoPath))).durationMs
+        }
+        return ExportedClip(videoPath, thumbPath, duration)
+    }
+
+    override suspend fun photoToSecond(
+        source: String,
+        motion: Motion,
+        format: FilmFormat,
+        videoPath: String,
+        thumbPath: String,
+    ): ExportedClip {
+        val uri = if (source.contains("://")) Uri.parse(source) else Uri.fromFile(File(source))
+        val (outW, outH) = if (format == FilmFormat.STORY) 1080 to 1920 else 1920 to 1080
+        val effects = buildList<Effect> {
+            add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP))
+            if (motion == Motion.ZOOM) {
+                add(
+                    MatrixTransformation { presentationTimeUs ->
+                        val s = PhotoMotion.zoomScale(presentationTimeUs / (SECOND_MS * 1000f))
+                        Matrix().apply { setScale(s, s) }
+                    },
+                )
+            }
+        }
+        val item = EditedMediaItem.Builder(MediaItem.Builder().setUri(uri).setImageDurationMs(SECOND_MS).build())
+            .setFrameRate(PhotoMotion.FPS)
+            .setEffects(Effects(emptyList(), effects))
+            .build()
+        val composition = Composition.Builder(
+            listOf(EditedMediaItemSequence.Builder(listOf(item)).experimentalSetForceAudioTrack(true).build()),
+        ).build()
+        runTransformer(composition, videoPath)
         val duration = withContext(Dispatchers.IO) {
             writeThumbnail(videoPath, thumbPath)
             probe(Uri.fromFile(File(videoPath))).durationMs

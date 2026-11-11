@@ -3,8 +3,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PKG=app.sliver
+# Several devices may be attached: pin to the Samsung unless ANDROID_SERIAL is already set.
+if [ -z "${ANDROID_SERIAL:-}" ]; then
+  ANDROID_SERIAL="$(adb devices -l | awk '/model:SM_/{print $1; exit}')"
+  [ -n "$ANDROID_SERIAL" ] || { echo "no Samsung device" >&2; echo no; exit 1; }
+  export ANDROID_SERIAL
+fi
 case "${1:?cmd}" in
-  ready)   adb devices | awk 'NR>1 && $2=="device"{f=1} END{exit !f}' && echo yes || { echo no; exit 1; } ;;
+  ready)   adb get-state >/dev/null 2>&1 && echo yes || { echo no; exit 1; } ;;
   install) ./gradlew :composeApp:installDebug -q ;;
   launch)  adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >/dev/null; sleep 3 ;;
   shot)    mkdir -p docs/screenshots; adb exec-out screencap -p > "docs/screenshots/${2:?name}.png"; echo "docs/screenshots/$2.png" ;;

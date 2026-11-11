@@ -1,6 +1,7 @@
 package app.sliver.data.export
 
 import app.sliver.data.FilmFormat
+import app.sliver.data.Motion
 import kotlin.math.ceil
 
 const val SECOND_MS = 1000L
@@ -24,6 +25,26 @@ interface ClipExporter {
         thumbPath: String,
         shortMode: ShortMode = ShortMode.SLOW_TO_FIT,
     ): ExportedClip
+
+    /** Turns the still [source] into a 1.000 s, 30 fps clip; ZOOM eases scale 1.00 to 1.08 over the second. */
+    suspend fun photoToSecond(
+        source: String,
+        motion: Motion,
+        format: FilmFormat,
+        videoPath: String,
+        thumbPath: String,
+    ): ExportedClip
+}
+
+object PhotoMotion {
+    const val FPS = 30
+    const val MAX_ZOOM = 1.08f
+
+    /** Smoothstep-eased zoom scale at [progress] 0..1 of the second. */
+    fun zoomScale(progress: Float): Float {
+        val t = progress.coerceIn(0f, 1f)
+        return 1f + (MAX_ZOOM - 1f) * t * t * (3f - 2f * t)
+    }
 }
 
 /** Which part of the source feeds the 1 s output and how it is filled when the source is too short. */
