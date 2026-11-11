@@ -18,3 +18,5 @@ local.properties
 google-services.json
 .workflow/input/
 .workflow/run.log
+build/
+.kotlin/
