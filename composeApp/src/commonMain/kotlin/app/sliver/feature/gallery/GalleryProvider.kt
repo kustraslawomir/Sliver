@@ -9,4 +9,9 @@ interface GalleryProvider {
 
     /** Copies the picked media into the app's tmp area and returns the new path. */
     suspend fun copyToTmp(uri: String): String
+
+    /** If the picked photo is a Motion Photo, writes its embedded video to tmp; null otherwise. */
+    suspend fun extractMotionVideo(uri: String): MotionClip?
 }
+
+class MotionClip(val path: String, val presentationUs: Long?)

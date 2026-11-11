@@ -34,4 +34,6 @@ object CaptureSession {
     var path: String? = null
     var forDate: kotlinx.datetime.LocalDate? = null
     var source: app.sliver.data.DaySource = app.sliver.data.DaySource.CAMERA
+    var motionPresentationUs: Long? = null
+    var motion: Boolean = false
 }

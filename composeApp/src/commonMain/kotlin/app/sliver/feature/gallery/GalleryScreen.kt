@@ -52,8 +52,9 @@ fun GalleryScreen(onNavigate: (Route) -> Unit) {
         busy = true
         failed = false
         scope.launch {
-            val video = provider.isVideo(uri)
-            val path = runCatching { provider.copyToTmp(uri) }.getOrNull()
+            val motion = runCatching { provider.extractMotionVideo(uri) }.getOrNull()
+            val video = motion != null || provider.isVideo(uri)
+            val path = motion?.path ?: runCatching { provider.copyToTmp(uri) }.getOrNull()
             busy = false
             if (path == null) {
                 failed = true
@@ -61,6 +62,8 @@ fun GalleryScreen(onNavigate: (Route) -> Unit) {
             }
             CaptureSession.path = path
             CaptureSession.forDate = forDate
+            CaptureSession.motion = motion != null
+            CaptureSession.motionPresentationUs = motion?.presentationUs
             CaptureSession.source = if (video) DaySource.GALLERY else DaySource.PHOTO
             onNavigate(if (video) Route.Trim else Route.PhotoTrim)
         }

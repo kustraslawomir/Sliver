@@ -6,6 +6,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import app.sliver.data.files.FileStore
+import app.sliver.data.media.MotionPhoto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -62,5 +63,17 @@ class AndroidGalleryProvider(private val context: Context, private val files: Fi
         val input = checkNotNull(resolver.openInputStream(source)) { "Cannot open media" }
         input.use { i -> java.io.File(path).outputStream().use { o -> i.copyTo(o) } }
         path
+    }
+
+    override suspend fun extractMotionVideo(uri: String): MotionClip? = withContext(Dispatchers.IO) {
+        val source = Uri.parse(uri)
+        if (resolver.getType(source)?.startsWith("image/") != true) return@withContext null
+        runCatching {
+            val bytes = resolver.openInputStream(source)?.use { it.readBytes() } ?: return@runCatching null
+            val video = MotionPhoto.find(bytes) ?: return@runCatching null
+            val path = files.newTmpPath(System.currentTimeMillis())
+            java.io.File(path).outputStream().use { it.write(bytes, video.offset, video.length) }
+            MotionClip(path, video.presentationUs)
+        }.getOrNull()
     }
 }

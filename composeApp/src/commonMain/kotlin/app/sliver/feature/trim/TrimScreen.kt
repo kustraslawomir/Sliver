@@ -96,6 +96,7 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveSecondRequest
 import app.sliver.data.settings.SettingsRepository
+import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -175,7 +176,9 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         clipAspect = media.aspect(path)
         durationMs = d
         if (resume == null && restoredMs == null) {
-            val pick = media.autoPickMs(path, d)
+            val motion = CaptureSession.motion
+            CaptureSession.motion = false
+            val pick = if (motion) MotionPhoto.windowStartMs(CaptureSession.motionPresentationUs, d) else media.autoPickMs(path, d)
             startMs = pick
             committedMs = pick
         }
