@@ -44,3 +44,14 @@ Product: one-clip-a-day video diary, organised in projects. Read before coding:
 - Offline-first; network only for the user's own Google Drive backup.
 - Gallery originals are read-only. In-app recordings live in `tmp/` and are deleted after the clip is saved (unless "Also save full recordings to Photos").
 - Filters and date stamp are never burned into stored clips — only into exports.
+
+# Add to CLAUDE.md (v1.2)
+
+- targetSdk 36. Never set `windowOptOutEdgeToEdgeEnforcement`, never rely on `onBackPressed`.
+- Never request READ_MEDIA_IMAGES / READ_MEDIA_VIDEO. Get media through the system Photo Picker (`PickVisualMedia` / `PickMultipleVisualMedia`).
+- Every screen must work at any window size ≥ 600 dp and survive recreation (state in ViewModel / SavedStateHandle). Use window size classes, not device checks.
+- Long work (render, backup, restore, fill empty days) shows a progress notification using `Notification.ProgressStyle` on API 36+, normal progress notification below.
+- State is never shown by color alone: add an icon, label or shape.
+
+## Test device
+Use the emulator `emulator-5554` (AVD tracker13, API 35): always set `ANDROID_SERIAL=emulator-5554`. Never touch other attached phones.
