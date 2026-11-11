@@ -101,15 +101,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         val p = rawPhoto
         value = if (p == null || look == null || look == LookParams()) p else renderer.render(p, look!!, PHOTO_EDGE)
     }
-    LaunchedEffect(Unit) { if (look == null) look = settings.settings.first().defaultLook.toParams() }
 
-    fun openLooks() {
-        LookSession.isPhoto = true
-        LookSession.params = look ?: LookParams()
-        LookSession.resume = LookSession.Resume(day = day, motion = motion)
-        done = true
-        onNavigate(Route.Looks)
-    }
 
     DisposableEffect(Unit) {
         onDispose { if (!done && isTmp(path)) files.delete(path) }
@@ -139,7 +131,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
-                look = look ?: settings.settings.first().defaultLook.toParams(),
+                look = LookParams(),
             )
             val ok = runCatching { undo.save(request) }.isSuccess
             saving = false
@@ -192,7 +184,6 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                     { if (inApp) onNavigate(Route.Camera) else navigator.back() },
                     Modifier.weight(1f),
                 )
-                GhostButton("Filters", ::openLooks, Modifier.weight(1f))
             }
         }
     }

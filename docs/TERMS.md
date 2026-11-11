@@ -18,3 +18,6 @@
 | SND | sound icon (muted / unmuted) | |
 
 Rename in strings, code identifiers you touch, analytics-free logs. Don't rename DB columns in this task — map in code.
+
+
+> **Filters dropped for now.** No user-facing "Filters" copy exists. Restore from git history before commit a78807d.

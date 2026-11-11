@@ -207,10 +207,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
         }
 
-        Section("One filter") {
-            LookChips(options.look) { options = options.copy(look = it) }
-        }
-
         if (lowStorage) {
             SliverText(
                 "$STORAGE_FULL_TITLE. $STORAGE_FULL_BODY", SliverType.Caption,
@@ -255,16 +251,6 @@ private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText(title.uppercase(), SliverType.MonoS, color = SliverColors.TextSecondary)
         content()
-    }
-}
-
-@Composable
-private fun LookChips(selected: LookPreset?, onSelect: (LookPreset?) -> Unit) {
-    val presets = LookPreset.entries
-    (listOf<LookPreset?>(null) + presets).chunked(3).forEach { row ->
-        Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            row.forEach { p -> Chip(p?.info?.label ?: "None", selected == p, { onSelect(p) }) }
-        }
     }
 }
 

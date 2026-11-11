@@ -170,7 +170,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
 
     LaunchedEffect(path) {
-        if (look == null) look = settings.settings.first().defaultLook.toParams()
         format = projects.active.first()?.format ?: FilmFormat.CINEMA
         val d = media.durationMs(path)
         info = clipInfo(d, media.fileSizeBytes(path))
@@ -236,18 +235,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     var backProgress by remember { mutableFloatStateOf(0f) }
     PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = { backProgress = it }, onBack = { backProgress = 0f; close() })
 
-    fun openLooks() {
-        val duration = durationMs ?: return
-        LookSession.isPhoto = false
-        LookSession.startMs = committedMs
-        LookSession.windowMs = if (isShortClip(duration)) duration else (SECOND_MS * speed).toLong()
-        LookSession.speed = speed
-        LookSession.params = look ?: LookParams()
-        LookSession.resume = LookSession.Resume(startMs, custom, speed, keepAudio, shortMode, day)
-        done = true
-        onNavigate(Route.Looks)
-    }
-
     fun useSecond() {
         if (saving || !ready || durationMs == null) return
         saving = true
@@ -256,7 +243,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 date = day, source = path, startMs = startMs, speed = speed,
                 cropY = cropY.takeIf { reframe }, format = format,
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
-                look = look ?: settings.settings.first().defaultLook.toParams(),
+                look = LookParams(),
             )
             val result = runCatching { undo.save(request) }
             if (result.isSuccess) {
@@ -381,7 +368,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         { if (inApp) onNavigate(Route.Camera) else navigator.back() },
                         Modifier.weight(1f),
                     )
-                    GhostButton("Filters", ::openLooks, Modifier.weight(1f))
                 }
             }
             }

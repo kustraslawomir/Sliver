@@ -12,11 +12,15 @@ import app.sliver.data.info
 /** Builds the Media3 effect chain for a [LookParams]; the same chain drives preview and export. */
 @UnstableApi
 object LookEffects {
+    private const val PARKED = true
+
     /**
      * [animateGrain] should be true only while playing (preview); exports always animate the grain.
      * Intensity blends the LUT with identity on the CPU, so no extra shader pass is needed.
      */
     fun build(context: Context, params: LookParams, forExport: Boolean, animateGrain: Boolean = true): List<Effect> {
+        // Filters are parked: clips always play and export unfiltered. Restore from git history to re-enable.
+        if (PARKED) return emptyList()
         val effects = ArrayList<Effect>()
         val lut = params.preset.info.lutFile
         if (lut != null && params.intensity > 0) {

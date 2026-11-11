@@ -45,7 +45,6 @@ import app.sliver.data.LookParams
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
-import app.sliver.feature.looks.LookSession
 import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.trim.ClipPlayer
 import app.sliver.feature.trim.dayLabel
@@ -87,11 +86,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     LaunchedEffect(Unit) {
         CaptureSession.path = null
-        LookSession.takeApplied()?.let { applied ->
-            val d = days.getDay(current) ?: return@let
-            days.save(d.copy(look = applied))
-            previewLook = applied
-        }
     }
 
     fun show(target: LocalDate?) {
@@ -99,17 +93,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             date = target
             ArchiveSession.selected = target
         }
-    }
-
-    fun openLooks(d: app.sliver.data.db.Day) {
-        CaptureSession.path = d.file
-        LookSession.isPhoto = false
-        LookSession.startMs = 0
-        LookSession.windowMs = 1000
-        LookSession.speed = 1f
-        LookSession.params = d.look
-        LookSession.resume = null
-        onNavigate(Route.Looks)
     }
 
     fun replace(d: LocalDate) {
@@ -177,10 +160,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 )
                 if (day != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        Chip(
-                            day.look.preset.name.replace('_', ' ').lowercase().replaceFirstChar(Char::uppercase),
-                            selected = false, onClick = { openLooks(day) }, trailing = SliverIcons.ChevronDown,
-                        )
                         day.place?.let { Chip(it, selected = false, onClick = {}) }
                     }
                 }

@@ -10,7 +10,7 @@ import app.sliver.feature.notifications.DeepLinkTarget
 import kotlinx.datetime.LocalDate
 
 /** Screens that belong to a capture flow; the first screen below them is where the flow started. */
-private val CaptureRoutes = setOf(Route.Camera, Route.GalleryPicker, Route.Trim, Route.PhotoTrim, Route.Looks)
+private val CaptureRoutes = setOf(Route.Camera, Route.GalleryPicker, Route.Trim, Route.PhotoTrim)
 
 /** Single entry point for navigation: de-duplicates events, returns capture flows to their origin, builds deep-link stacks. */
 class AppNavigator(private val nav: NavController) {

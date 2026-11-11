@@ -51,7 +51,6 @@ import app.sliver.feature.films.FilmPlayerScreen
 import app.sliver.feature.films.PremiereScreen
 import app.sliver.feature.films.YearInSecondsScreen
 import app.sliver.feature.gallery.GalleryScreen
-import app.sliver.feature.looks.LooksScreen
 import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.NotificationsScreen
@@ -107,7 +106,6 @@ fun SliverNavHost() {
                                 PhotoTrimScreen(go)
                             }
                             Route.GalleryPicker -> GalleryScreen(go)
-                            Route.Looks -> LooksScreen(onBack = back)
                             Route.Project -> ProjectScreen(go, onBack = back)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
                             Route.FillThePast -> BackfillScreen(onBack = back)

@@ -36,7 +36,6 @@ import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.FilmFormat
-import app.sliver.data.LookPreset
 import app.sliver.data.settings.AppSettings
 import app.sliver.data.settings.SettingsRepository
 import kotlinx.coroutines.launch
@@ -45,16 +44,12 @@ import org.koin.mp.KoinPlatform
 internal const val FEEDBACK_ADDRESS = "feedback@sliver.app"
 private val Formats = listOf(FilmFormat.CINEMA, FilmFormat.STORY)
 
-internal fun LookPreset.label(): String =
-    name.lowercase().split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
-
 @Composable
 fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
     val repo = remember { KoinPlatform.getKoin().get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val platform = rememberSettingsPlatform()
     val settings by remember { repo.settings }.collectAsState(null)
-    var showLooks by remember { mutableStateOf(false) }
     var showStores by remember { mutableStateOf(false) }
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}
 
@@ -78,18 +73,6 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         NavRow("Backup", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
 
         Group("Films")
-        NavRow("Default filter", s.defaultLook.label()) { showLooks = !showLooks }
-        if (showLooks) {
-            FlowRow(
-                Modifier.padding(bottom = SliverSpace.S2),
-                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-                verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-            ) {
-                LookPreset.entries.forEach { look ->
-                    Chip(look.label(), s.defaultLook == look, { update { it.copy(defaultLook = look) } })
-                }
-            }
-        }
         SliverText("New film format", SliverType.Body, Modifier.padding(top = SliverSpace.S3, bottom = SliverSpace.S2))
         Segmented(
             listOf("Cinema 16:9", "Story 9:16"),

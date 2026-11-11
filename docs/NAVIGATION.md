@@ -1,5 +1,7 @@
 # Navigation v1.1
 
+> **Filters dropped for now** (no Filters editor route or button anywhere). Restore from git history before commit a78807d.
+
 No bottom tab bar. **Camera is the root.** Everything else is at most two levels deep.
 
 ## Map
@@ -7,13 +9,13 @@ No bottom tab bar. **Camera is the root.** Everything else is at most two levels
 Onboarding (first launch only) ──► Camera
 Camera (root)
  ├─ project chip ─► Projects sheet ─► New project sheet
- ├─ calendar chip ─► Project ─┬─ day cell (filled) ─► Clip detail ─► Filters editor / Share sheet
+ ├─ calendar chip ─► Project ─┬─ day cell (filled) ─► Clip detail ─► Share sheet
  │                            ├─ day cell (empty) ─► Media picker(forDate) ─► Edit clip | Photo clip
  │                            ├─ Make film ─► Film builder ─► Export ─► Player
  │                            ├─ film poster ─► Player
  │                            ├─ Fill empty days (menu)
  │                            └─ ⚙ ─► Settings ─► Backup / Account / Notifications / …
- ├─ record stop ─► Edit clip ─► Filters editor
+ ├─ record stop ─► Edit clip
  ├─ Add (+) ─► Media picker ─► Edit clip | Photo clip
  └─ TODAY ✓ chip ─► Clip detail (today)
 ```
@@ -28,7 +30,6 @@ Camera (root)
 | Media picker | pick video | Edit clip (picker stays below) | Back → picker |
 | Media picker | pick photo | Photo clip | Back → picker |
 | Photo clip | Save clip | same as Edit clip | Back → Camera |
-| Filters editor | Apply | pop with result | Back = cancel, no changes |
 | Project | day cell | Clip detail | Back → Project, same month |
 | Clip detail | Replace clip | Media picker / Camera for that date → Save pops back to Clip detail | — |
 | Film builder | Make film | Export (replaces builder in the stack) | Back while rendering = "Keep rendering in background?" → Project |
