@@ -35,6 +35,7 @@ private object FakeExporter : ClipExporter {
     override suspend fun exportSecond(
         source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat,
         videoPath: String, thumbPath: String, shortMode: ShortMode,
+        look: LookParams,
     ): ExportedClip {
         File(videoPath).writeText("v")
         File(thumbPath).writeText("t")

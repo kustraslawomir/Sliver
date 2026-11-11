@@ -12,4 +12,5 @@ actual fun TrimPlayer(
     audio: Boolean,
     paused: Boolean,
     modifier: Modifier,
+    look: app.sliver.data.LookParams,
 ): Unit = TODO("iOS later")

@@ -23,7 +23,9 @@ import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
 import app.sliver.data.FilmFormat
+import app.sliver.data.LookParams
 import app.sliver.data.Motion
+import app.sliver.data.look.LookEffects
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +46,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         videoPath: String,
         thumbPath: String,
         shortMode: ShortMode,
+        look: LookParams,
     ): ExportedClip {
         val uri = if (source.contains("://")) Uri.parse(source) else Uri.fromFile(File(source))
         val info = withContext(Dispatchers.IO) { probe(uri) }
@@ -54,6 +57,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         val videoEffects = buildList<Effect> {
             add(Crop(crop.left, crop.right, crop.bottom, crop.top))
             add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT))
+            addAll(LookEffects.build(context, look, forExport = true))
         }
         fun item(mediaItem: MediaItem, itemSpeed: Float) = EditedMediaItem.Builder(mediaItem)
             .setEffects(

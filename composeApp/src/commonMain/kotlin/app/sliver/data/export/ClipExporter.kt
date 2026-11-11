@@ -1,6 +1,7 @@
 package app.sliver.data.export
 
 import app.sliver.data.FilmFormat
+import app.sliver.data.LookParams
 import app.sliver.data.Motion
 import kotlin.math.ceil
 
@@ -24,6 +25,7 @@ interface ClipExporter {
         videoPath: String,
         thumbPath: String,
         shortMode: ShortMode = ShortMode.SLOW_TO_FIT,
+        look: LookParams = LookParams(),
     ): ExportedClip
 
     /** Turns the still [source] into a 1.000 s, 30 fps clip; ZOOM eases scale 1.00 to 1.08 over the second. */

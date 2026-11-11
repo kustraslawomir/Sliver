@@ -3,6 +3,7 @@ package app.sliver.feature.trim
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import app.sliver.data.LookParams
 
 interface TrimMedia {
     suspend fun durationMs(path: String): Long
@@ -23,4 +24,5 @@ expect fun TrimPlayer(
     audio: Boolean,
     paused: Boolean,
     modifier: Modifier,
+    look: LookParams = LookParams(),
 )

@@ -14,6 +14,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import app.sliver.data.LookParams
+import app.sliver.data.look.LookEffects
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -25,6 +27,7 @@ actual fun TrimPlayer(
     audio: Boolean,
     paused: Boolean,
     modifier: Modifier,
+    look: LookParams,
 ) {
     val context = LocalContext.current
     val player = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ONE } }
@@ -37,6 +40,9 @@ actual fun TrimPlayer(
             .build()
         player.setMediaItem(MediaItem.Builder().setUri(path).setClippingConfiguration(clip).build())
         player.prepare()
+    }
+    LaunchedEffect(look, paused) {
+        player.setVideoEffects(LookEffects.build(context, look, forExport = false, animateGrain = !paused))
     }
     LaunchedEffect(speed) { player.playbackParameters = PlaybackParameters(speed) }
     LaunchedEffect(audio) { player.volume = if (audio) 1f else 0f }
