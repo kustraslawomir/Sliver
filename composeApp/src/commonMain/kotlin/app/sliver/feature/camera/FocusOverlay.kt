@@ -125,7 +125,7 @@ fun FocusOverlay(
             ExposureSlider(
                 visible = sliderVisible || f.locked, locked = f.locked, range = r, index = evIndex,
                 centerX = f.x, centerY = f.y, width = size.width.toFloat(), height = size.height.toFloat(),
-                onIndex = { evIndex = it; onExposure(it) },
+                onIndex = { if (it != evIndex) { evIndex = it; onExposure(it) } },
                 onTouch = { interaction++ },
             )
         }
