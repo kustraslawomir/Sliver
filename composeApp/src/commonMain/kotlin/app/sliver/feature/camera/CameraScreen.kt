@@ -3,6 +3,15 @@ package app.sliver.feature.camera
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.graphics.ImageBitmap
+import app.sliver.data.LookPreset
+import app.sliver.data.info
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,13 +70,10 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.rememberTapGate
 import app.sliver.feature.archive.ArchiveSession
-import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
-import app.sliver.feature.trim.rememberPhoto
 import app.sliver.core.ui.Segmented
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.feature.projects.ProjectsSheet
@@ -110,7 +116,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
-    var replacing by remember { mutableStateOf(false) }
+    var filterOpen by remember { mutableStateOf(false) }
+    var flipTurns by remember { mutableIntStateOf(0) }
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
     var projectsOpen by remember { mutableStateOf(false) }
@@ -206,7 +213,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     }
 
     Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
-        Box(Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 168.dp).clip(RoundedCornerShape(24.dp))) {
+        Box(Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 248.dp).clip(RoundedCornerShape(24.dp))) {
             CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
@@ -215,39 +222,39 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             }
         }
 
-        Row(
-            Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            ControlButton(SliverIcons.Grid3x3, null, "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
-            if (recording) {
-                SliverText(
-                    formatTimer(elapsedMs), SliverType.MonoL,
-                    Modifier.clip(CircleShape).background(SliverColors.BgVoid.copy(alpha = 0.5f))
-                        .padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S1),
-                    SliverColors.Accent,
-                )
-            }
-            ControlButton(SliverIcons.Timer, if (timerSec == 0) null else "${timerSec}s", "Self-timer", timerSec != 0, iconRot) {
-                if (!recording) timerSec = nextSelfTimer(timerSec)
-            }
-            ControlButton(if (cam.flash) SliverIcons.Zap else SliverIcons.ZapOff, null, "Flash", cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
-            ControlButton(SliverIcons.SwitchCamera, null, "Flip camera", false, iconRot) {
-                if (!recording) update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
-            }
-        }
-
         Column(
-            Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 64.dp),
+            Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
         ) {
-            if (!recording) {
-                Chip(
-                    "${project?.name ?: "My ${today.year}"} · ${format.label()}", selected = false,
-                    onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
-                )
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                if (recording) {
+                    SliverText(
+                        formatTimer(elapsedMs), SliverType.MonoL,
+                        Modifier.clip(CircleShape).background(SliverColors.BgVoid.copy(alpha = 0.5f))
+                            .padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S1),
+                        SliverColors.Accent,
+                    )
+                } else {
+                    Chip(
+                        project?.name ?: "My ${today.year}", selected = false,
+                        onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    val hasToday = todayDay != null
+                    Chip(
+                        if (hasToday) "TODAY \u2713" else "TODAY", selected = hasToday,
+                        onClick = {
+                            if (hasToday) {
+                                ArchiveSession.selected = today
+                                onNavigate(Route.DayDetail)
+                            } else {
+                                onNavigate(Route.Project)
+                            }
+                        },
+                    )
+                }
             }
             if (turnHint && bandActive) {
                 SliverText(
@@ -257,9 +264,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     SliverColors.TextPrimary,
                 )
             }
-            todayDay?.takeIf { !replacing && !recording }?.let { day ->
-                TodayCard(day, { replacing = true }, { ArchiveSession.selected = today; onNavigate(Route.DayDetail) })
-            }
         }
 
         ProjectsSheet(projectsOpen, { projectsOpen = false })
@@ -267,20 +271,46 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         Column(
             Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
+            if (filterOpen && !recording) {
+                LazyRow(
+                    Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = SliverSpace.Gutter),
+                    horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                ) {
+                    items(LookPreset.entries) { look ->
+                        Chip(look.info.label, selected = look == cam.look, onClick = { update { it.copy(look = look) } })
+                    }
+                }
+            }
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                ToolButton(SliverIcons.Grid3x3, "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
+                ToolButton(SliverIcons.Timer, if (timerSec == 0) "Timer" else "${timerSec}s", timerSec != 0, iconRot) {
+                    if (!recording) timerSec = nextSelfTimer(timerSec)
+                }
+                ToolButton(if (cam.flash) SliverIcons.Zap else SliverIcons.ZapOff, "Light", cam.flash, iconRot) {
+                    update { it.copy(flash = !it.flash) }
+                }
+                ToolButton(SliverIcons.SlidersHorizontal, "Filter", filterOpen || cam.look != LookPreset.NATURAL, iconRot) {
+                    filterOpen = !filterOpen
+                }
+            }
             Segmented(
                 listOf("PHOTO", "VIDEO"),
                 if (cam.mode == CameraMode.PHOTO) 0 else 1,
                 { if (!recording) update { s -> s.copy(mode = if (it == 0) CameraMode.PHOTO else CameraMode.VIDEO) } },
-                Modifier.width(200.dp),
+                Modifier.width(168.dp),
             )
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                GalleryThumb(thumb) { onNavigate(Route.GalleryPicker) }
+                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(thumb, iconRot) { onNavigate(Route.GalleryPicker) }
                 RecordButton(
                     photo = cam.mode == CameraMode.PHOTO,
                     recording = recording,
@@ -295,7 +325,20 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     },
                     onHoldEnd = { if (recording) stopRecording() },
                 )
-                if (recording) Box(Modifier.size(52.dp)) else ProjectButton { onNavigate(Route.Project) }
+                if (recording) {
+                    Box(Modifier.size(64.dp))
+                } else {
+                    val turn by animateFloatAsState(flipTurns * 180f, tween(240), label = "flip")
+                    IconButton44(
+                        {
+                            flipTurns++
+                            update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
+                        },
+                        "Switch camera", Modifier.size(64.dp),
+                    ) {
+                        SliverIcon(SliverIcons.SwitchCamera, SliverColors.TextPrimary, Modifier.rotate(turn))
+                    }
+                }
             }
         }
         if (storageFull) StorageFullOverlay({ storageFull = false })
@@ -303,44 +346,16 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
 }
 
 @Composable
-private fun TodayCard(day: Day, onReplace: () -> Unit, onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    val thumb = rememberPhoto(day.thumb)
-    Row(
-        modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth()
-            .clip(SliverShapes.M).background(SliverColors.Surface1.copy(alpha = 0.92f))
-            .border(1.dp, SliverColors.LineHairline, SliverShapes.M)
-            .clickable(onClick = rememberTapGate(onOpen))
-            .padding(SliverSpace.S3),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+private fun ToolButton(icon: ImageVector, label: String, active: Boolean, rotation: Float, onClick: () -> Unit) {
+    val tint = if (active) SliverColors.Accent else SliverColors.TextPrimary
+    val turn by animateFloatAsState(rotation, tween(240), label = "tool-upright")
+    Column(
+        Modifier.width(64.dp).clip(SliverShapes.S).clickable(role = Role.Button, onClick = rememberTapGate(onClick))
+            .semantics { contentDescription = label }.padding(vertical = SliverSpace.S1),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(44.dp).clip(SliverShapes.S).background(SliverColors.Surface1)) {
-            if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        }
-        Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 16.dp)
-                SliverText("Today's clip is in", SliverType.Headline)
-            }
-            SliverText(todayCardDetail(day.look.preset, day.takenAt), SliverType.MonoS)
-        }
-        GhostButton("Replace", onReplace)
-    }
-}
-
-@Composable
-private fun ControlButton(
-    icon: ImageVector,
-    value: String?,
-    description: String,
-    active: Boolean,
-    rotation: Float,
-    onClick: () -> Unit,
-) {
-    IconButton44(onClick, description, overCamera = true) {
-        val tint = if (active) SliverColors.Accent else SliverColors.TextPrimary
-        if (value != null) SliverText(value, SliverType.MonoS, Modifier.rotate(rotation), tint)
-        else SliverIcon(icon, tint, Modifier.rotate(rotation))
+        Box(Modifier.size(44.dp), Alignment.Center) { SliverIcon(icon, tint, Modifier.rotate(turn)) }
+        SliverText(label, SliverType.Caption, color = tint, maxLines = 1)
     }
 }
 
@@ -356,27 +371,24 @@ private fun CinemaBandDim() {
 }
 
 @Composable
-private fun GalleryThumb(thumb: androidx.compose.ui.graphics.ImageBitmap?, onClick: () -> Unit) {
-    Box(
-        Modifier.size(52.dp).clip(RoundedCornerShape(10.dp)).background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.LineHairline, RoundedCornerShape(10.dp))
-            .semantics { contentDescription = "Gallery"; role = Role.Button }
-            .clickable(onClick = onClick),
+private fun AddMediaButton(thumb: ImageBitmap?, rotation: Float, onClick: () -> Unit) {
+    val turn by animateFloatAsState(rotation, tween(240), label = "add-upright")
+    Column(
+        Modifier.width(64.dp).semantics { contentDescription = "Add media"; role = Role.Button }
+            .clickable(onClick = rememberTapGate(onClick)),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-    }
-}
-
-@Composable
-private fun ProjectButton(onClick: () -> Unit) {
-    Box(
-        Modifier.size(52.dp).clip(RoundedCornerShape(10.dp)).background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.LineHairline, RoundedCornerShape(10.dp))
-            .semantics { contentDescription = "Project calendar"; role = Role.Button }
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        SliverIcon(SliverIcons.Calendar, SliverColors.TextSecondary)
+        Box(
+            Modifier.size(52.dp).clip(SliverShapes.M).background(SliverColors.Surface1)
+                .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
+        ) {
+            if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            Box(
+                Modifier.align(Alignment.BottomEnd).size(20.dp).clip(CircleShape).background(SliverColors.Accent),
+                Alignment.Center,
+            ) { SliverIcon(SliverIcons.Plus, SliverColors.BgVoid, Modifier.rotate(turn), size = 14.dp) }
+        }
+        SliverText("ADD", SliverType.Caption, color = SliverColors.TextSecondary, maxLines = 1)
     }
 }
 
