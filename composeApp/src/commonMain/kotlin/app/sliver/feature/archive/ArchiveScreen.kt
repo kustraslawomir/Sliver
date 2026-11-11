@@ -254,7 +254,7 @@ private fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, f
                     row.forEachIndexed { d, color ->
                         if (color == null) return@forEachIndexed
                         drawRect(
-                            if (color == 0) Color(0xFF111113) else Color(color),
+                            if (color == 0) SliverColors.Surface1 else Color(color),
                             Offset(d * step, 0f),
                             Size(cell, size.height),
                         )
