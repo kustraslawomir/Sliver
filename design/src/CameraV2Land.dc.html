@@ -27,7 +27,7 @@
 
   <!-- tools column (was the row above the shutter) -->
   <div style="position: absolute; right: 92px; top: 0; height: 390px; display: flex; flex-direction: column; justify-content: center; gap: 12px">
-    <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+    <sc-for list="{{tools}}" as="t" hint-placeholder-count="2">
       <span style="width: 44px; height: 44px; border-radius: 22px; background: #05050599; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t}}"></path></svg></span>
     </sc-for>
   </div>
@@ -43,7 +43,7 @@
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
 class Component extends DCLogic {
   renderVals() {
-    return { tools: ['M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18', 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M12 9v4l2.5 2.5 M9 2h6', 'M13 3L5 14h6l-1 7 8-11h-6l1-7z', 'M4 7h10 M18 7h2 M4 17h4 M12 17h8 M16 5v4 M10 15v4'] };
+    return { tools: ['M13 3L5 14h6l-1 7 8-11h-6l1-7z', 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0'] };
   }
 }
 </script>

@@ -79,12 +79,17 @@
   <!-- tools row, in thumb reach -->
   <div style="position: absolute; left: 0; right: 0; top: 576px; display: flex; justify-content: center; gap: 22px; visibility: {{idleVis}}">
     <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
-      <button onClick="{{t.tap}}" aria-pressed="{{t.on}}" style="width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: {{t.color}}">
+      <button onClick="{{t.tap}}" aria-pressed="{{t.on}}" aria-label="{{t.n}}" style="width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: {{t.color}}">
         <span style="width: 44px; height: 44px; border-radius: 22px; background: #05050599; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span>
-        <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">{{t.n}}</span>
       </button>
     </sc-for>
   </div>
+  <sc-if value="{{more}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{toggleMore}}" style="position: absolute; inset: 0"></div>
+    <div role="menu" style="position: absolute; left: 50%; top: 512px; transform: translateX(-50%); width: 180px; border-radius: 16px; background: #18181BF2; border: 1px solid #3A3A40; padding: 4px; box-shadow: 0 12px 40px #000000">
+      <button onClick="{{toggleGrid}}" role="menuitemcheckbox" aria-checked="{{gridStr}}" style="width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">Grid<span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: {{gridColor}}">{{gridState}}</span></button>
+    </div>
+  </sc-if>
 
   <div style="position: absolute; left: 0; right: 0; top: 660px; display: flex; justify-content: center; visibility: {{idleVis}}">
     <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #05050599; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em">
@@ -157,16 +162,16 @@ class Component extends DCLogic {
       recTime: '0:' + String(st.sec).padStart(2, '0'), recColor: ok ? '#FF8A3D' : '#B9B9B3', recBorder: ok ? '#FF8A3D66' : '#3A3A40', okVis: ok ? 'visible' : 'hidden',
       recAria: 'Recording, ' + st.sec + ' seconds' + (ok ? ', clip is long enough' : ''),
       tools: [
-        { n: 'GRID', on: String(st.grid), color: st.grid ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ grid: !st.grid }), icon: 'M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18' },
-        { n: st.timer ? st.timer + 'S' : 'TIMER', on: String(!!st.timer), color: st.timer ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ timer: st.timer === 0 ? 3 : (st.timer === 3 ? 10 : 0) }), icon: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M12 9v4l2.5 2.5 M9 2h6' },
-        { n: st.flash ? 'LIGHT ON' : 'LIGHT', on: String(st.flash), color: st.flash ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ flash: !st.flash }), icon: 'M13 3L5 14h6l-1 7 8-11h-6l1-7z' },
-        { n: 'FILTER', on: 'false', color: '#EDEDE8', tap: () => {}, icon: 'M4 7h10 M18 7h2 M4 17h4 M12 17h8 M16 5v4 M10 15v4' }
+        { n: st.flash ? 'Light on' : 'Light', on: String(st.flash), color: st.flash ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ flash: !st.flash }), icon: 'M13 3L5 14h6l-1 7 8-11h-6l1-7z' },
+        { n: 'More', on: String(st.more), color: '#EDEDE8', tap: () => this.setState({ more: !st.more }), icon: 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }
       ],
+      more: !!st.more && !rec, toggleMore: () => this.setState({ more: false }),
+      toggleGrid: () => this.setState({ grid: !st.grid, more: false }), gridStr: String(st.grid), gridState: st.grid ? 'ON' : 'OFF', gridColor: st.grid ? '#FF8A3D' : '#8E8E88',
       setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
       photoBg: video ? 'transparent' : '#EDEDE8', photoColor: video ? '#8E8E88' : '#0A0A0B',
       videoBg: video ? '#EDEDE8' : 'transparent', videoColor: video ? '#0A0A0B' : '#8E8E88',
       flip: () => this.setState({ front: !st.front, flipDeg: st.flipDeg + 180 }),
-      flipDeg: st.flipDeg, lensLabel: st.front ? 'FRONT' : 'BACK'
+      flipDeg: st.flipDeg, lensLabel: 'FLIP'
     };
   }
 }

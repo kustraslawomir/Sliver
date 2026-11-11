@@ -24,7 +24,7 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Splash, edge states, widgets | `Splash.dc.html`, `EdgeStates.dc.html`, `Widgets.dc.html` | |
 | Before/after explanation | `Changes.dc.html` | reading only |
 
-`design/png/` — put PNG exports of the boards here, named like the source file (`CameraV2.png`). Without PNGs, agents measure from the HTML.
+`design/png/` contains rendered PNGs of every board. **Measure from these, not from the HTML.** Phone screens are @3x (1170×2532): px ÷ 3 = dp. Big boards are @1x. `tools/compare.py` takes these directly.
 
 ## Added in v1.2
 
@@ -51,3 +51,14 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Glow | `GLOW.md` | Mandatory. See GLOW.md. |
 | Copy | all | The word "second" no longer exists in the UI: it's "clip" ("Save clip", "Share this clip", "Your year in clips"). "Looks" → "Filters". If you find "second(s)" in UI copy anywhere, it's a bug (durations like "1 s" are fine). |
 | No toasts | all | Removed from Trim/PhotoTrim/Camera. Nothing may float over the UI after an action. Show the result in place (ProjectHubSaved). |
+
+## v1.2.3: after the first build review
+
+| Item | Design | Notes |
+|---|---|---|
+| Fonts | `fonts/` | Geist + Geist Mono .ttf files are in the pack now. Follow fonts/README.md. A system-font fallback is a bug. |
+| Camera tools | `CameraV2.dc.html`, `CameraV2Land.dc.html` | Matches what was built: only Light (icon) + ⋯ (menu → Grid on/off). No Timer, no Filter on the camera. The flip button label is "FLIP" ("BACK" read like navigation). |
+| Chip blur | `CameraV2.dc.html` | The plain dark fallback is accepted: #000000 at **70%**, not lighter. Don't add a blur library. |
+| Share image | `DayShare.dc.html` | The wordmark on the share image = `R.drawable.sliver_wordmark` drawn onto the bitmap (`drawable.setBounds(); drawable.draw(canvas)`). Never `drawText("SLIVER")`. |
+| Landscape | `CameraV2Land.dc.html` | Not a screenshot task. The owner holds the phone sideways and records 2 s; then you pull the file (`adb pull`) and prove with `ffprobe` (or MediaMetadataRetriever) that width > height after rotation and the preview in Edit clip is 16:9. Post the ffprobe output in docs/qa/landscape.md. Do the same for upside-down landscape. |
+| Filters | — | Parked in the app. Edit clip/Day detail boards still show "Filters": hide those entries while parked, don't leave dead buttons. |
