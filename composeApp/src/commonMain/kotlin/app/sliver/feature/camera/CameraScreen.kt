@@ -312,7 +312,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     },
                     onHoldEnd = { if (recording) stopRecording() },
                 )
-                Box(Modifier.size(52.dp))
+                if (recording) Box(Modifier.size(52.dp)) else ArchiveButton { onNavigate(Route.Archive) }
             }
         }
         if (storageFull) StorageFullOverlay({ storageFull = false })
@@ -371,6 +371,19 @@ private fun GalleryThumb(thumb: androidx.compose.ui.graphics.ImageBitmap?, onCli
             .clickable(onClick = onClick),
     ) {
         if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+    }
+}
+
+@Composable
+private fun ArchiveButton(onClick: () -> Unit) {
+    Box(
+        Modifier.size(52.dp).clip(RoundedCornerShape(10.dp)).background(SliverColors.Surface1)
+            .border(1.dp, SliverColors.LineHairline, RoundedCornerShape(10.dp))
+            .semantics { contentDescription = "Archive"; role = Role.Button }
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        SliverText("DAYS", SliverType.MonoS, color = SliverColors.TextSecondary)
     }
 }
 

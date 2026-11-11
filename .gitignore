@@ -25,3 +25,5 @@ build/
 .workflow/intake.md
 .kotlin/
 build/
+.workflow/*.out
+.workflow/install.log

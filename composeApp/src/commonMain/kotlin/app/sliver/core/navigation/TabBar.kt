@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -28,7 +29,7 @@ import app.sliver.core.theme.SliverType
 @Composable
 fun SliverTabBar(current: Route, onSelect: (Route) -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4)
+        modifier.navigationBarsPadding().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4)
             .fillMaxWidth().height(SliverSpace.S10)
             .background(SliverColors.Surface2, SliverShapes.Pill)
             .border(1.dp, SliverColors.LineHairline, SliverShapes.Pill),
