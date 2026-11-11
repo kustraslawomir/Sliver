@@ -14,3 +14,4 @@
 - DECISION: camera live preview does not apply the look yet (CameraX 1.5.1 has no stable Media3 effect bridge; a SurfaceProcessor GL pipeline is left for later). Frame rate and visual parity not verified on device.
 - photoToSecond does not apply a look yet.
 - T17: Day detail entry to Looks not wired (Day detail screen not built yet). Photo and thumbnail look preview is a CPU approximation (no grain or sharpness); video preview and export use the Media3 chain.
+- T19: Place chip omitted (Day has no location column or media-location source; needs Room migration plus Geocoder behind an interface). Day files are exported with the look baked in, so Look chip edits save Day.look and preview in-session only.

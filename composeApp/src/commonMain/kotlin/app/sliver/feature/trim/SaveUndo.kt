@@ -59,6 +59,21 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore) {
         return day
     }
 
+    /** Deletes the day; files are parked in tmp until the undo window closes. */
+    suspend fun remove(day: Day, label: String) {
+        val backup = park(day, day.takenAt.toEpochMilliseconds() + 2) ?: return
+        days.delete(day.date)
+        val timer = scope.launch {
+            delay(UNDO_WINDOW_MS)
+            files.delete(backup.video)
+            files.delete(backup.thumb)
+        }
+        toast.show("Removed $label", onAction = {
+            timer.cancel()
+            scope.launch { restore(day, backup) }
+        })
+    }
+
     private fun undo(p: Pending) {
         p.timer?.cancel()
         scope.launch {

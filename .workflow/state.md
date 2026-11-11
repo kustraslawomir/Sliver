@@ -15,7 +15,7 @@
 - [x] T16 (camera preview look deferred, see HANDOFF)
 - [x] T17
 - [x] T18
-- [ ] T19
+- [x] T19
 - [ ] T20
 - [ ] T21
 - [ ] T22
