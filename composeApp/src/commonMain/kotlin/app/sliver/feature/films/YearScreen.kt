@@ -79,10 +79,10 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Modifier.padding(horizontal = SliverSpace.Gutter),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
-            Stat("Seconds kept", "${stats.seconds}")
+            Stat("Clips kept", "${stats.seconds}")
             Stat("Films made", "${stats.films}")
             Stat(if (stats.topMonths.size > 1) "Most filmed months" else "Most filmed month", monthsText(stats.topMonths))
-            Stat("Favourite look", stats.favouriteLook?.let(::lookName) ?: "None yet")
+            Stat("Favourite filter", stats.favouriteLook?.let(::lookName) ?: "None yet")
         }
         Column(
             Modifier.padding(horizontal = SliverSpace.Gutter),
@@ -104,7 +104,7 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             } else {
                 SliverText("The premiere opens on 26 December.", SliverType.Caption, color = SliverColors.TextTertiary)
             }
-            SecondaryButton("Change music or look", {
+            SecondaryButton("Change music or filter", {
                 scope.launch {
                     FilmNav.id = yearFilmOrCreate().id
                     onNavigate(Route.FilmBuilder)

@@ -27,10 +27,10 @@ val ConsentPoints = listOf(
     "Google will ask to let SLIVER create one visible folder in your Drive named SLIVER.",
     "SLIVER can only see files it creates itself, never the rest of your Drive.",
     "We never store your videos on our servers. They go straight to your Drive.",
-    "Each second is about 2 MB.",
+    "Each clip is about 2 MB.",
 )
 
-/** "Save your seconds" sheet followed by the "Before Google consent" explainer. */
+/** "Back up your clips" sheet followed by the "Before Google consent" explainer. */
 @Composable
 fun GoogleSignInPanel(
     skipLabel: String,
@@ -50,7 +50,7 @@ fun GoogleSignInPanel(
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
     ) {
         if (!explainer) {
-            SliverText("Save your seconds", SliverType.DisplayM)
+            SliverText("Back up your clips", SliverType.DisplayM)
             SliverText("Back up to your own Google Drive, or stay a guest.", SliverType.Body, color = SliverColors.TextSecondary)
         } else {
             SliverText("Before Google asks", SliverType.DisplayM)
@@ -80,7 +80,7 @@ fun GoogleSignInPanel(
                 onClick = { if (explainer) { explainer = false; restoreAfter = false } else onFinished() },
             )
             if (!explainer && onRestore != null) {
-                GhostButton("Welcome back? Restore my seconds", onClick = { restoreAfter = true; explainer = true })
+                GhostButton("Welcome back? Restore my clips", onClick = { restoreAfter = true; explainer = true })
             }
         }
     }

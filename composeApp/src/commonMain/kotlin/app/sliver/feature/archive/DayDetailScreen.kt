@@ -183,7 +183,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     SecondaryButton("Share", { shareOpen = true }, Modifier.weight(1f), enabled = day != null)
-                    SecondaryButton("Replace", { replace(current) }, Modifier.weight(1f))
+                    SecondaryButton("Replace clip", { replace(current) }, Modifier.weight(1f))
                     GhostButton("Remove", { confirm = true }, Modifier.weight(1f), destructive = true, enabled = day != null)
                 }
             }
@@ -191,7 +191,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
         SliverBottomSheet(shareOpen, onDismiss = { if (!sharing) shareOpen = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                SliverText("Share this second", SliverType.DisplayM)
+                SliverText("Share this clip", SliverType.DisplayM)
                 SwitchRow("Date stamp", shDate, { shDate = it })
                 SwitchRow("Original sound", shSound, { shSound = it })
                 SwitchRow("SLIVER mark", shMark, { shMark = it })
@@ -217,7 +217,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
         SliverBottomSheet(confirm, onDismiss = { confirm = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                SliverText("Remove this second?", SliverType.DisplayM)
+                SliverText("Remove this clip?", SliverType.DisplayM)
                 SliverText("${dayLabel(current, today)} will be empty. You can undo for a few seconds.", SliverType.BodySmall)
                 PrimaryButton("Remove", { day?.let(::remove) }, Modifier.fillMaxWidth())
                 GhostButton("Keep it", { confirm = false }, Modifier.fillMaxWidth())

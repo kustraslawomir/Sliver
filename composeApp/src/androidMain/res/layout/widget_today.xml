@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Today's second is waiting"
+            android:text="Today's clip is waiting"
             android:textColor="#EDEDE8"
             android:textSize="13sp" />
     </LinearLayout>

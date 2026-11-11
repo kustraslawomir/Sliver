@@ -102,7 +102,7 @@ fun LooksScreen(onBack: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText("LOOKS", SliverType.MonoS, color = SliverColors.TextSecondary)
+            SliverText("FILTERS", SliverType.MonoS, color = SliverColors.TextSecondary)
             SliverText(
                 if (showOriginal) "ORIGINAL" else "HOLD = ORIGINAL", SliverType.MonoS,
                 color = if (showOriginal) SliverColors.Accent else SliverColors.TextTertiary,
@@ -134,7 +134,7 @@ fun LooksScreen(onBack: () -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
-            Segmented(listOf("LOOKS", "ADJUST"), tab, { tab = it })
+            Segmented(listOf("FILTERS", "ADJUST"), tab, { tab = it })
             if (tab == 0) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     items(LookPreset.entries) { preset ->
@@ -168,11 +168,11 @@ fun LooksScreen(onBack: () -> Unit) {
                 )
                 GhostButton("Reset all", { params = params.resetAll() }, Modifier.fillMaxWidth())
             }
-            PrimaryButton("Apply look", {
+            PrimaryButton("Apply filter", {
                 LookSession.applied = params
                 onBack()
             })
-            GhostButton("Set as default look", {
+            GhostButton("Set as default filter", {
                 scope.launch { settings.update { it.copy(defaultLook = params.preset) } }
             }, Modifier.fillMaxWidth())
         }

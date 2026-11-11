@@ -53,7 +53,7 @@ fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12
 }
 
 fun secondsHeader(count: Int, first: LocalDate): String =
-    "$count ${if (count == 1) "SECOND" else "SECONDS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]} ${first.year}"
+    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]} ${first.year}"
 
 val MonthNames = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
 val MonthLong = listOf(

@@ -60,7 +60,7 @@ private fun horizon(now: LocalDateTime) = List(HORIZON_DAYS) { now.date.plus(Dat
 data class NotifCopy(val title: String, val body: String)
 
 fun reminderCopy(kind: NotifKind, date: LocalDate): NotifCopy = when (kind) {
-    NotifKind.REMINDER -> NotifCopy("Your second for today", "Whatever's in front of you counts.")
+    NotifKind.REMINDER -> NotifCopy("Your clip for today", "Whatever's in front of you counts.")
     NotifKind.RANDOM -> NotifCopy("Right now.", "Whatever you're looking at — that's today.")
     NotifKind.RUNNING_LATE -> NotifCopy("Still time for today", "Even the ceiling counts.")
     NotifKind.ON_THIS_DAY -> {
@@ -69,10 +69,10 @@ fun reminderCopy(kind: NotifKind, date: LocalDate): NotifCopy = when (kind) {
     }
 }
 
-fun filmReadyCopy(name: String, seconds: Int) = NotifCopy("“$name” is ready", "$seconds seconds. Press play.")
+fun filmReadyCopy(name: String, seconds: Int) = NotifCopy("“$name” is ready", "$seconds clips. Press play.")
 
-val BackupPausedCopy = NotifCopy("Backup paused", "Your Drive is full. Your seconds are safe on this phone.")
-val BackupStuckCopy = NotifCopy("Backup paused", "We couldn't reach your Drive. Your seconds are safe on this phone.")
+val BackupPausedCopy = NotifCopy("Backup paused", "Your Drive is full. Your clips are safe on this phone.")
+val BackupStuckCopy = NotifCopy("Backup paused", "We couldn't reach your Drive. Your clips are safe on this phone.")
 
 fun backupProblemCopy(error: app.sliver.data.backup.BackupError) =
     if (error == app.sliver.data.backup.BackupError.DRIVE_FULL) BackupPausedCopy else BackupStuckCopy

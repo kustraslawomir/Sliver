@@ -163,10 +163,10 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                 Chip("Still", motion == Motion.STILL, { motion = Motion.STILL })
                 Chip("Slow zoom", motion == Motion.ZOOM, { motion = Motion.ZOOM })
             }
-            PrimaryButton(if (saving) "Saving..." else "Use this second", ::useSecond, enabled = photo != null && !saving)
+            PrimaryButton(if (saving) "Saving..." else "Save clip", ::useSecond, enabled = photo != null && !saving)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 GhostButton("Retake", ::close, Modifier.weight(1f))
-                GhostButton("Looks", ::openLooks, Modifier.weight(1f))
+                GhostButton("Filters", ::openLooks, Modifier.weight(1f))
             }
         }
     }

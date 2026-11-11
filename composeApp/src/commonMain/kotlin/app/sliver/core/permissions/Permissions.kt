@@ -35,7 +35,7 @@ fun PermissionKind.copy() = when (this) {
     )
     PermissionKind.Notifications -> PermissionCopy(
         "A gentle nudge each day",
-        "SLIVER reminds you once a day to capture your second.",
+        "SLIVER reminds you once a day to capture your clip.",
         "Allow notifications",
     )
 }

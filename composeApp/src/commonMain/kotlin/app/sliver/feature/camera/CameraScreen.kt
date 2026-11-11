@@ -336,7 +336,7 @@ private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modi
             if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         }
         Column(Modifier.weight(1f)) {
-            SliverText("Today's second is in", SliverType.Headline)
+            SliverText("Today's clip is in", SliverType.Headline)
             SliverText(todayCardDetail(day.look.preset, day.takenAt), SliverType.MonoS)
         }
         GhostButton("Replace", onReplace)

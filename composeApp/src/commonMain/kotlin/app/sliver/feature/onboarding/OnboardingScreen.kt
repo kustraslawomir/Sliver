@@ -94,7 +94,7 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when (step) {
                 OnboardingStep.Concept -> Pitch("One second. Every day.", "Capture a single second of each day. A year later, it's a film.") { PrimaryButton("Continue", ::next, Modifier.fillMaxWidth()) }
-                OnboardingStep.AutoPick -> Pitch("We find the best second. You have the final say.", "SLIVER picks the moment for you. Drag the window any time to choose your own.") { PrimaryButton("Continue", ::next, Modifier.fillMaxWidth()) }
+                OnboardingStep.AutoPick -> Pitch("We find the best clip. You have the final say.", "SLIVER picks the moment for you. Drag the window any time to choose your own.") { PrimaryButton("Continue", ::next, Modifier.fillMaxWidth()) }
                 OnboardingStep.Format -> Pitch("Watch your year add up.", "Pick the shape of your films. You can change it per film later.") {
                     Segmented(
                         listOf("CINEMA 16:9", "STORY 9:16"),

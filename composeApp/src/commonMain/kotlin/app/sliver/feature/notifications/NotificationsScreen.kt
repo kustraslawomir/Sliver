@@ -141,7 +141,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
         SwitchRow("Running late", s.notif.runningLate, { on ->
             update { it.copy(notif = it.notif.copy(runningLate = on)) }
             if (on) ensurePermission()
-        }, caption = "At 21:00 if there's no second yet")
+        }, caption = "At 21:00 if there's no clip yet")
         SwitchRow("Film ready", s.notif.filmReady, { on -> update { it.copy(notif = it.notif.copy(filmReady = on)) } })
         SwitchRow("Backup problems", s.notif.backupProblems, { on -> update { it.copy(notif = it.notif.copy(backupProblems = on)) } })
         SwitchRow("On this day", s.notif.onThisDay, { on -> update { it.copy(notif = it.notif.copy(onThisDay = on)) } })
@@ -174,7 +174,7 @@ private fun DeniedBanner(onOpen: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         SliverText("Notifications are off", SliverType.Headline)
         SliverText(
-            "Reminders can't reach you right now. Your seconds are unaffected, and you can turn this on whenever you like.",
+            "Reminders can't reach you right now. Your clips are unaffected, and you can turn this on whenever you like.",
             SliverType.BodySmall, color = SliverColors.TextSecondary,
         )
         PrimaryButton("Open Settings", onOpen)

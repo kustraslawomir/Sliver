@@ -65,8 +65,8 @@ class RestoreTest {
         assertEquals(RestoreStage.FOUND, restoreStage(scan, false, false, null, 1))
         assertEquals(RestoreStage.RESTORING, restoreStage(scan, false, true, null, 1))
         assertEquals(RestoreStage.DONE, restoreStage(scan, false, true, null, 0))
-        assertEquals("We found 1 second", foundCopy(1))
-        assertEquals("We found 3 seconds", foundCopy(3))
+        assertEquals("We found 1 clip", foundCopy(1))
+        assertEquals("We found 3 clips", foundCopy(3))
     }
 
     @Test

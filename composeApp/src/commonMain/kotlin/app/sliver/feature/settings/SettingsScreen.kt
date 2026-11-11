@@ -73,7 +73,7 @@ fun SettingsScreen(onGo: (Route) -> Unit) {
         NavRow("Backup", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
 
         Group("Films")
-        NavRow("Default look", s.defaultLook.label()) { showLooks = !showLooks }
+        NavRow("Default filter", s.defaultLook.label()) { showLooks = !showLooks }
         if (showLooks) {
             FlowRow(
                 Modifier.padding(bottom = SliverSpace.S2),
@@ -101,11 +101,11 @@ fun SettingsScreen(onGo: (Route) -> Unit) {
 
         Group("More")
         NavRow("Notifications", null) { onGo(Route.Notifications) }
-        NavRow("Fill the past", null) { onGo(Route.FillThePast) }
+        NavRow("Fill empty days", null) { onGo(Route.FillThePast) }
         NavRow("What SLIVER stores", null) { showStores = !showStores }
         if (showStores) {
             SliverText(
-                "Your seconds, photos and films stay on this phone. If you turn on backup, copies go to a private folder in your own Google Drive. Nothing is shared with us.",
+                "Your clips, photos and films stay on this phone. If you turn on backup, copies go to a private folder in your own Google Drive. Nothing is shared with us.",
                 SliverType.BodySmall, Modifier.padding(bottom = SliverSpace.S3), color = SliverColors.TextSecondary,
             )
         }

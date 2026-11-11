@@ -133,7 +133,7 @@ private fun Poster(film: Film, plan: FilmPlan, modifier: Modifier, onClick: () -
             "${if (film.format == FilmFormat.CINEMA) "16:9" else "9:16"} · ${formatRuntime(plan.seconds)}",
             SliverType.MonoS,
         )
-        SliverText("${film.rangeText()} · ${plan.seconds} seconds", SliverType.Caption)
+        SliverText("${film.rangeText()} · ${plan.seconds} clips", SliverType.Caption)
     }
 }
 

@@ -13,4 +13,4 @@ fun dayNumber(date: LocalDate, first: LocalDate): Int = first.daysUntil(date) + 
 fun weekdayName(date: LocalDate): String = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
 fun cellDescription(date: LocalDate, hasSecond: Boolean): String =
-    "${weekdayName(date)} ${date.day} ${MonthLong[date.month.ordinal]}" + if (hasSecond) ", has a second" else ""
+    "${weekdayName(date)} ${date.day} ${MonthLong[date.month.ordinal]}" + if (hasSecond) ", has a clip" else ""

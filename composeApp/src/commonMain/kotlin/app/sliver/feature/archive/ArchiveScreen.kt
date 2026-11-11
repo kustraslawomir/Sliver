@@ -129,7 +129,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
             if (all.isEmpty() && app != null) {
                 EdgeState(
                     "Your year starts today", "Record one second a day. Your archive fills in here.",
-                    Modifier.fillMaxWidth(), "Record today's second",
+                    Modifier.fillMaxWidth(), "Record today's clip",
                 ) { CaptureSession.forDate = null; onNavigate(Route.Camera) }
             }
 
@@ -142,7 +142,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                     shown = YearMonth(shown.year, month)
                     yearView = false
                 }
-                GhostButton("Fill the past from your gallery", { onNavigate(Route.FillThePast) })
+                GhostButton("Fill empty days from your gallery", { onNavigate(Route.FillThePast) })
                 GhostButton("Make your ${shown.year} film so far", { onNavigate(Route.FilmBuilder) })
             } else {
                 MonthHeader(
@@ -150,7 +150,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                     { shown = shown.plusMonths(-1) }, { shown = shown.plusMonths(1) },
                 )
                 MonthGrid(shown, byDate, today, ::onCell)
-                GhostButton("Fill the past from your gallery", { onNavigate(Route.FillThePast) })
+                GhostButton("Fill empty days from your gallery", { onNavigate(Route.FillThePast) })
             }
         }
 

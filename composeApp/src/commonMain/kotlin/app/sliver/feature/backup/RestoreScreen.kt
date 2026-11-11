@@ -42,7 +42,7 @@ import org.koin.mp.KoinPlatform
 
 enum class RestoreStage { SCANNING, FOUND, NONE, FAILED, RESTORING, DONE }
 
-fun foundCopy(count: Int) = if (count == 1) "We found 1 second" else "We found $count seconds"
+fun foundCopy(count: Int) = if (count == 1) "We found 1 clip" else "We found $count clips"
 
 fun restoreStage(scan: RestoreScan?, failed: Boolean, started: Boolean, progress: BackupProgress?, missing: Int): RestoreStage = when {
     failed -> RestoreStage.FAILED
@@ -111,7 +111,7 @@ fun RestoreScreen(onDone: () -> Unit) {
             }
             RestoreStage.NONE -> {
                 SliverText("Nothing to restore", SliverType.DisplayM)
-                SliverText("We didn't find any seconds in your SLIVER folder.", SliverType.Body, color = SliverColors.TextSecondary)
+                SliverText("We didn't find any clips in your SLIVER folder.", SliverType.Body, color = SliverColors.TextSecondary)
                 GhostButton("Continue", onClick = onDone)
             }
             RestoreStage.FAILED -> {
@@ -123,7 +123,7 @@ fun RestoreScreen(onDone: () -> Unit) {
                 val restoring = stage == RestoreStage.RESTORING
                 SliverText(if (restoring) "Restoring" else "All back", SliverType.DisplayM)
                 SliverText(
-                    if (restoring) "${total - missing} of $total seconds. It picks up where it left off." else "${foundCopy(total)} restored.",
+                    if (restoring) "${total - missing} of $total clips. It picks up where it left off." else "${foundCopy(total)} restored.",
                     SliverType.Body, color = SliverColors.TextSecondary,
                 )
                 val anchor = local.maxByOrNull { it.date }?.date

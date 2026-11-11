@@ -102,7 +102,7 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
-            SliverText("Fill the past", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
+            SliverText("Fill empty days", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
         }
 
         val running = batch
@@ -135,14 +135,14 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
 
         SliverText(
             "Add days you never captured, using videos from your gallery by the date they were taken. " +
-                "Everything stays on your phone, and days that already have a second are never touched.",
+                "Everything stays on your phone, and days that already have a clip are never touched.",
             SliverType.Body, color = SliverColors.TextSecondary,
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             BackfillRange.entries.forEach { r -> Chip(r.label, range == r, { range = r }) }
         }
-        SwitchRow("Use photos too", usePhotos, { usePhotos = it }, caption = "Days with only photos get a 1 second clip.")
+        SwitchRow("Use photos too", usePhotos, { usePhotos = it }, caption = "Days with only photos get a 1 s clip.")
 
         if (candidates == null) {
             PrimaryButton(if (scanning) "Scanning..." else "Scan my gallery", {

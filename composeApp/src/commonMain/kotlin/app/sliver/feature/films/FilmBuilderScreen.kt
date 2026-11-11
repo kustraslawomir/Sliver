@@ -117,7 +117,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 .background(SliverColors.BgVoid).clickable { paused = !paused },
         ) {
             if (clips.isEmpty()) {
-                SliverText("No seconds in this range", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.TextSecondary)
+                SliverText("No clips in this range", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.TextSecondary)
             } else {
                 FilmPreview(
                     clips, lookParams, options.audio, options.track, paused, seek,
@@ -146,7 +146,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 }
             }
             SliverSlider(fraction, { seek = FilmSeek(it) })
-            SliverText("${plan.seconds} seconds · ${formatRuntime(plan.seconds)}", SliverType.MonoS, color = SliverColors.TextSecondary)
+            SliverText("${plan.seconds} clips · ${formatRuntime(plan.seconds)}", SliverType.MonoS, color = SliverColors.TextSecondary)
         }
 
         Section("Range") {
@@ -194,7 +194,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
         }
 
-        Section("One look") {
+        Section("One filter") {
             LookChips(options.look) { options = options.copy(look = it) }
         }
 

@@ -62,15 +62,15 @@ data class StatusCopy(val title: String, val body: String, val action: String? =
 fun statusCopy(ui: BackupUi, progress: BackupProgress?): StatusCopy = when (ui) {
     BackupUi.BACKING_UP -> StatusCopy(
         "Backing up",
-        progress?.takeIf { it.total > 0 }?.let { "${it.done} of ${it.total} seconds. It picks up where it left off." }
+        progress?.takeIf { it.total > 0 }?.let { "${it.done} of ${it.total} clips. It picks up where it left off." }
             ?: "Getting ready. It picks up where it left off.",
     )
-    BackupUi.UP_TO_DATE -> StatusCopy("All backed up", "Every second is safe in your Drive.")
-    BackupUi.PAUSED_WIFI -> StatusCopy("Waiting for Wi-Fi", "Your seconds upload as soon as you're on Wi-Fi.", "Back up anyway")
-    BackupUi.FAILED -> StatusCopy("Backup didn't finish", "Your seconds are safe on this phone. We'll try again soon.", "Try again")
+    BackupUi.UP_TO_DATE -> StatusCopy("All backed up", "Every clip is safe in your Drive.")
+    BackupUi.PAUSED_WIFI -> StatusCopy("Waiting for Wi-Fi", "Your clips upload as soon as you're on Wi-Fi.", "Back up anyway")
+    BackupUi.FAILED -> StatusCopy("Backup didn't finish", "Your clips are safe on this phone. We'll try again soon.", "Try again")
     BackupUi.DRIVE_FULL -> StatusCopy(
         "Your Drive is full",
-        "Your seconds are safe on this phone. Free up space in Google Drive to continue.",
+        "Your clips are safe on this phone. Free up space in Google Drive to continue.",
         "Try again",
     )
     BackupUi.REVOKED -> StatusCopy("Access was removed", "Reconnect Google to keep backing up.", "Reconnect")
@@ -109,7 +109,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
         scope.launch {
             exportNote = "Exporting"
             exportNote = exporter.exportAll(uri) { done, total -> exportNote = "Exporting $done of $total" }
-                .fold({ "Saved. Your seconds are in the .zip." }, { "Export failed. Try again." })
+                .fold({ "Saved. Your clips are in the .zip." }, { "Export failed. Try again." })
         }
     }
 
@@ -140,7 +140,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
                         })
                         InfoRow("Folder", "SLIVER in your Google Drive")
-                        InfoRow("Backed up", "$backedUp of ${statuses.size} seconds")
+                        InfoRow("Backed up", "$backedUp of ${statuses.size} clips")
                         InfoRow(
                             "Drive space",
                             quota?.let { q ->
@@ -150,12 +150,12 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                         SwitchRow(
                             "Auto-backup", account.autoBackup,
                             { on -> scope.launch { repo.update { it.copy(account = it.account.copy(autoBackup = on)) } } },
-                            caption = "Upload new seconds as you save them",
+                            caption = "Upload new clips as you save them",
                         )
                         SwitchRow(
                             "Wi-Fi only", account.wifiOnly,
                             { on -> scope.launch { repo.update { it.copy(account = it.account.copy(wifiOnly = on)) } } },
-                            caption = "Roughly 2 MB per second",
+                            caption = "Roughly 2 MB per clip",
                         )
                         PrimaryButton(
                             "Back up now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
@@ -197,10 +197,10 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                 )
                 SwitchRow(
                     "Delete the SLIVER folder in Drive", deleteDrive, { deleteDrive = it },
-                    caption = "Your backed-up seconds are removed from Drive",
+                    caption = "Your backed-up clips are removed from Drive",
                 )
                 SwitchRow(
-                    "Delete my seconds on this phone", deleteLocal, { deleteLocal = it },
+                    "Delete my clips on this phone", deleteLocal, { deleteLocal = it },
                     caption = "This can't be undone",
                 )
                 if (deleteError) SliverText("Something went wrong. Nothing more was changed. Try again.", SliverType.Caption)

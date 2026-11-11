@@ -269,7 +269,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                     )
                     if (coach) {
                         SliverText(
-                            "Drag to choose your second.", SliverType.BodySmall,
+                            "Drag to choose your clip.", SliverType.BodySmall,
                             Modifier.align(Alignment.TopCenter).offset(y = (-28).dp)
                                 .clip(SliverShapes.Pill).background(SliverColors.Surface2)
                                 .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
@@ -296,12 +296,12 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                     })
                 }
                 PrimaryButton(
-                    if (saving) "Saving..." else "Use this second", ::useSecond,
+                    if (saving) "Saving..." else "Save clip", ::useSecond,
                     enabled = duration != null && !saving,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     GhostButton("Retake", ::close, Modifier.weight(1f))
-                    GhostButton("Looks", ::openLooks, Modifier.weight(1f))
+                    GhostButton("Filters", ::openLooks, Modifier.weight(1f))
                 }
             }
         }
@@ -318,7 +318,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                             dayLabel(d, today), SliverType.Body,
                             color = if (d == day) SliverColors.Accent else SliverColors.TextPrimary,
                         )
-                        if (filled.any { it.date == d }) SliverText("HAS A SECOND", SliverType.MonoS, color = SliverColors.TextTertiary)
+                        if (filled.any { it.date == d }) SliverText("HAS A CLIP", SliverType.MonoS, color = SliverColors.TextTertiary)
                     }
                 }
             }
