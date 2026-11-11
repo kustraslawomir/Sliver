@@ -3,3 +3,4 @@
 - T02: fonts (Instrument Serif, Geist, Geist Mono) could not be downloaded (no network access). `SliverFonts` in `core/theme/SliverType.kt` uses system Serif/SansSerif/Monospace as placeholders. To finish: add the OFL .ttf files to `composeApp/src/commonMain/composeResources/font/`, enable `compose.components.resources`, and build the three FontFamilies there.
 - T02: no Material3 dependency; theme is token-based on Compose foundation, so no Material color scheme exists to leak.
 - T02: gallery is toggled by `SHOW_GALLERY` in `App.kt`.
+- T09: 300 ms/15 s on-device timing not measured (no device); FrameSampler logs timing under tag FrameSampler.
