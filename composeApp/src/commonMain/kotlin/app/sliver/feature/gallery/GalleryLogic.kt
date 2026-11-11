@@ -39,3 +39,7 @@ fun durationLabel(ms: Long): String {
     val s = (ms / 1000).coerceAtLeast(0)
     return (s / 60).toString() + ":" + (s % 60).toString().padStart(2, '0')
 }
+
+/** 'MON 9 NOV' */
+fun dayHeader(date: LocalDate): String =
+    "${date.dayOfWeek.name.take(3)} ${date.day} ${date.month.name.take(3)}"

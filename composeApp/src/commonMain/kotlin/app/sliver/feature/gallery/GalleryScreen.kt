@@ -8,7 +8,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import app.sliver.core.theme.SliverShapes
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -107,11 +115,11 @@ private fun GalleryContent(
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton44({ navigator.back() }, "Close") {
                 SliverIcon(SliverIcons.X, SliverColors.TextPrimary)
             }
+            SliverText("Add media", SliverType.Headline, Modifier.weight(1f), SliverColors.TextPrimary, maxLines = 1)
             if (forDate != null) Chip("FOR " + dayLabel(forDate, today).uppercase(), selected = true, onClick = {})
         }
         if (status == PermissionStatus.Partial) {
@@ -127,13 +135,15 @@ private fun GalleryContent(
                 }
             }
         }
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2),
+        LazyRow(
+            Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2),
             horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            GalleryAlbum.entries.forEach { Chip(it.label, album == it, { album = it }) }
-            Box(Modifier.weight(1f))
-            GalleryFilter.entries.forEach { Chip(it.label, filter == it, { filter = it }) }
+            items(GalleryAlbum.entries) { Chip(it.label, album == it, { album = it }) }
+            item { Box(Modifier.width(1.dp).height(20.dp).background(SliverColors.LineHairline)) }
+            items(GalleryFilter.entries) { Chip(it.label, filter == it, { filter = it }) }
         }
         if (items != null && groups.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -142,17 +152,17 @@ private fun GalleryContent(
         }
         LazyVerticalGrid(
             GridCells.Fixed(3),
-            Modifier.fillMaxSize(),
+            Modifier.weight(1f).fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             groups.forEach { group ->
                 item(key = "h" + group.date, span = { GridItemSpan(maxLineSpan) }) {
                     SliverText(
-                        dayLabel(group.date, today),
-                        SliverType.Title,
+                        dayHeader(group.date),
+                        SliverType.MonoS,
                         Modifier.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
-                        SliverColors.TextPrimary,
+                        SliverColors.TextSecondary,
                     )
                 }
                 items(group.items, key = { it.uri }) { Cell(it, provider) { pick(it) } }
@@ -168,10 +178,16 @@ private fun Cell(item: GalleryItem, provider: GalleryProvider, onClick: () -> Un
     Box(Modifier.aspectRatio(1f).background(SliverColors.Surface1).clickable(onClick = onClick)) {
         thumb?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         if (item.isVideo) {
-            SliverText(
-                durationLabel(item.durationMs), SliverType.MonoS,
-                Modifier.align(Alignment.BottomEnd).padding(SliverSpace.S1), SliverColors.TextPrimary,
-            )
+            Row(
+                Modifier.align(Alignment.BottomEnd).padding(SliverSpace.S1)
+                    .clip(SliverShapes.Pill).background(Color.Black.copy(alpha = 0.55f))
+                    .padding(horizontal = SliverSpace.S2, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
+            ) {
+                SliverIcon(SliverIcons.Play, SliverColors.TextPrimary, size = 12.dp)
+                SliverText(durationLabel(item.durationMs), SliverType.MonoS, color = SliverColors.TextPrimary, maxLines = 1)
+            }
         }
     }
 }
