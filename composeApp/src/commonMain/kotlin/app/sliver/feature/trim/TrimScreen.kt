@@ -42,6 +42,12 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -335,7 +341,17 @@ private fun Filmstrip(
     val drag by rememberUpdatedState(onDrag)
     val dragEnd by rememberUpdatedState(onDragEnd)
     BoxWithConstraints(
-        Modifier.fillMaxWidth().height(StripHeight).background(SliverColors.Surface1).pointerInput(secPx) {
+        Modifier.fillMaxWidth().height(StripHeight).background(SliverColors.Surface1).semantics {
+            contentDescription = "Trim position"
+            stateDescription = "Starts at ${start / 1000}.${start / 100 % 10} seconds"
+            val maxStart = (durationMs - windowMs).coerceAtLeast(0).toFloat()
+            progressBarRangeInfo = ProgressBarRangeInfo(start.toFloat(), 0f..maxStart.coerceAtLeast(1f), (maxStart / 100).toInt().coerceAtLeast(1) - 1)
+            setProgress { v ->
+                val target = ((v / 100f).roundToInt() * 100L).coerceIn(0, maxStart.toLong())
+                dragStart(); drag(target); dragEnd()
+                true
+            }
+        }.pointerInput(secPx) {
             var pos = 0f
             detectHorizontalDragGestures(
                 onDragStart = { pos = start.toFloat(); dragStart() },

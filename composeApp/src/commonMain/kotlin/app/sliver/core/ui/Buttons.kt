@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverGlow
@@ -89,6 +91,7 @@ fun IconButton44(
     Box(
         modifier.size(44.dp).clip(CircleShape)
             .then(if (overCamera) Modifier.background(SliverColors.BgVoid.copy(alpha = 0.5f)) else Modifier)
+            .semantics { this.contentDescription = contentDescription }
             .clickable(source, null, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { content() }

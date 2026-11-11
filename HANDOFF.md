@@ -36,3 +36,6 @@
 - Notifications screen is Route.Notifications; main Settings screen is still the placeholder. notifyBackupPaused has no caller until the backup task exists.
 - Running late and On this day are planned with the reminder (7-day horizon, replanned on app open, settings change, day saved, alarm fire, boot).
 - T31: widget uses AppWidgetProvider/RemoteViews instead of Glance (no new dependency); widget and QS tile not device-tested; midnight refresh uses an inexact alarm.
+
+## T32
+TalkBack/font-scale pass not device-tested. Added icon button descriptions, calendar cell labels, trim strip adjustable (+-0.1 s).

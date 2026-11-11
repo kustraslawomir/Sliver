@@ -29,7 +29,7 @@
 - [x] T29 (Account/Backup rows route to Backup placeholder until T33)
 - [x] T30 (splash overlay + v31 splash theme, not device-tested)
 - [x] T31 (RemoteViews widget, not device-tested, see HANDOFF)
-- [ ] T32
+- [x] T32 (semantics added; manual TalkBack pass not done, see HANDOFF)
 - [ ] T33
 - [ ] T34
 - [ ] T35

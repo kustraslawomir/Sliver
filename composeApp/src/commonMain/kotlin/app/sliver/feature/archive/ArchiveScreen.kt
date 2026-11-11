@@ -26,6 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -214,7 +217,8 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, onClick: () ->
     )
     val ring = if (state == CellState.TODAY) base.border(2.dp, SliverColors.Accent, shape) else base
     Box(
-        ring.then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(onClick = onClick)),
+        ring.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
+            .then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)),
     ) {
         val thumb = if (day != null) rememberPhoto(day.thumb) else null
         if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
