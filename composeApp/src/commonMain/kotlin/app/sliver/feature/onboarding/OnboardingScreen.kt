@@ -52,7 +52,7 @@ import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
 
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit) {
+fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
     val repo = remember { KoinPlatform.getKoin().get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val settings by remember { repo.settings }.collectAsState(null)
@@ -116,7 +116,10 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     },
                     onSkip = { update { it.copy(reminder = it.reminder.copy(mode = ReminderMode.OFF)) }; next() },
                 )
-                OnboardingStep.Google -> GoogleSignInPanel("Skip — start as guest", onFinished = ::next)
+                OnboardingStep.Google -> GoogleSignInPanel(
+                    "Skip — start as guest", onFinished = ::next,
+                    onRestore = { scope.launch { repo.update { it.copy(onboardingDone = true) }; onRestore() } },
+                )
             }
         }
     }

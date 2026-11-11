@@ -5,6 +5,7 @@ import app.sliver.data.auth.GoogleAuth
 import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.backup.BackupEngine
 import app.sliver.data.backup.DriveClient
+import app.sliver.data.backup.RestoreEngine
 import app.sliver.data.backup.DriveTrashQueue
 import app.sliver.data.backup.SettingsTrashQueue
 import app.sliver.data.backup.InMemoryDriveClient
@@ -31,6 +32,7 @@ val commonModule: Module = module {
     single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get()) }
     single { BackupEngine(get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
+    single { RestoreEngine(get(), get(), get(), get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
     single { BackfillStore(get()) }
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }

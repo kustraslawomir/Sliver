@@ -33,5 +33,5 @@
 - [x] T33 (fake auth unless GOOGLE_WEB_CLIENT_ID set, see HANDOFF)
 - [x] T34 (Ktor RestDriveClient + InMemoryDriveClient when auth is fake)
 - [x] T35 (BackupEngine + WorkManager worker, 7-state machine, Backup screen, zip export, 24h problem notification)
-- [ ] T36
+- [x] T36 (RestoreEngine + RestoreWorker, Restore screen, local day wins; not device-tested)
 - [ ] T37

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -33,6 +35,45 @@ import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
 
 private const val WORK_NAME = "backup"
+private const val RESTORE_WORK_NAME = "restore"
+private const val RESTORE_THUMB_WIDTH = 320
+
+class AndroidRestoredDayWriter : RestoredDayWriter {
+    override suspend fun write(bytes: ByteArray, videoPath: String, thumbPath: String): Int = withContext(Dispatchers.IO) {
+        File(videoPath).writeBytes(bytes)
+        val r = MediaMetadataRetriever()
+        try {
+            r.setDataSource(videoPath)
+            val frame = r.getFrameAtTime(500_000, MediaMetadataRetriever.OPTION_CLOSEST) ?: return@withContext 0
+            val height = (RESTORE_THUMB_WIDTH.toFloat() * frame.height / frame.width).toInt().coerceAtLeast(1)
+            val thumb = Bitmap.createScaledBitmap(frame, RESTORE_THUMB_WIDTH, height, true)
+            File(thumbPath).outputStream().use { thumb.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+            Bitmap.createScaledBitmap(thumb, 1, 1, true).getPixel(0, 0) or (0xFF shl 24)
+        } catch (e: RuntimeException) {
+            0
+        } finally {
+            r.release()
+        }
+    }
+}
+
+class AndroidRestoreScheduler(private val context: Context) : RestoreScheduler {
+    override fun start() {
+        val request = OneTimeWorkRequestBuilder<RestoreWorker>()
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(context).enqueueUniqueWork(RESTORE_WORK_NAME, ExistingWorkPolicy.KEEP, request)
+    }
+}
+
+class RestoreWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result = when (KoinPlatform.getKoin().get<RestoreEngine>().run()) {
+        null -> Result.success()
+        BackupError.REVOKED -> Result.failure()
+        else -> Result.retry()
+    }
+}
 
 val AndroidDayFileReader = DayFileReader { path -> File(path).takeIf { it.exists() }?.readBytes() }
 

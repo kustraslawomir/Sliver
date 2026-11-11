@@ -51,3 +51,4 @@ TalkBack/font-scale pass not device-tested. Added icon button descriptions, cale
 4. Credentials -> Create OAuth client ID -> Web application (no redirect needed). Copy its client ID.
 5. Add `GOOGLE_WEB_CLIENT_ID=<web client id>` to `local.properties` (and `.env.local`), rebuild. The app then uses the real Credential Manager + AuthorizationClient.
 - T35: with the fake GoogleAuth, backup runs against InMemoryDriveClient (nothing leaves the device). Real Drive needs GOOGLE_WEB_CLIENT_ID.
+- T36: on restore conflict a locally captured day wins (restored file goes to tmp, moved only if the day is still empty). Films return from manifest.json without renders (lazy). Not device-tested; fake Drive is empty on a fresh install, so real restore needs GOOGLE_WEB_CLIENT_ID.

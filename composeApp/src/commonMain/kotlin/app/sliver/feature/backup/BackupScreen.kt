@@ -77,7 +77,7 @@ fun statusCopy(ui: BackupUi, progress: BackupProgress?): StatusCopy = when (ui) 
 }
 
 @Composable
-fun BackupScreen(onBack: () -> Unit) {
+fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val manager = remember { koin.get<AccountManager>() }
@@ -154,6 +154,7 @@ fun BackupScreen(onBack: () -> Unit) {
                             "Back up now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
                             Modifier.fillMaxWidth(), enabled = progress == null,
                         )
+                        SecondaryButton("Restore from Drive", onRestore, Modifier.fillMaxWidth())
                         SecondaryButton("Export everything (.zip)", { pickZip("sliver-archive.zip") }, Modifier.fillMaxWidth())
                         exportNote?.let { SliverText(it, SliverType.BodySmall) }
                         SliverText(
@@ -163,7 +164,7 @@ fun BackupScreen(onBack: () -> Unit) {
                         GhostButton("Disconnect", { confirmDisconnect = true }, destructive = true)
                     }
                 }
-                else -> GoogleSignInPanel(skipLabel = "Not now", onFinished = onBack)
+                else -> GoogleSignInPanel(skipLabel = "Not now", onFinished = onBack, onRestore = onRestore)
             }
         }
         SliverBottomSheet(confirmDisconnect, { confirmDisconnect = false }) {

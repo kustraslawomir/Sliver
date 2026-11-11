@@ -34,6 +34,7 @@ import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.archive.DayDetailScreen
 import app.sliver.feature.backfill.BackfillScreen
 import app.sliver.feature.backup.BackupScreen
+import app.sliver.feature.backup.RestoreScreen
 import app.sliver.feature.camera.CameraScreen
 import app.sliver.feature.films.ExportScreen
 import app.sliver.feature.films.FilmBuilderScreen
@@ -130,11 +131,19 @@ fun SliverNavHost() {
                         )
                         Route.YearInSeconds -> YearInSecondsScreen(::go, onBack = { nav.popBackStack() })
                         Route.Settings -> SettingsScreen(::go)
-                        Route.Backup -> BackupScreen(onBack = { nav.popBackStack() })
-                        Route.Notifications ->NotificationsScreen(onBack = { nav.popBackStack() })
-                        Route.Onboarding -> OnboardingScreen(onFinished = {
-                            nav.navigate(Route.Camera.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
+                        Route.Backup -> BackupScreen(onBack = { nav.popBackStack() }, onRestore = { go(Route.Restore) })
+                        Route.Restore -> RestoreScreen(onDone = {
+                            nav.navigate(Route.Camera.path) { popUpTo(nav.graph.startDestinationId) { inclusive = true } }
                         })
+                        Route.Notifications ->NotificationsScreen(onBack = { nav.popBackStack() })
+                        Route.Onboarding -> OnboardingScreen(
+                            onFinished = {
+                                nav.navigate(Route.Camera.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
+                            },
+                            onRestore = {
+                                nav.navigate(Route.Restore.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
+                            },
+                        )
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }

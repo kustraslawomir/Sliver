@@ -32,7 +32,13 @@ val ConsentPoints = listOf(
 
 /** "Save your seconds" sheet followed by the "Before Google consent" explainer. */
 @Composable
-fun GoogleSignInPanel(skipLabel: String, onFinished: () -> Unit, modifier: Modifier = Modifier) {
+fun GoogleSignInPanel(
+    skipLabel: String,
+    onFinished: () -> Unit,
+    modifier: Modifier = Modifier,
+    onRestore: (() -> Unit)? = null,
+) {
+    var restoreAfter by remember { mutableStateOf(false) }
     val manager = remember { KoinPlatform.getKoin().get<AccountManager>() }
     val scope = rememberCoroutineScope()
     var explainer by remember { mutableStateOf(false) }
@@ -61,7 +67,7 @@ fun GoogleSignInPanel(skipLabel: String, onFinished: () -> Unit, modifier: Modif
                         busy = true
                         error = null
                         scope.launch {
-                            manager.signIn().onSuccess { onFinished() }.onFailure { error = "Sign-in did not finish. Try again." }
+                            manager.signIn().onSuccess { if (restoreAfter && onRestore != null) onRestore() else onFinished() }.onFailure { error = "Sign-in did not finish. Try again." }
                             busy = false
                         }
                     }
@@ -69,7 +75,13 @@ fun GoogleSignInPanel(skipLabel: String, onFinished: () -> Unit, modifier: Modif
                 Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            GhostButton(if (explainer) "Back" else skipLabel, onClick = { if (explainer) explainer = false else onFinished() })
+            GhostButton(
+                if (explainer) "Back" else skipLabel,
+                onClick = { if (explainer) { explainer = false; restoreAfter = false } else onFinished() },
+            )
+            if (!explainer && onRestore != null) {
+                GhostButton("Welcome back? Restore my seconds", onClick = { restoreAfter = true; explainer = true })
+            }
         }
     }
 }

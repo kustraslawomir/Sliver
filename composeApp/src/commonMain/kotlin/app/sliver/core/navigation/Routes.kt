@@ -18,6 +18,7 @@ enum class Route(val path: String, val title: String, val tabBar: Boolean = fals
     YearInSeconds("year-in-seconds", "Year in Seconds"),
     Settings("settings", "Settings"),
     Backup("backup", "Backup & account"),
+    Restore("restore", "Restore"),
     Notifications("notifications", "Notifications"),
     ;
 
