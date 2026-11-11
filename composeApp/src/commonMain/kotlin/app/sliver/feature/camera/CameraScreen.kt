@@ -51,7 +51,13 @@ import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
+import app.sliver.core.theme.SliverShapes
+import app.sliver.core.time.todayLocal
+import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.data.db.Day
+import app.sliver.data.repo.DayRepository
+import app.sliver.feature.trim.rememberPhoto
 import app.sliver.core.ui.Segmented
 import app.sliver.data.files.FileStore
 import app.sliver.data.settings.CameraMode
@@ -87,6 +93,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val thumb = rememberLatestGalleryThumb()
+    val days = remember { koin.get<DayRepository>() }
+    val today = remember { todayLocal() }
+    val todayDay by remember { days.observeDay(today) }.collectAsState(null)
+    var replacing by remember { mutableStateOf(false) }
 
     var ready by remember { mutableStateOf(false) }
     var recording by remember { mutableStateOf(false) }
@@ -193,6 +203,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             }
         }
 
+        todayDay?.takeIf { !replacing && !recording }?.let { day ->
+            TodayCard(day, { replacing = true }, Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 64.dp))
+        }
+
         Column(
             Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -227,6 +241,28 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                 Box(Modifier.size(52.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modifier) {
+    val thumb = rememberPhoto(day.thumb)
+    Row(
+        modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth()
+            .clip(SliverShapes.M).background(SliverColors.Surface1.copy(alpha = 0.92f))
+            .border(1.dp, SliverColors.LineHairline, SliverShapes.M)
+            .padding(SliverSpace.S3),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+    ) {
+        Box(Modifier.size(44.dp).clip(SliverShapes.S).background(SliverColors.Surface1)) {
+            if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        }
+        Column(Modifier.weight(1f)) {
+            SliverText("Today's second is in", SliverType.Headline)
+            SliverText(todayCardDetail(day.look.preset, day.takenAt), SliverType.MonoS)
+        }
+        GhostButton("Replace", onReplace)
     }
 }
 

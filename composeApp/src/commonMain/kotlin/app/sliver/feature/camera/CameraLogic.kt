@@ -1,6 +1,18 @@
 package app.sliver.feature.camera
 
+import app.sliver.data.LookPreset
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 const val HOLD_THRESHOLD_MS = 300L
+
+/** "Night Neon · 09:05" for the today-captured card; HH:mm in [zone]. */
+fun todayCardDetail(look: LookPreset, takenAt: Instant, zone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val t = takenAt.toLocalDateTime(zone)
+    val name = look.name.lowercase().split('_').joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+    return "$name · ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}"
+}
 
 val SelfTimerOptions = listOf(0, 3, 10)
 
