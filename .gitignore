@@ -20,3 +20,8 @@ google-services.json
 .workflow/run.log
 build/
 .kotlin/
+.idea/
+.workflow/launch.out
+.workflow/intake.md
+.kotlin/
+build/

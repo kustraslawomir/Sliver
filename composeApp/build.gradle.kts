@@ -17,6 +17,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(libs.koin.core)
+            implementation(libs.navigation.compose)
             implementation(libs.kotlinx.coroutines.core)
         }
         androidMain.dependencies {
