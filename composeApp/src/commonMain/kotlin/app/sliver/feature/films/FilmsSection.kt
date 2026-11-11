@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -63,22 +65,21 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
-        SliverText("Films", SliverType.DisplayM)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            SliverText("Films", SliverType.DisplayM, Modifier.weight(1f))
+            SecondaryButton("+ Make film", { onNavigate(Route.FilmBuilder) })
+        }
         if (teaser != TeaserState.HIDDEN) {
             YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
         }
-        list.chunked(2).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                row.forEach { film ->
-                    Poster(film, film.plan(all), Modifier.weight(1f)) {
-                        FilmNav.id = film.id
-                        onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
-                    }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+            items(list, key = { it.id }) { film ->
+                Poster(film, film.plan(all), Modifier.width(if (film.format == FilmFormat.CINEMA) 220.dp else 130.dp)) {
+                    FilmNav.id = film.id
+                    onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
                 }
-                if (row.size == 1) Box(Modifier.weight(1f))
             }
         }
-        SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) }, Modifier.fillMaxWidth())
     }
 }
 

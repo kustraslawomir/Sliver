@@ -1,6 +1,8 @@
 package app.sliver.feature.archive
 
+import app.sliver.data.FilmFormat
 import app.sliver.data.db.Day
+import app.sliver.feature.camera.label
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -52,8 +54,9 @@ fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12
     List(31) { d -> if (d >= length) null else days[LocalDate(year, m + 1, d + 1)]?.color ?: 0 }
 }
 
-fun secondsHeader(count: Int, first: LocalDate): String =
-    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]} ${first.year}"
+fun secondsHeader(count: Int, first: LocalDate, format: FilmFormat? = null): String =
+    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]} ${first.year}" +
+        (format?.let { " · ${it.label().uppercase()}" } ?: "")
 
 val MonthNames = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
 val MonthLong = listOf(

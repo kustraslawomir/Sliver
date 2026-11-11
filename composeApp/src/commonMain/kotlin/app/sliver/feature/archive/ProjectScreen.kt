@@ -14,13 +14,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,7 +79,7 @@ object ArchiveSession {
 private val WeekDays = listOf("M", "T", "W", "T", "F", "S", "S")
 
 @Composable
-fun ArchiveScreen(onNavigate: (Route) -> Unit) {
+fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
@@ -83,6 +88,9 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
     val app by remember { settings.settings }.collectAsState(null)
     val byDate = remember(all) { all.associateBy { it.date } }
     val first = app?.firstDay ?: all.minOfOrNull { it.date } ?: today
+    var seen by remember { mutableStateOf<Set<LocalDate>?>(null) }
+    LaunchedEffect(app != null, byDate.isNotEmpty()) { if (app != null && seen == null) seen = byDate.keys }
+    val fresh = seen?.let { byDate.keys - it } ?: emptySet()
     val memory = remember(byDate, today) { pickMemory(today, byDate.keys) }
 
     var yearView by remember { mutableStateOf(false) }
@@ -90,6 +98,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     var projectsOpen by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
 
     fun openDay(date: LocalDate) {
         ArchiveSession.selected = date
@@ -122,6 +131,9 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                IconButton44(onBack, "Back to camera") {
+                    SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary)
+                }
                 Column(
                     Modifier.weight(1f).clip(SliverShapes.S).clickable(onClick = rememberTapGate { projectsOpen = true }),
                 ) {
@@ -129,13 +141,13 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                         SliverText(project?.name ?: "", SliverType.DisplayM, Modifier.weight(1f, fill = false), maxLines = 1)
                         SliverIcon(SliverIcons.ChevronDown, SliverColors.TextSecondary)
                     }
-                    SliverText(secondsHeader(all.size, first), SliverType.MonoS, color = SliverColors.TextSecondary)
-                }
-                IconButton44({ projectsOpen = true }, "Project menu") {
-                    SliverIcon(SliverIcons.More, SliverColors.TextPrimary)
+                    SliverText(secondsHeader(all.size, first, project?.format), SliverType.MonoS, color = SliverColors.TextSecondary)
                 }
                 IconButton44({ onNavigate(Route.Settings) }, "Settings") {
                     SliverIcon(SliverIcons.Settings, SliverColors.TextPrimary)
+                }
+                IconButton44({ menuOpen = true }, "More") {
+                    SliverIcon(SliverIcons.More, SliverColors.TextPrimary)
                 }
             }
             Segmented(listOf("MONTH", "YEAR"), if (yearView) 1 else 0, { yearView = it == 1 })
@@ -161,15 +173,19 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                     shown, canGoPrev(shown, first), canGoNext(shown, today),
                     { shown = shown.plusMonths(-1) }, { shown = shown.plusMonths(1) },
                 )
-                MonthGrid(shown, byDate, today, ::onCell)
+                MonthGrid(shown, byDate, today, fresh, ::onCell)
             }
             FilmsSection(onNavigate)
         }
 
-        ProjectsSheet(
-            projectsOpen, { projectsOpen = false }, project?.id,
-            extras = listOf("Fill empty days" to { projectsOpen = false; onNavigate(Route.FillThePast) }),
-        )
+        ProjectsSheet(projectsOpen, { projectsOpen = false })
+        SliverBottomSheet(menuOpen, onDismiss = { menuOpen = false }) {
+            val tap = rememberTapGate { menuOpen = false; onNavigate(Route.FillThePast) }
+            SliverText(
+                "Fill empty days", SliverType.Body,
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = tap).padding(vertical = SliverSpace.S3),
+            )
+        }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
@@ -206,7 +222,7 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, onCell: (LocalDate) -> Unit) {
+private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, fresh: Set<LocalDate>, onCell: (LocalDate) -> Unit) {
     val weeks = remember(shown) { monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } } }
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
@@ -218,7 +234,7 @@ private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: Loca
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
                 week.forEach { date ->
                     Box(Modifier.weight(1f).height(60.dp)) {
-                        if (date != null) DayCell(date, today, byDate[date]) { onCell(date) }
+                        if (date != null) DayCell(date, today, byDate[date], date in fresh) { onCell(date) }
                     }
                 }
             }
@@ -227,7 +243,14 @@ private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: Loca
 }
 
 @Composable
-private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, onClick: () -> Unit) {
+private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean, onClick: () -> Unit) {
+    val scale = remember { Animatable(1f) }
+    LaunchedEffect(isNew) {
+        if (isNew) {
+            scale.snapTo(0.6f)
+            scale.animateTo(1f, tween(240))
+        }
+    }
     val state = cellState(date, today, day)
     val shape = SliverShapes.S
     val base = Modifier.fillMaxSize().clip(shape).background(
@@ -235,7 +258,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, onClick: () ->
     )
     val ring = if (state == CellState.TODAY) base.border(2.dp, SliverColors.Accent, shape) else base
     Box(
-        ring.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
+        ring.graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = scale.value }.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
             .then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)),
     ) {
         val thumb = if (day != null) rememberPhoto(day.thumb) else null

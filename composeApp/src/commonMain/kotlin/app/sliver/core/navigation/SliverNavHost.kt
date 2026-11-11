@@ -31,7 +31,7 @@ import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverSpace
 import app.sliver.data.DaySource
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.feature.archive.ArchiveScreen
+import app.sliver.feature.archive.ProjectScreen
 import app.sliver.feature.archive.ArchiveSession
 import app.sliver.feature.archive.DayDetailScreen
 import app.sliver.feature.backfill.BackfillScreen
@@ -104,7 +104,7 @@ fun SliverNavHost() {
                             }
                             Route.GalleryPicker -> GalleryScreen(go)
                             Route.Looks -> LooksScreen(onBack = back)
-                            Route.Project -> ArchiveScreen(go)
+                            Route.Project -> ProjectScreen(go, onBack = back)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
                             Route.FillThePast -> BackfillScreen(onBack = back)
                             Route.FilmBuilder -> FilmBuilderScreen(

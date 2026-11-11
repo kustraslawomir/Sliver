@@ -65,7 +65,6 @@ fun ProjectsSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     initialMenuFor: String? = null,
-    extras: List<Pair<String, () -> Unit>> = emptyList(),
 ) {
     val repo = remember { KoinPlatform.getKoin().get<ProjectRepository>() }
     val projects by remember { repo.projects }.collectAsState(emptyList())
@@ -114,7 +113,6 @@ fun ProjectsSheet(
             )
             is SheetMode.Menu -> ProjectMenu(
                 m.project, canLeaveActive(m.project, projects),
-                extras = if (m.project.id == initialMenuFor) extras else emptyList(),
                 onBack = ::backToList,
                 onRename = { mode = SheetMode.Rename(m.project) },
                 onFormat = { mode = SheetMode.Format(m.project) },
@@ -265,7 +263,6 @@ private fun MenuRow(label: String, onClick: () -> Unit, destructive: Boolean = f
 private fun ProjectMenu(
     project: Project,
     canLeave: Boolean,
-    extras: List<Pair<String, () -> Unit>>,
     onBack: () -> Unit,
     onRename: () -> Unit,
     onFormat: () -> Unit,
@@ -274,7 +271,6 @@ private fun ProjectMenu(
 ) {
     Column {
         SheetHeader(project.name, onBack)
-        extras.forEach { (label, action) -> MenuRow(label, action) }
         MenuRow("Rename", onRename)
         MenuRow("Change format", onFormat)
         MenuRow(if (project.archived) "Unarchive" else "Archive", onArchive, enabled = canLeave || project.archived)

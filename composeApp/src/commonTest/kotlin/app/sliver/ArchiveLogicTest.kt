@@ -1,6 +1,7 @@
 package app.sliver
 
 import app.sliver.data.DaySource
+import app.sliver.data.FilmFormat
 import app.sliver.data.db.Day
 import app.sliver.feature.archive.CellState
 import app.sliver.feature.archive.MemoryKind
@@ -72,5 +73,6 @@ class ArchiveLogicTest {
     fun header() {
         assertEquals("1 CLIP · SINCE 3 MAR 2026", secondsHeader(1, LocalDate(2026, 3, 3)))
         assertEquals("42 CLIPS · SINCE 3 MAR 2026", secondsHeader(42, LocalDate(2026, 3, 3)))
+        assertEquals("2 CLIPS · SINCE 3 MAR 2026 · CINEMA 16:9", secondsHeader(2, LocalDate(2026, 3, 3), FilmFormat.CINEMA))
     }
 }
