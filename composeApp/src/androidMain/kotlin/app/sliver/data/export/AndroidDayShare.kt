@@ -79,10 +79,14 @@ class AndroidDayShare(private val context: Context) : DayShare {
             canvas.drawText(stampText(date), w - margin, margin + paint.textSize, paint)
         }
         if (options.mark) {
-            paint.color = 0xB3EDEDE8.toInt()
-            paint.textAlign = Paint.Align.LEFT
-            paint.letterSpacing = 0.2f
-            canvas.drawText("SLIVER", margin, h - margin, paint)
+            val mark = checkNotNull(androidx.core.content.ContextCompat.getDrawable(context, app.sliver.R.drawable.sliver_wordmark)).mutate()
+            val mw = (140f * unit).toInt()
+            val mh = mw * 32 / 97
+            val left = margin.toInt()
+            val top = (h - margin).toInt() - mh
+            mark.setBounds(left, top, left + mw, top + mh)
+            mark.alpha = 0xB3
+            mark.draw(canvas)
         }
         return bmp
     }
