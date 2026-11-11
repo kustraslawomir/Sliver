@@ -1,0 +1,134 @@
+package app.sliver.data.settings
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+
+interface SettingsRepository {
+    val settings: Flow<AppSettings>
+    suspend fun update(transform: (AppSettings) -> AppSettings)
+}
+
+class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : SettingsRepository {
+
+    override val settings: Flow<AppSettings> = store.data.map { it.toSettings() }
+
+    override suspend fun update(transform: (AppSettings) -> AppSettings) {
+        store.edit { prefs -> prefs.write(transform(prefs.toSettings())) }
+    }
+
+    private object K {
+        val defaultLook = stringPreferencesKey("defaultLook")
+        val newFilmFormat = stringPreferencesKey("newFilmFormat")
+        val dateStamp = booleanPreferencesKey("dateStamp")
+        val saveFullRecordings = booleanPreferencesKey("saveFullRecordings")
+        val reminderMode = stringPreferencesKey("reminder.mode")
+        val reminderTime = stringPreferencesKey("reminder.time")
+        val reminderWindowStart = stringPreferencesKey("reminder.windowStart")
+        val reminderWindowEnd = stringPreferencesKey("reminder.windowEnd")
+        val reminderDays = stringPreferencesKey("reminder.days")
+        val notifRunningLate = booleanPreferencesKey("notif.runningLate")
+        val notifFilmReady = booleanPreferencesKey("notif.filmReady")
+        val notifBackupProblems = booleanPreferencesKey("notif.backupProblems")
+        val notifOnThisDay = booleanPreferencesKey("notif.onThisDay")
+        val cameraMode = stringPreferencesKey("camera.mode")
+        val cameraLook = stringPreferencesKey("camera.look")
+        val cameraLens = stringPreferencesKey("camera.lens")
+        val cameraFlash = booleanPreferencesKey("camera.flash")
+        val cameraGrid = booleanPreferencesKey("camera.grid")
+        val cameraActiveFilmId = stringPreferencesKey("camera.activeFilmId")
+        val onboardingDone = booleanPreferencesKey("onboardingDone")
+        val coachTrimSeen = booleanPreferencesKey("coachTrimSeen")
+        val firstDay = stringPreferencesKey("firstDay")
+        val accountSignedIn = booleanPreferencesKey("account.signedIn")
+        val accountEmail = stringPreferencesKey("account.email")
+        val accountDriveFolderId = stringPreferencesKey("account.driveFolderId")
+        val accountAutoBackup = booleanPreferencesKey("account.autoBackup")
+        val accountWifiOnly = booleanPreferencesKey("account.wifiOnly")
+    }
+
+    private inline fun <reified E : Enum<E>> Preferences.enum(key: Preferences.Key<String>, default: E): E =
+        this[key]?.let { name -> enumValues<E>().firstOrNull { it.name == name } } ?: default
+
+    private fun Preferences.toSettings(): AppSettings {
+        val d = AppSettings()
+        return AppSettings(
+            defaultLook = enum(K.defaultLook, d.defaultLook),
+            newFilmFormat = enum(K.newFilmFormat, d.newFilmFormat),
+            dateStamp = this[K.dateStamp] ?: d.dateStamp,
+            saveFullRecordings = this[K.saveFullRecordings] ?: d.saveFullRecordings,
+            reminder = ReminderSettings(
+                mode = enum(K.reminderMode, d.reminder.mode),
+                time = this[K.reminderTime]?.let(LocalTime::parse) ?: d.reminder.time,
+                windowStart = this[K.reminderWindowStart]?.let(LocalTime::parse) ?: d.reminder.windowStart,
+                windowEnd = this[K.reminderWindowEnd]?.let(LocalTime::parse) ?: d.reminder.windowEnd,
+                days = this[K.reminderDays]?.takeIf { it.length == 7 }?.map { it == '1' } ?: d.reminder.days,
+            ),
+            notif = NotifSettings(
+                runningLate = this[K.notifRunningLate] ?: d.notif.runningLate,
+                filmReady = this[K.notifFilmReady] ?: d.notif.filmReady,
+                backupProblems = this[K.notifBackupProblems] ?: d.notif.backupProblems,
+                onThisDay = this[K.notifOnThisDay] ?: d.notif.onThisDay,
+            ),
+            camera = CameraSettings(
+                mode = enum(K.cameraMode, d.camera.mode),
+                look = enum(K.cameraLook, d.camera.look),
+                lens = enum(K.cameraLens, d.camera.lens),
+                flash = this[K.cameraFlash] ?: d.camera.flash,
+                grid = this[K.cameraGrid] ?: d.camera.grid,
+                activeFilmId = this[K.cameraActiveFilmId],
+            ),
+            onboardingDone = this[K.onboardingDone] ?: d.onboardingDone,
+            coachTrimSeen = this[K.coachTrimSeen] ?: d.coachTrimSeen,
+            firstDay = this[K.firstDay]?.let(LocalDate::parse),
+            account = AccountSettings(
+                signedIn = this[K.accountSignedIn] ?: d.account.signedIn,
+                email = this[K.accountEmail],
+                driveFolderId = this[K.accountDriveFolderId],
+                autoBackup = this[K.accountAutoBackup] ?: d.account.autoBackup,
+                wifiOnly = this[K.accountWifiOnly] ?: d.account.wifiOnly,
+            ),
+        )
+    }
+
+    private fun <T> MutablePreferences.put(key: Preferences.Key<T>, v: T?) {
+        if (v == null) remove(key) else this[key] = v
+    }
+
+    private fun MutablePreferences.write(s: AppSettings) {
+        put(K.defaultLook, s.defaultLook.name)
+        put(K.newFilmFormat, s.newFilmFormat.name)
+        put(K.dateStamp, s.dateStamp)
+        put(K.saveFullRecordings, s.saveFullRecordings)
+        put(K.reminderMode, s.reminder.mode.name)
+        put(K.reminderTime, s.reminder.time.toString())
+        put(K.reminderWindowStart, s.reminder.windowStart.toString())
+        put(K.reminderWindowEnd, s.reminder.windowEnd.toString())
+        put(K.reminderDays, s.reminder.days.joinToString("") { if (it) "1" else "0" })
+        put(K.notifRunningLate, s.notif.runningLate)
+        put(K.notifFilmReady, s.notif.filmReady)
+        put(K.notifBackupProblems, s.notif.backupProblems)
+        put(K.notifOnThisDay, s.notif.onThisDay)
+        put(K.cameraMode, s.camera.mode.name)
+        put(K.cameraLook, s.camera.look.name)
+        put(K.cameraLens, s.camera.lens.name)
+        put(K.cameraFlash, s.camera.flash)
+        put(K.cameraGrid, s.camera.grid)
+        put(K.cameraActiveFilmId, s.camera.activeFilmId)
+        put(K.onboardingDone, s.onboardingDone)
+        put(K.coachTrimSeen, s.coachTrimSeen)
+        put(K.firstDay, s.firstDay?.toString())
+        put(K.accountSignedIn, s.account.signedIn)
+        put(K.accountEmail, s.account.email)
+        put(K.accountDriveFolderId, s.account.driveFolderId)
+        put(K.accountAutoBackup, s.account.autoBackup)
+        put(K.accountWifiOnly, s.account.wifiOnly)
+    }
+}

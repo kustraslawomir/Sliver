@@ -3,7 +3,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    alias(libs.plugins.kotlinSerialization)
 }
+
+room { schemaDirectory("$projectDir/schemas") }
 
 kotlin {
     androidTarget {
@@ -19,6 +24,10 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.room.runtime)
+            implementation(libs.datastore.preferences)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
@@ -27,8 +36,17 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.coroutines.test)
+        }
+        getByName("androidUnitTest").dependencies {
+            implementation(libs.robolectric)
+            implementation(libs.androidx.test.core)
         }
     }
+}
+
+dependencies {
+    add("kspAndroid", libs.room.compiler)
 }
 
 android {
@@ -46,5 +64,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    testOptions.unitTests.isIncludeAndroidResources = true
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
 }
