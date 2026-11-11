@@ -29,3 +29,9 @@
 - Not device-tested: share to YouTube, Save to Photos, fullscreen landscape.
 - Edit film opens the builder for a new film (editing an existing film is not supported yet).
 - Missing built-in music asset (assets/music/<id>.aac) is logged and skipped at render; film keeps original sound.
+
+## T28 notifications
+- Not device-tested: alarm firing, boot reschedule, POST_NOTIFICATIONS flow. Rules and deep links are unit-tested (NotifRulesTest).
+- Exact alarms use SCHEDULE_EXACT_ALARM when granted, otherwise a 20 min window. No in-app prompt for the exact-alarm permission.
+- Notifications screen is Route.Notifications; main Settings screen is still the placeholder. notifyBackupPaused has no caller until the backup task exists.
+- Running late and On this day are planned with the reminder (7-day horizon, replanned on app open, settings change, day saved, alarm fire, boot).

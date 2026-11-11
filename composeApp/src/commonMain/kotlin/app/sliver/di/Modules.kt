@@ -9,6 +9,7 @@ import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.backfill.BackfillExecutor
 import app.sliver.feature.backfill.BackfillStore
+import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.trim.SaveUndo
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -22,6 +23,7 @@ val commonModule: Module = module {
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
+    single { ReminderCoordinator(get(), get(), get()) }
 }
 
 expect val platformModule: Module

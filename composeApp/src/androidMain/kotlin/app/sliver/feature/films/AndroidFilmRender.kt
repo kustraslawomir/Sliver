@@ -62,7 +62,9 @@ import app.sliver.data.files.FileStore
 import app.sliver.data.look.LookEffects
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
+import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.toParams
+import app.sliver.feature.notifications.notifyFilmReady
 import com.google.common.collect.ImmutableList
 import java.io.File
 import java.io.FileOutputStream
@@ -127,12 +129,25 @@ class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 setProgress(Data.Builder().putInt(KEY_PERCENT, percent).build())
                 setForeground(foreground(percent))
             }
-            if (ok) Result.success() else Result.failure()
+            if (ok) {
+                announceReady(id)
+                Result.success()
+            } else {
+                Result.failure()
+            }
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
             Result.failure()
         }
+    }
+
+    private suspend fun announceReady(id: String) {
+        val koin = KoinPlatform.getKoin()
+        if (!koin.get<SettingsRepository>().settings.first().notif.filmReady) return
+        val film = koin.get<FilmRepository>().getFilm(id) ?: return
+        val seconds = film.plan(koin.get<DayRepository>().observeAll().first()).days.size
+        notifyFilmReady(applicationContext, id, film.name, seconds)
     }
 
     private fun foreground(percent: Int): ForegroundInfo {

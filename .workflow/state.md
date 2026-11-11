@@ -25,7 +25,7 @@
 - [x] T25 (not device-tested, see HANDOFF)
 - [x] T26
 - [ ] T27
-- [ ] T28
+- [x] T28 (alarms not device-tested, see HANDOFF)
 - [ ] T29
 - [ ] T30
 - [ ] T31

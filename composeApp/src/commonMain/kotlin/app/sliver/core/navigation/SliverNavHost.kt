@@ -22,7 +22,13 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import app.sliver.feature.archive.ArchiveSession
+import app.sliver.feature.notifications.DeepLink
+import app.sliver.feature.notifications.DeepLinkTarget
+import app.sliver.feature.notifications.NotificationsScreen
 import app.sliver.core.ui.UndoToastHost
 import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.archive.DayDetailScreen
@@ -62,6 +68,23 @@ fun SliverNavHost() {
         }
     }
 
+    val link by DeepLink.target.collectAsState()
+    LaunchedEffect(link) {
+        when (val t = link ?: return@LaunchedEffect) {
+            DeepLinkTarget.Camera -> go(Route.Camera)
+            DeepLinkTarget.Backup -> go(Route.Backup)
+            is DeepLinkTarget.Film -> {
+                FilmNav.id = t.id
+                go(Route.FilmPlayer)
+            }
+            is DeepLinkTarget.Day -> {
+                ArchiveSession.selected = t.date
+                go(Route.DayDetail)
+            }
+        }
+        DeepLink.target.value = null
+    }
+
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
         NavHost(nav, startDestination = Route.start(OnboardingFlag.done).path) {
             Route.entries.forEach { route ->
@@ -95,6 +118,7 @@ fun SliverNavHost() {
                             onEdit = { go(Route.FilmBuilder) },
                         )
                         Route.YearInSeconds -> YearInSecondsScreen(::go, onBack = { nav.popBackStack() })
+                        Route.Notifications -> NotificationsScreen(onBack = { nav.popBackStack() })
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }

@@ -20,6 +20,8 @@ import app.sliver.feature.films.FilmRenderer
 import app.sliver.feature.films.FilmShare
 import app.sliver.feature.gallery.AndroidGalleryProvider
 import app.sliver.feature.gallery.GalleryProvider
+import app.sliver.feature.notifications.AndroidReminderScheduler
+import app.sliver.feature.notifications.ReminderScheduler
 import app.sliver.feature.trim.AndroidTrimMedia
 import app.sliver.feature.trim.TrimMedia
 import androidx.media3.common.util.UnstableApi
@@ -44,6 +46,7 @@ actual val platformModule: Module = module {
     single<TrimMedia> { AndroidTrimMedia() }
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
+    single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }
     single {
