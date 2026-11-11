@@ -32,6 +32,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.Segmented
+import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookPreset
@@ -47,7 +48,7 @@ internal fun LookPreset.label(): String =
     name.lowercase().split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
 
 @Composable
-fun SettingsScreen(onGo: (Route) -> Unit) {
+fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
     val repo = remember { KoinPlatform.getKoin().get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val platform = rememberSettingsPlatform()
@@ -66,7 +67,10 @@ fun SettingsScreen(onGo: (Route) -> Unit) {
             .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S6)
             .padding(bottom = SliverSpace.S10 + SliverSpace.S8),
     ) {
-        SliverText("Settings", SliverType.DisplayM)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
+            SliverText("Settings", SliverType.DisplayM)
+        }
 
         Group("Backup")
         NavRow("Account", if (s.account.signedIn) s.account.email ?: "Signed in" else "Not signed in") { onGo(Route.Backup) }

@@ -44,7 +44,9 @@ import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
+import app.sliver.core.ui.BackHandler
 import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
@@ -74,8 +76,12 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
         if (state == RenderState.Idle && film?.renderPath != null) done.value()
     }
 
+    var leaving by remember { mutableStateOf(false) }
+    BackHandler(enabled = state is RenderState.Running) { leaving = true }
+
+    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().padding(SliverSpace.Gutter),
+        Modifier.fillMaxSize().statusBarsPadding().padding(SliverSpace.Gutter),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -108,6 +114,18 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
                 GhostButton("Back", onBack)
             }
         }
+    }
+    SliverBottomSheet(leaving, { leaving = false }) {
+        Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+            SliverText("Keep rendering in background?", SliverType.DisplayM)
+            SliverText("We'll tell you when your film is ready.", SliverType.BodySmall)
+            PrimaryButton("Keep rendering", onBack)
+            GhostButton("Cancel render", {
+                id?.let(renderer::cancel)
+                onBack()
+            }, destructive = true)
+        }
+    }
     }
 }
 

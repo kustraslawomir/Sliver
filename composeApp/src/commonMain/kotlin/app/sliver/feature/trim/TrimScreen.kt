@@ -58,7 +58,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
+import androidx.lifecycle.SavedStateHandle
+import app.sliver.core.ui.BackHandler
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -96,11 +99,12 @@ import org.koin.mp.KoinPlatform
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 
+private const val KEY_START_MS = "trim.startMs"
 private const val SECOND_DP = 72
 private val StripHeight = 72.dp
 
 @Composable
-fun TrimScreen(onNavigate: (Route) -> Unit) {
+fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val path = remember { CaptureSession.path }
     if (path == null) {
         LaunchedEffect(Unit) { onNavigate(Route.Camera) }
@@ -122,12 +126,14 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val saved by remember { settings.settings }.collectAsState(null)
 
     val resume = remember { LookSession.takeResume() }
+    val restoredMs = remember { savedState.get<Long>(KEY_START_MS) }
+    val navigator = LocalNavigator.current
     var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
 
     var durationMs by remember { mutableStateOf<Long?>(null) }
     var thumbs by remember { mutableStateOf<List<ImageBitmap>>(emptyList()) }
-    var startMs by remember { mutableStateOf(resume?.startMs ?: 0L) }
-    var committedMs by remember { mutableStateOf(resume?.startMs ?: 0L) }
+    var startMs by remember { mutableStateOf(resume?.startMs ?: restoredMs ?: 0L) }
+    var committedMs by remember { mutableStateOf(resume?.startMs ?: restoredMs ?: 0L) }
     var custom by remember { mutableStateOf(resume?.custom ?: false) }
     var dragging by remember { mutableStateOf(false) }
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
@@ -152,7 +158,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
         format = projects.active.first()?.format ?: FilmFormat.CINEMA
         clipAspect = media.aspect(path)
         val d = media.durationMs(path)
-        if (resume == null) {
+        if (resume == null && restoredMs == null) {
             val pick = media.autoPickMs(path, d)
             startMs = pick
             committedMs = pick
@@ -176,14 +182,20 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     fun release(to: Long) {
         startMs = to
         committedMs = to
+        savedState[KEY_START_MS] = to
         dragging = false
         frameState = SliverFrameState.Locked
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
     }
 
+    val inApp = daySource == DaySource.CAMERA
+    var discardOpen by remember { mutableStateOf(false) }
+
     fun close() {
-        onNavigate(Route.Camera)
+        if (inApp) discardOpen = true else navigator.back()
     }
+
+    BackHandler(onBack = ::close)
 
     fun openLooks() {
         val duration = durationMs ?: return
@@ -211,7 +223,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
             saving = false
             if (ok) {
                 done = true
-                close()
+                navigator.finishFlow(day)
             }
         }
     }
@@ -224,7 +236,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                Chip("FOR ${dayLabel(day, today).uppercase()} v", selected = false, onClick = { sheet = true })
+                Chip("For ${dayLabel(day, today)}", selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
                 IconButton44({ audio = !audio }, if (audio) "Mute" else "Unmute") {
                     SliverIcon(if (audio) SliverIcons.Volume2 else SliverIcons.VolumeX, if (audio) SliverColors.Accent else SliverColors.TextTertiary)
                 }
@@ -238,7 +250,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                     TrimPlayer(path, committedMs, windowMs, speed, audio, dragging, Modifier.fillMaxSize(), look ?: LookParams())
                     if (reframe) ReframeBand(cropY, { cropY = it })
                     Badge(
-                        if (custom) "Custom" else "✦ Auto-picked",
+                        if (custom) "Custom" else "Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),
                     )
                 }
@@ -299,11 +311,16 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                     enabled = duration != null && !saving,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                    GhostButton("Retake", ::close, Modifier.weight(1f))
+                    GhostButton(
+                        if (inApp) "Retake" else "Pick another",
+                        { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                        Modifier.weight(1f),
+                    )
                     GhostButton("Filters", ::openLooks, Modifier.weight(1f))
                 }
             }
         }
+        DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
         SliverBottomSheet(sheet, { sheet = false }) {
             Column {
                 SliverText("Save to which day", SliverType.Headline, color = SliverColors.TextPrimary)

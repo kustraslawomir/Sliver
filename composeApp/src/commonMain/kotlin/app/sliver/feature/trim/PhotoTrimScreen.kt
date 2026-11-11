@@ -34,7 +34,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
+import app.sliver.core.ui.BackHandler
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -115,7 +117,15 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         infiniteRepeatable(tween(SECOND_MS.toInt(), easing = LinearEasing), RepeatMode.Restart),
     )
 
-    fun close() = onNavigate(Route.Camera)
+    val navigator = LocalNavigator.current
+    val inApp = remember { CaptureSession.source == DaySource.CAMERA }
+    var discardOpen by remember { mutableStateOf(false) }
+
+    fun close() {
+        if (inApp) discardOpen = true else navigator.back()
+    }
+
+    BackHandler(onBack = ::close)
 
     fun useSecond() {
         if (saving) return
@@ -131,12 +141,13 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             saving = false
             if (ok) {
                 done = true
-                close()
+                navigator.finishFlow(day)
             }
         }
     }
 
-    Column(Modifier.fillMaxSize().background(SliverColors.BgVoid).statusBarsPadding().navigationBarsPadding()) {
+    Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
@@ -168,9 +179,15 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             }
             PrimaryButton(if (saving) "Saving..." else "Save clip", ::useSecond, enabled = photo != null && !saving)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                GhostButton("Retake", ::close, Modifier.weight(1f))
+                GhostButton(
+                    if (inApp) "Retake" else "Pick another",
+                    { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                    Modifier.weight(1f),
+                )
                 GhostButton("Filters", ::openLooks, Modifier.weight(1f))
             }
         }
+    }
+    DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
     }
 }

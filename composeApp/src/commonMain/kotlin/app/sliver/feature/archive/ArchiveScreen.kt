@@ -56,6 +56,7 @@ import app.sliver.data.DaySource
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
+import app.sliver.feature.films.FilmsSection
 import app.sliver.feature.projects.ProjectsSheet
 import app.sliver.core.ui.rememberTapGate
 import app.sliver.data.settings.SettingsRepository
@@ -117,7 +118,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
         Column(
             Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())
                 .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4)
-                .padding(bottom = SliverSpace.S10 + SliverSpace.S8),
+                .padding(bottom = SliverSpace.S6),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -129,6 +130,9 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                         SliverIcon(SliverIcons.ChevronDown, SliverColors.TextSecondary)
                     }
                     SliverText(secondsHeader(all.size, first), SliverType.MonoS, color = SliverColors.TextSecondary)
+                }
+                IconButton44({ projectsOpen = true }, "Project menu") {
+                    SliverIcon(SliverIcons.More, SliverColors.TextPrimary)
                 }
                 IconButton44({ onNavigate(Route.Settings) }, "Settings") {
                     SliverIcon(SliverIcons.Settings, SliverColors.TextPrimary)
@@ -152,19 +156,20 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                     shown = YearMonth(shown.year, month)
                     yearView = false
                 }
-                GhostButton("Fill empty days from your gallery", { onNavigate(Route.FillThePast) })
-                GhostButton("Make your ${shown.year} film so far", { onNavigate(Route.FilmBuilder) })
             } else {
                 MonthHeader(
                     shown, canGoPrev(shown, first), canGoNext(shown, today),
                     { shown = shown.plusMonths(-1) }, { shown = shown.plusMonths(1) },
                 )
                 MonthGrid(shown, byDate, today, ::onCell)
-                GhostButton("Fill empty days from your gallery", { onNavigate(Route.FillThePast) })
             }
+            FilmsSection(onNavigate)
         }
 
-        ProjectsSheet(projectsOpen, { projectsOpen = false })
+        ProjectsSheet(
+            projectsOpen, { projectsOpen = false }, project?.id,
+            extras = listOf("Fill empty days" to { projectsOpen = false; onNavigate(Route.FillThePast) }),
+        )
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
@@ -245,7 +250,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, onClick: () ->
             if (state == CellState.FUTURE) SliverColors.TextDisabled else SliverColors.TextPrimary,
         )
         if (state == CellState.BACKFILLED) {
-            SliverText("G", SliverType.MonoS, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S1 + 2.dp), SliverColors.AccentCore)
+            SliverIcon(SliverIcons.ImagePlus, SliverColors.AccentCore, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S1), size = 12.dp)
         }
     }
 }

@@ -1,16 +1,15 @@
 package app.sliver.core.navigation
 
-enum class Route(val path: String, val title: String, val tabBar: Boolean = false) {
+enum class Route(val path: String, val title: String) {
     Onboarding("onboarding", "Onboarding"),
     Camera("camera", "Camera"),
     Trim("trim", "Edit clip"),
     PhotoTrim("photo-trim", "Photo trim"),
     GalleryPicker("gallery", "Gallery picker"),
     Looks("looks", "Filters editor"),
-    Archive("archive", "Archive", tabBar = true),
-    DayDetail("day", "Day detail"),
+    Project("project", "Project"),
+    DayDetail("day", "Clip detail"),
     FillThePast("fill-the-past", "Fill empty days"),
-    Films("films", "Films", tabBar = true),
     FilmBuilder("film-builder", "Film builder"),
     Export("export", "Export"),
     FilmPlayer("film-player", "Film player"),

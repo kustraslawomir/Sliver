@@ -177,7 +177,10 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 )
                 if (day != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        Chip(day.look.preset.name.replace('_', ' ') + " v", selected = false, onClick = { openLooks(day) })
+                        Chip(
+                            day.look.preset.name.replace('_', ' ').lowercase().replaceFirstChar(Char::uppercase),
+                            selected = false, onClick = { openLooks(day) }, trailing = SliverIcons.ChevronDown,
+                        )
                         day.place?.let { Chip(it, selected = false, onClick = {}) }
                     }
                 }

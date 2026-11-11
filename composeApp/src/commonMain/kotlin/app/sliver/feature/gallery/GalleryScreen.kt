@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import app.sliver.core.navigation.AppNavigator
+import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
 import app.sliver.core.permissions.PermissionController
 import app.sliver.core.permissions.PermissionGate
@@ -53,16 +55,22 @@ import org.koin.mp.KoinPlatform
 
 @Composable
 fun GalleryScreen(onNavigate: (Route) -> Unit) {
+    val navigator = LocalNavigator.current
     val controller = rememberPermissionController()
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        PermissionGate(PermissionKind.Photos, controller, onSkip = { onNavigate(Route.Camera) }) { status ->
-            GalleryContent(status, controller, onNavigate)
+        PermissionGate(PermissionKind.Photos, controller, onSkip = { navigator.back() }) { status ->
+            GalleryContent(status, controller, onNavigate, navigator)
         }
     }
 }
 
 @Composable
-private fun GalleryContent(status: PermissionStatus, controller: PermissionController, onNavigate: (Route) -> Unit) {
+private fun GalleryContent(
+    status: PermissionStatus,
+    controller: PermissionController,
+    onNavigate: (Route) -> Unit,
+    navigator: AppNavigator,
+) {
     val provider = remember { KoinPlatform.getKoin().get<GalleryProvider>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
@@ -101,7 +109,7 @@ private fun GalleryContent(status: PermissionStatus, controller: PermissionContr
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton44({ onNavigate(Route.Camera) }, "Close") {
+            IconButton44({ navigator.back() }, "Close") {
                 SliverIcon(SliverIcons.X, SliverColors.TextPrimary)
             }
             if (forDate != null) Chip("FOR " + dayLabel(forDate, today).uppercase(), selected = true, onClick = {})

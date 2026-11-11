@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import app.sliver.core.navigation.Route
 import app.sliver.core.permissions.PermissionGate
 import app.sliver.core.permissions.PermissionKind
@@ -62,6 +63,8 @@ import app.sliver.core.theme.SliverShapes
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.rememberTapGate
+import app.sliver.feature.archive.ArchiveSession
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.feature.trim.rememberPhoto
@@ -217,7 +220,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            ControlButton("Grid", "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
+            ControlButton(SliverIcons.Grid3x3, null, "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
             if (recording) {
                 SliverText(
                     formatTimer(elapsedMs), SliverType.MonoL,
@@ -226,11 +229,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     SliverColors.Accent,
                 )
             }
-            ControlButton(if (timerSec == 0) "Timer" else "${timerSec}s", "Self-timer", timerSec != 0, iconRot) {
+            ControlButton(SliverIcons.Timer, if (timerSec == 0) null else "${timerSec}s", "Self-timer", timerSec != 0, iconRot) {
                 if (!recording) timerSec = nextSelfTimer(timerSec)
             }
-            ControlButton("Flash", "Flash", cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
-            ControlButton("Flip", "Flip camera", false, iconRot) {
+            ControlButton(if (cam.flash) SliverIcons.Zap else SliverIcons.ZapOff, null, "Flash", cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
+            ControlButton(SliverIcons.SwitchCamera, null, "Flip camera", false, iconRot) {
                 if (!recording) update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
             }
         }
@@ -254,7 +257,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     SliverColors.TextPrimary,
                 )
             }
-            todayDay?.takeIf { !replacing && !recording }?.let { day -> TodayCard(day, { replacing = true }) }
+            todayDay?.takeIf { !replacing && !recording }?.let { day ->
+                TodayCard(day, { replacing = true }, { ArchiveSession.selected = today; onNavigate(Route.DayDetail) })
+            }
         }
 
         ProjectsSheet(projectsOpen, { projectsOpen = false })
@@ -290,7 +295,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     },
                     onHoldEnd = { if (recording) stopRecording() },
                 )
-                if (recording) Box(Modifier.size(52.dp)) else ArchiveButton { onNavigate(Route.Archive) }
+                if (recording) Box(Modifier.size(52.dp)) else ProjectButton { onNavigate(Route.Project) }
             }
         }
         if (storageFull) StorageFullOverlay({ storageFull = false })
@@ -298,12 +303,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
 }
 
 @Composable
-private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modifier) {
+private fun TodayCard(day: Day, onReplace: () -> Unit, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val thumb = rememberPhoto(day.thumb)
     Row(
         modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth()
             .clip(SliverShapes.M).background(SliverColors.Surface1.copy(alpha = 0.92f))
             .border(1.dp, SliverColors.LineHairline, SliverShapes.M)
+            .clickable(onClick = rememberTapGate(onOpen))
             .padding(SliverSpace.S3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
@@ -312,7 +318,10 @@ private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modi
             if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         }
         Column(Modifier.weight(1f)) {
-            SliverText("Today's clip is in", SliverType.Headline)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 16.dp)
+                SliverText("Today's clip is in", SliverType.Headline)
+            }
             SliverText(todayCardDetail(day.look.preset, day.takenAt), SliverType.MonoS)
         }
         GhostButton("Replace", onReplace)
@@ -320,12 +329,18 @@ private fun TodayCard(day: Day, onReplace: () -> Unit, modifier: Modifier = Modi
 }
 
 @Composable
-private fun ControlButton(label: String, description: String, active: Boolean, rotation: Float, onClick: () -> Unit) {
+private fun ControlButton(
+    icon: ImageVector,
+    value: String?,
+    description: String,
+    active: Boolean,
+    rotation: Float,
+    onClick: () -> Unit,
+) {
     IconButton44(onClick, description, overCamera = true) {
-        SliverText(
-            label.uppercase(), SliverType.MonoS, Modifier.rotate(rotation),
-            if (active) SliverColors.Accent else SliverColors.TextPrimary,
-        )
+        val tint = if (active) SliverColors.Accent else SliverColors.TextPrimary
+        if (value != null) SliverText(value, SliverType.MonoS, Modifier.rotate(rotation), tint)
+        else SliverIcon(icon, tint, Modifier.rotate(rotation))
     }
 }
 
@@ -353,11 +368,11 @@ private fun GalleryThumb(thumb: androidx.compose.ui.graphics.ImageBitmap?, onCli
 }
 
 @Composable
-private fun ArchiveButton(onClick: () -> Unit) {
+private fun ProjectButton(onClick: () -> Unit) {
     Box(
         Modifier.size(52.dp).clip(RoundedCornerShape(10.dp)).background(SliverColors.Surface1)
             .border(1.dp, SliverColors.LineHairline, RoundedCornerShape(10.dp))
-            .semantics { contentDescription = "Archive"; role = Role.Button }
+            .semantics { contentDescription = "Project calendar"; role = Role.Button }
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

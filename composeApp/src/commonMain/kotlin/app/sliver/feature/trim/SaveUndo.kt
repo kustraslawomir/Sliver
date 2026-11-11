@@ -23,7 +23,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
 
     private class Backup(val video: String, val thumb: String)
 
-    private inner class Pending(val request: SaveSecondRequest, val previous: Day?, val backup: Backup?) {
+    private inner class Pending(val request: SaveSecondRequest, val previous: Day?, val backup: Backup?, val label: String) {
         var timer: Job? = null
 
         fun cleanup() {
@@ -51,15 +51,20 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             throw e
         }
         runCatching { films.ensureDefaultFilm(request.date, request.format) }
-        val p = Pending(request, previous, backup)
+        val p = Pending(request, previous, backup, label)
         pending = p
         p.timer = scope.launch {
             delay(UNDO_WINDOW_MS)
             p.cleanup()
             if (pending === p) pending = null
         }
-        toast.show("Saved to $label", onAction = { undo(p) })
         return day
+    }
+
+    /** Called by the screen a capture flow returned to, so the toast lives on the destination. */
+    fun announceSaved(onView: (() -> Unit)?) {
+        val p = pending ?: return
+        toast.show("Clip saved to ${p.label}", onAction = { undo(p) }, onView = onView)
     }
 
     /** Deletes the day; files are parked in tmp until the undo window closes. */

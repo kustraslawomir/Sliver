@@ -86,3 +86,14 @@ Walked through onboarding → camera record → trim → save → archive → da
 
 ## F01 fonts
 Geist / Geist Mono / Instrument Serif OFL files could not be downloaded (curl/wget denied) and none exist in resources. `SliverFonts` in core/theme/SliverType.kt still maps to system families; to finish, add the TTFs to composeResources/font and set the three FontFamily vals via Font(Res.font.*).
+
+## F03 gap: backup manifest and restore are not per project
+BackupEngine/RestoreEngine still treat days as one flat list: the Drive manifest does not list projects, files are not under `SLIVER/<project name>/`, and restore does not recreate projects (restored days land in the active project). Needs a manifest v2 with projects, per-project folders, and a restore that creates projects before attaching days/films. Deleting a project queues its Drive files for trash via the existing queue.
+
+## F04 / F05 decisions
+- Project start date is fixed to today (shown as "Starts today"); no date picker.
+- Changing a project's format only affects clips saved afterwards; existing clip files keep their format.
+- The last open project cannot be archived or deleted (camera needs a target). Tapping an archived project reopens it.
+- `camera.activeFilmId` setting is now unused (camera follows the active project); left in storage to avoid a settings migration.
+- Navigation (F05) is not verified by hand on a device. Origin of a capture flow is derived from the back stack (first screen below Camera/Gallery/Edit clip/Filters), not stored.
+- SavedStateHandle restores the Edit clip source path, day and trim position; the applied Filters look is not restored after process death.

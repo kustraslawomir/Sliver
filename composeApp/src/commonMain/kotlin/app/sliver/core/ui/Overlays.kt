@@ -81,18 +81,28 @@ fun SliverBottomSheet(
     }
 }
 
-data class ToastMessage(val text: String, val actionLabel: String = "Undo", val onAction: (() -> Unit)? = null)
+data class ToastMessage(
+    val text: String,
+    val actionLabel: String = "Undo",
+    val onAction: (() -> Unit)? = null,
+    val onView: (() -> Unit)? = null,
+)
 
 @Stable
 class UndoToastState {
     var current by mutableStateOf<ToastMessage?>(null)
         private set
 
-    fun show(text: String, actionLabel: String = "Undo", onAction: (() -> Unit)? = null) {
-        current = ToastMessage(text, actionLabel, onAction)
+    fun show(text: String, actionLabel: String = "Undo", onView: (() -> Unit)? = null, onAction: (() -> Unit)? = null) {
+        current = ToastMessage(text, actionLabel, onAction, onView)
     }
 
     fun dismiss() {
+        current = null
+    }
+
+    fun performView() {
+        current?.onView?.invoke()
         current = null
     }
 
@@ -127,10 +137,17 @@ fun UndoToastHost(state: UndoToastState, modifier: Modifier = Modifier, duration
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 SliverText(shown.text, SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextPrimary, maxLines = 1)
+                if (shown.onView != null) {
+                    SliverText(
+                        "View", SliverType.Headline,
+                        Modifier.clickable(onClick = rememberTapGate(state::performView)).padding(SliverSpace.S2),
+                        SliverColors.TextPrimary,
+                    )
+                }
                 if (shown.onAction != null) {
                     SliverText(
                         shown.actionLabel, SliverType.Headline,
-                        Modifier.clickable(onClick = state::performAction).padding(SliverSpace.S2),
+                        Modifier.clickable(onClick = rememberTapGate(state::performAction)).padding(SliverSpace.S2),
                         SliverColors.Accent,
                     )
                 }

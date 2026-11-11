@@ -43,8 +43,9 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.trim.rememberPhoto
 import org.koin.mp.KoinPlatform
 
+/** Films of the active project, shown under the calendar on the Project screen. */
 @Composable
-fun FilmsScreen(onNavigate: (Route) -> Unit) {
+fun FilmsSection(onNavigate: (Route) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
@@ -61,30 +62,23 @@ fun FilmsScreen(onNavigate: (Route) -> Unit) {
         if (first != null && format != null) films.ensureDefaultFilm(first, format)
     }
 
-    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        Column(
-            Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())
-                .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4)
-                .padding(bottom = SliverSpace.S10 + SliverSpace.S8),
-            verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
-        ) {
-            SliverText("Films", SliverType.DisplayM)
-            if (teaser != TeaserState.HIDDEN) {
-                YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
-            }
-            list.chunked(2).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                    row.forEach { film ->
-                        Poster(film, film.plan(all), Modifier.weight(1f)) {
-                            FilmNav.id = film.id
-                            onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
-                        }
-                    }
-                    if (row.size == 1) Box(Modifier.weight(1f))
-                }
-            }
-            SecondaryButton("+ New film", { onNavigate(Route.FilmBuilder) }, Modifier.fillMaxWidth())
+    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
+        SliverText("Films", SliverType.DisplayM)
+        if (teaser != TeaserState.HIDDEN) {
+            YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
         }
+        list.chunked(2).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                row.forEach { film ->
+                    Poster(film, film.plan(all), Modifier.weight(1f)) {
+                        FilmNav.id = film.id
+                        onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
+                    }
+                }
+                if (row.size == 1) Box(Modifier.weight(1f))
+            }
+        }
+        SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) }, Modifier.fillMaxWidth())
     }
 }
 

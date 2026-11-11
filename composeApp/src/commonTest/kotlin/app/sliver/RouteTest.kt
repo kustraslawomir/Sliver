@@ -12,11 +12,6 @@ class RouteTest {
     }
 
     @Test
-    fun tabBarOnlyOnArchiveAndFilms() {
-        assertEquals(setOf(Route.Archive, Route.Films), Route.entries.filter { it.tabBar }.toSet())
-    }
-
-    @Test
     fun pathsAreUnique() {
         assertEquals(Route.entries.size, Route.entries.map { it.path }.toSet().size)
     }
