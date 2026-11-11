@@ -107,11 +107,11 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         } finally {
             holdFrame?.delete()
         }
-        val duration = withContext(Dispatchers.IO) {
-            writeThumbnail(videoPath, thumbPath)
-            probe(Uri.fromFile(File(videoPath))).durationMs
+        val (duration, color) = withContext(Dispatchers.IO) {
+            val color = writeThumbnail(videoPath, thumbPath)
+            probe(Uri.fromFile(File(videoPath))).durationMs to color
         }
-        return ExportedClip(videoPath, thumbPath, duration)
+        return ExportedClip(videoPath, thumbPath, duration, color)
     }
 
     override suspend fun photoToSecond(
@@ -144,11 +144,11 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             listOf(EditedMediaItemSequence.Builder(listOf(item)).experimentalSetForceAudioTrack(true).build()),
         ).build()
         runTransformer(composition, videoPath)
-        val duration = withContext(Dispatchers.IO) {
-            writeThumbnail(videoPath, thumbPath)
-            probe(Uri.fromFile(File(videoPath))).durationMs
+        val (duration, color) = withContext(Dispatchers.IO) {
+            val color = writeThumbnail(videoPath, thumbPath)
+            probe(Uri.fromFile(File(videoPath))).durationMs to color
         }
-        return ExportedClip(videoPath, thumbPath, duration)
+        return ExportedClip(videoPath, thumbPath, duration, color)
     }
 
     private suspend fun runTransformer(composition: Composition, outPath: String) = withContext(Dispatchers.Main) {
@@ -197,13 +197,15 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         }
     }
 
-    private fun writeThumbnail(videoPath: String, thumbPath: String) {
+    /** Writes the JPEG thumbnail and returns its average color as opaque ARGB. */
+    private fun writeThumbnail(videoPath: String, thumbPath: String): Int {
         val r = MediaMetadataRetriever()
         try {
             r.setDataSource(videoPath)
             val frame = r.getFrameAtTime(500_000, MediaMetadataRetriever.OPTION_CLOSEST) ?: error("No frame in export")
             val thumb = Bitmap.createScaledBitmap(frame, THUMB_WIDTH, (THUMB_WIDTH.toFloat() * frame.height / frame.width).toInt().coerceAtLeast(1), true)
             FileOutputStream(thumbPath).use { thumb.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+            return Bitmap.createScaledBitmap(thumb, 1, 1, true).getPixel(0, 0) or (0xFF shl 24)
         } finally {
             r.release()
         }

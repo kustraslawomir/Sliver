@@ -24,6 +24,7 @@ import app.sliver.core.ui.GhostButton
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.remember
 import app.sliver.core.ui.UndoToastHost
+import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.camera.CameraScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.looks.LooksScreen
@@ -62,7 +63,8 @@ fun SliverNavHost() {
                         Route.PhotoTrim -> PhotoTrimScreen(::go)
                         Route.GalleryPicker -> GalleryScreen(::go)
                         Route.Looks -> LooksScreen(onBack = { nav.popBackStack() })
-                        else ->PlaceholderScreen(route, ::go)
+                        Route.Archive -> ArchiveScreen(::go)
+                        else -> PlaceholderScreen(route, ::go)
                     }
                 }
             }

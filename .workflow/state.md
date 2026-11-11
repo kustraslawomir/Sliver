@@ -14,7 +14,7 @@
 - [x] T15 (LUT .cube files not yet generated: python execution denied; run tools/gen_luts.py)
 - [x] T16 (camera preview look deferred, see HANDOFF)
 - [x] T17
-- [ ] T18
+- [x] T18
 - [ ] T19
 - [ ] T20
 - [ ] T21

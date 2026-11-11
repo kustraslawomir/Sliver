@@ -9,7 +9,7 @@ const val SECOND_MS = 1000L
 
 enum class ShortMode { SLOW_TO_FIT, LOOP, HOLD_LAST }
 
-data class ExportedClip(val videoPath: String, val thumbPath: String, val durationMs: Long)
+data class ExportedClip(val videoPath: String, val thumbPath: String, val durationMs: Long, val color: Int = 0)
 
 interface ClipExporter {
     /**
