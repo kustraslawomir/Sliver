@@ -32,6 +32,9 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.SwitchRow
+import app.sliver.data.export.DayShare
+import app.sliver.data.export.ShareOptions
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.data.LookParams
 import app.sliver.data.repo.DayRepository
@@ -53,6 +56,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
+    val dayShare = remember { koin.get<DayShare>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
 
@@ -70,6 +74,11 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     var muted by remember { mutableStateOf(false) }
     var confirm by remember { mutableStateOf(false) }
+    var shareOpen by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
+    var shDate by remember(app?.dateStamp) { mutableStateOf(app?.dateStamp ?: true) }
+    var shSound by remember { mutableStateOf(true) }
+    var shMark by remember { mutableStateOf(false) }
     var previewLook by remember(current) { mutableStateOf<LookParams?>(null) }
 
     LaunchedEffect(Unit) {
@@ -170,9 +179,36 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                    SecondaryButton("Share", { shareOpen = true }, Modifier.weight(1f), enabled = day != null)
                     SecondaryButton("Replace", { replace(current) }, Modifier.weight(1f))
                     GhostButton("Remove", { confirm = true }, Modifier.weight(1f), destructive = true, enabled = day != null)
                 }
+            }
+        }
+
+        SliverBottomSheet(shareOpen, onDismiss = { if (!sharing) shareOpen = false }) {
+            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                SliverText("Share this second", SliverType.DisplayM)
+                SwitchRow("Date stamp", shDate, { shDate = it })
+                SwitchRow("Original sound", shSound, { shSound = it })
+                SwitchRow("SLIVER mark", shMark, { shMark = it })
+                PrimaryButton(
+                    if (sharing) "Exporting..." else "Share",
+                    {
+                        val d = day ?: return@PrimaryButton
+                        sharing = true
+                        scope.launch {
+                            try {
+                                dayShare.share(d.file, d.date, ShareOptions(shDate, shSound, shMark))
+                                shareOpen = false
+                            } finally {
+                                sharing = false
+                            }
+                        }
+                    },
+                    Modifier.fillMaxWidth(),
+                    enabled = !sharing,
+                )
             }
         }
 
