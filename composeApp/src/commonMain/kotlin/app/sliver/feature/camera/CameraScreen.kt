@@ -14,8 +14,8 @@ import app.sliver.core.ui.SwitchRow
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import app.sliver.core.designsystem.blurSupported
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
@@ -351,14 +351,19 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     Box(Modifier.size(64.dp))
                 } else {
                     val turn by animateFloatAsState(flipTurns * 180f, tween(240), label = "flip")
-                    IconButton44(
-                        {
-                            flipTurns++
-                            update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
-                        },
-                        "Switch camera", Modifier.size(64.dp),
+                    Column(
+                        Modifier.width(64.dp).semantics { contentDescription = "Switch camera"; role = Role.Button }
+                            .clickable(onClick = rememberTapGate {
+                                flipTurns++
+                                update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
+                            }),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        SliverIcon(SliverIcons.SwitchCamera, SliverColors.TextPrimary, Modifier.rotate(turn))
+                        Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.TextPrimary.copy(alpha = 0.1f)), Alignment.Center) {
+                            SliverIcon(SliverIcons.SwitchCamera, SliverColors.TextPrimary, Modifier.rotate(turn), size = 22.dp)
+                        }
+                        SliverText("FLIP", SliverType.MonoS.copy(fontSize = 9.sp, letterSpacing = 0.08.em, lineHeight = 12.sp), color = SliverColors.TextPrimary, maxLines = 1)
                     }
                 }
             }
@@ -421,7 +426,7 @@ private fun CameraChip(
     leading: ImageVector? = null,
     trailing: ImageVector? = null,
 ) {
-    val plate = Color.Black.copy(alpha = if (blurSupported()) 0.55f else 0.7f)
+    val plate = Color.Black.copy(alpha = 0.7f)
     Box(
         modifier.height(48.dp).clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
         contentAlignment = Alignment.Center,
