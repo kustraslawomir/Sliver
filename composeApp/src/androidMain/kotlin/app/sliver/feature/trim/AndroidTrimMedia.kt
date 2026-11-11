@@ -42,7 +42,11 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
     override suspend fun autoPickMs(path: String, durationMs: Long): Long =
         if (durationMs <= 1000) 0L else runCatching { sampler.pickBestSecondMs(path, durationMs) }.getOrDefault(0L)
 
-    override suspend fun thumbnails(path: String, durationMs: Long, count: Int): List<ImageBitmap> =
+    override suspend fun fileSizeBytes(path: String): Long = withContext(Dispatchers.IO) {
+        if (path.contains("://")) 0L else java.io.File(path).length()
+    }
+
+    override suspend fun thumbnails(path: String, durationMs: Long, count: Int, onEach: (ImageBitmap) -> Unit): List<ImageBitmap> =
         withContext(Dispatchers.IO) {
             val r = MediaMetadataRetriever()
             try {
@@ -55,7 +59,8 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
                     } else {
                         r.getFrameAtTime(us, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
                     }
-                    bmp?.asImageBitmap() ?: android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap()
+                    (bmp?.asImageBitmap() ?: android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap())
+                        .also(onEach)
                 }
             } finally {
                 r.release()

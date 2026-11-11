@@ -74,7 +74,6 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
-import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
@@ -101,6 +100,7 @@ import kotlin.time.Clock
 
 private const val KEY_START_MS = "trim.startMs"
 private const val SECOND_DP = 72
+private const val HINT_MS = 3_000L
 private val StripHeight = 72.dp
 
 @Composable
@@ -137,8 +137,13 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     var custom by remember { mutableStateOf(resume?.custom ?: false) }
     var dragging by remember { mutableStateOf(false) }
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
-    var speed by remember { mutableStateOf(resume?.speed ?: 1f) }
-    var audio by remember { mutableStateOf(resume?.audio ?: true) }
+    val speed = 1f
+    var keepAudio by remember { mutableStateOf(resume?.audio ?: true) }
+    var previewSound by remember { mutableStateOf(false) }
+    var soundTouched by remember { mutableStateOf(false) }
+    var info by remember { mutableStateOf("") }
+    var ready by remember { mutableStateOf(false) }
+    var thumbsTotal by remember { mutableStateOf(1) }
     var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
     var day by remember { mutableStateOf(resume?.day ?: CaptureSession.forDate ?: today) }
     val daySource = remember { CaptureSession.source }
@@ -156,15 +161,26 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     LaunchedEffect(path) {
         if (look == null) look = settings.settings.first().defaultLook.toParams()
         format = projects.active.first()?.format ?: FilmFormat.CINEMA
-        clipAspect = media.aspect(path)
         val d = media.durationMs(path)
+        info = clipInfo(d, media.fileSizeBytes(path))
+        clipAspect = media.aspect(path)
+        durationMs = d
         if (resume == null && restoredMs == null) {
             val pick = media.autoPickMs(path, d)
             startMs = pick
             committedMs = pick
         }
-        durationMs = d
-        if (!isShortClip(d)) thumbs = media.thumbnails(path, d, thumbCount(d))
+        ready = true
+        if (!isShortClip(d)) {
+            thumbsTotal = thumbCount(d)
+            media.thumbnails(path, d, thumbsTotal) { thumbs = thumbs + it }
+        }
+    }
+    LaunchedEffect(soundTouched) {
+        if (!soundTouched) {
+            delay(HINT_MS)
+            soundTouched = true
+        }
     }
     LaunchedEffect(frameState) {
         if (frameState == SliverFrameState.Locked) {
@@ -204,26 +220,27 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         LookSession.windowMs = if (isShortClip(duration)) duration else (SECOND_MS * speed).toLong()
         LookSession.speed = speed
         LookSession.params = look ?: LookParams()
-        LookSession.resume = LookSession.Resume(startMs, custom, speed, audio, shortMode, day)
+        LookSession.resume = LookSession.Resume(startMs, custom, speed, keepAudio, shortMode, day)
         done = true
         onNavigate(Route.Looks)
     }
 
     fun useSecond() {
-        if (saving || duration == null) return
+        if (saving || !ready || duration == null) return
         saving = true
         scope.launch {
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = startMs, speed = speed,
                 cropY = cropY.takeIf { reframe }, format = format,
-                daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = audio,
+                daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
                 look = look ?: settings.settings.first().defaultLook.toParams(),
             )
             val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
-            saving = false
             if (ok) {
                 done = true
                 navigator.finishFlow(day)
+            } else {
+                saving = false
             }
         }
     }
@@ -236,9 +253,15 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                Chip("For ${dayLabel(day, today)}", selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
-                IconButton44({ audio = !audio }, if (audio) "Mute" else "Unmute") {
-                    SliverIcon(if (audio) SliverIcons.Volume2 else SliverIcons.VolumeX, if (audio) SliverColors.Accent else SliverColors.TextTertiary)
+                Chip(dayLabel(day, today).uppercase(), selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
+                IconButton44(
+                    { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
+                    if (previewSound) "Mute" else "Unmute",
+                ) {
+                    SliverIcon(
+                        if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX,
+                        if (previewSound) SliverColors.Accent else SliverColors.TextTertiary,
+                    )
                 }
             }
 
@@ -246,10 +269,23 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
                     .clip(SliverShapes.S).background(SliverColors.Surface1),
             ) {
-                if (duration != null) {
+                if (!ready) {
+                    PrepareSkeleton(
+                        prepareProgress(duration != null, ready, thumbs.size, thumbsTotal), info, Modifier.align(Alignment.Center),
+                    )
+                } else if (duration != null) {
                     ClipPlayer(
-                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, audio, dragging, look ?: LookParams(),
+                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging, look ?: LookParams(),
                     ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
+                    if (!soundTouched) {
+                        SliverText(
+                            "Clip keeps its sound", SliverType.BodySmall,
+                            Modifier.align(Alignment.BottomCenter).padding(SliverSpace.S3)
+                                .clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                                .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
+                            SliverColors.TextPrimary,
+                        )
+                    }
                     Badge(
                         if (custom) "Custom" else "Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),
@@ -300,16 +336,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         listOf(ShortMode.SLOW_TO_FIT to "Slow to fit", ShortMode.LOOP to "Loop", ShortMode.HOLD_LAST to "Hold last frame")
                             .forEach { (mode, label) -> Chip(label, shortMode == mode, { shortMode = mode }) }
                     }
-                } else if (duration != null) {
-                    Segmented(listOf("1×", "0.5×"), if (speed == 1f) 0 else 1, {
-                        speed = if (it == 0) 1f else 0.5f
-                        startMs = clampStart(startMs, duration, speed)
-                        committedMs = startMs
-                    })
                 }
                 PrimaryButton(
-                    if (saving) "Saving..." else "Save clip", ::useSecond,
-                    enabled = duration != null && !saving,
+                    if (saving) "Saving…" else if (!ready) "Preparing…" else "Save clip", ::useSecond,
+                    enabled = ready && !saving,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     GhostButton(
@@ -458,5 +488,13 @@ internal fun dayLabel(date: LocalDate, today: LocalDate): String {
         0L -> "Today"
         1L -> "Yesterday"
         else -> "${date.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }} ${date.day}"
+    }
+}
+
+@Composable
+private fun PrepareSkeleton(progress: Float, info: String, modifier: Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        SliverText("Preparing video… ${(progress * 100).roundToInt()}%", SliverType.Body, color = SliverColors.TextPrimary)
+        if (info.isNotEmpty()) SliverText(info, SliverType.MonoS, color = SliverColors.TextTertiary)
     }
 }

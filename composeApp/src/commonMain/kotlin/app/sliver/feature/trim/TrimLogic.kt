@@ -33,3 +33,22 @@ fun minimapJump(fraction: Float, durationMs: Long, speed: Float): Long =
 fun lastSevenDays(today: LocalDate): List<LocalDate> = (0..6).map { today.minus(DatePeriod(days = it)) }
 
 fun thumbCount(durationMs: Long) = ((durationMs + SECOND_MS - 1) / SECOND_MS).toInt().coerceIn(1, MAX_THUMBS)
+
+/** '4:32 · 812 MB' for the loading state; size is omitted when unknown (0). */
+fun clipInfo(durationMs: Long, bytes: Long): String {
+    val total = durationMs / 1000
+    val time = "${total / 60}:${(total % 60).toString().padStart(2, '0')}"
+    val size = when {
+        bytes <= 0 -> return time
+        bytes >= 1_000_000_000 -> "${bytes / 100_000_000 / 10}.${bytes / 100_000_000 % 10} GB"
+        else -> "${(bytes / 1_000_000).coerceAtLeast(1)} MB"
+    }
+    return "$time · $size"
+}
+
+/** Overall preparing progress 0..1: open 10%, auto-pick 30%, thumbnails 60%. */
+fun prepareProgress(opened: Boolean, picked: Boolean, thumbsDone: Int, thumbsTotal: Int): Float {
+    if (!opened) return 0f
+    if (!picked) return 0.1f
+    return 0.4f + 0.6f * (thumbsDone.toFloat() / thumbsTotal.coerceAtLeast(1)).coerceIn(0f, 1f)
+}
