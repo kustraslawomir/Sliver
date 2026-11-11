@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Record button styles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#08080A}
+@keyframes sv-ring{from{stroke-dashoffset:241.9}to{stroke-dashoffset:0}}
+@keyframes sv-pulse{0%,100%{box-shadow:0 0 18px #FF8A3D,0 0 40px #FF8A3D66}50%{box-shadow:0 0 30px #FF8A3D,0 0 72px #FF8A3D99}}
+.sv-ring{animation:sv-ring 1000ms linear forwards}
+.sv-pulse{animation:sv-pulse 1400ms ease-in-out infinite}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1140px; box-sizing: border-box; padding: 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 36px">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / v1.2 · CAMERA · RECORD BUTTON</span>
+      <span>5 OPTIONS · D CHOSEN</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+      <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1.05; letter-spacing: -0.02em">The middle button.</h1>
+      <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A">
+        <sc-for list="{{states}}" as="s" hint-placeholder-count="3">
+          <button onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="height: 40px; padding: 0 20px; border-radius: 20px; border: 0; background: {{s.bg}}; color: {{s.color}}; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">{{s.n}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <p style="margin: 0; max-width: 860px; font-size: 17px; line-height: 1.5; color: #B9B9B3">Every option is 80dp of touch target, sits in the same spot and morphs into a stop shape while recording. Switch the state at the top right, or tap any button.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px">
+    <sc-for list="{{variants}}" as="v" hint-placeholder-count="5">
+      <div style="box-sizing: border-box; border: {{v.cardBorder}}; border-radius: 28px; background: #0D0D0F; overflow: hidden; display: flex; flex-direction: column">
+        <div style="position: relative; height: 260px; background: radial-gradient(90% 70% at 50% 20%, #3A4048 0%, #14161A 70%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 40px; gap: 18px; box-sizing: border-box">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #FF8A3D; visibility: {{recVis}}">● 0:03</span>
+          <button onClick="{{cycle}}" aria-label="{{v.aria}}" style="position: relative; width: {{v.ow}}; height: {{v.oh}}; box-sizing: border-box; border-radius: {{v.or}}; border: {{v.ob}}; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 240ms ease">
+            <span class="{{v.cls}}" style="width: {{v.iw}}; height: {{v.ih}}; border-radius: {{v.ir}}; background: {{v.ibg}}; box-shadow: {{v.ish}}; display: flex; align-items: center; justify-content: center; transition: all 240ms cubic-bezier(.2,.8,.2,1)">
+              <span style="width: 22px; height: 22px; border-radius: 5px; background: #0A0A0B; display: {{v.stop}}"></span>
+            </span>
+            <sc-if value="{{v.ring}}" hint-placeholder-val="{{ false }}">
+              <svg aria-hidden="true" width="80" height="80" viewBox="0 0 80 80" style="position: absolute; left: 0; top: 0; transform: rotate(-90deg)"><circle class="sv-ring" cx="40" cy="40" r="38.5" fill="none" stroke="#FF8A3D" stroke-width="3" stroke-linecap="round" stroke-dasharray="241.9" stroke-dashoffset="241.9"></circle></svg>
+            </sc-if>
+          </button>
+          <sc-if value="{{v.best}}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; left: 14px; top: 14px; height: 24px; padding: 0 10px; border-radius: 12px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 500">CHOSEN</span>
+          </sc-if>
+        </div>
+        <div style="padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #8E8E88">{{v.k}}</span>
+          <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{v.n}}</span>
+          <span style="font-size: 14px; line-height: 1.5; color: #B9B9B3; min-height: 84px">{{v.d}}</span>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.45">
+            <span style="color: #EDEDE8">+ {{v.pro}}</span>
+            <span style="color: #8E8E88">− {{v.con}}</span>
+          </div>
+          <span style="margin-top: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88">COMPOSE · {{v.cost}}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["photo","video","rec"],"default":"video"},"$preview":{"width":1440,"height":1140}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { s: (props && props.state) || 'video' }; }
+  renderVals() {
+    const s = this.state.s;
+    const P = s === 'photo', R = s === 'rec';
+    const W = '#EDEDE8', E = '#FF8A3D', CORE = '#FFD2AE';
+    const ring = '3px solid ' + W;
+    const slitIdle = { iw: '10px', ih: '40px', ir: '5px', ibg: P ? W : CORE, ish: P ? '0 0 10px #FFFFFF66' : '0 0 6px ' + E + ', 0 0 18px ' + E + ', 0 0 36px ' + E + '99' };
+    const stopSq = { iw: '28px', ih: '28px', ir: '8px', ibg: E, ish: '0 0 12px ' + E + '88' };
+    const base = { ow: '80px', oh: '80px', or: '40px', ob: ring, cls: '', stop: 'none', ring: false, best: false, cardBorder: '1px solid #1F1F22' };
+    const v = [
+      Object.assign({}, base, { aria: 'Record, option A', k: 'A · CURRENT', n: 'Ring', d: 'The classic shutter we have now. Filled disc inside a ring; becomes a rounded square while recording.',
+        pro: 'everyone gets it instantly', con: 'looks like every camera app; zero identity', cost: 'LOW · animate size + corner' },
+        R ? { iw: '28px', ih: '28px', ir: '8px', ibg: E, ish: 'none' } : { iw: '62px', ih: '62px', ir: '31px', ibg: P ? W : E, ish: 'none' }),
+      Object.assign({}, base, { aria: 'Record, option B', k: 'B', n: 'Slit', d: 'The logo slit glows inside the ring. While recording, the slit opens into a stop square — the slit lets the light in.',
+        pro: 'brand in the most-used control', con: 'thinner target look; must keep 80dp hit area', cost: 'LOW · drawBehind radial glow' },
+        R ? stopSq : slitIdle),
+      Object.assign({}, base, { aria: 'Record, option C', k: 'C', n: 'Capsule', d: 'The whole button is a tall slit-shaped pill. Bold and unmistakably ours.',
+        pro: 'strongest silhouette, very ownable', con: 'not round, so it has to rotate in landscape; reads less as a shutter', cost: 'LOW · plus rotation with device',
+        ow: '58px', oh: '88px', or: '29px' },
+        R ? { iw: '24px', ih: '24px', ir: '6px', ibg: E, ish: 'none' } : { iw: '44px', ih: '74px', ir: '22px', ibg: P ? W : E, ish: 'none' }),
+      Object.assign({}, base, { aria: 'Record, option D', k: 'D', n: 'Ember', d: 'No ring. A warm ember disc like a light leak; it breathes softly while recording, with a dark stop mark. At 1 s: one haptic tick + timer turns ember (“CLIP OK”).',
+        pro: 'warm, cinematic, matches the light-leak filters', con: 'glow must stay subtle; breathing off with reduce-motion', cost: 'MEDIUM · infinite transition',
+        ob: '0', cls: R ? 'sv-pulse' : '', stop: R ? 'flex' : 'none', best: true, cardBorder: '1px solid #FF8A3D' },
+        { iw: '68px', ih: '68px', ir: '34px', ibg: P ? W : E, ish: P ? '0 0 24px #FFFFFF55' : '0 0 18px ' + E + ', 0 0 40px ' + E + '66' }),
+      Object.assign({}, base, { aria: 'Record, option E', k: 'E', n: 'Slit + 1 s ring', d: 'B, plus a ring that draws itself in exactly one second. Closed ring = you have your clip, stop whenever.',
+        pro: 'explains the whole app in one control; brand + function', con: 'a filling ring reads as “max length” (IG/TikTok): users think it auto-stops at 1 s', cost: 'MEDIUM · Animatable + drawArc, 1000ms linear',
+        ob: R ? '3px solid #FFFFFF33' : ring, ring: R },
+        R ? stopSq : slitIdle)
+    ];
+    const seg = (on) => ({ bg: on ? W : 'transparent', color: on ? '#0A0A0B' : '#8E8E88', on: String(on) });
+    const order = ['photo', 'video', 'rec'];
+    return {
+      states: [['photo', 'PHOTO'], ['video', 'VIDEO'], ['rec', 'RECORDING']].map((x) => Object.assign({ n: x[1], pick: () => this.setState({ s: x[0] }) }, seg(s === x[0]))),
+      variants: v, recVis: R ? 'visible' : 'hidden',
+      cycle: () => this.setState({ s: order[(order.indexOf(s) + 1) % 3] })
+    };
+  }
+}
+</script>
+</body>
+</html>

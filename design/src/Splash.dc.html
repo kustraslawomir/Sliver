@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Launch animation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 0; right: 0; top: 380px; height: 84px; display: flex; align-items: center; justify-content: center; gap: {{gap}}px; font-weight: 300; font-size: 48px; letter-spacing: 0">
+    <span style="opacity: {{lettersO}}">S</span><span style="opacity: {{lettersO}}">L</span>
+    <span style="width: 3px; height: {{slitH}}px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 {{glowA}}px #FF8A3D, 0 0 {{glowB}}px #FF8A3D99; opacity: {{slitO}}"></span>
+    <span style="opacity: {{lettersO}}">V</span><span style="opacity: {{lettersO}}">E</span><span style="opacity: {{lettersO}}">R</span>
+  </div>
+
+  <span style="position: absolute; left: 0; right: 0; top: 760px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #55555A">{{phaseLabel}}</span>
+  <button onClick="{{replay}}" style="position: absolute; left: 145px; top: 784px; width: 100px; height: 40px; border-radius: 20px; border: 1px solid #26262A; background: transparent; color: #8E8E88; font-family: Geist, sans-serif; font-size: 13px; visibility: {{replayVis}}">Replay</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { t: 0 }; }
+  componentDidMount() {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    if (reduce) this.setState({ t: 1600 });
+    this._iv = setInterval(() => { if (this.state.t < 1600) this.setState({ t: this.state.t + 25 }); }, 25);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const t = this.state.t;
+    const c = (a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
+    const ease = (x) => 1 - Math.pow(1 - x, 3);
+    const grow = ease(c(100, 600));
+    const letters = ease(c(650, 1050));
+    const settle = c(1050, 1400);
+    let label = 'ICON → SLIT';
+    if (t >= 600) label = 'SLIT BECOMES THE I';
+    if (t >= 1050) label = 'HOLD → CAMERA (CROSS-FADE 240MS)';
+    return {
+      slitH: (4 + grow * 62).toFixed(1),
+      slitO: Math.min(1, t / 100).toFixed(2),
+      glowA: (10 + 14 * grow * (1 - settle)).toFixed(0),
+      glowB: (28 + 40 * grow * (1 - settle)).toFixed(0),
+      lettersO: letters.toFixed(2),
+      gap: (4 + letters * 11).toFixed(1),
+      phaseLabel: label + ' · ' + Math.min(t, 1400) + 'MS',
+      replayVis: t >= 1600 ? 'visible' : 'hidden',
+      replay: () => this.setState({ t: 0 })
+    };
+  }
+}
+</script>
+</body>
+</html>

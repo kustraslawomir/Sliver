@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER app icon variants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#08080A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 780px; box-sizing: border-box; padding: 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 40px">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / STAGE 1 · BRAND / 02 — APP ICON</span>
+      <span>DIRECTION A · 3 VARIANTS</span>
+    </div>
+    <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1.05; letter-spacing: -0.02em">The slit, at home-screen size.</h1>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+
+    <!-- 1 Slit -->
+    <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 28px; background: #0D0D0F; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; align-items: flex-end; gap: 20px">
+        <div aria-hidden="true" style="width: 200px; height: 200px; border-radius: 45px; background: radial-gradient(120% 60% at 50% 100%, #141414 0%, #050505 60%); border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center">
+          <div style="width: 6px; height: 112px; border-radius: 3px; background: {{core}}; box-shadow: {{glowL}}"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center">
+          <div aria-hidden="true" style="width: 60px; height: 60px; border-radius: 14px; background: #050505; border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center"><div style="width: 2px; height: 34px; background: {{core}}; box-shadow: {{glowS}}"></div></div>
+          <div aria-hidden="true" style="width: 29px; height: 29px; border-radius: 7px; background: #050505; border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center"><div style="width: 1px; height: 16px; background: {{core}}; box-shadow: {{glowS}}"></div></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">01 — SLIT</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #B9B9B3">Pure: one hot cut of light on true black. Most iconic in a big tile, but at 29px it shrinks to a hairline and starts to look like a loading bar.</p>
+      </div>
+    </div>
+
+    <!-- 2 Light leak (recommended) -->
+    <div style="box-sizing: border-box; border: 1px solid {{accentLine}}; border-radius: 28px; background: #0D0D0F; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; align-items: flex-end; gap: 20px">
+        <div aria-hidden="true" style="position: relative; overflow: hidden; width: 200px; height: 200px; border-radius: 45px; background: #050505; border: 1px solid #1F1F22">
+          <div style="position: absolute; left: 70px; top: 0; width: 170px; height: 200px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, {{leakA}} 0%, {{leakB}} 45%, transparent 100%)"></div>
+          <div style="position: absolute; left: 66px; top: 44px; width: 7px; height: 112px; border-radius: 3px; background: {{core}}; box-shadow: {{glowL}}"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center">
+          <div aria-hidden="true" style="position: relative; overflow: hidden; width: 60px; height: 60px; border-radius: 14px; background: #050505; border: 1px solid #1F1F22">
+            <div style="position: absolute; left: 21px; top: 0; width: 51px; height: 60px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, {{leakA}} 0%, {{leakB}} 45%, transparent 100%)"></div>
+            <div style="position: absolute; left: 19px; top: 13px; width: 3px; height: 34px; border-radius: 2px; background: {{core}}; box-shadow: {{glowS}}"></div>
+          </div>
+          <div aria-hidden="true" style="position: relative; overflow: hidden; width: 29px; height: 29px; border-radius: 7px; background: #050505; border: 1px solid #1F1F22">
+            <div style="position: absolute; left: 10px; top: 0; width: 25px; height: 29px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, {{leakA}} 0%, {{leakB}} 45%, transparent 100%)"></div>
+            <div style="position: absolute; left: 9px; top: 6px; width: 2px; height: 17px; background: {{core}}"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">02 — LIGHT LEAK</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: {{accent}}; border: 1px solid {{accentLine}}; border-radius: 999px; padding: 5px 9px">RECOMMENDED</span>
+        </div>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #B9B9B3">A door left ajar: the slit spills a wedge of warm light into the dark. Same motif, but more surface area, so it survives small sizes and owns a spot on a busy home screen.</p>
+      </div>
+    </div>
+
+    <!-- 3 Frame -->
+    <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 28px; background: #0D0D0F; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; align-items: flex-end; gap: 20px">
+        <div aria-hidden="true" style="width: 200px; height: 200px; border-radius: 45px; background: #050505; border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center">
+          <div style="width: 64px; height: 128px; box-sizing: border-box; border: 2px solid #EDEDE8; border-radius: 16px; display: flex; align-items: center; justify-content: center">
+            <div style="width: 4px; height: 76px; border-radius: 2px; background: {{core}}; box-shadow: {{glowL}}"></div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center">
+          <div aria-hidden="true" style="width: 60px; height: 60px; border-radius: 14px; background: #050505; border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center"><div style="width: 20px; height: 38px; box-sizing: border-box; border: 1.5px solid #EDEDE8; border-radius: 5px; display: flex; align-items: center; justify-content: center"><div style="width: 2px; height: 22px; background: {{core}}"></div></div></div>
+          <div aria-hidden="true" style="width: 29px; height: 29px; border-radius: 7px; background: #050505; border: 1px solid #1F1F22; display: flex; align-items: center; justify-content: center"><div style="width: 10px; height: 19px; box-sizing: border-box; border: 1px solid #EDEDE8; border-radius: 3px"></div></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">03 — FRAME</span>
+        <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #B9B9B3">Borrows C's frame around the slit, so the icon previews the trim window. Clear at any size, but the bone outline dominates and the light becomes secondary.</p>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #8E8E88; max-width: 900px">Plan: ship 02 as the default icon; offer 01 and 03 as alternate icons (iOS alternate icons / Android themed icon uses 01's single slit as the monochrome layer).</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FF8A3D","options":["#FF8A3D","#8B5CFF"]},"$preview":{"width":1440,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.accent ?? '#FF8A3D';
+    return {
+      accent: a,
+      accentLine: a + '55',
+      core: a.toUpperCase() === '#FF8A3D' ? '#FFD2AE' : a,
+      leakA: a + '66',
+      leakB: a + '1F',
+      glowL: '0 0 6px ' + a + ', 0 0 18px ' + a + ', 0 0 48px ' + a + '99',
+      glowS: '0 0 4px ' + a + ', 0 0 10px ' + a + 'AA'
+    };
+  }
+}
+</script>
+</body>
+</html>

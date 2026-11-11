@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER design system</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0B}
+a{color:#FF8A3D}a:hover{color:#FFD2AE}
+</style>
+</helmet>
+<div style="width: 1440px; min-height: 6100px; box-sizing: border-box; padding: 72px; background: #0A0A0B; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 80px">
+
+  <!-- HEADER -->
+  <div style="display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / STAGE 2 · DESIGN SYSTEM / V1</span>
+      <span>DARK ONLY · IOS 390×844 · MATERIAL 3 READY</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+      <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 77px; line-height: 1.05; letter-spacing: -0.01em">The light<br>&amp; the dark.</h1>
+      <p style="margin: 0; max-width: 460px; font-size: 17px; line-height: 1.55; color: #B9B9B3">Three rules run the whole system. Darkness is the material. Ember marks the one thing you act on. The slit — one thin cut of light — is the only signature shape.</p>
+    </div>
+  </div>
+
+  <!-- 01 COLOR -->
+  <div style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #26262A">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D">01</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; letter-spacing: -0.02em">Color tokens</h2>
+      <span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8E8E88">CONTRAST MEASURED ON BG/BASE #0A0A0B</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+      <sc-for list="{{colorGroups}}" as="g" hint-placeholder-count="4">
+        <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">{{g.label}}</span>
+          <sc-for list="{{g.tokens}}" as="t" hint-placeholder-count="5">
+            <div style="display: flex; gap: 14px; align-items: center">
+              <div style="flex: 0 0 44px; height: 44px; border-radius: 12px; border: 1px solid #2E2E33; background: {{t.hex}}; box-shadow: {{t.glow}}"></div>
+              <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #EDEDE8">{{t.n}}</span>
+                <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">{{t.hex}} {{t.ratio}}</span>
+                <span style="font-size: 13px; color: #B9B9B3">{{t.use}}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #8E8E88; max-width: 1000px">Rules: ember fills only the primary CTA and record dot; everywhere else it is a 1–2.5px line or a glow. Error red never appears on streaks or missed days. text/disabled fails AA by design — never use it for information.</p>
+  </div>
+
+  <!-- 02 TYPE -->
+  <div style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #26262A">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D">02</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; letter-spacing: -0.02em">Type scale &amp; pairing</h2>
+      <span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8E8E88">INSTRUMENT SERIF · GEIST · GEIST MONO — ALL OFL</span>
+    </div>
+    <div style="display: flex; flex-direction: column">
+      <sc-for list="{{typeRows}}" as="r" hint-placeholder-count="10">
+        <div style="display: grid; grid-template-columns: 200px minmax(0, 1fr) 320px; gap: 24px; align-items: center; padding: 14px 0; border-bottom: 1px solid #1A1A1D">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #EDEDE8">{{r.n}}</span>
+          <span style="font-family: {{r.ff}}; font-weight: {{r.fw}}; font-size: {{r.fs}}px; line-height: {{r.lh}}px; letter-spacing: {{r.ls}}; color: #EDEDE8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.sample}}</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; line-height: 1.5; color: #8E8E88">{{r.spec}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #8E8E88; max-width: 1000px">Serif is for moments, never for controls. Mono is for anything a camera would print: dates, timecodes, counts. Sizes map to iOS Dynamic Type (body = 17pt) and Android sp; display styles cap at +2 steps so titles don't wrap into three lines.</p>
+  </div>
+
+  <!-- 03 SPACE, RADII, ELEVATION -->
+  <div style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #26262A">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D">03</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; letter-spacing: -0.02em">Space, radii, elevation &amp; glow</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88; padding-bottom: 6px">SPACING · 4PT BASE</span>
+        <sc-for list="{{spacing}}" as="s" hint-placeholder-count="10">
+          <div style="display: flex; align-items: center; gap: 14px">
+            <span style="width: 64px; font-family: 'Geist Mono', monospace; font-size: 12px; color: #B9B9B3">{{s.n}}</span>
+            <div style="height: 10px; width: {{s.v}}px; border-radius: 2px; background: #3A3A40"></div>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">{{s.v}}</span>
+          </div>
+        </sc-for>
+        <span style="font-size: 13px; line-height: 1.5; color: #8E8E88; padding-top: 6px">Screen gutter 20. Thumb zone: primary actions sit in the bottom 40% (y ≥ 506 on 844).</span>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">RADII</span>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+          <sc-for list="{{radii}}" as="r" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+              <div style="width: 64px; height: 64px; box-sizing: border-box; border: 1.5px solid #8E8E88; border-radius: {{r.v}}px; border-right-color: transparent; border-bottom-color: transparent"></div>
+              <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #EDEDE8">{{r.n}} · {{r.v}}</span>
+              <span style="font-size: 12px; line-height: 1.35; color: #8E8E88">{{r.use}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">ELEVATION = SURFACE STEP + HAIRLINE, NOT SHADOW</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 72px; border-radius: 16px; background: #0A0A0B; border: 1px solid #26262A"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">e0</span><span style="font-size: 12px; color: #8E8E88">base + hairline</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 72px; border-radius: 16px; background: #111113; border: 1px solid #26262A"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">e1</span><span style="font-size: 12px; color: #8E8E88">cards, cells</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 72px; border-radius: 16px; background: #18181B; border: 1px solid #3A3A40; box-shadow: 0 -12px 40px #000000"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">e2</span><span style="font-size: 12px; color: #8E8E88">sheets, toasts</span></div>
+        </div>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88; padding-top: 8px">GLOW (EMBER ONLY)</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end">
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center"><div style="width: 3px; height: 48px; background: #FFD2AE; box-shadow: 0 0 6px #FF8A3D"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">glow/s</span><span style="font-size: 12px; color: #8E8E88; text-align: center">dots, dividers</span></div>
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center"><div style="width: 40px; height: 48px; box-sizing: border-box; border: 2.5px solid #FF8A3D; border-radius: 10px; box-shadow: 0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">glow/m</span><span style="font-size: 12px; color: #8E8E88; text-align: center">sliver frame</span></div>
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center"><div style="width: 72px; height: 32px; border-radius: 16px; background: #FF8A3D; box-shadow: 0 8px 32px #FF8A3D44"></div><span style="font-family: 'Geist Mono', monospace; font-size: 12px">glow/l</span><span style="font-size: 12px; color: #8E8E88; text-align: center">primary CTA</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 TEXTURE, ICONS, MOTION -->
+  <div style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #26262A">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D">04</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; letter-spacing: -0.02em">Grain, iconography &amp; motion</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px">
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">GRAIN &amp; TEXTURE</span>
+        <div aria-hidden="true" style="height: 140px; border-radius: 16px; background-color: #141417; background-image: radial-gradient(#FFFFFF14 0.6px, transparent 0.7px), radial-gradient(#00000055 0.6px, transparent 0.7px); background-size: 3px 3px, 5px 5px; background-position: 0 0, 1px 2px; display: flex; align-items: flex-end; padding: 14px; box-sizing: border-box"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #B9B9B3">grain/ui · 4% · static</span></div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; color: #B9B9B3">
+          <span><strong style="color: #EDEDE8; font-weight: 500">grain/ui</strong> 3–5%, static tile, over bg layers only — never over text or controls.</span>
+          <span><strong style="color: #EDEDE8; font-weight: 500">grain/film</strong> 6–10%, animated 24fps, only during playback and the premiere.</span>
+          <span><strong style="color: #EDEDE8; font-weight: 500">Hairlines</strong> 1px line/hairline everywhere a shadow would normally go.</span>
+          <span><strong style="color: #EDEDE8; font-weight: 500">Blur</strong> only for chrome over the live viewfinder (20px, bg/void 60%).</span>
+          <span><strong style="color: #EDEDE8; font-weight: 500">Reduced transparency</strong> → blur becomes solid surface/2.</span>
+        </div>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; justify-content: space-between">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">ICONOGRAPHY · 24 GRID · 1.5 STROKE · ROUND CAPS · NO FILLS</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">TAP TARGET ≥ 44</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; color: #EDEDE8">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Camera" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M8 7l1.5-3h5L16 7"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">camera</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Gallery" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 9"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">gallery</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Archive" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">archive</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Film" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">film</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Filters" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">looks</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Flip camera" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">flip</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Flash" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">flash</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Grid" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M9 3v18M15 3v18M3 9h18M3 15h18"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">grid</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Timer" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2.5M9 2h6"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">timer</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Audio" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">audio</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Note" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5z"></path><path d="M15 4v4h4M8 13h8M8 17h5"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">note</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Backup" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z"></path><path d="M12 15v-4M10 13l2-2 2 2"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">backup</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Reminders" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">reminder</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Settings" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">settings</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #FF8A3D55; border-radius: 14px; color: #FF8A3D"><svg role="img" aria-label="Auto-pick" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">auto-pick</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0; border: 1px solid #1F1F22; border-radius: 14px"><svg role="img" aria-label="Undo" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">undo</span></div>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Base set: Lucide-compatible geometry, so Android/iOS builds can use one SVG source. Ember only for the auto-pick sparkle and active tab.</span>
+      </div>
+    </div>
+
+    <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">CURVES</span>
+        <sc-for list="{{curves}}" as="c" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid #1A1A1D">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #EDEDE8">{{c.n}}</span>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">{{c.v}}</span>
+            <span style="font-size: 13px; color: #B9B9B3">{{c.use}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">DURATIONS</span>
+        <sc-for list="{{durations}}" as="d" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 12px"><span>{{d.n}}</span><span style="color: #8E8E88">{{d.v}}ms</span></div>
+            <div style="height: 4px; border-radius: 2px; background: #1F1F22"><div style="height: 4px; width: {{d.pct}}%; border-radius: 2px; background: #FF8A3D"></div></div>
+            <span style="font-size: 13px; color: #B9B9B3">{{d.use}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">HAPTICS</span>
+        <sc-for list="{{haptics}}" as="h" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 2px; padding-bottom: 10px; border-bottom: 1px solid #1A1A1D">
+            <span style="font-size: 14px; color: #EDEDE8">{{h.n}}</span>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">{{h.api}}</span>
+            <span style="font-size: 13px; color: #B9B9B3">{{h.use}}</span>
+          </div>
+        </sc-for>
+        <span style="font-size: 13px; line-height: 1.45; color: #8E8E88">Reduced motion: drops → cross-fades, glow pulse → static brighten, no parallax, premiere cuts instead of fades. Haptics stay.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 COMPONENTS -->
+  <div style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #26262A">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D">05</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; letter-spacing: -0.02em">Components</h2>
+    </div>
+
+    <!-- Buttons + record -->
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: 20px">
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">BUTTONS</span>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start">
+          <div style="display: flex; flex-direction: column; gap: 8px"><button style="height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">primary · 56 · one per screen</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px"><button style="height: 56px; border: 1px solid #3A3A40; border-radius: 28px; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-weight: 500; font-size: 17px">Make a film</button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">secondary · hairline</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px"><button style="height: 56px; border: 0; border-radius: 28px; background: #202024; color: #55555A; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px" disabled>Save clip</button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">primary · disabled</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px"><button style="height: 44px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Retake</button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">ghost · 44</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px; align-items: center"><button aria-label="Flip camera" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #26262A; background: #05050599; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">icon · 44 · over viewfinder</span></div>
+          <div style="display: flex; flex-direction: column; gap: 8px"><button style="height: 44px; border: 0; background: transparent; color: #E5675F; font-family: Geist, sans-serif; font-size: 15px">Delete account</button><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">destructive · text only</span></div>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Pressed: scale 0.97 + surface step, 100ms. Focus: 2px bone ring, 2px offset.</span>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">RECORD BUTTON · 80 HIT AREA</span>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: end">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: transparent">·</span>
+            <button aria-label="Record" style="width: 76px; height: 76px; border-radius: 38px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 58px; height: 58px; border-radius: 29px; background: #FF8A3D"></span></button>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">video idle</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">00:07.4</span>
+            <button aria-label="Stop recording" style="width: 76px; height: 76px; border-radius: 38px; border: 3px solid #FF8A3D; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 0 18px #FF8A3D66"><span style="width: 28px; height: 28px; border-radius: 8px; background: #FF8A3D"></span></button>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">tap · recording</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">HOLD</span>
+            <button aria-label="Recording while held" style="width: 92px; height: 92px; margin: -8px; border-radius: 46px; border: 3px solid #FF8A3D; background: #FF8A3D22; display: flex; align-items: center; justify-content: center; padding: 0; box-shadow: 0 0 28px #FF8A3D88"><span style="width: 40px; height: 40px; border-radius: 20px; background: #FF8A3D"></span></button>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">hold · grows 1.2×</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: transparent">·</span>
+            <button aria-label="Take photo" style="width: 76px; height: 76px; border-radius: 38px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 58px; height: 58px; border-radius: 29px; background: #EDEDE8"></span></button>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">photo mode</span>
+          </div>
+        </div>
+        <span style="font-size: 13px; line-height: 1.45; color: #8E8E88">No 1s cap while recording. Tap = start/stop; hold = record while pressed, release stops. Both land in Trim &amp; Pick.</span>
+      </div>
+    </div>
+
+    <!-- Chips + sliders -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">CHIPS, BADGES &amp; SEGMENTED</span>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center">
+          <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #05050599; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em">
+            <button style="height: 36px; padding: 0 16px; border-radius: 18px; border: 0; background: transparent; color: #8E8E88; font: inherit; letter-spacing: inherit">PHOTO</button>
+            <button style="height: 36px; padding: 0 16px; border-radius: 18px; border: 0; background: #EDEDE8; color: #0A0A0B; font: inherit; letter-spacing: inherit">VIDEO</button>
+          </div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #FF8A3D; border: 1px solid #FF8A3D55; border-radius: 999px; padding: 8px 12px">✦ AUTO-PICKED</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #EDEDE8; border: 1px solid #3A3A40; border-radius: 999px; padding: 8px 12px">CUSTOM</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #8E8E88; border: 1px solid #26262A; border-radius: 999px; padding: 8px 12px">1 OF 3</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #FF8A3D; background: #FF8A3D1F; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 14px">Slow zoom in</button>
+          <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #26262A; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 14px">Still</button>
+          <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #26262A; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 14px">Pan</button>
+          <button style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #26262A; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 14px">Parallax</button>
+        </div>
+        <div style="display: flex; gap: 12px">
+          <sc-for list="{{looks}}" as="l" hint-placeholder-count="5">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+              <div style="width: 64px; height: 84px; box-sizing: border-box; border-radius: 12px; border: {{l.border}}; background: {{l.bg}}"></div>
+              <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: {{l.color}}">{{l.n}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Filter chip: 64×84 live thumbnail, selected = 2px ember border. Chip height 40, hit area 44.</span>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 22px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">SLIDERS</span>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -0.02em">Sharpness</span><span style="font-family: 'Geist Mono', monospace; font-size: 15px; color: #FF8A3D">+32</span></div>
+          <div aria-hidden="true" style="position: relative; height: 28px">
+            <div style="position: absolute; left: 0; right: 0; top: 13px; height: 2px; background: #26262A"></div>
+            <div style="position: absolute; left: 0; width: 66%; top: 12px; height: 4px; border-radius: 2px; background: #FF8A3D"></div>
+            <div style="position: absolute; left: calc(66% - 2px); top: 0; width: 4px; height: 28px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 10px #FF8A3D"></div>
+          </div>
+          <span style="font-size: 13px; color: #8E8E88">Featured slider: display/m label, 4px track, slit thumb. Haptic tick every 10, detent at 0.</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; font-size: 15px"><span>Contrast</span><span style="font-family: 'Geist Mono', monospace; color: #B9B9B3">−12 <span style="color: #8E8E88">· reset</span></span></div>
+          <div aria-hidden="true" style="position: relative; height: 20px">
+            <div style="position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: #26262A"></div>
+            <div style="position: absolute; left: 50%; top: 4px; width: 1px; height: 12px; background: #55555A"></div>
+            <div style="position: absolute; left: 44%; width: 6%; top: 9px; height: 2px; background: #EDEDE8"></div>
+            <div style="position: absolute; left: calc(44% - 1.5px); top: 0; width: 3px; height: 20px; border-radius: 2px; background: #EDEDE8"></div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; justify-content: space-between; font-size: 15px"><span>Filter intensity · Noir</span><span style="font-family: 'Geist Mono', monospace; color: #B9B9B3">80%</span></div>
+          <div aria-hidden="true" style="position: relative; height: 20px">
+            <div style="position: absolute; left: 0; right: 0; top: 9px; height: 2px; background: #26262A"></div>
+            <div style="position: absolute; left: 0; width: 80%; top: 9px; height: 2px; background: #EDEDE8"></div>
+            <div style="position: absolute; left: calc(80% - 1.5px); top: 0; width: 3px; height: 20px; border-radius: 2px; background: #EDEDE8"></div>
+          </div>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Bipolar sliders start from a centre detent; double-tap value resets. Built on native slider for VoiceOver / TalkBack.</span>
+      </div>
+    </div>
+
+    <!-- Tab bar + sheet + cards -->
+    <div style="display: grid; grid-template-columns: 430px 430px minmax(0, 1fr); gap: 20px; align-items: start">
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">TAB BAR · FLOATING</span>
+        <div style="height: 150px; border-radius: 18px; background: linear-gradient(180deg, #2A2621 0%, #121110 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; box-sizing: border-box">
+          <nav aria-label="Main" style="width: 350px; height: 72px; box-sizing: border-box; border-radius: 36px; background: #050505B3; border: 1px solid #26262A; display: flex; align-items: center; justify-content: space-around">
+            <a href="#" style="width: 64px; height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #8E8E88; text-decoration: none; font-size: 11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Archive</a>
+            <a href="#" aria-label="Camera" aria-current="page" style="width: 56px; height: 56px; box-sizing: border-box; border-radius: 28px; border: 1.5px solid #EDEDE8; display: flex; align-items: center; justify-content: center"><span style="width: 3px; height: 26px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D, 0 0 18px #FF8A3D99"></span></a>
+            <a href="#" style="width: 64px; height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #8E8E88; text-decoration: none; font-size: 11px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"></path></svg>Films</a>
+          </nav>
+        </div>
+        <span style="font-size: 13px; line-height: 1.45; color: #8E8E88">Three destinations; the camera is the centre slit. On the camera screen the bar hides behind the record button and returns on swipe-up.</span>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">BOTTOM SHEET · E2</span>
+        <div style="border-radius: 32px 32px 18px 18px; background: #18181B; border: 1px solid #3A3A40; padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 6px">
+          <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40; margin-bottom: 10px"></div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">MON · 9 NOV</span>
+          <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1.1; padding-bottom: 8px; font-weight: 600; letter-spacing: -0.02em">Add this day</span>
+          <button style="height: 52px; display: flex; align-items: center; gap: 14px; border: 0; border-top: 1px solid #26262A; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 16px; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 9"></path></svg>Video from gallery</button>
+          <button style="height: 52px; display: flex; align-items: center; gap: 14px; border: 0; border-top: 1px solid #26262A; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 16px; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M8 15l3-3 2 2 3-3"></path></svg>Photo → 1 s clip</button>
+          <button style="height: 52px; border: 0; border-radius: 26px; background: #202024; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 16px; margin-top: 10px">Cancel</button>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Scrim #000 70%. Radius 32 top. Detents: medium / large. Swipe or tap scrim to dismiss.</span>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">CARDS</span>
+        <div style="display: flex; gap: 14px">
+          <div style="flex: 0 0 150px; height: 225px; box-sizing: border-box; border-radius: 16px; border: 1px solid #26262A; background: linear-gradient(180deg, #1D1915 0%, #050505 75%); padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px">
+            <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">October</span>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #B9B9B3">31 DAYS · 00:31</span>
+          </div>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px">
+            <div style="box-sizing: border-box; border-radius: 20px; border: 1px solid #26262A; background: #0A0A0B; padding: 12px; display: flex; gap: 12px; align-items: center">
+              <div style="flex: 0 0 48px; height: 64px; border-radius: 10px; background: linear-gradient(160deg, #5A4A3A, #16130F)"></div>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">ON THIS DAY · 2025</span>
+                <span style="font-size: 15px">One year ago, today.</span>
+              </div>
+            </div>
+            <div style="box-sizing: border-box; border-radius: 20px; border: 1px solid #26262A; background: #0A0A0B; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+              <span style="display: flex; align-items: center; gap: 8px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8FC7A4"><span style="width: 6px; height: 6px; border-radius: 3px; background: #8FC7A4"></span>UP TO DATE</span>
+              <span style="font-size: 15px">Your clips live in your Drive.</span>
+              <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">214 BACKED UP · 2 MIN AGO</span>
+            </div>
+          </div>
+        </div>
+        <span style="font-size: 13px; color: #8E8E88">Film poster 2:3, serif title + mono runtime. Info cards e0 on surface/1.</span>
+      </div>
+    </div>
+
+    <!-- Calendar cells -->
+    <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; justify-content: space-between">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">CALENDAR CELL STATES · 46×62 · RADIUS 10</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">OPEN = EMPTY. NO RED, NO X, NO STREAKS.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 12px; color: #55555A">24</div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">future</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; background: #111113; border: 1px solid #1F1F22; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">07</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #3A3A40"></span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">empty / missed</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; background: #18181B; border: 1px solid #3A3A40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #EDEDE8">07</span><span style="font-size: 16px; line-height: 1; color: #EDEDE8">+</span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">empty · pressed</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="position: relative; width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; background: linear-gradient(160deg, #4E5A63, #121518)"><span style="position: absolute; left: 6px; bottom: 5px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #EDEDE8">06</span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">filled</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="position: relative; width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; background: linear-gradient(160deg, #6A5640, #18140F)"><span style="position: absolute; left: 6px; bottom: 5px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #EDEDE8">05</span><svg aria-hidden="true" style="position: absolute; right: 4px; top: 4px" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EDEDE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M21 16l-5-5-9 9"></path></svg></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">backfilled</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; border: 2px solid #FF8A3D; box-shadow: 0 0 12px #FF8A3D55; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">10</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #FF8A3D"></span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">today · empty</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="position: relative; width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; border: 2px solid #FF8A3D; background: linear-gradient(160deg, #7A5A3A, #1A120B)"><span style="position: absolute; left: 5px; bottom: 4px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #FFD2AE">10</span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">today · filled</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center">
+          <div style="position: relative; width: 46px; height: 62px; box-sizing: border-box; border-radius: 10px; background: linear-gradient(160deg, #4E5A63, #121518); outline: 2px solid #EDEDE8; outline-offset: 2px"><span style="position: absolute; left: 6px; bottom: 5px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #EDEDE8">03</span></div>
+          <span style="font-size: 12px; color: #B9B9B3; text-align: center">selected (film range)</span>
+        </div>
+      </div>
+      <span style="font-size: 13px; color: #8E8E88">VoiceOver: "Tuesday 10 November, today, no clip yet. Double-tap to add." No streaks — an open day is just an open day.</span>
+    </div>
+
+    <!-- Toasts + coach mark -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">TOASTS · BOTTOM, ABOVE TAB BAR · 4S, UNDO 6S</span>
+        <div role="status" style="height: 56px; box-sizing: border-box; border-radius: 28px; background: #18181B; border: 1px solid #3A3A40; box-shadow: 0 -12px 40px #000000; padding: 0 8px 0 10px; display: flex; align-items: center; gap: 12px">
+          <div style="width: 30px; height: 40px; border-radius: 8px; background: linear-gradient(160deg, #7A5A3A, #1A120B)"></div>
+          <span style="flex-grow: 1; font-size: 15px">Saved to <span style="font-family: 'Geist Mono', monospace; font-size: 13px">TUE 10 NOV</span></span>
+          <button style="height: 44px; padding: 0 16px; border: 0; border-radius: 22px; background: transparent; color: #FF8A3D; font-family: Geist, sans-serif; font-weight: 500; font-size: 15px">Undo</button>
+        </div>
+        <div role="status" style="height: 56px; box-sizing: border-box; border-radius: 28px; background: #18181B; border: 1px solid #3A3A40; padding: 0 20px; display: flex; align-items: center; gap: 12px">
+          <span style="width: 8px; height: 8px; border-radius: 4px; background: #8FC7A4"></span>
+          <span style="font-size: 15px">Backed up · 214 clips in your Drive</span>
+        </div>
+        <div role="status" style="height: 56px; box-sizing: border-box; border-radius: 28px; background: #18181B; border: 1px solid #3A3A40; padding: 0 8px 0 20px; display: flex; align-items: center; gap: 12px">
+          <span style="width: 8px; height: 8px; border-radius: 4px; background: #E8C27A"></span>
+          <span style="flex-grow: 1; font-size: 15px">Backup paused — waiting for Wi-Fi</span>
+          <button style="height: 44px; padding: 0 16px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Details</button>
+        </div>
+      </div>
+
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #111113; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">COACH MARK · ONE TIME</span>
+        <div style="position: relative; height: 210px; border-radius: 18px; background: #050505">
+          <div style="position: absolute; left: 32px; right: 32px; top: 122px; display: flex; gap: 2px">
+            <sc-for list="{{coachStrip}}" as="f" hint-placeholder-count="14">
+              <div style="flex: 1 1 0; height: 52px; border-radius: 4px; background: {{f}}; opacity: 0.4"></div>
+            </sc-for>
+          </div>
+          <div style="position: absolute; left: 260px; top: 116px; width: 56px; height: 64px; box-sizing: border-box; border: 2.5px solid #FF8A3D; border-radius: 10px; box-shadow: 0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55"></div>
+          <div style="position: absolute; left: 160px; top: 20px; width: 260px; box-sizing: border-box; border-radius: 18px; background: #EDEDE8; color: #0A0A0B; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 18px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em">Drag to choose the part you keep.</span>
+            <span style="font-size: 13px; color: #3A3A40">We picked one for you. ✦</span>
+          </div>
+          <div style="position: absolute; left: 281px; top: 98px; width: 14px; height: 14px; background: #EDEDE8; transform: rotate(45deg)"></div>
+        </div>
+        <span style="font-size: 13px; line-height: 1.45; color: #8E8E88">Bone bubble (the only light surface in the app), dims everything except the target. Dismisses on first drag or tap. Never shown twice.</span>
+      </div>
+    </div>
+
+    <!-- Signature sliver frame -->
+    <div style="box-sizing: border-box; border: 1px solid #FF8A3D55; border-radius: 24px; background: #050505; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; align-items: baseline; gap: 16px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #FF8A3D">SIGNATURE</span>
+        <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; font-weight: 600; letter-spacing: -0.02em">The sliver frame</span>
+        <span style="margin-left: auto; font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">WIDTH = 1.000S OF TIMELINE · BORDER 2.5 · RADIUS 10 · HIT AREA ≥ 44</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px">
+        <sc-for list="{{frames}}" as="s" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="position: relative; height: 96px">
+              <div style="position: absolute; left: 0; right: 0; top: 18px; display: flex; gap: 2px">
+                <sc-for list="{{miniStrip}}" as="f" hint-placeholder-count="8">
+                  <div style="flex: 1 1 0; height: 56px; border-radius: 3px; background: {{f}}"></div>
+                </sc-for>
+              </div>
+              <div style="position: absolute; left: 0; width: 38%; top: 18px; height: 56px; background: #050505A8"></div>
+              <div style="position: absolute; right: 0; width: 38%; top: 18px; height: 56px; background: #050505A8"></div>
+              <div style="position: absolute; left: {{s.left}}; top: 10px; width: 24%; height: 72px; box-sizing: border-box; border: {{s.border}}; border-radius: 10px; box-shadow: {{s.glow}}; transform: scale({{s.scale}})"></div>
+              <span style="position: absolute; left: 38%; top: 78px; font-family: 'Geist Mono', monospace; font-size: 10px; color: {{s.tc}}">{{s.time}}</span>
+            </div>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #EDEDE8">{{s.n}}</span>
+            <span style="font-size: 13px; line-height: 1.45; color: #B9B9B3">{{s.d}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <span style="font-size: 14px; line-height: 1.5; color: #8E8E88">The frame stays put; the strip slides beneath it (window drag also allowed). Snap points = top-3 auto-pick markers, ±80ms magnet. Same glyph scales down to the app icon slit, the loader sweep and the record button.</span>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; padding-top: 24px; border-top: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">
+    <span>SLIVER DESIGN SYSTEM · V1 · 10 NOV 2026</span>
+    <span>NEXT: STAGE 3 — ONBOARDING, CAPTURE &amp; TRIM</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const g = (hex) => '0 0 14px ' + hex + '66';
+    return {
+      colorGroups: [
+        { label: 'SURFACE', tokens: [
+          { n: 'bg/void', hex: '#050505', ratio: '', use: 'Camera, premiere, icon', glow: 'none' },
+          { n: 'bg/base', hex: '#0A0A0B', ratio: '', use: 'App background', glow: 'none' },
+          { n: 'surface/1', hex: '#111113', ratio: '', use: 'Cards, cells', glow: 'none' },
+          { n: 'surface/2', hex: '#18181B', ratio: '', use: 'Sheets, toasts, inputs', glow: 'none' },
+          { n: 'surface/3', hex: '#202024', ratio: '', use: 'Pressed, disabled fill', glow: 'none' },
+          { n: 'line/hairline', hex: '#26262A', ratio: '', use: '1px borders, dividers', glow: 'none' },
+          { n: 'line/strong', hex: '#3A3A40', ratio: '', use: 'Borders on surface/2', glow: 'none' }
+        ]},
+        { label: 'TEXT', tokens: [
+          { n: 'text/primary', hex: '#EDEDE8', ratio: '· 16.5:1', use: 'Titles, body', glow: 'none' },
+          { n: 'text/secondary', hex: '#B9B9B3', ratio: '· 9.9:1', use: 'Supporting copy', glow: 'none' },
+          { n: 'text/tertiary', hex: '#8E8E88', ratio: '· 6.0:1', use: 'Labels, meta, timecodes', glow: 'none' },
+          { n: 'text/disabled', hex: '#55555A', ratio: '· 2.6:1', use: 'Disabled only', glow: 'none' }
+        ]},
+        { label: 'ACCENT · EMBER', tokens: [
+          { n: 'accent', hex: '#FF8A3D', ratio: '· 8.4:1', use: 'CTA, sliver frame, today', glow: g('#FF8A3D') },
+          { n: 'accent/core', hex: '#FFD2AE', ratio: '', use: 'Slit centre, glow core', glow: g('#FF8A3D') },
+          { n: 'accent/line', hex: '#FF8A3D55', ratio: '', use: 'Accent hairlines', glow: 'none' },
+          { n: 'accent/tint', hex: '#FF8A3D1F', ratio: '', use: 'Selected chip fill', glow: 'none' },
+          { n: 'on-accent', hex: '#0A0A0B', ratio: '· 8.4:1', use: 'Text on ember', glow: 'none' }
+        ]},
+        { label: 'STATE', tokens: [
+          { n: 'state/success', hex: '#8FC7A4', ratio: '· 10.6:1', use: 'Backup done', glow: 'none' },
+          { n: 'state/warning', hex: '#E8C27A', ratio: '· 11.3:1', use: 'Paused, storage low', glow: 'none' },
+          { n: 'state/error', hex: '#E5675F', ratio: '· 6.0:1', use: 'Failures — never streaks', glow: 'none' },
+          { n: 'scrim', hex: '#000000B3', ratio: '', use: 'Behind sheets, 70%', glow: 'none' }
+        ]}
+      ],
+      typeRows: [
+        { n: 'display/xl', ff: 'Geist, sans-serif', fw: 600, fs: 52, lh: 56, ls: '-0.03em', sample: 'Your Year in Clips', spec: 'Geist 600 52/56 · −3% · premiere' },
+        { n: 'display/l', ff: 'Geist, sans-serif', fw: 600, fs: 36, lh: 40, ls: '-0.025em', sample: 'One clip. Every day.', spec: 'Geist 600 36/40 · −2.5% · onboarding, heroes' },
+        { n: 'display/m', ff: 'Geist, sans-serif', fw: 600, fs: 24, lh: 30, ls: '-0.02em', sample: 'October · Add this day', spec: 'Geist 600 24/30 · −2% · screen, sheet & film titles' },
+        { n: 'title', ff: 'Geist, sans-serif', fw: 600, fs: 22, lh: 28, ls: '-0.01em', sample: 'Backup & restore', spec: 'Geist 600 22/28 · screen titles' },
+        { n: 'headline', ff: 'Geist, sans-serif', fw: 500, fs: 17, lh: 24, ls: '0', sample: 'Save clip', spec: 'Geist 500–600 17/24 · buttons, rows' },
+        { n: 'body', ff: 'Geist, sans-serif', fw: 400, fs: 17, lh: 26, ls: '0', sample: 'Your clips live in your Drive. We never store your videos.', spec: 'Geist 400 17/26 · body' },
+        { n: 'body/s', ff: 'Geist, sans-serif', fw: 400, fs: 15, lh: 22, ls: '0', sample: 'Pick a moment, or let us suggest one.', spec: 'Geist 400 15/22 · secondary' },
+        { n: 'caption', ff: 'Geist, sans-serif', fw: 400, fs: 13, lh: 18, ls: '0', sample: 'Backed up 2 minutes ago', spec: 'Geist 400 13/18 · meta' },
+        { n: 'mono/l', ff: "'Geist Mono', monospace", fw: 500, fs: 15, lh: 20, ls: '0.06em', sample: 'DAY 142 · 00:01.00', spec: 'Geist Mono 500 15/20 · +6% · timecode' },
+        { n: 'mono/s', ff: "'Geist Mono', monospace", fw: 500, fs: 12, lh: 16, ls: '0.12em', sample: 'TUE · 10 NOV · 142 DAYS', spec: 'Geist Mono 500 12/16 · +12% caps · labels' }
+      ],
+      spacing: [
+        { n: 'space/1', v: 4 }, { n: 'space/2', v: 8 }, { n: 'space/3', v: 12 }, { n: 'space/4', v: 16 }, { n: 'space/5', v: 20 },
+        { n: 'space/6', v: 24 }, { n: 'space/8', v: 32 }, { n: 'space/10', v: 40 }, { n: 'space/14', v: 56 }, { n: 'space/18', v: 72 }
+      ],
+      radii: [
+        { n: 'xs', v: 4, use: 'Strip frames' }, { n: 's', v: 10, use: 'Sliver frame, cells' }, { n: 'm', v: 16, use: 'Thumbs, posters' }, { n: 'l', v: 24, use: 'Cards, preview' },
+        { n: 'xl', v: 32, use: 'Sheets (top)' }, { n: 'pill', v: 999, use: 'Buttons, chips' }, { n: 'icon', v: 45, use: 'App icon (squircle)' }, { n: 'device', v: 52, use: 'Mockup body' }
+      ],
+      curves: [
+        { n: 'ease/standard', v: 'cubic-bezier(0.2, 0, 0, 1)', use: 'Most transitions' },
+        { n: 'ease/emphasized', v: 'cubic-bezier(0.3, 0, 0, 1)', use: 'Sheets, screen pushes' },
+        { n: 'ease/exit', v: 'cubic-bezier(0.4, 0, 1, 1)', use: 'Dismiss, fade out' },
+        { n: 'spring/lock', v: 'stiffness 420 · damping 28', use: 'Sliver lock-in, snap' },
+        { n: 'spring/drop', v: 'stiffness 260 · damping 22', use: 'Clip drops into calendar cell' }
+      ],
+      durations: [
+        { n: 'instant', v: 100, pct: 6, use: 'Press states' },
+        { n: 'quick', v: 160, pct: 10, use: 'Chips, toggles' },
+        { n: 'base', v: 240, pct: 15, use: 'Default transitions' },
+        { n: 'slow', v: 400, pct: 25, use: 'Sheets, glow pulse' },
+        { n: 'drop', v: 650, pct: 40, use: 'Save → calendar flight' },
+        { n: 'cinematic', v: 1600, pct: 100, use: 'Premiere: fade-in + title hold' }
+      ],
+      haptics: [
+        { n: 'Tick', api: 'UISelectionFeedback · CLOCK_TICK', use: 'Strip drag, every 0.25s; slider steps' },
+        { n: 'Snap', api: 'Impact light · CONTEXT_CLICK', use: 'Frame snaps to a suggestion' },
+        { n: 'Lock-in', api: 'Impact medium · CONFIRM', use: 'Release frame; Save clip' },
+        { n: 'Shutter', api: 'Impact rigid · VIRTUAL_KEY', use: 'Record start / stop' },
+        { n: 'Done', api: 'Notification success · CONFIRM', use: 'Saved, film ready, restore done' },
+        { n: 'Fail', api: 'Notification warning · REJECT', use: 'Export / backup failed (never streaks)' }
+      ],
+      looks: [
+        { n: 'NOIR', bg: 'linear-gradient(160deg, #6B6B6B, #0E0E0E)', border: '2px solid #FF8A3D', color: '#EDEDE8' },
+        { n: 'EMBER', bg: 'linear-gradient(160deg, #A0643A, #1A0E07)', border: '1px solid #26262A', color: '#8E8E88' },
+        { n: 'STEEL', bg: 'linear-gradient(160deg, #56677A, #0B1016)', border: '1px solid #26262A', color: '#8E8E88' },
+        { n: 'VHS 94', bg: 'linear-gradient(160deg, #7A6A86, #1A1220)', border: '1px solid #26262A', color: '#8E8E88' },
+        { n: 'GHOST', bg: 'linear-gradient(160deg, #9A9A94, #3A3A38)', border: '1px solid #26262A', color: '#8E8E88' }
+      ],
+      coachStrip: ['#2A2A2F', '#33333A', '#3F3F46', '#4A4A52', '#55555E', '#4A4A52', '#3F3F46', '#33333A', '#2A2A2F', '#26262B', '#2E2E34', '#383840', '#2E2E34', '#232327'],
+      miniStrip: ['#26262B', '#30303A', '#3E3E46', '#4C4C55', '#56565F', '#45454D', '#34343B', '#28282D'],
+      frames: [
+        { n: 'IDLE · AUTO-PICKED', d: 'Glow/m, ✦ badge above. Dimmed strip outside the window (66%).', left: '38%', border: '2.5px solid #FF8A3D', glow: '0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55', scale: 1, time: '00:04.20', tc: '#8E8E88' },
+        { n: 'DRAGGING', d: 'Scale 1.04, glow intensifies, timecode turns ember, tick haptics.', left: '38%', border: '2.5px solid #FFD2AE', glow: '0 0 18px #FF8A3D, 0 0 48px #FF8A3D88', scale: 1.04, time: '00:05.75', tc: '#FF8A3D' },
+        { n: 'LOCKED IN', d: 'On release: one 400ms glow pulse + medium haptic. Badge → CUSTOM.', left: '38%', border: '3px solid #FF8A3D', glow: '0 0 0 4px #FF8A3D33, 0 0 24px #FF8A3D, 0 0 60px #FF8A3D88', scale: 1, time: '00:05.75', tc: '#EDEDE8' },
+        { n: 'NEAR SUGGESTION', d: 'Within ±80ms of a marker the frame magnetises with a snap haptic.', left: '38%', border: '2.5px dashed #FF8A3D', glow: '0 0 10px #FF8A3D66', scale: 1, time: '✦ 00:09.10', tc: '#FF8A3D' },
+        { n: 'CLIP < 1S', d: 'Frame covers whole clip, hairline only; output loops or slows to fill 1.0s.', left: '38%', border: '1.5px solid #8E8E88', glow: 'none', scale: 1, time: '00:00.64', tc: '#8E8E88' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

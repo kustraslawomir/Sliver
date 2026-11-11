@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Filters editor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes slLoop{from{transform:scale(1)}to{transform:scale(1.035)}}
+@keyframes slBar{from{width:0%}to{width:100%}}
+.sl-loop{animation:slLoop 1s linear infinite;transform-origin:50% 60%}
+.sl-bar{animation:slBar 1s linear infinite}
+@media (prefers-reduced-motion: reduce){.sl-loop,.sl-bar{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
+
+  <!-- header -->
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="Trim.dc.html" aria-label="Back to trim" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #B9B9B3">LOOKS · DAY 142</span>
+    <a href="Trim.dc.html" style="height: 44px; padding: 0 8px; display: flex; align-items: center; color: #EDEDE8; text-decoration: none; font-size: 15px; font-weight: 500">Done</a>
+  </div>
+
+  <!-- preview / hold to compare -->
+  <button onPointerDown="{{cmpOn}}" onPointerUp="{{cmpOff}}" onPointerLeave="{{cmpOff}}" onPointerCancel="{{cmpOff}}" aria-label="Hold to compare with the original" style="position: absolute; left: 20px; top: 104px; width: 350px; height: 360px; padding: 0; border: 1px solid #1A1A1D; border-radius: 24px; overflow: hidden; background: #050505; touch-action: none; cursor: pointer">
+    <div class="sl-loop" style="position: absolute; inset: 0">
+      <dc-import name="Frame" look="{{look}}" intensity="{{intensity}}" adj="{{adj}}" compare="{{cmp}}" frame-w="{{ 350 }}" frame-h="{{ 360 }}" radius="{{ 0 }}" hint-size="350px,360px"></dc-import>
+    </div>
+    <span style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #EDEDE8; background: #050505CC; border: 1px solid #3A3A40; border-radius: 999px; padding: 7px 11px">{{badge}}</span>
+    <sc-if value="{{cmp}}" hint-placeholder-val="{{ false }}">
+      <span style="position: absolute; right: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #0A0A0B; background: #EDEDE8; border-radius: 999px; padding: 7px 11px">ORIGINAL</span>
+    </sc-if>
+    <span style="position: absolute; left: 0; right: 0; bottom: 24px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #EDEDE8B3">HOLD TO COMPARE</span>
+    <div style="position: absolute; left: 14px; right: 14px; bottom: 12px; height: 2px; background: #FFFFFF26"><div class="sl-bar" style="height: 2px; background: #EDEDE8"></div></div>
+  </button>
+
+  <!-- tabs -->
+  <div style="position: absolute; left: 20px; right: 20px; top: 476px; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em">
+    <button onClick="{{tabLooks}}" style="flex: 1 1 0; height: 34px; border-radius: 17px; border: 0; background: {{looksBg}}; color: {{looksColor}}; font: inherit; letter-spacing: inherit">LOOKS</button>
+    <button onClick="{{tabAdjust}}" style="flex: 1 1 0; height: 34px; border-radius: 17px; border: 0; background: {{adjBg}}; color: {{adjColor}}; font: inherit; letter-spacing: inherit">ADJUST{{adjCount}}</button>
+  </div>
+
+  <!-- LOOKS tab -->
+  <sc-if value="{{isLooks}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 530px; height: 100px; display: flex; gap: 10px; overflow-x: auto; padding: 0 20px; box-sizing: border-box; scrollbar-width: none">
+      <sc-for list="{{presets}}" as="p" hint-placeholder-count="9">
+        <button onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="flex: 0 0 auto; width: 64px; padding: 0; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 6px">
+          <div style="width: 64px; height: 76px; box-sizing: border-box; border-radius: 12px; border: {{p.border}}; box-shadow: {{p.glow}}; display: flex; align-items: center; justify-content: center; overflow: hidden">
+            <dc-import name="Frame" look="{{p.i}}" intensity="{{p.int}}" adj="{{p.adj}}" frame-w="{{ 60 }}" frame-h="{{ 72 }}" radius="{{ 9 }}" hint-size="60px,72px"></dc-import>
+          </div>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: {{p.color}}; white-space: nowrap">{{p.n}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{hasLook}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 20px; right: 20px; top: 640px; display: flex; justify-content: space-between; align-items: baseline">
+        <span style="font-size: 15px">Intensity · {{lookName}}</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #FF8A3D">{{intensity}}%</span>
+      </div>
+      <input type="range" min="0" max="100" step="1" value="{{intensity}}" onChange="{{onIntensity}}" aria-label="Look intensity" style="position: absolute; left: 20px; top: 664px; width: 350px; height: 28px; margin: 0; accent-color: #FF8A3D">
+    </sc-if>
+    <sc-if value="{{noLook}}" hint-placeholder-val="{{ false }}">
+      <span style="position: absolute; left: 20px; right: 20px; top: 652px; font-size: 14px; color: #8E8E88">Original — no look applied. Adjustments still work.</span>
+    </sc-if>
+  </sc-if>
+
+  <!-- ADJUST tab -->
+  <sc-if value="{{isAdjust}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; right: 0; top: 530px; height: 40px; display: flex; gap: 6px; overflow-x: auto; padding: 0 20px; box-sizing: border-box; scrollbar-width: none">
+      <sc-for list="{{tools}}" as="t" hint-placeholder-count="9">
+        <button onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="flex: 0 0 auto; height: 36px; padding: 0 12px; border-radius: 18px; border: {{t.border}}; background: {{t.bg}}; color: {{t.color}}; font-family: Geist, sans-serif; font-size: 13px; display: flex; align-items: center; gap: 6px">{{t.n}}<span style="width: 5px; height: 5px; border-radius: 3px; background: {{t.dot}}"></span></button>
+      </sc-for>
+    </div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 584px; display: flex; justify-content: space-between; align-items: baseline">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{toolName}}</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 16px; color: {{toolValColor}}">{{toolValLabel}}</span>
+    </div>
+    <input type="range" min="{{toolMin}}" max="{{toolMax}}" step="1" value="{{toolVal}}" onChange="{{onTool}}" onDoubleClick="{{resetTool}}" aria-label="{{toolName}}" style="position: absolute; left: 20px; top: 626px; width: 350px; height: 28px; margin: 0; accent-color: #FF8A3D">
+    <div style="position: absolute; left: 20px; right: 20px; top: 660px; height: 36px; display: flex; justify-content: space-between; align-items: center">
+      <span style="font-size: 12px; color: #8E8E88">{{toolHint}}</span>
+      <sc-if value="{{toolChanged}}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{resetTool}}" style="height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid #26262A; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 13px">Reset</button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- bottom -->
+  <a href="Trim.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Apply filter</a>
+  <div style="position: absolute; left: 20px; right: 20px; top: 778px; height: 44px; display: flex; justify-content: space-between; align-items: center">
+    <button onClick="{{resetAll}}" style="height: 44px; padding: 0 4px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Reset all</button>
+    <button onClick="{{toggleDef}}" role="switch" aria-checked="{{defStr}}" style="height: 44px; padding: 0; border: 0; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px; display: flex; align-items: center; gap: 10px">
+      {{defLabel}}
+      <span style="position: relative; width: 44px; height: 26px; border-radius: 13px; background: {{trackBg}}; transition: background 160ms ease">
+        <span style="position: absolute; top: 2px; left: {{knobX}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; transition: left 160ms cubic-bezier(0.2, 0, 0, 1)"></span>
+      </span>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startTab":{"editor":"enum","options":["looks","adjust"],"default":"looks"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const adjust = props && props.startTab === 'adjust';
+    this.state = {
+      look: 1,
+      ints: [100, 80, 80, 80, 80, 80, 80, 80, 80],
+      adj: adjust ? { sharp: 32, contrast: -12, shadows: 0, highlights: 0, grain: 20, vig: 0, fade: 0, temp: 0, sat: 0 } : { sharp: 0, contrast: 0, shadows: 0, highlights: 0, grain: 0, vig: 0, fade: 0, temp: 0, sat: 0 },
+      tab: adjust ? 'adjust' : 'looks',
+      tool: 'sharp', cmp: false, def: false
+    };
+  }
+  renderVals() {
+    const st = this.state;
+    const names = ['Original', 'Noir', 'Blackout', 'Night Neon', 'Cold Steel', 'Ember', 'VHS 94', 'Hard Light', 'Ghost'];
+    const T = [
+      ['sharp', 'Sharpness', -100, 100, 'Featured · negative softens like a diffusion filter'],
+      ['contrast', 'Contrast', -100, 100, 'Double-tap the slider to reset'],
+      ['grain', 'Grain', 0, 100, 'Animated in playback, 24 fps'],
+      ['vig', 'Vignette', 0, 100, 'Darkens the edges'],
+      ['fade', 'Fade', 0, 100, 'Raises the blacks — matte film'],
+      ['sat', 'Saturation', -100, 100, '−100 is black & white']
+    ];
+    const tool = T.find((t) => t[0] === st.tool) || T[0];
+    const tv = st.adj[tool[0]] || 0;
+    const fmt = (v, t) => (t[2] < 0 && v > 0 ? '+' : '') + v;
+    const nAdj = T.filter((t) => st.adj[t[0]]).length;
+    const setAdj = (key, val) => { const a = Object.assign({}, st.adj); a[key] = val; this.setState({ adj: a }); };
+    const intensity = st.ints[st.look];
+    const zero = {};
+    let badge = names[st.look].toUpperCase() + (st.look ? ' · ' + intensity + '%' : '');
+    if (st.adj.sharp) badge += ' · SHARP ' + fmt(st.adj.sharp, T[0]);
+    return {
+      look: st.look, intensity, adj: st.adj, cmp: st.cmp,
+      badge,
+      cmpOn: () => this.setState({ cmp: true }),
+      cmpOff: () => { if (this.state.cmp) this.setState({ cmp: false }); },
+      isLooks: st.tab === 'looks', isAdjust: st.tab === 'adjust',
+      tabLooks: () => this.setState({ tab: 'looks' }), tabAdjust: () => this.setState({ tab: 'adjust' }),
+      looksBg: st.tab === 'looks' ? '#EDEDE8' : 'transparent', looksColor: st.tab === 'looks' ? '#0A0A0B' : '#8E8E88',
+      adjBg: st.tab === 'adjust' ? '#EDEDE8' : 'transparent', adjColor: st.tab === 'adjust' ? '#0A0A0B' : '#8E8E88',
+      adjCount: nAdj ? ' · ' + nAdj : '',
+      presets: names.map((n, i) => ({
+        i, n: n.toUpperCase(), int: st.ints[i], adj: zero, on: String(i === st.look),
+        pick: () => this.setState({ look: i }),
+        border: i === st.look ? '2px solid #FF8A3D' : '1px solid #26262A',
+        glow: i === st.look ? '0 0 14px #FF8A3D55' : 'none',
+        color: i === st.look ? '#FF8A3D' : '#8E8E88'
+      })),
+      hasLook: st.look !== 0, noLook: st.look === 0,
+      lookName: names[st.look],
+      onIntensity: (e) => { const ints = st.ints.slice(); ints[st.look] = Number(e.target.value); this.setState({ ints }); },
+      tools: T.map((t) => ({
+        n: t[1], on: String(t[0] === st.tool),
+        pick: () => this.setState({ tool: t[0] }),
+        border: t[0] === st.tool ? '1px solid #EDEDE8' : (t[0] === 'sharp' ? '1px solid #FF8A3D55' : '1px solid #26262A'),
+        bg: t[0] === st.tool ? '#EDEDE8' : 'transparent',
+        color: t[0] === st.tool ? '#0A0A0B' : '#B9B9B3',
+        dot: st.adj[t[0]] ? '#FF8A3D' : 'transparent'
+      })),
+      toolName: tool[1], toolMin: tool[2], toolMax: tool[3], toolVal: tv, toolHint: tool[4],
+      toolValLabel: fmt(tv, tool), toolValColor: tv ? '#FF8A3D' : '#8E8E88',
+      toolChanged: tv !== 0,
+      onTool: (e) => setAdj(tool[0], Number(e.target.value)),
+      resetTool: () => setAdj(tool[0], 0),
+      resetAll: () => this.setState({ adj: { sharp: 0, contrast: 0, shadows: 0, highlights: 0, grain: 0, vig: 0, fade: 0, temp: 0, sat: 0 }, ints: [100, 80, 80, 80, 80, 80, 80, 80, 80] }),
+      toggleDef: () => this.setState({ def: !st.def }),
+      defStr: String(st.def),
+      defLabel: st.def ? 'Default for new clips' : 'Set as default look',
+      trackBg: st.def ? '#FF8A3D' : '#3A3A40',
+      knobX: st.def ? 20 : 2
+    };
+  }
+}
+</script>
+</body>
+</html>

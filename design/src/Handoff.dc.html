@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER developer handoff</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}</style>
+</helmet>
+<div style="width: 1440px; min-height: 4400px; box-sizing: border-box; padding: 64px 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 36px">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">SLIVER / STAGE 9 · DEVELOPER HANDOFF · V1</span>
+      <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1; letter-spacing: -0.02em">How to build it.</h1>
+    </div>
+    <p style="margin: 0; max-width: 480px; font-size: 15px; line-height: 1.5; color: #B9B9B3">Native iOS (Swift/SwiftUI) and Android (Kotlin/Compose). Local-first: the app is complete offline; Google is only for backup. Tokens and components: see the Design system page.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start">
+    <sc-for list="{{sections}}" as="s" hint-placeholder-count="14">
+      <div style="box-sizing: border-box; border-radius: 20px; border: 1px solid #1F1F22; background: #0D0D0F; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">{{s.no}}</span>
+          <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{s.t}}</span>
+        </div>
+        <sc-for list="{{s.lines}}" as="l" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; padding-top: 10px; border-top: 1px solid #1A1A1D">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.04em; line-height: 1.5; color: #8E8E88">{{l.k}}</span>
+            <span style="font-size: 13px; line-height: 1.55; color: #D4D4CE">{{l.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = [
+      ['01', 'Tokens', [
+        ['Colors', 'bg/void #050505 · bg/base #0A0A0B · surface 1/2/3 #111113 / #18181B / #202024 · line #26262A / #3A3A40 · text #EDEDE8 / #B9B9B3 / #8E8E88 / #55555A · accent #FF8A3D · accent/core #FFD2AE · success #8FC7A4 · warning #E8C27A · error #E5675F.'],
+        ['Type', 'Instrument Serif (display 64/44/30), Geist (title 22/600, body 17/26, small 15, caption 13), Geist Mono (15 and 12 caps +12% tracking). All OFL — bundle the fonts. Map body to Dynamic Type “body” / 17sp.'],
+        ['Space & radii', '4pt grid, gutter 20. Radii 4 / 10 (sliver frame, cells) / 16 / 24 / 32 (sheets) / pill. Elevation = surface step + 1px hairline, no shadows except sheets.'],
+        ['Rule', 'Ember is a fill only on the primary CTA and the record dot. Everywhere else it is a 1–2.5px line or a glow.']
+      ]],
+      ['02', 'Data model (local DB)', [
+        ['Day', 'date (local YYYY-MM-DD, PK) · file days/{date}.mp4 · thumb · proxy? · source camera|gallery|photo|backfill · look {preset, intensity, sharp, contrast, grain, vig, fade, sat} · motion still|zoom (photo) · keepAudio · speed 1|0.5 · createdAt · driveFileId? · backupState.'],
+        ['Film', 'id · name · format cinema|story · range {from, to} or live · audio original|music|mix · track · cut cut|fade · dateOn · look preset|none · mismatch center|blur · lastRenderPath · renderedAt.'],
+        ['Settings', 'defaultLook · newFilmFormat · dateStamp (true) · saveFullRecordings (false) · reminder {mode fixed|random|off, time, window, days[7]} · notif {late:false, film, backup, memory} · camera {mode, look, lens, flash, grid, activeFilmId} — the self-timer is never persisted.'],
+        ['Storage', 'iOS: SwiftData / Core Data in the app container. Android: Room. Media in app files dir, never in a public folder.']
+      ]],
+      ['03', 'File pipeline', [
+        ['In-app record', 'Record to tmp/rec_{ts}.mov in the sandbox (never the camera roll) → Trim & Pick → export exactly 1.000 s at 1080p → days/{date}.mp4 → thumb (JPEG 320px) → delete tmp after the 6 s undo window. If saveFullRecordings is on, copy tmp to Photos first.'],
+        ['Gallery import', 'Read-only (PHAsset / MediaStore URI). Export the chosen second to a new days/ file. Never modify or delete the original.'],
+        ['Photo → 1 s', 'Render 30 frames from the still: Still, or Slow zoom (scale 1.00 → 1.08, ease-in-out). New file; photo untouched.'],
+        ['Edge clips', '< 1 s: Slow to fit (time-stretch), Loop, or Hold last frame. Slow-mo 0.5×: take 0.5 s of source, stretch to 1.0 s; audio muted.'],
+        ['Replace / remove', 'Write new file, keep old until undo expires, then delete. On Drive: trash the old file (Drive empties trash after 30 days).'],
+        ['Cleanup', 'On launch delete tmp/* older than 24 h (crash leftovers).'],
+        ['Encode', 'Trim with a re-encode, not passthrough (passthrough snaps to keyframes). iOS AVAssetExportSession with timeRange; Android Media3 Transformer + ClippingConfiguration. H.264 or HEVC, 30 fps, ~1–2 MB per second.']
+      ]],
+      ['04', 'Auto-pick (v1 heuristic)', [
+        ['Method', 'Sample frames at 10 fps at ~160px (AVAssetImageGenerator / MediaMetadataRetriever.getScaledFrameAtTime). Mean absolute difference between consecutive frames; pick the 1 s window with the highest sum. Ties → closer to the middle.'],
+        ['Budget', 'Run async while the Trim screen animates in; under 300 ms for a 15 s clip. Long videos: sample at 2 fps first, refine around the best region.'],
+        ['UX', 'Badge “✦ Auto-picked”; any drag switches to “Custom”. Haptic tick every 0.25 s of strip travel, medium impact on release.']
+      ]],
+      ['05', 'Looks & rendering', [
+        ['Presets', 'Each preset = a 33³ 3D LUT (.cube) + a few parameter values. Intensity = mix(original, graded, k). Ship LUTs as assets so both platforms share them.'],
+        ['Sliders', 'Sharpness (unsharp mask; negative = soft blur), Contrast, Grain (noise texture, animated only in playback), Vignette, Fade (lift blacks), Saturation.'],
+        ['iOS', 'CIColorCubeWithColorSpace + CIUnsharpMask + CIColorControls + CIVignette. Camera preview: AVCaptureVideoDataOutput → Core Image → MTKView. Playback: AVVideoComposition(applyingCIFiltersWithHandler).'],
+        ['Android', 'Media3 effects: SingleColorLut, Contrast, HslAdjustment, plus a small custom GlShaderProgram for sharpen / grain / vignette / fade. Camera preview: CameraX with camera-media3-effect or a custom SurfaceProcessor.'],
+        ['Non-destructive', 'Day files are never graded. Look and date stamp are applied at display time and burned in only on export.']
+      ]],
+      ['06', 'Films & export', [
+        ['Preview', 'Play day files (or 540p proxies once films get long) with live filters. Proxies are optional: add them when year films start to stutter — the data model does not change.'],
+        ['Render iOS', 'AVMutableComposition (one segment per day) + AVMutableVideoComposition with the CI filter chain; date text via AVVideoCompositionCoreAnimationTool; AVMutableAudioMix for volumes.'],
+        ['Render Android', 'Media3 Transformer Composition: a video sequence of EditedMediaItems (effects + TextOverlay for the date) and a music sequence mixed in.'],
+        ['Rules', 'Cut = concat. Fade = 120 ms dip to black at each boundary. Mix = original 100% + music at 30%. Music-only mutes clips. Format mismatch: centered crop (default) or blurred fill. 2 s end title card. Output 1080p30 H.264 + AAC for YouTube / IG compatibility.'],
+        ['Long renders', 'Render in monthly chunks then concat — makes it resumable. Android: foreground service (type mediaProcessing) via WorkManager. iOS 26+: BGContinuedProcessingTask; older: foreground with progress, resume from the last chunk.'],
+        ['After export', 'Save under films/{id}.mp4 → premiere → in-app player (AVPlayer / ExoPlayer) → Save to Photos or system share sheet (YouTube, Instagram, TikTok…). No direct YouTube API in v1.']
+      ]],
+      ['07', 'Camera', [
+        ['Stack', 'iOS AVCaptureSession + AVCaptureMovieFileOutput (1080p30). Android CameraX VideoCapture with Recorder to a file in cache.'],
+        ['Controls', 'Tap = start/stop, long-press > 300 ms = record while held. Timer, flash, grid, flip; PHOTO / VIDEO mode. Persist every setting except the timer.'],
+        ['Orientation', 'UI stays portrait-locked; icons rotate with device orientation (CoreMotion / OrientationEventListener). For a Cinema film held upright, dim outside a 16:9 band and show “Turn sideways” for 3.5 s. Nothing blocks recording.'],
+        ['Speed', 'Start the capture session before the first frame of UI is drawn; target < 2 s from icon tap to recording-ready.']
+      ]],
+      ['08', 'Account & Drive backup', [
+        ['Sign-in', 'Google only for v1. iOS GoogleSignIn SDK; Android Credential Manager for sign-in + AuthorizationClient for the Drive scope. If iOS review insists (guideline 4.8), add Sign in with Apple as a second button.'],
+        ['Scope', 'drive.file only — the app sees just the files it created. Non-sensitive scope: no Google security assessment needed. Visible folder “SLIVER” in My Drive (chosen over appDataFolder for trust).'],
+        ['Files', 'One file per day: {date}.mp4 with appProperties {sliverDate, look…}, plus manifest.json (settings + films). Restore = list files in the folder, download, rebuild thumbs, re-render films lazily.'],
+        ['Upload', 'Resumable upload sessions. iOS: background URLSession + BGProcessingTask. Android: WorkManager (NetworkType.UNMETERED when Wi-Fi only), exponential backoff.'],
+        ['Errors → states', '403 storageQuotaExceeded → “Drive is full”. 401 / invalid_grant → “Access turned off · Reconnect”. No network → offline. Other errors → retry in 15 min; notify only after 24 h of failures.'],
+        ['Firebase?', 'Option A (brief): Firebase Auth anonymous → linkWithCredential(Google), Firestore with metadata only. Option B (simpler, recommended): skip Firebase — Google sign-in + manifest.json in Drive is enough for backup and restore, and “delete account” becomes revoke token + optional folder delete.']
+      ]],
+      ['09', 'Fill the past', [
+        ['Query', 'iOS PHAsset.fetchAssets sorted by creationDate. Android MediaStore DATE_TAKEN (fallback DATE_ADDED). Group by local calendar day of the capture.'],
+        ['Pick', 'Per empty day: longest video → auto-pick second; else first photo → Slow zoom. Never touch days that already have a second.'],
+        ['Access', 'Needs full library access. Limited: iOS .limited + presentLimitedLibraryPicker; Android 14+ READ_MEDIA_VISUAL_USER_SELECTED. Opt-in tool only — never suggested by the app.']
+      ]],
+      ['10', 'Notifications (all local)', [
+        ['iOS', 'UNUserNotificationCenter. Fixed reminder = one repeating UNCalendarNotificationTrigger per chosen weekday. Random = next 7 days scheduled individually, rescheduled on every app open (stay under the 64-pending limit).'],
+        ['Android', 'POST_NOTIFICATIONS on 13+. Exact alarms need SCHEDULE_EXACT_ALARM (not granted by default on 14+): use it if granted, else setWindow ±10 min. Channels: Reminders, Films, Backup, Memories.'],
+        ['Rules', 'Saving today’s second cancels today’s reminder and “Running late” (21:00, off by default). Film ready: on render complete. Backup: after 24 h failing, max once a day. On this day: 1 month / 100 days / 1 year ago, max once a week.']
+      ]],
+      ['11', 'Widgets', [
+        ['iOS', 'WidgetKit small + medium + lock-screen accessoryCircular / accessoryRectangular. ControlWidget (iOS 18) opens the camera. Shared data through an App Group: todayCaptured, todayThumb, week[7]. Reload timelines on every save.'],
+        ['Android', 'Glance AppWidget 2×2 + TileService Quick Settings tile (startActivityAndCollapse with a PendingIntent on API 34+).'],
+        ['Later', 'Capture from the lock screen without unlocking (iOS LockedCameraCapture) — separate extension, out of v1.']
+      ]],
+      ['12', 'Motion specs', [
+        ['Curves', 'standard (0.2, 0, 0, 1) · emphasized (0.3, 0, 0, 1) · exit (0.4, 0, 1, 1). Springs: lock-in 420 / 28, drop 260 / 22.'],
+        ['Key moments', 'Sliver lock-in: 400 ms glow pulse + medium haptic. Save: clip flies into today’s cell, 650 ms emphasized. Sheets 400 ms. Premiere: slit opens 1000 ms ease-out cubic, title fades in 600 ms from 1.4 s. Splash: 1.4 s, then 240 ms cross-fade to the camera.'],
+        ['Reduced motion', 'Fly-ins become cross-fades, glow pulses become a static brighten, premiere and splash jump to their final frame. Haptics stay.']
+      ]],
+      ['13', 'Permissions & accessibility', [
+        ['Order', 'Always a friendly pre-prompt first, then the system dialog: camera + mic, photos, notifications. Every denied state has a designed screen with a path to Settings.'],
+        ['Contrast', 'All text tokens pass 4.5:1 on bg/base except text/disabled (2.6:1, never used for information).'],
+        ['VoiceOver / TalkBack', 'Calendar cells read “Tuesday 10 November, has a second”. The trim strip is an adjustable control (±0.1 s per step). Every icon button has a label.']
+      ]],
+      ['14', 'Build order (suggested)', [
+        ['1', 'Camera → record to temp → fixed 1 s trim → save day file → month grid.'],
+        ['2', 'Gallery import, Photo → 1 s, Day detail, Replace / Remove with undo.'],
+        ['3', 'Looks (LUTs + sliders) in preview and day files.'],
+        ['4', 'Film builder + export + premiere + player + share.'],
+        ['5', 'Local notifications, widgets, settings persistence.'],
+        ['6', 'Google sign-in + Drive backup / restore, then Fill the past.']
+      ]]
+    ];
+    return { sections: S.map((s) => ({ no: s[0], t: s[1], lines: s[2].map((l) => ({ k: l[0], v: l[1] })) })) };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What changed</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}</style>
+</helmet>
+<div style="width: 1440px; height: 5600px; box-sizing: border-box; padding: 72px 72px 0; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 60px; padding-bottom: 56px">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">SLIVER / v1.1 + v1.2 / WHAT CHANGED</span>
+      <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 64px; line-height: 1.05; letter-spacing: -0.02em">Same identity.<br>Fewer mistakes.</h1>
+    </div>
+    <p style="margin: 0; max-width: 470px; font-size: 16px; line-height: 1.6; color: #B9B9B3">Left: your build, as it runs on the phone. Right: the fix. Fonts, ember, the slit and the dark stay exactly as they were. Nothing borrowed from Material You or Liquid Glass — Android's own UI only where the platform requires it: back gesture, edge-to-edge, photo picker, notifications.</p>
+  </div>
+
+  <!-- 01 camera -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">01 · CAMERA</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Controls where the thumb is</h2>
+      <sc-for list="{{b1}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption><img src="/_blob/6cbfd75c303fb011ef36c6e6213a20e7" alt="Camera before: text buttons GRID TIMER FLASH FLIP at the top" style="width: 234px; height: 507px; object-fit: cover; border-radius: 28px; border: 1px solid #26262A"></figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="CameraV2" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 02 after save -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">02 · AFTER SAVING</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Save shows where the clip landed</h2>
+      <sc-for list="{{b2}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption><img src="/_blob/ab165706e66ed60837edb08162480073" alt="Camera before: large Today's second is in card with Replace over the viewfinder" style="width: 234px; height: 507px; object-fit: cover; border-radius: 28px; border: 1px solid #26262A"></figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="ProjectHub" just-saved="{{ true }}" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 03 edit clip -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">03 · EDIT CLIP</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Sideways stays sideways</h2>
+      <sc-for list="{{b3}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption><img src="/_blob/359d2f713f190c76b8bab24450261e34" alt="Edit screen before: sideways video squeezed into a portrait frame" style="width: 234px; height: 507px; object-fit: cover; border-radius: 28px; border: 1px solid #26262A"></figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="EditClipV2" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 04 loading -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">04 · BIG FILES</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Never a black box</h2>
+      <sc-for list="{{b4}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption><img src="/_blob/b4d33a9b8ba4ec52a3f23a9097610407" alt="Edit screen before: empty dark preview and a disabled button while a large file loads" style="width: 234px; height: 507px; object-fit: cover; border-radius: 28px; border: 1px solid #26262A"></figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="EditClipV2" variant="loading" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 05 media -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">05 · ADDING MEDIA</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Android's picker, not ours</h2>
+      <sc-for list="{{b5}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption><img src="/_blob/03dea1c1aadd575ecfc277684e86b195" alt="Gallery before: filter chips with Photos wrapped one letter per line" style="width: 234px; height: 507px; object-fit: cover; border-radius: 28px; border: 1px solid #26262A"></figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="PickerV2" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 06 projects -->
+  <section style="display: grid; grid-template-columns: 500px 234px 56px 234px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">06 · PROJECTS</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">See, switch, create</h2>
+      <sc-for list="{{b6}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · YOUR BUILD</figcaption>
+      <div style="width: 234px; height: 507px; box-sizing: border-box; border-radius: 28px; border: 1px dashed #3A3A40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center">
+        <span style="height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid #3A3A40; display: flex; align-items: center; font-size: 12px; color: #B9B9B3">FOR: NEW FILM · CINEMA 16:9 v</span>
+        <span style="font-size: 13px; line-height: 1.5; color: #8E8E88">The only trace of projects. No list, no way to create or switch.</span>
+      </div>
+    </figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER</figcaption><div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="ProjectsV2" hint-size="390px,844px"></dc-import></div></div></figure>
+  </section>
+
+  <!-- 07 onboarding -->
+  <section style="display: flex; flex-direction: column; gap: 28px; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: grid; grid-template-columns: 500px minmax(0, 1fr); gap: 36px; align-items: end">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">07 · ONBOARDING</span>
+        <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Seven slides become three</h2>
+        <sc-for list="{{b7}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · 7 STEPS</span>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap">
+          <sc-for list="{{oldSteps}}" as="o" hint-placeholder-count="7"><span style="height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid #26262A; display: flex; align-items: center; font-size: 12px; color: #8E8E88; text-decoration: line-through">{{o}}</span></sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 28px; align-items: flex-start">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D; padding-top: 4px; width: 60px">AFTER</span>
+      <div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="OnbV2" step="{{ 0 }}" hint-size="390px,844px"></dc-import></div></div>
+      <div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="OnbV2" step="{{ 1 }}" hint-size="390px,844px"></dc-import></div></div>
+      <div style="width: 234px; height: 507px; overflow: hidden; border-radius: 28px; border: 1px solid #26262A"><div style="width: 390px; height: 844px; transform: scale(0.6); transform-origin: 0 0"><dc-import name="OnbV2" step="{{ 2 }}" hint-size="390px,844px"></dc-import></div></div>
+    </div>
+  </section>
+
+  <!-- 08 long work -->
+  <section style="display: grid; grid-template-columns: 500px 360px 56px 360px; gap: 36px; align-items: center; padding: 48px 0; border-top: 1px solid #26262A">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #FF8A3D">08 · LONG WORK · v1.2</span>
+      <h2 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1; letter-spacing: -0.02em">Progress you can read</h2>
+      <sc-for list="{{b8}}" as="t" hint-placeholder-count="3"><div style="display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: #D4D4CE"><span style="flex: 0 0 2px; height: 20px; margin-top: 2px; background: #FF8A3D"></span><span>{{t}}</span></div></sc-for>
+    </div>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8E8E88">BEFORE · PLAIN PROGRESS</figcaption>
+      <div style="box-sizing: border-box; border-radius: 24px; background: #1E1E22; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; color: #EDEDE8AA">SLIVER · now</span>
+        <span style="font-size: 15px; font-weight: 600">Rendering…</span>
+        <div style="height: 4px; border-radius: 2px; background: #3A3A40"><div style="width: 57%; height: 4px; border-radius: 2px; background: #EDEDE8"></div></div>
+      </div>
+    </figure>
+    <span aria-hidden="true" style="font-size: 28px; color: #55555A; text-align: center">→</span>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 10px"><figcaption style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">AFTER · LIVE UPDATE (ANDROID 16)</figcaption>
+      <div style="box-sizing: border-box; border-radius: 24px; background: #1E1E22; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+        <span style="font-size: 12px; color: #EDEDE8AA">SLIVER · Making “My 2026” · 01:04 left</span>
+        <span style="font-size: 15px; font-weight: 600">September · clip 74 of 129</span>
+        <div style="position: relative; display: flex; gap: 3px; height: 8px; align-items: center">
+          <sc-for list="{{segs}}" as="s" hint-placeholder-count="6"><span style="flex: {{s.w}} 1 0; height: 6px; border-radius: 3px; background: {{s.c}}"></span></sc-for>
+          <span style="position: absolute; left: 56%; top: -6px; width: 3px; height: 20px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 10px; color: #8E8E88"><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span><span>NOV</span></div>
+        <span style="font-size: 13px; font-weight: 600; color: #FF8A3D">Open</span>
+      </div>
+    </figure>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":5600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      b1: ['Grid, Timer, Light and Filter sit right above the shutter, in reach of the right thumb.', 'Add (+) and Switch camera flank the record button. Real icons with small labels — no words in circles.', 'The “FOR: NEW FILM · CINEMA 16:9 v” pill becomes a project chip; a calendar chip opens the project.'],
+      b2: ['Save opens the project: today’s cell pops in with an ember ring. No toast, nothing on top of the UI.', 'Every primary button fires once per tap and shows progress, so the screen never freezes on “Saved”.', 'Changed your mind? Tap today → Replace / Delete. Camera is one tap away (chevron down).'],
+      b3: ['Sideways recordings are saved with the real rotation and shown 16:9 — no portrait box.', 'The preview loop is muted; sound is an icon, not “SND”.', '1× / 0.5× removed. “Use this second” is now “Save clip”.'],
+      b4: ['A skeleton and the slit loader appear in under 100 ms instead of a black box.', 'Real progress with the three steps named, plus file length and size.', 'The strip fills in while loading; the button says “Preparing…”.'],
+      b5: ['Android’s own photo picker replaces our grid: no media permission, Play-policy safe.', 'No chip row to break (“P-h-o-t-o-s”).', 'Motion photos from Pixel and Samsung open as moving clips (v1.2).'],
+      b6: ['Every project shows its shape, clip count and start date.', 'Tap to switch; the camera and calendar follow the active project.', 'New project: a name and one of two shapes. That’s all.'],
+      b7: ['Screen 1 says what the app is in one line. Screen 2 creates a real project. Screen 3 asks for the camera — then you’re recording.', 'Photos and reminders are asked later, at the moment they’re needed.', 'Copy is specific to SLIVER — no generic “capture memories” lines.'],
+      oldSteps: ['One second. Every day.', 'We find the best second', 'Watch your year add up', 'Camera & mic', 'Photo library', 'Reminder', 'Save your seconds'],
+      b8: ['Film render, backup and restore use Android 16 progress notifications.', 'One segment per month, a marker where it is now, time left in words.', 'Older Android gets a normal progress notification — same words.'],
+      segs: [['30', '#FF8A3D'], ['31', '#FF8A3D'], ['31', '#FF8A3D'], ['30', '#FF8A3D88'], ['31', '#3A3A40'], ['10', '#3A3A40']].map((s) => ({ w: s[0], c: s[1] }))
+    };
+  }
+}
+</script>
+</body>
+</html>

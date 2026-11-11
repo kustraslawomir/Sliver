@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notifications board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; padding: 60px 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; gap: 48px">
+
+  <!-- iOS -->
+  <div style="flex: 0 0 390px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">iOS · LOCK SCREEN</span>
+    <div style="position: relative; height: 844px; border-radius: 52px; overflow: hidden; border: 1px solid #26262A; background: radial-gradient(90% 60% at 30% 20%, #3A2A20 0%, #120E0C 60%, #060505 100%)">
+      <div style="position: absolute; left: 0; right: 0; top: 70px; display: flex; flex-direction: column; align-items: center; gap: 2px">
+        <span style="font-size: 17px; font-weight: 500; color: #EDEDE8CC">Wednesday 11 November</span>
+        <span style="font-size: 84px; font-weight: 600; letter-spacing: -0.02em; line-height: 1">21:00</span>
+      </div>
+      <div style="position: absolute; left: 12px; right: 12px; top: 250px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{notifs}}" as="n" hint-placeholder-count="6">
+          <div style="border-radius: 22px; background: #2C2A2AD9; padding: 12px 14px; display: flex; gap: 10px; align-items: center">
+            <div style="position: relative; flex: 0 0 36px; height: 36px; border-radius: 9px; background: #050505; overflow: hidden">
+              <div style="position: absolute; left: 13px; top: 0; width: 28px; height: 36px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, #FF8A3D66, transparent)"></div>
+              <div style="position: absolute; left: 12px; top: 8px; width: 2px; height: 20px; background: #FFD2AE"></div>
+            </div>
+            <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+              <div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">{{n.t}}</span><span style="color: #EDEDE899">{{n.when}}</span></div>
+              <span style="font-size: 13px; line-height: 1.3; color: #EDEDE8E6">{{n.b}}</span>
+            </div>
+            <sc-if value="{{n.thumb}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: 0 0 36px; height: 36px; border-radius: 8px; background: {{n.thumbBg}}"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- Android -->
+  <div style="flex: 0 0 390px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">ANDROID · NOTIFICATION SHADE</span>
+    <div style="position: relative; height: 844px; border-radius: 40px; overflow: hidden; border: 1px solid #26262A; background: #0E0E10">
+      <div style="position: absolute; left: 24px; right: 24px; top: 22px; display: flex; justify-content: space-between; font-size: 13px; color: #EDEDE8CC"><span>21:00</span><span>Wed, 11 Nov</span></div>
+      <div style="position: absolute; left: 12px; right: 12px; top: 70px; display: flex; flex-direction: column; gap: 4px">
+        <sc-for list="{{notifs}}" as="n" hint-placeholder-count="6">
+          <div style="border-radius: {{n.ar}}; background: #1E1E22; padding: 14px 16px; display: flex; gap: 12px">
+            <span style="flex: 0 0 26px; height: 26px; border-radius: 13px; background: #FF8A3D33; display: flex; align-items: center; justify-content: center"><span style="width: 2px; height: 14px; background: #FFD2AE"></span></span>
+            <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+              <span style="font-size: 11px; color: #EDEDE899">SLIVER · {{n.when}}</span>
+              <span style="font-size: 14px; font-weight: 600">{{n.t}}</span>
+              <span style="font-size: 13px; line-height: 1.35; color: #EDEDE8CC">{{n.b}}</span>
+              <sc-if value="{{n.hasAction}}" hint-placeholder-val="{{ false }}">
+                <span style="padding-top: 6px; font-size: 13px; font-weight: 600; color: #FF8A3D">{{n.action}}</span>
+              </sc-if>
+            </div>
+            <sc-if value="{{n.thumb}}" hint-placeholder-val="{{ false }}">
+              <div style="flex: 0 0 40px; height: 40px; border-radius: 10px; background: {{n.thumbBg}}"></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- copy sheet -->
+  <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; padding-top: 30px">
+    <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1; letter-spacing: -0.02em">Short. Warm.<br>Never guilt.</h1>
+    <p style="margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: #B9B9B3">All six are local notifications scheduled on the phone — no push server needed.</p>
+    <sc-for list="{{notifs}}" as="n" hint-placeholder-count="6">
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-top: 1px solid #26262A">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">{{n.type}}</span>
+        <span style="font-size: 14px">{{n.t}} — {{n.b}}</span>
+        <span style="font-size: 12px; color: #8E8E88">{{n.trigger}}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const N = [
+      { type: 'DAILY · FIXED TIME', t: 'Your clip for today', b: 'Whatever’s in front of you counts.', when: '19:30', trigger: 'At the chosen time on chosen days. Skipped if today already has a clip.' },
+      { type: 'DAILY · RANDOM MOMENT', t: 'Right now.', b: 'Whatever you’re looking at — that’s today.', when: '14:12', trigger: 'Once, at a random minute inside the window.', action: 'Open camera' },
+      { type: 'RUNNING LATE', t: 'Still time for today', b: 'Even the ceiling counts.', when: '21:00', trigger: '21:00 if today has no clip yet. Off by default.', action: 'Open camera' },
+      { type: 'FILM READY', t: '“October” is ready', b: '29 clips. One month. Press play.', when: 'now', trigger: 'When a render finishes in the background.', thumb: true, thumbBg: 'linear-gradient(180deg, #34201A, #050505)' },
+      { type: 'BACKUP PROBLEM', t: 'Backup paused', b: 'Your Drive is full. Your clips are safe on this phone.', when: 'now', trigger: 'Only after 24 h of failed attempts, max once a day.', action: 'Manage storage' },
+      { type: 'ON THIS DAY', t: 'One month ago today', b: 'Saturday, 10 October. Want to see it?', when: '10:00', trigger: '1 month / 100 days / 1 year ago. Once a week at most.', thumb: true, thumbBg: 'linear-gradient(160deg, #7A6A50, #0C0B0A)' }
+    ];
+    return {
+      notifs: N.map((n, i) => Object.assign({ thumb: false, thumbBg: 'none', action: '' }, n, {
+        hasAction: !!n.action,
+        ar: i === 0 ? '24px 24px 6px 6px' : (i === N.length - 1 ? '6px 6px 24px 24px' : '6px')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

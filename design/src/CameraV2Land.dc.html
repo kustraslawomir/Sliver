@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Camera v1.1 landscape</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 844px; height: 390px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+  <div style="position: absolute; inset: 0; background: radial-gradient(60% 70% at 40% 35%, #C99A6A 0%, #6B4A30 35%, #241812 70%, #0C0907 100%)">
+    <div style="position: absolute; left: 150px; top: 40px; width: 230px; height: 170px; border-radius: 6px; background: linear-gradient(180deg, #F2D6B0 0%, #B98A5E 100%); opacity: 0.85"></div>
+    <div style="position: absolute; left: 470px; top: 120px; width: 84px; height: 92px; border-radius: 42px / 46px; background: radial-gradient(70% 70% at 30% 40%, #F0C4A0 0%, #C68A62 35%, #4A2C1E 75%, #1E140E 100%)"></div>
+    <div style="position: absolute; left: 430px; top: 200px; width: 170px; height: 200px; border-radius: 85px 85px 0 0; background: #140E0A"></div>
+  </div>
+  <div style="position: absolute; left: 0; top: 0; width: 75px; height: 390px; background: #050505B3"></div>
+  <div style="position: absolute; right: 0; top: 0; width: 76px; height: 390px; background: #050505B3"></div>
+
+  <!-- top-left: project (was top in portrait) -->
+  <div style="position: absolute; left: 75px; right: 76px; top: 0; height: 90px; background: linear-gradient(180deg, #000000A6 0%, #00000000 100%); pointer-events: none"></div>
+  <span style="position: absolute; left: 91px; top: 14px; height: 36px; padding: 0 10px 0 14px; border-radius: 18px; background: #0000008C; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 6px; color: #FFFFFF; font-family: Geist, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap">My 2026<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFFB3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></span>
+  <span style="position: absolute; left: 91px; bottom: 16px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #FFFFFFAA">LAYOUT STAYS · ICONS TURN UPRIGHT</span>
+
+  <!-- tools column (was the row above the shutter) -->
+  <div style="position: absolute; right: 92px; top: 0; height: 390px; display: flex; flex-direction: column; justify-content: center; gap: 12px">
+    <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+      <span style="width: 44px; height: 44px; border-radius: 22px; background: #05050599; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t}}"></path></svg></span>
+    </sc-for>
+  </div>
+
+  <!-- capture column (was the bottom row): flip top, shutter middle, add bottom -->
+  <div style="position: absolute; right: 8px; top: 0; height: 390px; width: 64px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 20px 0; box-sizing: border-box">
+    <span style="width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EDEDE8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></span>
+    <a href="EditClipV2.dc.html" aria-label="Record" style="width: 72px; height: 72px; border-radius: 36px; display: flex; align-items: center; justify-content: center"><span style="width: 64px; height: 64px; border-radius: 32px; background: #FF8A3D; box-shadow: 0 0 14px #FF8A3D88, 0 0 32px #FF8A3D33"></span></a>
+    <span style="position: relative; width: 46px; height: 46px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #EDEDE8; background: linear-gradient(160deg, #6A7A86, #1A2026)"><span style="position: absolute; right: -7px; top: -7px; width: 20px; height: 20px; border-radius: 10px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">+</span></span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { tools: ['M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18', 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M12 9v4l2.5 2.5 M9 2h6', 'M13 3L5 14h6l-1 7 8-11h-6l1-7z', 'M4 7h10 M18 7h2 M4 17h4 M12 17h8 M16 5v4 M10 15v4'] };
+  }
+}
+</script>
+</body>
+</html>

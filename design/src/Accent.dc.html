@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER accent comparison</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#08080A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1160px; box-sizing: border-box; padding: 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 40px">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / STAGE 1 · BRAND / 03 — ACCENT</span>
+      <span>SAME SCREEN · TWO ACCENTS</span>
+    </div>
+    <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1.05; letter-spacing: -0.02em">Ember or Violet.</h1>
+  </div>
+
+  <div style="display: flex; gap: 64px; align-items: flex-start">
+    <sc-for list="{{phones}}" as="p" hint-placeholder-count="2">
+      <div style="display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em">
+          <span style="color: {{p.hex}}">{{p.name}}</span>
+          <span style="color: #8E8E88">{{p.hex}} · {{p.ratio}}</span>
+        </div>
+        <div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 52px; border: 1px solid #26262A; background: #050505; padding: 24px 20px 28px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+
+          <div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #B9B9B3; padding: 8px 4px 0">
+            <span>TUE · 10 NOV</span>
+            <span style="display: flex; align-items: center; gap: 8px"><span style="width: 6px; height: 6px; border-radius: 3px; background: {{p.hex}}; box-shadow: {{p.glowS}}"></span>142 DAYS</span>
+          </div>
+
+          <div style="position: relative; height: 430px; border-radius: 24px; overflow: hidden; background: #111113; border: 1px solid #1A1A1D">
+            <div style="position: absolute; left: 196px; top: 64px; width: 104px; height: 176px; border-radius: 4px; background: linear-gradient(180deg, #4A4A4F 0%, #26262A 100%)"></div>
+            <div style="position: absolute; left: 247px; top: 64px; width: 2px; height: 176px; background: #111113"></div>
+            <div style="position: absolute; left: 0; top: 300px; width: 350px; height: 130px; background: linear-gradient(180deg, #19191C 0%, #0C0C0E 100%)"></div>
+            <div style="position: absolute; left: 60px; top: 236px; width: 70px; height: 64px; border-radius: 35px 35px 6px 6px; background: #08080A"></div>
+            <div style="position: absolute; left: 80px; top: 196px; width: 30px; height: 36px; border-radius: 15px; background: #08080A"></div>
+            <div style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: {{p.hex}}; background: #050505CC; border: 1px solid {{p.line}}; border-radius: 999px; padding: 7px 11px">✦ AUTO-PICKED</div>
+            <button aria-label="Audio on" style="position: absolute; right: 14px; top: 10px; width: 44px; height: 44px; border-radius: 22px; border: 1px solid #26262A; background: #050505CC; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0">
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path></svg>
+            </button>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 0 4px">
+            <span>DAY 142 · 00:01.00</span>
+            <span style="color: #8E8E88">TRY ANOTHER</span>
+          </div>
+
+          <div style="position: relative; height: 84px">
+            <div style="position: absolute; top: 0; left: 0; width: 350px; height: 12px">
+              <div style="position: absolute; left: 62px; top: 3px; width: 5px; height: 5px; border-radius: 3px; background: {{p.hex}}; opacity: 0.55"></div>
+              <div style="position: absolute; left: 172px; top: 3px; width: 5px; height: 5px; border-radius: 3px; background: {{p.hex}}"></div>
+              <div style="position: absolute; left: 286px; top: 3px; width: 5px; height: 5px; border-radius: 3px; background: {{p.hex}}; opacity: 0.55"></div>
+            </div>
+            <div style="position: absolute; top: 20px; left: 0; display: flex; gap: 2px">
+              <sc-for list="{{strip}}" as="f" hint-placeholder-count="12">
+                <div style="width: 27.5px; height: 56px; border-radius: 4px; background: {{f}}"></div>
+              </sc-for>
+            </div>
+            <div style="position: absolute; top: 14px; left: 0; width: 145px; height: 68px; background: #050505AA; border-radius: 6px 0 0 6px"></div>
+            <div style="position: absolute; top: 14px; left: 205px; width: 145px; height: 68px; background: #050505AA; border-radius: 0 6px 6px 0"></div>
+            <div style="position: absolute; top: 12px; left: 143px; width: 64px; height: 72px; box-sizing: border-box; border: 2.5px solid {{p.hex}}; border-radius: 10px; box-shadow: {{p.glow}}"></div>
+          </div>
+
+          <div style="flex-grow: 1"></div>
+
+          <button style="height: 58px; border: 0; border-radius: 29px; background: {{p.hex}}; color: #0A0A0A; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: {{p.ctaGlow}}">Use this second</button>
+          <div style="display: flex; justify-content: space-between; padding: 0 8px">
+            <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Retake</button>
+            <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Filters</button>
+            <button style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Replace day</button>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 28px; padding-top: 30px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #FF8A3D">VERDICT — EMBER</span>
+      <p style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em">Ember is light. Violet is UI.</p>
+      <div style="display: flex; flex-direction: column; gap: 18px; font-size: 15px; line-height: 1.55; color: #B9B9B3">
+        <p style="margin: 0"><strong style="color: #EDEDE8; font-weight: 500">It's the brand motif.</strong> A slit of tungsten light through a door is warm. Ember makes every glow read as real light, not a neon effect.</p>
+        <p style="margin: 0"><strong style="color: #EDEDE8; font-weight: 500">Contrast.</strong> On #0A0A0A ember hits 8.4:1, violet 4.8:1. Violet small text and thin strokes would sit right on the AA edge.</p>
+        <p style="margin: 0"><strong style="color: #EDEDE8; font-weight: 500">Footage.</strong> Day clips are mostly warm skin, sunsets, interiors — ember harmonises; violet fights them and ages fast (gaming / crypto / AI-product cliché in 2026).</p>
+        <p style="margin: 0"><strong style="color: #EDEDE8; font-weight: 500">Risk.</strong> Orange can drift to "warning". Mitigation: errors use a separate desaturated red, and ember never appears as a fill outside the primary CTA.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (name, hex, ratio) => ({
+      name, hex, ratio,
+      line: hex + '55',
+      glow: '0 0 0 1px ' + hex + '33, 0 0 14px ' + hex + '99, 0 0 36px ' + hex + '55',
+      glowS: '0 0 8px ' + hex,
+      ctaGlow: '0 8px 32px ' + hex + '44'
+    });
+    return {
+      phones: [mk('A — EMBER', '#FF8A3D', '8.4:1'), mk('B — ELECTRIC VIOLET', '#8B5CFF', '4.8:1')],
+      strip: ['#1C1C20', '#232327', '#2C2C31', '#3A3A40', '#45454B', '#4E4E55', '#3F3F45', '#303035', '#26262A', '#2E2E33', '#202024', '#18181B']
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER prototype map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}a:hover{border-color:#FF8A3D}</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 64px 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 34px">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">SLIVER / STAGE 9 · START HERE</span>
+      <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1; letter-spacing: -0.02em">One prototype, end to end.</h1>
+    </div>
+    <p style="margin: 0; max-width: 420px; font-size: 15px; line-height: 1.5; color: #B9B9B3">Press Play on this board, then tap any screen. Every screen links onward — you can walk the whole app from onboarding to a shared film.</p>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 22px">
+    <sc-for list="{{flows}}" as="f" hint-placeholder-count="5">
+      <div style="display: flex; align-items: center; gap: 18px">
+        <span style="flex: 0 0 170px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: {{f.c}}">{{f.n}}</span>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+          <sc-for list="{{f.nodes}}" as="nd" hint-placeholder-count="5">
+            <a href="{{nd.href}}" style="height: 52px; padding: 0 18px; box-sizing: border-box; border-radius: 16px; border: 1px solid #26262A; background: #111113; display: flex; flex-direction: column; justify-content: center; gap: 2px; color: #EDEDE8; text-decoration: none">
+              <span style="font-size: 15px">{{nd.n}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #8E8E88">{{nd.s}}</span>
+            </a>
+            <sc-if value="{{nd.arrow}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="color: #55555A; font-size: 18px">→</span></sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const F = [
+      ['FIRST RUN', '#FF8A3D', [['Launch', 'Splash.dc.html', 'STAGE 8'], ['Onboarding', 'Onboarding.dc.html', '7 STEPS'], ['Camera', 'Camera.dc.html', 'HOME']]],
+      ['EVERY DAY', '#FF8A3D', [['Camera', 'Camera.dc.html', 'RECORD'], ['Trim & Pick', 'Trim.dc.html', 'HERO'], ['Looks', 'Looks.dc.html', '8 PRESETS'], ['Saved', 'CameraDone.dc.html', 'TODAY ✓']]],
+      ['FROM GALLERY', '#B9B9B3', [['Gallery', 'Gallery.dc.html', 'PICK'], ['Photo → 1s', 'PhotoTrim.dc.html', 'STILL / ZOOM'], ['Landscape cam', 'CameraLandscape.dc.html', 'CINEMA'], ['Reframe', 'TrimReframe.dc.html', 'PORTRAIT CLIP']]],
+      ['ARCHIVE', '#B9B9B3', [['Month', 'Archive.dc.html', 'GRID'], ['Year', 'ArchiveYear.dc.html', 'HEATMAP'], ['Day', 'DayDetail.dc.html', 'LOOP'], ['Empty day', 'ArchiveAdd.dc.html', 'ADD'], ['Fill the past', 'Backfill.dc.html', 'OPT-IN']]],
+      ['FILMS', '#B9B9B3', [['Films', 'Films.dc.html', 'LIBRARY'], ['Builder', 'FilmBuilder.dc.html', 'LIVE PREVIEW'], ['Export', 'Export.dc.html', 'ON DEVICE'], ['Player', 'FilmPlayer.dc.html', 'PLAY & SHARE'], ['Year in Seconds', 'YearInSeconds.dc.html', '26 DEC']]],
+      ['BACKUP & ACCOUNT', '#8FC7A4', [['Save your seconds', 'SaveSheet.dc.html', 'GOOGLE'], ['Drive consent', 'DriveConnect.dc.html', 'PLAIN WORDS'], ['Backup', 'Backup.dc.html', 'STATUS'], ['Restore', 'Restore.dc.html', 'NEW PHONE'], ['Account', 'AccountSettings.dc.html', 'DELETE']]],
+      ['SETTINGS', '#8E8E88', [['Settings', 'Settings.dc.html', 'ALL'], ['Notifications', 'Notifications.dc.html', 'LOCAL'], ['Edge states', 'EdgeStates.dc.html', 'BOARD'], ['Widgets', 'Widgets.dc.html', 'BOARD']]]
+    ];
+    return {
+      flows: F.map((f) => ({ n: f[0], c: f[1], nodes: f[2].map((nd, i) => ({ n: nd[0], href: nd[1], s: nd[2], arrow: i < f[2].length - 1 })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

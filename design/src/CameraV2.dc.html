@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Camera v1.1</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}
+@keyframes sv-breathe{0%,100%{box-shadow:0 0 14px #FF8A3D88,0 0 32px #FF8A3D33}50%{box-shadow:0 0 20px #FF8A3DAA,0 0 44px #FF8A3D44}}
+.sv-breathe{animation:sv-breathe 1600ms ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.sv-breathe{animation:none}}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
+
+  <!-- viewfinder -->
+  <div style="position: absolute; inset: 0; background: radial-gradient(70% 45% at 70% 28%, #C99A6A 0%, #6B4A30 35%, #241812 70%, #0C0907 100%)">
+    <div style="position: absolute; left: 228px; top: 120px; width: 120px; height: 200px; border-radius: 6px; background: linear-gradient(180deg, #F2D6B0 0%, #B98A5E 100%); opacity: 0.85"></div>
+    <div style="position: absolute; left: 60px; top: 300px; width: 92px; height: 92px; border-radius: 46px; background: #140E0A"></div>
+    <div style="position: absolute; left: 32px; top: 380px; width: 150px; height: 320px; border-radius: 75px 75px 0 0; background: #140E0A"></div>
+  </div>
+  <sc-if value="{{grid}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 130px; top: 0; width: 1px; height: 844px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 260px; top: 0; width: 1px; height: 844px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 0; top: 281px; width: 390px; height: 1px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 0; top: 562px; width: 390px; height: 1px; background: #FFFFFF33"></div>
+  </sc-if>
+  <!-- 16:9 band for a Cinema project held upright -->
+  <div style="position: absolute; left: 0; right: 0; top: 0; height: 232px; background: #000000A6"></div>
+  <div style="position: absolute; left: 0; right: 0; top: 451px; height: 393px; background: #000000A6"></div>
+  <div style="position: absolute; left: 0; right: 0; top: 232px; height: 219px; box-sizing: border-box; border-top: 1px solid #EDEDE866; border-bottom: 1px solid #EDEDE866"></div>
+  <!-- tap to focus · long-press = AE/AF lock -->
+  <div onPointerDown="{{fDown}}" onPointerUp="{{fUp}}" onPointerLeave="{{fUp}}" aria-label="Viewfinder. Tap to focus, hold to lock focus and exposure" style="position: absolute; left: 0; right: 0; top: 104px; height: 460px; touch-action: none">
+    <sc-if value="{{focusOn}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: {{fx}}px; top: {{fy}}px; width: {{fs}}px; height: {{fs}}px; margin-left: {{fm}}px; margin-top: {{fm}}px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid {{fColor}}; box-shadow: {{fGlow}}; opacity: {{fOp}}; transition: width 220ms cubic-bezier(.2,.8,.2,1), height 220ms cubic-bezier(.2,.8,.2,1), margin 220ms cubic-bezier(.2,.8,.2,1), opacity 400ms ease, border-color 200ms; pointer-events: none">
+        <span style="position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 2px; background: {{fColor}}"></span>
+      </div>
+      <sc-if value="{{locked}}" hint-placeholder-val="{{ false }}">
+        <span style="position: absolute; left: {{fx}}px; top: {{ly}}px; transform: translateX(-50%); height: 24px; padding: 0 10px; border-radius: 12px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 500; white-space: nowrap; pointer-events: none">AE/AF LOCK</span>
+      </sc-if>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{hint}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 182px; display: flex; justify-content: center">
+      <span style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: #EDEDE8; color: #0A0A0B; font-size: 13px; font-weight: 500">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M20 14a6 6 0 0 1-5 6M18 20h-3v-3"></path></svg>
+        Turn sideways for the full frame
+      </span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; right: 0; top: 182px; display: flex; justify-content: center">
+      <span role="timer" aria-label="{{recAria}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: #050505B3; border: 1px solid {{recBorder}}; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.06em; color: {{recColor}}; transition: color 200ms, border-color 200ms">
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D"></span>{{recTime}}<span style="font-size: 10px; letter-spacing: 0.12em; visibility: {{okVis}}">· CLIP OK</span>
+      </span>
+    </div>
+  </sc-if>
+
+  <!-- top scrim: keeps chips readable on any video -->
+  <div style="position: absolute; left: 0; right: 0; top: 0; height: 150px; background: linear-gradient(180deg, #000000B3 0%, #00000059 55%, #00000000 100%); pointer-events: none"></div>
+
+  <!-- top: project + calendar (rarely used → top) -->
+  <div style="position: absolute; left: 16px; right: 16px; top: 52px; height: 44px; display: flex; align-items: center; justify-content: space-between">
+    <a href="ProjectsV2.dc.html" aria-label="Project My 2026. Switch project" style="height: 36px; padding: 0 10px 0 14px; border-radius: 18px; background: #0000008C; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 6px; color: #FFFFFF; text-decoration: none; font-family: Geist, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap">
+      My 2026
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFFB3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+    </a>
+    <a href="ProjectHub.dc.html" aria-label="{{calAria}}" style="height: 36px; padding: 0 14px 0 10px; border-radius: 18px; background: #0000008C; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 6px; color: #FFFFFF; text-decoration: none; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500; white-space: nowrap">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+      Today
+    </a>
+  </div>
+
+  <!-- tools row, in thumb reach -->
+  <div style="position: absolute; left: 0; right: 0; top: 576px; display: flex; justify-content: center; gap: 22px; visibility: {{idleVis}}">
+    <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+      <button onClick="{{t.tap}}" aria-pressed="{{t.on}}" style="width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: {{t.color}}">
+        <span style="width: 44px; height: 44px; border-radius: 22px; background: #05050599; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">{{t.n}}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 660px; display: flex; justify-content: center; visibility: {{idleVis}}">
+    <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #05050599; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em">
+      <button onClick="{{setPhoto}}" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: {{photoBg}}; color: {{photoColor}}; font: inherit; letter-spacing: inherit">PHOTO</button>
+      <button onClick="{{setVideo}}" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: {{videoBg}}; color: {{videoColor}}; font: inherit; letter-spacing: inherit">VIDEO</button>
+    </div>
+  </div>
+
+  <!-- capture row -->
+  <div style="position: absolute; left: 0; right: 0; top: 712px; height: 88px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; box-sizing: border-box">
+    <a href="PickerV2.dc.html" aria-label="Add from gallery" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #EDEDE8; text-decoration: none">
+      <span style="position: relative; width: 52px; height: 52px; box-sizing: border-box; border-radius: 14px; border: 1.5px solid #EDEDE8; background: linear-gradient(160deg, #6A7A86, #1A2026)">
+        <span style="position: absolute; right: -7px; top: -7px; width: 22px; height: 22px; border-radius: 11px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 600; line-height: 1">+</span>
+      </span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">ADD</span>
+    </a>
+    <!-- record button: option D "Ember" -->
+    <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: 0 0 14px #FF8A3D88, 0 0 32px #FF8A3D33"></span></button>
+    </sc-if>
+    <sc-if value="{{photoIdle}}" hint-placeholder-val="{{ false }}">
+      <a href="EditClipV2.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #EDEDE8; box-shadow: 0 0 16px #FFFFFF33"></span></a>
+    </sc-if>
+    <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
+      <a href="EditClipV2.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="sv-breathe" style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B"></span></span></a>
+    </sc-if>
+    <button onClick="{{flip}}" aria-label="Switch camera" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: #EDEDE8">
+      <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center; transform: rotate({{flipDeg}}deg); transition: transform 240ms ease"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">{{lensLabel}}</span>
+    </button>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"saved":{"editor":"boolean","default":false},"recording":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { grid: false, timer: 0, flash: false, mode: 'video', front: false, flipDeg: 0, rec: !!(props && props.recording), sec: (props && props.recording) ? 3 : 0, f: null, fBig: false, fDim: false, lock: false }; }
+  focusAt(e) {
+    const r = e.currentTarget.getBoundingClientRect(), sc = r.width / 390;
+    const x = (e.clientX - r.left) / sc, y = (e.clientY - r.top) / sc;
+    clearTimeout(this._ft1); clearTimeout(this._ft2); clearTimeout(this._lt);
+    this.setState({ f: { x, y }, fBig: true, fDim: false, lock: false });
+    this._ft1 = setTimeout(() => this.setState({ fBig: false }), 30);
+    this._lt = setTimeout(() => this.setState({ lock: true }), 600);
+  }
+  focusUp() {
+    clearTimeout(this._lt);
+    if (!this.state.f || this.state.lock) return;
+    this._ft2 = setTimeout(() => this.setState({ fDim: true }), 1200);
+  }
+  startRec() {
+    this.setState({ rec: true, sec: 0 });
+    if (this._iv) clearInterval(this._iv);
+    this._iv = setInterval(() => { if (!this.state.rec || this.state.sec >= 59) { clearInterval(this._iv); return; } this.setState({ sec: this.state.sec + 1 }); }, 1000);
+  }
+  renderVals() {
+    const st = this.state;
+    const saved = !!this.props.saved;
+    const video = st.mode === 'video';
+    const rec = st.rec, ok = st.sec >= 1;
+    return {
+      saved, hint: !saved && !rec, grid: st.grid,
+      rec, videoIdle: video && !rec, photoIdle: !video && !rec, idleVis: rec ? 'hidden' : 'visible',
+      startRec: () => this.startRec(),
+      fDown: (e) => this.focusAt(e), fUp: () => this.focusUp(),
+      focusOn: !!st.f && !rec, fx: st.f ? st.f.x.toFixed(0) : 0, fy: st.f ? st.f.y.toFixed(0) : 0, ly: st.f ? (st.f.y - 54).toFixed(0) : 0,
+      fs: st.fBig ? 88 : 64, fm: st.fBig ? -44 : -32, locked: st.lock,
+      fColor: st.lock ? '#FF8A3D' : '#FFFFFF', fGlow: st.lock ? '0 0 10px #FF8A3D99' : '0 0 6px #00000066', fOp: st.fDim && !st.lock ? 0.35 : 1,
+      calAria: (saved ? 'Today has a clip. ' : '') + 'Open the calendar of this project',
+      recTime: '0:' + String(st.sec).padStart(2, '0'), recColor: ok ? '#FF8A3D' : '#B9B9B3', recBorder: ok ? '#FF8A3D66' : '#3A3A40', okVis: ok ? 'visible' : 'hidden',
+      recAria: 'Recording, ' + st.sec + ' seconds' + (ok ? ', clip is long enough' : ''),
+      tools: [
+        { n: 'GRID', on: String(st.grid), color: st.grid ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ grid: !st.grid }), icon: 'M3 3h18v18H3z M9 3v18 M15 3v18 M3 9h18 M3 15h18' },
+        { n: st.timer ? st.timer + 'S' : 'TIMER', on: String(!!st.timer), color: st.timer ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ timer: st.timer === 0 ? 3 : (st.timer === 3 ? 10 : 0) }), icon: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M12 9v4l2.5 2.5 M9 2h6' },
+        { n: st.flash ? 'LIGHT ON' : 'LIGHT', on: String(st.flash), color: st.flash ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ flash: !st.flash }), icon: 'M13 3L5 14h6l-1 7 8-11h-6l1-7z' },
+        { n: 'FILTER', on: 'false', color: '#EDEDE8', tap: () => {}, icon: 'M4 7h10 M18 7h2 M4 17h4 M12 17h8 M16 5v4 M10 15v4' }
+      ],
+      setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
+      photoBg: video ? 'transparent' : '#EDEDE8', photoColor: video ? '#8E8E88' : '#0A0A0B',
+      videoBg: video ? '#EDEDE8' : 'transparent', videoColor: video ? '#0A0A0B' : '#8E8E88',
+      flip: () => this.setState({ front: !st.front, flipDeg: st.flipDeg + 180 }),
+      flipDeg: st.flipDeg, lensLabel: st.front ? 'FRONT' : 'BACK'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Photo to a clip</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="PickerV2.dc.html" aria-label="Back to gallery" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <span style="height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">FOR TUE · 10 NOV ▾</span>
+    <span style="width: 44px"></span>
+  </div>
+
+  <div style="position: absolute; left: 20px; top: 106px; width: 350px; height: 440px; border-radius: 24px; overflow: hidden; border: 1px solid #1A1A1D">
+    <div style="position: absolute; inset: -20px; transform: {{bgT}}; background: radial-gradient(80% 60% at 60% 30%, #E8B98A 0%, #9A6A44 30%, #3A2416 65%, #120B07 100%)">
+      <div style="position: absolute; left: 0; right: 0; top: 330px; height: 160px; background: linear-gradient(180deg, #2A1A10, #0C0805)"></div>
+    </div>
+    <div style="position: absolute; inset: -20px; transform: {{fgT}}">
+      <div style="position: absolute; left: 150px; top: 170px; width: 90px; height: 90px; border-radius: 45px; background: #120B07"></div>
+      <div style="position: absolute; left: 120px; top: 250px; width: 150px; height: 240px; border-radius: 75px 75px 0 0; background: #120B07"></div>
+    </div>
+    <span style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; background: #050505CC; border: 1px solid #3A3A40; border-radius: 999px; padding: 7px 11px">PHOTO · TAKEN SUN 8 NOV</span>
+    <sc-if value="{{dateOn}}" hint-placeholder-val="{{ true }}">
+      <span style="position: absolute; right: 16px; bottom: 26px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">10 NOV 2026</span>
+    </sc-if>
+    <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 2px; background: #FFFFFF26"><div style="height: 2px; width: {{loopPct}}%; background: #EDEDE8"></div></div>
+  </div>
+
+  <sc-if value="{{notSaved}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 558px; display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.06em">
+      <span>PHOTO → 1S · 00:01.00</span><span style="color: #8E8E88">{{motionName}}</span>
+    </div>
+    <div style="position: absolute; left: 20px; right: 0; top: 596px; display: flex; gap: 8px; overflow-x: auto; padding-right: 20px">
+      <sc-for list="{{motions}}" as="m" hint-placeholder-count="5">
+        <button onClick="{{m.pick}}" aria-pressed="{{m.on}}" style="flex: 0 0 auto; height: 40px; padding: 0 14px; border-radius: 20px; border: {{m.border}}; background: {{m.bg}}; color: {{m.color}}; font-family: Geist, sans-serif; font-size: 14px">{{m.n}}</button>
+      </sc-for>
+    </div>
+    <span style="position: absolute; left: 20px; right: 20px; top: 650px; font-size: 13px; color: #8E8E88">Subtle by default — 8% travel over one second, eased.</span>
+    <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</button>
+    <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
+      <a href="CameraV2.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Retake</a>
+      <a href="Looks.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Filters</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+        <a href="ProjectHubSaved.dc.html" style="position: absolute; left: 20px; right: 20px; top: 752px; height: 56px; border-radius: 28px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 17px; font-weight: 500">Done</a>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { m: 0, t: 0, saved: false, dateOn: true }; }
+  componentDidMount() { this._iv = setInterval(() => this.setState({ t: (this.state.t + 40) % 1000 }), 40); }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const p = st.t / 1000;
+    const e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    const names = ['Still', 'Slow zoom'];
+    let bg = 'none', fg = 'none';
+    if (st.m === 1) { bg = fg = 'scale(' + (1 + 0.08 * e).toFixed(4) + ')'; }
+    if (st.m === 2) { bg = fg = 'scale(' + (1.08 - 0.08 * e).toFixed(4) + ')'; }
+    if (st.m === 3) { bg = fg = 'translateX(' + (-14 + 28 * e).toFixed(1) + 'px) scale(1.08)'; }
+    if (st.m === 4) { bg = 'translateX(' + (-6 + 12 * e).toFixed(1) + 'px) scale(1.06)'; fg = 'translateX(' + (12 - 24 * e).toFixed(1) + 'px) scale(1.1)'; }
+    return {
+      bgT: bg, fgT: fg, loopPct: (p * 100).toFixed(1),
+      motionName: names[st.m].toUpperCase(),
+      motions: names.map((n, i) => ({ n, on: String(i === st.m), pick: () => this.setState({ m: i }), border: i === st.m ? '1px solid #FF8A3D' : '1px solid #26262A', bg: i === st.m ? '#FF8A3D1F' : 'transparent', color: i === st.m ? '#EDEDE8' : '#B9B9B3' })),
+      dateOn: st.dateOn, dateStr: String(st.dateOn),
+      dateLabel: st.dateOn ? 'Date: on' : 'Date: off', dateColor: st.dateOn ? '#FF8A3D' : '#B9B9B3',
+      toggleDate: () => this.setState({ dateOn: !st.dateOn }),
+      notSaved: !st.saved, saved: st.saved,
+      save: () => this.setState({ saved: true }), undo: () => this.setState({ saved: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

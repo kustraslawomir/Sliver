@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Camera</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
+
+  <!-- viewfinder -->
+  <div onPointerDown="{{vfDown}}" onPointerUp="{{vfUp}}" role="presentation" style="position: absolute; inset: 0; touch-action: pan-y">
+    <div style="position: absolute; inset: 0; filter: {{lookFilter}}; transition: filter 240ms ease; background: radial-gradient(70% 45% at 70% 28%, #C99A6A 0%, #6B4A30 35%, #241812 70%, #0C0907 100%)">
+      <div style="position: absolute; left: 228px; top: 120px; width: 120px; height: 200px; border-radius: 6px; background: linear-gradient(180deg, #F2D6B0 0%, #B98A5E 100%); opacity: 0.85"></div>
+      <div style="position: absolute; left: 286px; top: 120px; width: 3px; height: 200px; background: #3A2618"></div>
+      <div style="position: absolute; left: 0; right: 0; top: 470px; height: 374px; background: linear-gradient(180deg, #2A1C13 0%, #0C0907 100%)"></div>
+      <div style="position: absolute; left: 60px; top: 300px; width: 92px; height: 92px; border-radius: 46px; background: #140E0A"></div>
+      <div style="position: absolute; left: 32px; top: 380px; width: 150px; height: 320px; border-radius: 75px 75px 0 0; background: #140E0A"></div>
+      <div style="position: absolute; left: 210px; top: 430px; width: 70px; height: 48px; border-radius: 0 0 14px 14px; background: #E9D9C4; opacity: 0.8"></div>
+    </div>
+    <sc-if value="{{grid}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 130px; top: 0; width: 1px; height: 844px; background: #FFFFFF33"></div>
+      <div style="position: absolute; left: 260px; top: 0; width: 1px; height: 844px; background: #FFFFFF33"></div>
+      <div style="position: absolute; left: 0; top: 281px; width: 390px; height: 1px; background: #FFFFFF33"></div>
+      <div style="position: absolute; left: 0; top: 562px; width: 390px; height: 1px; background: #FFFFFF33"></div>
+    </sc-if>
+    <sc-if value="{{cinema}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 0; right: 0; top: 0; height: 262px; background: #000000A6; pointer-events: none"></div>
+      <div style="position: absolute; left: 0; right: 0; top: 481px; height: 363px; background: #000000A6; pointer-events: none"></div>
+      <div style="position: absolute; left: 0; right: 0; top: 262px; height: 219px; box-sizing: border-box; border-top: 1px solid #EDEDE866; border-bottom: 1px solid #EDEDE866; pointer-events: none">
+        <span style="position: absolute; left: 12px; top: 8px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #EDEDE8CC">CINEMA 16:9</span>
+      </div>
+      <sc-if value="{{showTurn}}" hint-placeholder-val="{{ true }}">
+        <div style="position: absolute; left: 0; right: 0; top: 210px; display: flex; justify-content: center; pointer-events: none">
+          <span style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 18px; background: #EDEDE8; color: #0A0A0B; font-size: 13px; font-weight: 500">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M20 14a6 6 0 0 1-5 6M18 20h-3v-3"></path></svg>
+            Turn sideways for the full frame
+          </span>
+        </div>
+      </sc-if>
+    </sc-if>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 160px; background: linear-gradient(180deg, #050505B3, transparent)"></div>
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 320px; background: linear-gradient(0deg, #050505E6 30%, transparent)"></div>
+  </div>
+
+  <!-- top bar -->
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="Archive.dc.html" aria-label="Archive" style="width: 44px; height: 44px; border-radius: 22px; background: #05050566; color: #EDEDE8; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></a>
+    <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+      <span style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 14px; border-radius: 16px; background: #05050566; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #EDEDE8">TUE · 10 NOV</span>
+    </sc-if>
+    <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
+      <span role="timer" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 14px; letter-spacing: 0.06em; color: #FF8A3D"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D; opacity: {{blink}}"></span>{{elapsed}}</span>
+    </sc-if>
+    <button onClick="{{toggleFlash}}" aria-label="{{flashLabel}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{flashColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"></path></svg></button>
+  </div>
+
+  <!-- active film -->
+  <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 108px; display: flex; justify-content: center">
+      <button onClick="{{toggleFilms}}" aria-expanded="{{menuStr}}" style="height: 34px; padding: 0 14px; border-radius: 17px; border: 1px solid #FFFFFF26; background: #05050599; color: #EDEDE8; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em">FOR: {{filmName}} · {{filmFmt}} ▾</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{menu}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 70px; right: 70px; top: 148px; border-radius: 18px; background: #18181B; border: 1px solid #3A3A40; padding: 6px; display: flex; flex-direction: column; box-shadow: 0 12px 40px #000000">
+      <sc-for list="{{filmList}}" as="fl" hint-placeholder-count="2">
+        <button onClick="{{fl.pick}}" style="height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 0; border-radius: 12px; background: {{fl.bg}}; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">
+          <span>{{fl.n}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #8E8E88">{{fl.f}}</span>
+        </button>
+      </sc-for>
+      <a href="FilmBuilder.dc.html" style="height: 44px; display: flex; align-items: center; padding: 0 12px; color: #B9B9B3; text-decoration: none; font-size: 14px; border-top: 1px solid #26262A">+ New film</a>
+    </div>
+  </sc-if>
+
+  <!-- right rail -->
+  <div style="position: absolute; right: 12px; top: 110px; display: flex; flex-direction: column; gap: 8px">
+    <button onClick="{{toggleGrid}}" aria-label="Grid" aria-pressed="{{gridStr}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{gridColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M9 3v18M15 3v18M3 9h18M3 15h18"></path></svg></button>
+    <button onClick="{{cycleTimer}}" aria-label="Self-timer" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{timerColor}}; display: flex; align-items: center; justify-content: center; padding: 0; font-family: 'Geist Mono', monospace; font-size: 11px">
+      <sc-if value="{{timerOff}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2.5M9 2h6"></path></svg></sc-if>
+      <sc-if value="{{timerOn}}" hint-placeholder-val="{{ false }}"><span>{{timerLabel}}</span></sc-if>
+    </button>
+  </div>
+
+  <!-- today captured -->
+  <sc-if value="{{showCaptured}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 70px; top: 112px; height: 64px; box-sizing: border-box; border-radius: 20px; background: #111113E6; border: 1px solid #26262A; padding: 8px 8px 8px 8px; display: flex; align-items: center; gap: 12px">
+      <div style="width: 36px; height: 48px; border-radius: 8px; border: 1.5px solid #FF8A3D; box-sizing: border-box; background: linear-gradient(160deg, #8A6A48, #1A120B)"></div>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 14px">Today's second is in.</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8E8E88">00:01.00 · NOIR · 07:42 PM</span>
+      </div>
+      <a href="Trim.dc.html" style="height: 40px; padding: 0 12px; border-radius: 20px; border: 1px solid #3A3A40; display: flex; align-items: center; color: #EDEDE8; text-decoration: none; font-size: 13px">Replace</a>
+    </div>
+  </sc-if>
+
+  <!-- look flash -->
+  <sc-if value="{{lookFlash}}" hint-placeholder-val="{{ false }}">
+    <span style="position: absolute; left: 0; right: 0; top: 380px; text-align: center; font-family: Geist, Inter, system-ui, sans-serif; font-size: 32px; color: #EDEDE8; text-shadow: 0 2px 24px #000000; font-weight: 600; letter-spacing: -0.02em">{{lookName}}</span>
+  </sc-if>
+
+  <!-- looks strip -->
+  <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 590px; display: flex; gap: 6px; overflow-x: auto; padding: 0 20px; box-sizing: border-box; scrollbar-width: none">
+      <sc-for list="{{looks}}" as="l" hint-placeholder-count="9">
+        <button onClick="{{l.pick}}" style="flex: 0 0 auto; height: 32px; padding: 0 10px; border: 0; border-radius: 16px; background: {{l.bg}}; color: {{l.color}}; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em">{{l.n}}</button>
+      </sc-for>
+    </div>
+    <div style="position: absolute; left: 0; right: 0; top: 636px; display: flex; justify-content: center">
+      <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #05050599; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em">
+        <button onClick="{{setPhoto}}" style="height: 34px; padding: 0 16px; border-radius: 17px; border: 0; background: {{photoBg}}; color: {{photoColor}}; font: inherit; letter-spacing: inherit">PHOTO</button>
+        <button onClick="{{setVideo}}" style="height: 34px; padding: 0 16px; border-radius: 17px; border: 0; background: {{videoBg}}; color: {{videoColor}}; font: inherit; letter-spacing: inherit">VIDEO</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- capture row -->
+  <div style="position: absolute; left: 0; right: 0; top: 700px; height: 92px; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; box-sizing: border-box">
+    <a href="Gallery.dc.html" aria-label="Open gallery" style="width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #EDEDE8; box-sizing: border-box; background: linear-gradient(160deg, #6A7A86, #1A2026); visibility: {{sideVis}}"></a>
+
+    <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{startRec}}" aria-label="Record" style="width: 80px; height: 80px; border-radius: 40px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 62px; height: 62px; border-radius: 31px; background: #FF8A3D"></span></button>
+    </sc-if>
+    <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
+      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; box-sizing: border-box; border-radius: 40px; border: 3px solid #FF8A3D; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px #FF8A3D66"><span style="width: 28px; height: 28px; border-radius: 8px; background: #FF8A3D"></span></a>
+    </sc-if>
+    <sc-if value="{{photoMode}}" hint-placeholder-val="{{ false }}">
+      <a href="PhotoTrim.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; box-sizing: border-box; border-radius: 40px; border: 3px solid #EDEDE8; display: flex; align-items: center; justify-content: center"><span style="width: 62px; height: 62px; border-radius: 31px; background: #EDEDE8"></span></a>
+    </sc-if>
+
+    <button aria-label="Flip camera" style="width: 48px; height: 48px; border-radius: 24px; border: 0; background: #FFFFFF1A; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0; visibility: {{sideVis}}"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></button>
+  </div>
+
+  <span style="position: absolute; left: 0; right: 0; top: 802px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #8E8E88">{{hint}}</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"captured":{"editor":"boolean","default":false},"format":{"editor":"enum","options":["cinema","story"],"default":"cinema"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'video', rec: false, ms: 0, look: 1, flash: false, grid: false, timer: 0, flashAt: 0, now: 0, mountAt: Date.now(), film: (props && props.format === 'story') ? 1 : 0, menu: false };
+  }
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      const s = { now: Date.now() };
+      if (this.state.rec) s.ms = this.state.ms + 100;
+      this.setState(s);
+    }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const names = ['NATURAL', 'NOIR', 'BLACKOUT', 'NIGHT NEON', 'COLD STEEL', 'EMBER', 'VHS 94', 'HARD LIGHT', 'GHOST'];
+    const filters = ['none', 'grayscale(1) contrast(1.35) brightness(0.9)', 'contrast(1.5) brightness(0.7) saturate(0.6)', 'saturate(1.7) contrast(1.2) brightness(0.88) hue-rotate(-12deg)', 'saturate(0.45) hue-rotate(170deg) contrast(1.2) brightness(0.9)', 'sepia(0.45) saturate(1.6) contrast(1.1)', 'saturate(1.4) contrast(0.85) brightness(1.08) blur(0.6px)', 'contrast(1.65) brightness(1.06) saturate(1.12)', 'grayscale(0.6) brightness(1.25) contrast(0.7)'];
+    const setLook = (i) => this.setState({ look: (i + names.length) % names.length, flashAt: Date.now() });
+    const s = Math.floor(st.ms / 1000), ds = Math.floor((st.ms % 1000) / 100);
+    const video = st.mode === 'video';
+    return {
+      cinema: st.film === 0,
+      filmName: st.film === 0 ? '2026' : 'LISBON', filmFmt: st.film === 0 ? 'CINEMA 16:9' : 'STORY 9:16',
+      menu: st.menu && !st.rec, menuStr: String(st.menu),
+      toggleFilms: () => this.setState({ menu: !st.menu }),
+      filmList: [['2026', 'CINEMA 16:9'], ['Lisbon', 'STORY 9:16']].map((f, i) => ({ n: f[0], f: f[1], bg: i === st.film ? '#FFFFFF14' : 'transparent', pick: () => this.setState({ film: i, menu: false, mountAt: Date.now() }) })),
+      showTurn: !st.rec && st.now - st.mountAt < 3500,
+      idle: !st.rec, recording: st.rec,
+      videoIdle: video && !st.rec, photoMode: !video && !st.rec,
+      elapsed: '00:' + String(s).padStart(2, '0') + '.' + ds,
+      blink: (Math.floor(st.ms / 500) % 2) ? 0.3 : 1,
+      startRec: () => this.setState({ rec: true, ms: 0 }),
+      lookFilter: filters[st.look],
+      lookName: names[st.look],
+      lookFlash: st.now - st.flashAt < 900,
+      looks: names.map((n, i) => ({ n, pick: () => setLook(i), bg: i === st.look ? '#FF8A3D1F' : 'transparent', color: i === st.look ? '#FF8A3D' : '#B9B9B3' })),
+      vfDown: (e) => { this._x = e.clientX; },
+      vfUp: (e) => { if (this._x == null) return; const dx = e.clientX - this._x; this._x = null; if (Math.abs(dx) > 40 && !st.rec) setLook(st.look + (dx < 0 ? 1 : -1)); },
+      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#FF8A3D' : '#EDEDE8',
+      toggleGrid: () => this.setState({ grid: !st.grid }),
+      flashColor: st.flash ? '#FF8A3D' : '#EDEDE8', flashLabel: st.flash ? 'Flash on' : 'Flash off',
+      toggleFlash: () => this.setState({ flash: !st.flash }),
+      timerOff: st.timer === 0, timerOn: st.timer !== 0, timerLabel: st.timer + 's', timerColor: st.timer ? '#FF8A3D' : '#EDEDE8',
+      cycleTimer: () => this.setState({ timer: st.timer === 0 ? 3 : (st.timer === 3 ? 10 : 0) }),
+      setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
+      photoBg: video ? 'transparent' : '#EDEDE8', photoColor: video ? '#8E8E88' : '#0A0A0B',
+      videoBg: video ? '#EDEDE8' : 'transparent', videoColor: video ? '#0A0A0B' : '#8E8E88',
+      showCaptured: !!this.props.captured && !st.rec,
+      sideVis: st.rec ? 'hidden' : 'visible',
+      hint: st.rec ? 'TAP TO STOP · ANY LENGTH, TRIM NEXT' : (video ? 'TAP TO RECORD · HOLD FOR A QUICK ONE · SWIPE FOR LOOKS' : 'TAP FOR A PHOTO · BECOMES A 1S CLIP')
+    };
+  }
+}
+</script>
+</body>
+</html>

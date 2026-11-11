@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Export and premiere</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <!-- RENDER -->
+  <sc-if value="{{isRender}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 20px; top: 60px; width: 350px; display: flex; justify-content: space-between; align-items: center">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88">2026 · CINEMA 16:9</span>
+      <a href="FilmBuilder.dc.html" style="height: 44px; padding: 0 4px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Cancel</a>
+    </div>
+    <div style="position: absolute; left: 20px; top: 250px; width: 350px; height: 197px; border-radius: 10px; overflow: hidden; background: {{tileBg}}; border: 1px solid #26262A"></div>
+    <h1 style="position: absolute; left: 20px; right: 20px; top: 480px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.02em">Cutting your film…</h1>
+    <div style="position: absolute; left: 20px; right: 20px; top: 548px; height: 2px; background: #26262A"><div style="height: 2px; width: {{pct}}%; background: #FF8A3D; box-shadow: 0 0 8px #FF8A3D"></div></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 562px; display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8E8E88">
+      <span>{{doneSec}} / 129 SECONDS</span><span>{{pctLabel}}%</span>
+    </div>
+    <p style="position: absolute; left: 20px; right: 20px; top: 610px; margin: 0; font-size: 14px; line-height: 1.5; color: #B9B9B3">Made on your phone — nothing is uploaded. You can leave; we'll let you know when it's ready.</p>
+  </sc-if>
+
+  <!-- PREMIERE -->
+  <sc-if value="{{isPremiere}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: {{slitX}}px; top: 200px; width: {{slitW}}px; height: 197px; border-radius: 4px; overflow: hidden; background: linear-gradient(160deg, #8A6A48 0%, #2A1A10 60%, #0C0806 100%); box-shadow: 0 0 {{slitGlow}}px #FF8A3D88"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 440px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: {{titleO}}">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.4em; color: #8E8E88">A FILM BY YOU</span>
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 67px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">2026</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #B9B9B3">21 JUN — 10 NOV · 129 SECONDS · 02:09</span>
+    </div>
+    <sc-if value="{{showActions}}" hint-placeholder-val="{{ false }}">
+      <a href="FilmPlayer.dc.html" style="position: absolute; left: 20px; right: 20px; top: 656px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Play film</a>
+      <div style="position: absolute; left: 20px; right: 20px; top: 724px; display: flex; gap: 10px">
+        <button onClick="{{save}}" style="flex: 1 1 0; height: 50px; border-radius: 25px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">{{saveLabel}}</button>
+        <a href="FilmPlayer.dc.html" style="flex: 1 1 0; height: 50px; box-sizing: border-box; border-radius: 25px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 15px">Share…</a>
+      </div>
+      <a href="Films.dc.html" style="position: absolute; left: 20px; right: 20px; top: 784px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">Done</a>
+    </sc-if>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startPhase":{"editor":"enum","options":["render","premiere"],"default":"render"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: (props && props.startPhase) || 'render', pct: 0, t: 0, saved: false };
+  }
+  componentDidMount() {
+    let reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    this._reduce = reduce;
+    this._iv = setInterval(() => {
+      const st = this.state;
+      if (st.phase === 'render') {
+        const pct = Math.min(100, st.pct + 1.25);
+        if (pct >= 100) this.setState({ phase: 'premiere', t: reduce ? 3000 : 0, pct });
+        else this.setState({ pct });
+      } else if (st.t < 3000) this.setState({ t: st.t + 50 });
+    }, 50);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const pal = ['#4E5A63', '#7A6A50', '#A07050', '#506A7A', '#6A5A7A', '#5A6A50', '#8A6A48', '#6A4A5A', '#3E5A6A', '#9A7A5A'];
+    const done = Math.round(st.pct / 100 * 129);
+    const k = Math.max(0, Math.min(1, (st.t - 300) / 1000));
+    const e = 1 - Math.pow(1 - k, 3);
+    const w = 3 + e * 347;
+    return {
+      isRender: st.phase === 'render', isPremiere: st.phase === 'premiere',
+      pct: st.pct.toFixed(1), pctLabel: Math.round(st.pct), doneSec: done,
+      tileBg: 'linear-gradient(160deg, ' + pal[done % pal.length] + ', #0C0B0A)',
+      slitW: w.toFixed(1), slitX: ((390 - w) / 2).toFixed(1), slitGlow: (40 - 30 * e).toFixed(0),
+      titleO: Math.max(0, Math.min(1, (st.t - 1400) / 600)).toFixed(2),
+      showActions: st.t >= 2400,
+      replay: () => this.setState({ t: 0 }),
+      save: () => this.setState({ saved: true }),
+      saveLabel: st.saved ? 'Saved to Photos ✓' : 'Save to Photos'
+    };
+  }
+}
+</script>
+</body>
+</html>

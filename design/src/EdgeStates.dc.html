@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Edge states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1680px; height: 844px; display: flex; gap: 40px; font-family: Geist, Inter, system-ui, sans-serif; color: #EDEDE8">
+  <sc-for list="{{states}}" as="s" hint-placeholder-count="4">
+    <div style="position: relative; flex: 0 0 390px; height: 844px; box-sizing: border-box; border-radius: 44px; overflow: hidden; border: 1px solid #26262A; background: {{s.bg}}">
+      <span style="position: absolute; left: 24px; top: 60px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: {{s.kc}}">{{s.k}}</span>
+      <div style="position: absolute; left: 24px; top: 200px; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 20px; border: 1px solid #26262A; background: #111113; color: {{s.ic}}">
+        <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{s.icon}}"></path></svg>
+      </div>
+      <h2 style="position: absolute; left: 24px; right: 24px; top: 290px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.02em">{{s.t}}</h2>
+      <p style="position: absolute; left: 24px; right: 24px; top: {{s.bodyTop}}px; margin: 0; font-size: 15px; line-height: 1.5; color: #B9B9B3">{{s.b}}</p>
+      <a href="{{s.href}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{s.cta}}</a>
+      <span style="position: absolute; left: 20px; right: 20px; top: 790px; text-align: center; font-size: 14px; color: #8E8E88">{{s.sec}}</span>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1680,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      states: [
+        { k: 'FIRST DAY · EMPTY ARCHIVE', kc: '#FF8A3D', ic: '#FF8A3D', bg: '#0A0A0B', icon: 'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4',
+          t: 'Day one starts whenever you do.', b: 'Your archive is empty — that’s the best part. Film one clip today and it lands right here.', bodyTop: 384, cta: 'Film today’s clip', href: 'CameraV2.dc.html', sec: 'or fill the past from your gallery' },
+        { k: 'CAMERA ACCESS OFF', kc: '#E8C27A', ic: '#E8C27A', bg: '#050505', icon: 'M3 7h18v13H3z M8 7l1.5-3h5L16 7 M3 3l18 18',
+          t: 'SLIVER can’t see through the camera.', b: 'Camera access is turned off in your phone’s Settings. You can still add days from your gallery in the meantime.', bodyTop: 384, cta: 'Open Settings', href: 'CameraV2.dc.html', sec: 'Add from gallery instead' },
+        { k: 'EXPORT DIDN’T FINISH', kc: '#E5675F', ic: '#E5675F', bg: '#000000', icon: 'M12 8v5 M12 16h.01 M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+          t: 'Your film got stuck at 57%.', b: 'Usually because SLIVER was closed or the phone ran low on battery. Nothing is lost — we’ll pick up where it stopped.', bodyTop: 384, cta: 'Try again', href: 'Export.dc.html', sec: 'Back to films' },
+        { k: 'PHONE STORAGE FULL', kc: '#E8C27A', ic: '#E8C27A', bg: '#0A0A0B', icon: 'M4 6h16v12H4z M8 10h8 M8 14h5',
+          t: 'Your phone is out of space.', b: 'A clip needs about 2 MB. Free up a little space to keep filming — your saved clips are safe.', bodyTop: 384, cta: 'Open phone storage', href: 'CameraV2.dc.html', sec: 'Back up & free up space' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

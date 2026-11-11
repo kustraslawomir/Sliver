@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Film player</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="Films.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">October</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8E8E88">00:29 · 1—31 OCT · CINEMA 16:9</span>
+    </div>
+    <span style="width: 44px"></span>
+  </div>
+
+  <!-- video -->
+  <button onClick="{{toggle}}" aria-label="{{playLabel}}" style="position: absolute; left: 0; top: 230px; width: 390px; height: 219px; padding: 0; border: 0; background: #000000; overflow: hidden; cursor: pointer">
+    <div style="position: absolute; inset: 0; background: {{dayBg}}">
+      <div style="position: absolute; left: {{subX}}%; top: 30%; width: 14%; padding-top: 14%; border-radius: 50%; background: #0A0806E6"></div>
+      <div style="position: absolute; left: {{subBX}}%; top: 52%; width: 24%; height: 60%; border-radius: 999px 999px 0 0; background: #0A0806E6"></div>
+    </div>
+    <span style="position: absolute; left: 14px; bottom: 12px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #EDEDE8; text-shadow: 0 1px 6px #000000">{{dayLabel}}</span>
+    <sc-if value="{{paused}}" hint-placeholder-val="{{ false }}">
+      <span style="position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 30px; background: #050505B3; display: flex; align-items: center; justify-content: center"><span style="width: 0; height: 0; margin-left: 5px; border-left: 16px solid #EDEDE8; border-top: 10px solid transparent; border-bottom: 10px solid transparent"></span></span>
+    </sc-if>
+  </button>
+
+  <!-- scrubber -->
+  <div style="position: absolute; left: 20px; right: 20px; top: 470px; display: flex; flex-direction: column; gap: 8px">
+    <div onClick="{{seek}}" role="slider" aria-label="Scrub film" aria-valuetext="{{timeLabel}}" tabindex="0" style="position: relative; height: 24px; cursor: pointer">
+      <div style="position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: #26262A"></div>
+      <sc-for list="{{ticks}}" as="tk" hint-placeholder-count="28">
+        <span style="position: absolute; left: {{tk}}%; top: 8px; width: 1px; height: 8px; background: #3A3A40"></span>
+      </sc-for>
+      <div style="position: absolute; left: 0; top: 11px; height: 2px; width: {{headPct}}%; background: #FF8A3D"></div>
+      <span style="position: absolute; left: {{headPct}}%; top: 2px; width: 3px; height: 20px; margin-left: -1px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88"><span>{{timeLabel}}</span><span>-{{remain}}</span></div>
+  </div>
+
+  <!-- controls -->
+  <div style="position: absolute; left: 0; right: 0; top: 540px; display: flex; justify-content: center; align-items: center; gap: 28px">
+    <button onClick="{{toggleSound}}" aria-label="{{soundLabel}}" style="width: 48px; height: 48px; border-radius: 24px; border: 1px solid #26262A; background: transparent; color: {{soundColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="{{soundPath}}"></path></svg></button>
+    <button onClick="{{toggle}}" aria-label="{{playLabel}}" style="width: 72px; height: 72px; border-radius: 36px; border: 0; background: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0">
+      <sc-if value="{{paused}}" hint-placeholder-val="{{ false }}"><span style="width: 0; height: 0; margin-left: 5px; border-left: 18px solid #0A0A0B; border-top: 11px solid transparent; border-bottom: 11px solid transparent"></span></sc-if>
+      <sc-if value="{{playing}}" hint-placeholder-val="{{ true }}"><span style="display: flex; gap: 6px"><span style="width: 6px; height: 22px; border-radius: 2px; background: #0A0A0B"></span><span style="width: 6px; height: 22px; border-radius: 2px; background: #0A0A0B"></span></span></sc-if>
+    </button>
+    <button aria-label="Full screen — turn your phone sideways" style="width: 48px; height: 48px; border-radius: 24px; border: 1px solid #26262A; background: transparent; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+  </div>
+
+  <!-- actions -->
+  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 660px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Share film…</button>
+  <div style="position: absolute; left: 20px; right: 20px; top: 728px; display: flex; gap: 10px">
+    <button onClick="{{save}}" style="flex: 1 1 0; height: 48px; border-radius: 24px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">{{saveLabel}}</button>
+    <a href="FilmBuilder.dc.html" style="flex: 1 1 0; height: 48px; box-sizing: border-box; border-radius: 24px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 15px">Edit film</a>
+  </div>
+  <span style="position: absolute; left: 20px; right: 20px; top: 794px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #55555A">MP4 · 1080P · 30 FPS · 9 MB · SAVED IN SLIVER</span>
+
+  <!-- system share sheet (mock) -->
+  <sc-if value="{{share}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{closeShare}}" style="position: absolute; inset: 0; background: #000000B3"></div>
+    <div role="dialog" aria-label="Share film" style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 28px 28px 0 0; background: #1C1C1F; padding: 10px 20px 34px; display: flex; flex-direction: column; gap: 14px">
+      <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40"></div>
+      <div style="display: flex; gap: 12px; align-items: center">
+        <div style="flex: 0 0 72px; height: 41px; border-radius: 6px; background: linear-gradient(160deg, #34201A, #050505)"></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">October.mp4</span><span style="font-size: 12px; color: #8E8E88">Video · 29 s · 9 MB</span></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 8px">
+        <sc-for list="{{targets}}" as="t" hint-placeholder-count="8">
+          <button onClick="{{closeShare}}" style="display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: transparent; color: #EDEDE8; padding: 0; font-family: Geist, sans-serif; font-size: 11px">
+            <span style="width: 56px; height: 56px; border-radius: 16px; background: {{t.bg}}; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500; color: {{t.fg}}">{{t.i}}</span>{{t.n}}
+          </button>
+        </sc-for>
+      </div>
+      <span style="font-size: 12px; line-height: 1.4; color: #8E8E88">This is your phone's share sheet. YouTube opens with the film ready to upload — title and privacy are set there.</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { playing: true, t: 0, sound: true, share: false, saved: false }; }
+  componentDidMount() { this._iv = setInterval(() => { if (this.state.playing && !this.state.share) this.setState({ t: (this.state.t + 100) % 29000 }); }, 100); }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const days = [];
+    for (let d = 1; d <= 31; d++) { const n = 273 + d; if (n % 13 !== 0) days.push({ d, n }); }
+    const count = days.length, total = count * 1000;
+    const idx = Math.floor(st.t / 1000) % count;
+    const day = days[idx];
+    const pal = ['#4E5A63', '#7A6A50', '#A07050', '#506A7A', '#6A5A7A', '#5A6A50', '#8A6A48', '#6A4A5A', '#3E5A6A', '#9A7A5A'];
+    const WD = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const wd = WD[new Date(2026, 9, day.d).getDay()];
+    const fmt = (ms) => { const s = Math.floor(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+    const sub = 30 + 30 * Math.sin(day.n * 1.7);
+    const ticks = [];
+    for (let i = 1; i < count; i++) ticks.push((i / count * 100).toFixed(2));
+    return {
+      playing: st.playing, paused: !st.playing,
+      toggle: () => this.setState({ playing: !st.playing }),
+      playLabel: st.playing ? 'Pause' : 'Play',
+      dayBg: 'linear-gradient(160deg, ' + pal[day.n % pal.length] + ' 0%, #0C0B0A 100%)',
+      subX: sub.toFixed(0), subBX: (sub - 5).toFixed(0),
+      dayLabel: wd + ' · ' + day.d + ' OCT 2026',
+      ticks, headPct: (st.t / total * 100).toFixed(2),
+      seek: (e) => { const r = e.currentTarget.getBoundingClientRect(); const f = Math.max(0, Math.min(0.999, (e.clientX - r.left) / r.width)); this.setState({ t: Math.floor(f * count) * 1000 }); },
+      timeLabel: fmt(st.t), remain: fmt(total - st.t),
+      toggleSound: () => this.setState({ sound: !st.sound }),
+      soundLabel: st.sound ? 'Mute' : 'Unmute', soundColor: st.sound ? '#EDEDE8' : '#8E8E88',
+      soundPath: st.sound ? 'M16.5 8.5a5 5 0 0 1 0 7' : 'M17 9l5 6M22 9l-5 6',
+      openShare: () => this.setState({ share: true }), closeShare: () => this.setState({ share: false }), share: st.share,
+      save: () => this.setState({ saved: true }), saveLabel: st.saved ? 'Saved to Photos ✓' : 'Save to Photos',
+      targets: [
+        { n: 'YouTube', i: 'YT', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'Instagram', i: 'IG', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'TikTok', i: 'TT', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'Messages', i: 'MSG', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'Save video', i: '↓', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'Files', i: 'F', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'Drive', i: 'D', bg: '#2A2A2E', fg: '#EDEDE8' },
+        { n: 'More', i: '···', bg: '#2A2A2E', fg: '#EDEDE8' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

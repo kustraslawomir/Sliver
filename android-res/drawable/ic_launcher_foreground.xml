@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Slit 4x40dp, centred. Glow = two radial gradients stretched vertically. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:pivotX="54" android:pivotY="54" android:scaleY="2.2">
+        <path android:pathData="M40,54a14,14 0 1,0 28,0a14,14 0 1,0 -28,0">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="54" android:centerY="54" android:gradientRadius="14">
+                    <item android:offset="0" android:color="#88FF8A3D"/>
+                    <item android:offset="0.5" android:color="#26FF8A3D"/>
+                    <item android:offset="1" android:color="#00FF8A3D"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:scaleY="4.4">
+        <path android:pathData="M49,54a5,5 0 1,0 10,0a5,5 0 1,0 -10,0">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="54" android:centerY="54" android:gradientRadius="5">
+                    <item android:offset="0" android:color="#FFFF8A3D"/>
+                    <item android:offset="1" android:color="#00FF8A3D"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+    <path android:fillColor="#FFD2AE"
+        android:pathData="M54,34a2,2 0 0,1 2,2v36a2,2 0 0,1 -4,0v-36a2,2 0 0,1 2,-2z"/>
+</vector>

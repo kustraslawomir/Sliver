@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Restore</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <sc-if value="{{isSignin}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center"><span aria-hidden="true" style="width: 3px; height: 120px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 12px #FF8A3D, 0 0 40px #FF8A3D"></span></div>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 330px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">Welcome back.</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 392px; margin: 0; font-size: 16px; line-height: 1.5; color: #B9B9B3">New phone? Sign in and we'll look for your clips in your Google Drive.</p>
+    <div style="position: absolute; left: 20px; right: 20px; top: 560px; display: flex; flex-direction: column; gap: 10px">
+      <button onClick="{{signIn}}" style="height: 54px; border: 0; border-radius: 27px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 16px">Continue with Google</button>
+      <a href="OnbV2.dc.html" style="height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">I'm new — start fresh</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isFound}}" hint-placeholder-val="{{ false }}">
+    <span style="position: absolute; left: 24px; top: 150px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8FC7A4">FOUND IN MY DRIVE / SLIVER</span>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 178px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">We found 129 clips.</h1>
+    <div style="position: absolute; left: 20px; right: 20px; top: 310px; display: flex; flex-direction: column">
+      <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22"><span style="color: #B9B9B3">Days</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px">21 JUN — 10 NOV 2026</span></div>
+      <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22"><span style="color: #B9B9B3">Size</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px">214 MB</span></div>
+      <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22"><span style="color: #B9B9B3">Last backup</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px">YESTERDAY · 21:14</span></div>
+      <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22; border-bottom: 1px solid #1F1F22"><span style="color: #B9B9B3">Films</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px">4 · RE-RENDERED ON THIS PHONE</span></div>
+    </div>
+    <p style="position: absolute; left: 24px; right: 24px; top: 540px; margin: 0; font-size: 14px; line-height: 1.5; color: #8E8E88">Restoring uses Wi-Fi when it can. You can start using the camera straight away — today's clip won't wait for the restore.</p>
+    <button onClick="{{start}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Restore all</button>
+    <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 780px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">Not now</a>
+  </sc-if>
+
+  <sc-if value="{{isRestoring}}" hint-placeholder-val="{{ false }}">
+    <span style="position: absolute; left: 24px; top: 150px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88">{{restoredLabel}}</span>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 178px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">{{restTitle}}</h1>
+    <div style="position: absolute; left: 20px; right: 20px; top: 300px; display: flex; flex-direction: column; gap: 8px">
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+        <div style="display: flex; align-items: center">
+          <span style="flex: 0 0 34px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #8E8E88">{{r.n}}</span>
+          <span style="display: flex; gap: 2.2px">
+            <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="31">
+              <span style="width: 8px; height: 22px; border-radius: 2px; background: {{c.bg}}; visibility: {{c.vis}}; transition: background 200ms ease"></span>
+            </sc-for>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 560px; height: 3px; border-radius: 2px; background: #26262A"><div style="height: 3px; border-radius: 2px; width: {{pct}}%; background: #FF8A3D"></div></div>
+    <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+      <a href="ProjectHub.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Open your archive</a>
+    </sc-if>
+    <sc-if value="{{notDone}}" hint-placeholder-val="{{ true }}">
+      <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; border: 1px solid #3A3A40; color: #EDEDE8; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 500; font-size: 17px">Use the camera meanwhile</a>
+    </sc-if>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { phase: 'signin', pct: 0 }; }
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      if (this.state.phase === 'restoring' && this.state.pct < 100) this.setState({ pct: Math.min(100, this.state.pct + 1.5) });
+    }, 60);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const ML = [30, 31, 31, 30, 31, 30];
+    const MS = ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV'];
+    const pal = ['#4E5A63', '#7A6A50', '#A07050', '#506A7A', '#6A5A7A', '#5A6A50', '#8A6A48', '#6A4A5A', '#3E5A6A', '#9A7A5A'];
+    const total = 142;
+    const upto = Math.round(st.pct / 100 * total);
+    let k = 0;
+    const rows = MS.map((n, mi) => {
+      const cells = [];
+      for (let d = 1; d <= 31; d++) {
+        if (d > ML[mi]) { cells.push({ vis: 'hidden', bg: 'transparent' }); continue; }
+        const active = (mi > 0 || d >= 21) && !(mi === 5 && d >= 10);
+        if (!active) { cells.push({ vis: 'visible', bg: '#111113' }); continue; }
+        k++;
+        cells.push({ vis: 'visible', bg: k <= upto ? pal[(k * 7) % pal.length] : '#1C1C20' });
+      }
+      return { n, cells };
+    });
+    const done = st.pct >= 100;
+    return {
+      isSignin: st.phase === 'signin', isFound: st.phase === 'found', isRestoring: st.phase === 'restoring',
+      signIn: () => this.setState({ phase: 'found' }),
+      start: () => this.setState({ phase: 'restoring', pct: 0 }),
+      rows, pct: st.pct.toFixed(1), done, notDone: !done,
+      restoredLabel: done ? 'RESTORE COMPLETE' : 'RESTORING · ' + Math.round(st.pct / 100 * 129) + ' / 129',
+      restTitle: done ? 'All 129 clips are back.' : 'Bringing your days back…'
+    };
+  }
+}
+</script>
+</body>
+</html>

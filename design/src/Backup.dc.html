@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Backup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #0A0A0B; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 20px; top: 50px; height: 48px; display: flex; align-items: center; gap: 4px">
+    <a href="ProjectHub.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 26px; line-height: 1; letter-spacing: -0.02em">Backup</h1>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 110px; display: flex; gap: 12px; align-items: center">
+    <span aria-hidden="true" style="flex: 0 0 2px; height: 34px; border-radius: 1px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+    <span style="font-size: 14px; line-height: 1.4; color: #B9B9B3">Your clips live in your Drive. We never store your videos.</span>
+  </div>
+
+  <!-- status -->
+  <div role="status" style="position: absolute; left: 20px; right: 20px; top: 168px; box-sizing: border-box; border-radius: 22px; border: 1px solid #26262A; background: #111113; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+    <span style="display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{dot}}"></span>{{title}}</span>
+    <span style="font-size: 14px; line-height: 1.45; color: #B9B9B3">{{desc}}</span>
+    <sc-if value="{{hasBar}}" hint-placeholder-val="{{ false }}">
+      <div style="height: 3px; border-radius: 2px; background: #26262A; margin-top: 4px"><div style="height: 3px; border-radius: 2px; width: {{bar}}%; background: #FF8A3D"></div></div>
+    </sc-if>
+    <sc-if value="{{hasAct}}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{doAct}}" style="align-self: flex-start; height: 40px; margin-top: 4px; padding: 0 16px; border-radius: 20px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500">{{act}}</button>
+    </sc-if>
+  </div>
+
+  <!-- details -->
+  <div style="position: absolute; left: 20px; right: 20px; top: 340px; display: flex; flex-direction: column">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="3">
+      <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22; font-size: 15px">
+        <span style="color: #B9B9B3">{{r.k}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #EDEDE8">{{r.v}}</span>
+      </div>
+    </sc-for>
+    <sc-for list="{{toggles}}" as="t" hint-placeholder-count="2">
+      <button onClick="{{t.toggle}}" role="switch" aria-checked="{{t.on}}" style="height: 64px; display: flex; align-items: center; justify-content: space-between; border: 0; border-top: 1px solid #1F1F22; background: transparent; color: #EDEDE8; padding: 0; font-family: Geist, sans-serif; text-align: left">
+        <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px">{{t.n}}</span><span style="font-size: 12px; color: #8E8E88">{{t.d}}</span></span>
+        <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{t.track}}"><span style="position: absolute; top: 2px; left: {{t.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+      </button>
+    </sc-for>
+  </div>
+
+  <button onClick="{{backupNow}}" style="position: absolute; left: 20px; right: 20px; top: 646px; height: 52px; border-radius: 26px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-weight: 500; font-size: 16px">Back up now</button>
+  <div style="position: absolute; left: 20px; right: 20px; top: 712px; display: flex; justify-content: space-between">
+    <button style="height: 44px; padding: 0 4px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Export everything (.zip)</button>
+    <button onClick="{{askDisconnect}}" style="height: 44px; padding: 0 4px; border: 0; background: transparent; color: #E5675F; font-family: Geist, sans-serif; font-size: 15px">Disconnect Drive</button>
+  </div>
+
+  <sc-if value="{{confirm}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{cancel}}" style="position: absolute; inset: 0; background: #000000B3"></div>
+    <div role="dialog" aria-label="Disconnect Drive" style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 32px 32px 0 0; background: #18181B; border-top: 1px solid #3A3A40; padding: 10px 20px 36px; display: flex; flex-direction: column; gap: 8px">
+      <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40; margin-bottom: 10px"></div>
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em">Disconnect Google Drive?</span>
+      <span style="font-size: 14px; line-height: 1.45; color: #B9B9B3; padding-bottom: 8px">Everything already backed up stays in your Drive. New clips will only live on this phone until you reconnect.</span>
+      <button onClick="{{cancel}}" style="height: 52px; border: 0; border-radius: 26px; background: #E5675F; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 16px">Disconnect</button>
+      <button onClick="{{cancel}}" style="height: 52px; border: 0; border-radius: 26px; background: #202024; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 16px">Keep backing up</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["uptodate","progress","paused","failed","full","revoked","offline"],"default":"uptodate"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { over: null, pct: 0, auto: true, wifi: true, confirm: false }; }
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      if (this.state.over !== 'progress') return;
+      const pct = this.state.pct + 4;
+      if (pct >= 100) this.setState({ over: 'uptodate', pct: 100 }); else this.setState({ pct });
+    }, 120);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const S = {
+      progress: { dot: '#FF8A3D', t: 'Backing up · ' + Math.round(st.pct / 100 * 129) + ' of 129', d: 'You can close SLIVER — it keeps going in the background and picks up where it left off.', act: null },
+      uptodate: { dot: '#8FC7A4', t: 'Up to date', d: 'All 129 clips are in your Drive · 3 min ago', act: null },
+      paused: { dot: '#E8C27A', t: 'Paused — waiting for Wi-Fi', d: '3 new clips will upload when you’re on Wi-Fi.', act: 'Use mobile data this time' },
+      failed: { dot: '#E5675F', t: 'Backup didn’t finish', d: 'Couldn’t reach Google Drive. We’ll try again in 15 minutes.', act: 'Try again now' },
+      full: { dot: '#E8C27A', t: 'Your Drive is full', d: '3 clips are waiting. They’re safe on this phone until there’s space.', act: 'Manage Google storage' },
+      revoked: { dot: '#E5675F', t: 'Drive access was turned off', d: 'SLIVER can’t reach its folder any more. Reconnect to keep backing up.', act: 'Reconnect Drive' },
+      offline: { dot: '#8E8E88', t: 'You’re offline', d: 'Backup carries on when you’re back online. Nothing is lost.', act: null }
+    };
+    const key = st.over || this.props.state || 'uptodate';
+    const s = S[key];
+    const sw = (on) => ({ track: on ? '#FF8A3D' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
+    return {
+      dot: s.dot, title: s.t, desc: s.d, act: s.act || '', hasAct: !!s.act,
+      hasBar: key === 'progress', bar: key === 'progress' ? (st.over ? st.pct : 65) : 0,
+      doAct: () => this.setState({ over: 'progress', pct: 0 }),
+      backupNow: () => this.setState({ over: 'progress', pct: 0 }),
+      rows: [
+        { k: 'Folder', v: 'MY DRIVE / SLIVER' },
+        { k: 'Backed up', v: key === 'progress' ? '84 / 129' : (key === 'uptodate' ? '129 / 129' : '126 / 129') },
+        { k: 'Drive space used', v: '214 MB' }
+      ],
+      toggles: [
+        Object.assign({ n: 'Back up automatically', d: 'After every new clip', toggle: () => this.setState({ auto: !st.auto }) }, sw(st.auto)),
+        Object.assign({ n: 'Wi-Fi only', d: 'Clips wait for Wi-Fi before uploading', toggle: () => this.setState({ wifi: !st.wifi }) }, sw(st.wifi))
+      ],
+      confirm: st.confirm,
+      askDisconnect: () => this.setState({ confirm: true }), cancel: () => this.setState({ confirm: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

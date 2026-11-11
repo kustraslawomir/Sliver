@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Assign photos to days</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="Gallery.dc.html" aria-label="Back to gallery" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <sc-for list="{{slits}}" as="s" hint-placeholder-count="3">
+        <span style="width: 3px; height: 18px; border-radius: 2px; background: {{s.bg}}; box-shadow: {{s.glow}}"></span>
+      </sc-for>
+    </div>
+    <span style="width: 44px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 12px; color: #8E8E88">{{count}}</span>
+  </div>
+
+  <div style="position: absolute; left: 20px; top: 108px; display: flex; flex-direction: column; gap: 4px">
+    <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">Three photos,<br>three days.</span>
+    <span style="font-size: 14px; color: #8E8E88">Matched by the date each was taken. Tap a day to move one.</span>
+  </div>
+
+  <div style="position: absolute; left: 20px; top: 214px; width: 350px; height: 330px; display: flex; gap: 10px">
+    <sc-for list="{{photos}}" as="p" hint-placeholder-count="3">
+      <button onClick="{{p.go}}" aria-label="{{p.label}}" style="position: relative; flex: {{p.flex}}; height: 330px; border-radius: 20px; border: {{p.border}}; box-sizing: border-box; background: {{p.bg}}; padding: 0; overflow: hidden; transition: flex 320ms cubic-bezier(0.3, 0, 0, 1)">
+        <span style="position: absolute; left: 10px; bottom: 10px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #EDEDE8; background: #050505B3; border-radius: 999px; padding: 6px 9px; white-space: nowrap">{{p.day}}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{notSaved}}" hint-placeholder-val="{{ true }}">
+    <span style="position: absolute; left: 20px; top: 562px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88">PHOTO {{cur1}} GOES TO</span>
+    <div style="position: absolute; left: 20px; right: 20px; top: 584px; display: flex; justify-content: space-between">
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+        <button onClick="{{d.pick}}" aria-label="{{d.label}}" style="width: 44px; height: 58px; box-sizing: border-box; border-radius: 10px; border: {{d.border}}; background: {{d.bg}}; color: {{d.color}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0; font-family: 'Geist Mono', monospace; font-size: 12px">
+          <span>{{d.n}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: {{d.dot}}"></span>
+        </button>
+      </sc-for>
+    </div>
+    <span style="position: absolute; left: 20px; right: 20px; top: 654px; font-size: 13px; line-height: 1.4; color: {{msgColor}}">{{msg}}</span>
+    <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{cta}}</button>
+    <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
+      <button onClick="{{prev}}" style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Back</button>
+      <span style="height: 44px; display: flex; align-items: center; font-size: 15px; color: #B9B9B3">Motion: Slow zoom in ▾</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: absolute; left: 20px; right: 20px; top: 676px; height: 56px; box-sizing: border-box; border-radius: 28px; background: #18181B; border: 1px solid #3A3A40; padding: 0 8px 0 20px; display: flex; align-items: center; gap: 12px">
+      <span style="flex-grow: 1; font-size: 15px">3 days filled in</span>
+      <button onClick="{{undo}}" style="height: 44px; padding: 0 16px; border: 0; background: transparent; color: #FF8A3D; font-family: Geist, sans-serif; font-weight: 500; font-size: 15px">Undo</button>
+    </div>
+    <a href="CameraDone.dc.html" style="position: absolute; left: 20px; right: 20px; top: 752px; height: 56px; border-radius: 28px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 17px; font-weight: 500">Done</a>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { cur: 0, assign: [2, 4, 5], saved: false }; }
+  renderVals() {
+    const st = this.state;
+    const days = [['4', 'WED'], ['5', 'THU'], ['6', 'FRI'], ['7', 'SAT'], ['8', 'SUN'], ['9', 'MON'], ['10', 'TUE']];
+    const filled = [true, true, false, true, true, false, false];
+    const bgs = ['linear-gradient(160deg, #A07050, #20140C)', 'linear-gradient(160deg, #7A6A50, #1A160E)', 'linear-gradient(160deg, #5A5A62, #141418)'];
+    const a = st.assign[st.cur];
+    const label = (i) => days[i][1] + ' ' + days[i][0] + ' NOV';
+    const taken = (i) => st.assign.some((x, j) => x === i && j !== st.cur);
+    let msg = 'Taken ' + label(a) + ' — empty day, perfect fit.', mc = '#8E8E88';
+    if (filled[a]) { msg = label(a) + ' already has a second. This photo will replace it.'; mc = '#E8C27A'; }
+    if (taken(a)) { msg = 'Another photo is already going to ' + label(a) + '.'; mc = '#E8C27A'; }
+    const last = st.cur === 2;
+    return {
+      slits: [0, 1, 2].map((i) => ({ bg: i <= st.cur || st.saved ? '#FFD2AE' : '#3A3A40', glow: i === st.cur && !st.saved ? '0 0 8px #FF8A3D' : 'none' })),
+      count: (st.cur + 1) + '/3',
+      cur1: String(st.cur + 1),
+      photos: [0, 1, 2].map((i) => ({ bg: bgs[i], flex: i === st.cur ? '6 1 0' : '1 1 0', border: i === st.cur ? '2px solid #FF8A3D' : '1px solid #26262A', day: i === st.cur ? label(st.assign[i]) : days[st.assign[i]][0], label: 'Photo ' + (i + 1) + ', ' + label(st.assign[i]), go: () => this.setState({ cur: i }) })),
+      days: days.map((d, i) => {
+        const sel = i === a;
+        return { n: d[0], label: label(i) + (filled[i] ? ', has a second' : ', empty'), pick: () => { const as = st.assign.slice(); as[st.cur] = i; this.setState({ assign: as }); },
+          border: sel ? '2px solid #FF8A3D' : '1px solid #1F1F22', bg: sel ? '#FF8A3D1F' : '#111113', color: sel ? '#FF8A3D' : (i === 6 ? '#EDEDE8' : '#B9B9B3'), dot: filled[i] ? '#8E8E88' : (taken(i) ? '#FF8A3D' : '#26262A') };
+      }),
+      msg, msgColor: mc,
+      cta: last ? 'Save 3 days' : 'Next photo',
+      next: () => last ? this.setState({ saved: true }) : this.setState({ cur: st.cur + 1 }),
+      prev: () => this.setState({ cur: Math.max(0, st.cur - 1) }),
+      notSaved: !st.saved, saved: st.saved,
+      undo: () => this.setState({ saved: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

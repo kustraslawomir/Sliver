@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gallery picker</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #0A0A0B; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="Camera.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+        <button onClick="{{t.pick}}" style="height: 32px; padding: 0 14px; border-radius: 16px; border: 0; background: {{t.bg}}; color: {{t.color}}; font-family: Geist, sans-serif; font-size: 14px">{{t.n}}</button>
+      </sc-for>
+    </div>
+    <span style="width: 44px"></span>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 106px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; gap: 6px">
+      <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+        <button onClick="{{f.pick}}" style="height: 32px; padding: 0 12px; border-radius: 16px; border: {{f.border}}; background: {{f.bg}}; color: {{f.color}}; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em">{{f.n}}</button>
+      </sc-for>
+    </div>
+    <span style="display: flex; align-items: center; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #FF8A3D"><span style="width: 6px; height: 6px; border-radius: 3px; background: #FF8A3D"></span>FOR {{forDay}}</span>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 152px; bottom: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 120px">
+    <sc-for list="{{sections}}" as="s" hint-placeholder-count="3">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88; padding-top: 6px">{{s.n}}</span>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+        <sc-for list="{{s.items}}" as="it" hint-placeholder-count="6">
+          <sc-if value="{{it.isVideo}}" hint-placeholder-val="{{ true }}">
+            <a href="{{it.href}}" aria-label="{{it.label}}" style="position: relative; height: 150px; border-radius: 6px; background: {{it.bg}}; text-decoration: none">
+              <span style="position: absolute; right: 6px; bottom: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #EDEDE8; text-shadow: 0 1px 6px #000000">{{it.dur}}</span>
+              <sc-if value="{{it.fav}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; left: 6px; bottom: 4px; font-size: 12px; color: #EDEDE8">♥</span></sc-if>
+            </a>
+          </sc-if>
+          <sc-if value="{{it.isPhoto}}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{it.toggle}}" aria-label="{{it.label}}" aria-pressed="{{it.selStr}}" style="position: relative; height: 150px; border-radius: 6px; border: {{it.border}}; box-sizing: border-box; background: {{it.bg}}; padding: 0">
+              <span style="position: absolute; right: 6px; top: 6px; width: 24px; height: 24px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #EDEDE8; background: {{it.badgeBg}}; color: #0A0A0B; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center">{{it.num}}</span>
+            </button>
+          </sc-if>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(0deg, #0A0A0B 60%, transparent)"></div>
+    <a href="{{selHref}}" style="position: absolute; left: 20px; right: 20px; bottom: 34px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{selLabel}}</a>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"forDay":{"editor":"text","default":"TUE · 10 NOV"},"trimHref":{"editor":null},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 0, filter: 0, sel: [] };
+  }
+  renderVals() {
+    const st = this.state;
+    const th = this.props.trimHref || 'Trim.dc.html';
+    const g = (a, b) => 'linear-gradient(160deg, ' + a + ', ' + b + ')';
+    const data = [
+      { n: 'TODAY', items: [
+        { id: 'a', k: 'v', dur: '0:14', href: th, bg: g('#8A6A48', '#1A120B'), fav: true },
+        { id: 'b', k: 'p', bg: g('#B98A5E', '#2A1C13') },
+        { id: 'c', k: 'v', dur: '0:00.6', href: 'TrimShort.dc.html', bg: g('#5A6A5A', '#121812') },
+        { id: 'd', k: 'p', bg: g('#3A4A5A', '#0B1016'), fav: true },
+        { id: 'e', k: 'p', bg: g('#9A8A7A', '#2A2420') },
+        { id: 'f', k: 'v', dur: '0:41', href: th, bg: g('#6A4A5A', '#1A1016') }
+      ]},
+      { n: 'MON · 9 NOV', items: [
+        { id: 'g', k: 'v', dur: '4:32', href: 'TrimLong.dc.html', bg: g('#4E5A63', '#121518'), fav: true },
+        { id: 'h', k: 'p', bg: g('#7A6A50', '#1A160E') },
+        { id: 'i', k: 'p', bg: g('#5A5A62', '#141418') }
+      ]},
+      { n: 'SUN · 8 NOV', items: [
+        { id: 'j', k: 'p', bg: g('#A07050', '#20140C') },
+        { id: 'k', k: 'v', dur: '0:09', href: th, bg: g('#506A7A', '#0E161C') },
+        { id: 'l', k: 'p', bg: g('#6A6A5A', '#181812') }
+      ]}
+    ];
+    const toggle = (id) => this.setState({ sel: st.sel[0] === id ? [] : [id] });
+    const sections = data.map((sec) => ({ n: sec.n, items: sec.items.filter((it) => (st.tab === 0 || it.fav) && (st.filter === 0 || (st.filter === 1 ? it.k === 'v' : it.k === 'p'))).map((it) => {
+      const idx = st.sel.indexOf(it.id);
+      return { isVideo: it.k === 'v', isPhoto: it.k === 'p', href: it.href, dur: it.dur, bg: it.bg, fav: !!it.fav,
+        label: it.k === 'v' ? 'Video, ' + it.dur : 'Photo',
+        toggle: () => toggle(it.id), selStr: String(idx >= 0), num: idx >= 0 ? String(idx + 1) : '',
+        badgeBg: idx >= 0 ? '#FF8A3D' : '#00000033', border: idx >= 0 ? '2px solid #FF8A3D' : '0' };
+    }) })).filter((s) => s.items.length);
+    const n = st.sel.length;
+    return {
+      forDay: this.props.forDay || 'TUE · 10 NOV',
+      tabs: ['Recents', 'Favorites'].map((t, i) => ({ n: t, pick: () => this.setState({ tab: i }), bg: i === st.tab ? '#EDEDE8' : 'transparent', color: i === st.tab ? '#0A0A0B' : '#B9B9B3' })),
+      filters: ['ALL', 'VIDEOS', 'PHOTOS'].map((f, i) => ({ n: f, pick: () => this.setState({ filter: i }), border: i === st.filter ? '1px solid #EDEDE8' : '1px solid #26262A', bg: 'transparent', color: i === st.filter ? '#EDEDE8' : '#8E8E88' })),
+      sections,
+      hasSel: n > 0,
+      selHref: n === 1 ? 'PhotoTrim.dc.html' : 'MultiImport.dc.html',
+      selLabel: n === 1 ? 'Turn into 1 second' : 'Assign ' + n + ' photos to days'
+    };
+  }
+}
+</script>
+</body>
+</html>

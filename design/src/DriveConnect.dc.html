@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Connect Google Drive</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #0A0A0B; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center">
+    <a href="SaveSheet.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+  </div>
+
+  <div style="position: absolute; left: 24px; top: 120px; width: 64px; height: 64px; border-radius: 20px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #8FC7A4"><svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z"></path><path d="M12 15v-4M10 13l2-2 2 2"></path></svg></div>
+  <h1 style="position: absolute; left: 24px; right: 24px; top: 206px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 34px; line-height: 1.04; letter-spacing: -0.02em">Your clips,<br>in your Drive.</h1>
+  <p style="position: absolute; left: 24px; right: 24px; top: 310px; margin: 0; font-size: 15px; line-height: 1.5; color: #B9B9B3">Next, Google will ask for permission. Here's what it means, in plain words:</p>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 376px; display: flex; flex-direction: column">
+    <sc-for list="{{points}}" as="p" hint-placeholder-count="4">
+      <div style="display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid #1F1F22">
+        <span style="flex: 0 0 2px; height: 36px; border-radius: 1px; background: {{p.c}}"></span>
+        <div style="display: flex; flex-direction: column; gap: 3px">
+          <span style="font-size: 15px; font-weight: 500">{{p.t}}</span>
+          <span style="font-size: 13px; line-height: 1.4; color: #8E8E88">{{p.d}}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 660px; height: 40px; box-sizing: border-box; border-radius: 12px; background: #111113; border: 1px solid #26262A; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: #B9B9B3">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+    My Drive / SLIVER
+  </div>
+  <a href="Backup.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Continue to Google</a>
+  <a href="ProjectHub.dc.html" style="position: absolute; left: 20px; right: 20px; top: 780px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">Not now</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      points: [
+        { t: 'One folder, called SLIVER', d: 'Visible in your Drive. You can open, move or delete it any time.', c: '#8FC7A4' },
+        { t: 'We only touch files SLIVER creates', d: 'We can’t see your photos, documents or anything else in your Drive.', c: '#8FC7A4' },
+        { t: 'We never store your videos', d: 'Our server only knows which clip belongs to which day.', c: '#8FC7A4' },
+        { t: 'Uses your Drive storage', d: 'About 2 MB per second — a year fits in under 1 GB.', c: '#E8C27A' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

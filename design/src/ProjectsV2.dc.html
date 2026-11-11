@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Projects</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+  <div aria-hidden="true" style="position: absolute; inset: 0"><dc-import name="CameraV2" hint-size="390px,844px"></dc-import></div>
+  <div style="position: absolute; inset: 0; background: #000000B3"></div>
+
+  <div role="dialog" aria-label="Projects" style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 32px 32px 0 0; background: #18181B; border-top: 1px solid #3A3A40; padding: 10px 20px 34px; display: flex; flex-direction: column">
+    <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40; margin-bottom: 16px"></div>
+
+    <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; padding-bottom: 14px; font-weight: 600; letter-spacing: -0.02em">Projects</span>
+      <sc-for list="{{projects}}" as="p" hint-placeholder-count="3">
+        <button onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="min-height: 76px; display: flex; align-items: center; gap: 14px; border: 0; border-top: 1px solid #26262A; background: transparent; color: #EDEDE8; padding: 10px 0; text-align: left; font-family: Geist, sans-serif">
+          <span style="flex: 0 0 auto; width: {{p.cw}}px; height: 52px; border-radius: 8px; background: {{p.bg}}"></span>
+          <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px">
+            <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{p.n}}</span>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: #8E8E88">{{p.meta}}</span>
+          </span>
+          <span style="flex: 0 0 24px; height: 24px; border-radius: 12px; background: {{p.dot}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="visibility: {{p.checkVis}}"><path d="M5 12l5 5L20 7"></path></svg></span>
+        </button>
+      </sc-for>
+      <button onClick="{{openNew}}" style="height: 52px; margin-top: 12px; border-radius: 26px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: Geist, sans-serif; font-weight: 500; font-size: 16px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>New project</button>
+    </sc-if>
+
+    <sc-if value="{{isNew}}" hint-placeholder-val="{{ false }}">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; padding-bottom: 18px; font-weight: 600; letter-spacing: -0.02em">New project</span>
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #B9B9B3">Name
+        <input value="{{name}}" onChange="{{onName}}" style="height: 52px; box-sizing: border-box; border-radius: 14px; border: 1px solid #3A3A40; background: #111113; color: #EDEDE8; padding: 0 14px; font-family: Geist, sans-serif; font-size: 17px; outline: none">
+      </label>
+      <span style="font-size: 13px; color: #B9B9B3; padding: 18px 0 8px">Shape of the film</span>
+      <div style="display: flex; gap: 10px">
+        <sc-for list="{{formats}}" as="f" hint-placeholder-count="2">
+          <button onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="flex: 1 1 0; height: 128px; box-sizing: border-box; border-radius: 18px; border: {{f.border}}; background: {{f.bg}}; color: #EDEDE8; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 14px; font-family: Geist, sans-serif; text-align: left">
+            <span style="width: {{f.w}}px; height: {{f.h}}px; box-sizing: border-box; border-radius: 4px; border: 1.5px solid {{f.shape}}"></span>
+            <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">{{f.n}}</span><span style="font-size: 12px; color: #8E8E88">{{f.d}}</span></span>
+          </button>
+        </sc-for>
+      </div>
+      <a href="CameraV2.dc.html" style="height: 56px; margin-top: 22px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Create project</a>
+      <button onClick="{{back}}" style="height: 44px; margin-top: 4px; border: 0; background: transparent; color: #8E8E88; font-family: Geist, sans-serif; font-size: 15px">Back</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startNew":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { view: (props && props.startNew) ? 'new' : 'list', active: 0, name: 'Project 4', fmt: 'cinema' }; }
+  renderVals() {
+    const st = this.state;
+    const P = [
+      ['My 2026', 'CINEMA 16:9 · 129 CLIPS · SINCE 21 JUN', 'cinema', '#8A6A48'],
+      ['Lisbon trip', 'STORY 9:16 · 8 CLIPS · 12–20 SEP', 'story', '#3E5A6A'],
+      ['Garden', 'CINEMA 16:9 · 34 CLIPS · SINCE 2 APR', 'cinema', '#5A6A50']
+    ];
+    return {
+      isList: st.view === 'list', isNew: st.view === 'new',
+      projects: P.map((p, i) => ({ n: p[0], meta: p[1], cw: p[2] === 'cinema' ? 92 : 30, bg: 'linear-gradient(160deg, ' + p[3] + ', #0C0B0A)', on: String(i === st.active), pick: () => this.setState({ active: i }), dot: i === st.active ? '#FF8A3D' : 'transparent', checkVis: i === st.active ? 'visible' : 'hidden' })),
+      openNew: () => this.setState({ view: 'new' }), back: () => this.setState({ view: 'list' }),
+      name: st.name, onName: (e) => this.setState({ name: e.target.value }),
+      formats: [['cinema', 'Cinema 16:9', 'For TV & YouTube', 44, 25], ['story', 'Story 9:16', 'For Instagram & TikTok', 18, 32]].map((f) => ({ n: f[1], d: f[2], w: f[3], h: f[4], on: String(st.fmt === f[0]), pick: () => this.setState({ fmt: f[0] }), border: st.fmt === f[0] ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: st.fmt === f[0] ? '#FF8A3D14' : 'transparent', shape: st.fmt === f[0] ? '#FF8A3D' : '#8E8E88' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

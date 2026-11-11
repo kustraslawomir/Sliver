@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Day detail, share sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes slLoop{from{transform:scale(1)}to{transform:scale(1.035)}}
+@keyframes slBar{from{width:0%}to{width:100%}}
+.sl-loop{animation:slLoop 1s linear infinite;transform-origin:50% 60%}
+.sl-bar{animation:slBar 1s linear infinite}
+@media (prefers-reduced-motion: reduce){.sl-loop,.sl-bar{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #050505">
+  <dc-import name="DayDetail" start-share="{{ true }}" hint-size="390px,844px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

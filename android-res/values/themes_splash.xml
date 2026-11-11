@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- androidx.core:core-splashscreen. Set as the activity theme; call installSplashScreen() before super.onCreate(). -->
+<resources>
+    <style name="Theme.Sliver.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0A0A0B</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Sliver</item>
+    </style>
+</resources>

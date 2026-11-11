@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System photo picker</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #E6E1E5; font-family: Roboto, 'Google Sans', system-ui, sans-serif">
+  <div aria-hidden="true" style="position: absolute; inset: 0"><dc-import name="CameraV2" hint-size="390px,844px"></dc-import></div>
+  <div style="position: absolute; inset: 0; background: #00000099"></div>
+
+  <span style="position: absolute; left: 0; right: 0; top: 150px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #FFFFFFAA">ANDROID PHOTO PICKER · SYSTEM UI, NOT OURS</span>
+
+  <div role="dialog" aria-label="Photo picker" style="position: absolute; left: 0; right: 0; top: 180px; bottom: 0; border-radius: 28px 28px 0 0; background: #1D1B20; padding: 10px 16px 0; display: flex; flex-direction: column; gap: 12px">
+    <div style="align-self: center; width: 32px; height: 4px; border-radius: 2px; background: #49454F"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px">
+      <span style="font-size: 20px">Select a photo or video</span>
+      <span style="width: 24px; height: 24px; color: #CAC4D0"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+    </div>
+    <div style="display: flex; gap: 8px; padding: 0 4px">
+      <span style="height: 32px; padding: 0 16px; border-radius: 16px; background: #4A4458; display: flex; align-items: center; font-size: 14px">Photos</span>
+      <span style="height: 32px; padding: 0 16px; border-radius: 16px; border: 1px solid #49454F; display: flex; align-items: center; font-size: 14px; color: #CAC4D0">Albums</span>
+    </div>
+    <span style="font-size: 14px; color: #CAC4D0; padding: 4px 4px 0">Today</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="12">
+        <div style="position: relative; aspect-ratio: 1 / 1; background: {{t.bg}}">
+          <span style="position: absolute; right: 6px; bottom: 6px; font-size: 12px; color: #FFFFFF; text-shadow: 0 1px 4px #000000; visibility: {{t.vis}}">{{t.d}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pal = ['#4E5A63', '#7A6A50', '#A07050', '#506A7A', '#6A5A7A', '#5A6A50', '#8A6A48', '#6A4A5A', '#3E5A6A', '#9A7A5A', '#5A5A62', '#7A5A44'];
+    const dur = ['0:14', '', '0:03', '', '', '1:09', '', '0:41', '', '', '4:32', ''];
+    return { tiles: pal.map((c, i) => ({ bg: 'linear-gradient(160deg, ' + c + ', #121212)', d: dur[i], vis: dur[i] ? 'visible' : 'hidden' })) };
+  }
+}
+</script>
+</body>
+</html>

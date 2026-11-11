@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Onboarding</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <!-- progress -->
+  <div style="position: absolute; left: 20px; right: 20px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <button onClick="{{back}}" aria-label="Back" style="width: 44px; height: 44px; border: 0; background: transparent; color: #EDEDE8; padding: 0; visibility: {{backVis}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+    <div style="display: flex; gap: 8px; align-items: center">
+      <sc-for list="{{slits}}" as="s" hint-placeholder-count="8">
+        <span style="width: 2px; height: {{s.h}}px; border-radius: 1px; background: {{s.bg}}; box-shadow: {{s.glow}}"></span>
+      </sc-for>
+    </div>
+    <button onClick="{{skip}}" style="width: 44px; height: 44px; border: 0; background: transparent; color: #8E8E88; font-family: Geist, sans-serif; font-size: 15px; padding: 0; visibility: {{skipVis}}">Skip</button>
+  </div>
+
+  <!-- 0 concept: one second -->
+  <sc-if value="{{s0}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 0; right: 0; top: 120px; height: 360px; display: flex; align-items: center; justify-content: center">
+      <div style="width: {{slitW}}px; height: 260px; border-radius: 3px; background: #FFD2AE; box-shadow: 0 0 12px #FF8A3D, 0 0 40px #FF8A3D, 0 0 {{slitGlow}}px #FF8A3D88"></div>
+    </div>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 500px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">One second.<br>Every day.</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 610px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">Keep one moment from each day. In a year, it's a film only you could make.</p>
+  </sc-if>
+
+  <!-- 1 concept: auto-pick -->
+  <sc-if value="{{s1}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 150px; height: 300px; border-radius: 24px; background: #0D0D0F; border: 1px solid #1F1F22">
+      <div style="position: absolute; left: 20px; right: 20px; top: 112px; display: flex; gap: 2px">
+        <sc-for list="{{strip}}" as="f" hint-placeholder-count="10">
+          <div style="flex: 1 1 0; height: 64px; border-radius: 4px; background: {{f}}"></div>
+        </sc-for>
+      </div>
+      <div style="position: absolute; left: 20px; width: 112px; top: 112px; height: 64px; background: #0D0D0FA8"></div>
+      <div style="position: absolute; right: 20px; width: 160px; top: 112px; height: 64px; background: #0D0D0FA8"></div>
+      <div style="position: absolute; left: 130px; top: 102px; width: 50px; height: 84px; box-sizing: border-box; border: 2.5px solid #FF8A3D; border-radius: 10px; box-shadow: 0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55"></div>
+      <span style="position: absolute; left: 106px; top: 54px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #FF8A3D; border: 1px solid #FF8A3D55; border-radius: 999px; padding: 7px 11px">✦ AUTO-PICKED</span>
+      <span style="position: absolute; left: 0; right: 0; top: 214px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8E8E88">DAY 142 · 00:01.00</span>
+    </div>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 500px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1.04; letter-spacing: -0.02em">We find the best second.<br>You have the final say.</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 610px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">Record as long as you like. SLIVER suggests the moment — drag to choose another.</p>
+  </sc-if>
+
+  <!-- 2 concept: private film -->
+  <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 0; right: 0; top: 130px; height: 340px; display: flex; align-items: center; justify-content: center">
+      <div style="width: {{posterW}}px; height: {{posterH}}px; transition: width 320ms cubic-bezier(0.3, 0, 0, 1), height 320ms cubic-bezier(0.3, 0, 0, 1); box-sizing: border-box; border-radius: 18px; border: 1px solid #26262A; background: linear-gradient(180deg, #2A2018 0%, #050505 70%); padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; box-shadow: 0 20px 60px #FF8A3D22">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: #8E8E88">A FILM BY YOU</span>
+        <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 38px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">2026</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #B9B9B3">365 DAYS · 06:05</span>
+      </div>
+    </div>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 500px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1.04; letter-spacing: -0.02em">Watch your year add up.<br>Just for you.</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 600px; margin: 0; font-size: 15px; line-height: 1.45; color: #B9B9B3">No feed, no followers — just your film. Pick its shape (you can change it later):</p>
+    <div style="position: absolute; left: 24px; right: 24px; top: 652px; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">
+      <button onClick="{{fmtCinema}}" aria-pressed="{{cinemaOn}}" style="flex: 1 1 0; height: 38px; border-radius: 19px; border: 0; background: {{cinemaBg}}; color: {{cinemaColor}}; font: inherit; letter-spacing: inherit">CINEMA 16:9</button>
+      <button onClick="{{fmtStory}}" aria-pressed="{{storyOn}}" style="flex: 1 1 0; height: 38px; border-radius: 19px; border: 0; background: {{storyBg}}; color: {{storyColor}}; font: inherit; letter-spacing: inherit">STORY 9:16</button>
+    </div>
+  </sc-if>
+
+  <!-- 3–4 permissions -->
+  <sc-if value="{{perm}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 24px; top: 170px; width: 72px; height: 72px; border-radius: 22px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #FF8A3D">
+      <sc-if value="{{s3}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M8 7l1.5-3h5L16 7"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg></sc-if>
+      <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 9"></path></svg></sc-if>
+    </div>
+    <span style="position: absolute; left: 24px; top: 272px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">{{permLabel}}</span>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 296px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1.04; letter-spacing: -0.02em">{{permTitle}}</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 420px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">{{permBody}}</p>
+    <div style="position: absolute; left: 24px; right: 24px; top: 560px; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{permPoints}}" as="pp" hint-placeholder-count="2">
+        <span style="display: flex; gap: 10px; align-items: center; font-size: 14px; color: #B9B9B3"><span style="width: 2px; height: 14px; background: #FF8A3D"></span>{{pp}}</span>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- 5 reminder -->
+  <sc-if value="{{s5}}" hint-placeholder-val="{{ false }}">
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 112px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1.04; letter-spacing: -0.02em">A nudge,<br>not a nag.</h1>
+    <div style="position: absolute; left: 24px; right: 24px; top: 228px; display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A">
+      <button onClick="{{setFixed}}" style="flex: 1 1 0; height: 40px; border-radius: 20px; border: 0; background: {{fixedBg}}; color: {{fixedColor}}; font-family: Geist, sans-serif; font-size: 15px">Fixed time</button>
+      <button onClick="{{setRandom}}" style="flex: 1 1 0; height: 40px; border-radius: 20px; border: 0; background: {{randBg}}; color: {{randColor}}; font-family: Geist, sans-serif; font-size: 15px">Random moment</button>
+    </div>
+    <sc-if value="{{isFixed}}" hint-placeholder-val="{{ true }}">
+      <div style="position: absolute; left: 24px; right: 24px; top: 296px; display: flex; gap: 8px">
+        <sc-for list="{{times}}" as="tm" hint-placeholder-count="4">
+          <button onClick="{{tm.pick}}" style="flex: 1 1 0; height: 48px; border-radius: 14px; border: {{tm.border}}; background: {{tm.bg}}; color: {{tm.color}}; font-family: 'Geist Mono', monospace; font-size: 14px">{{tm.n}}</button>
+        </sc-for>
+      </div>
+      <span style="position: absolute; left: 24px; right: 24px; top: 356px; font-size: 13px; color: #8E8E88">Same time every day. Change it any time in Settings.</span>
+    </sc-if>
+    <sc-if value="{{isRandom}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 24px; right: 24px; top: 300px; height: 40px">
+        <div style="position: absolute; left: 0; right: 0; top: 19px; height: 2px; background: #26262A"></div>
+        <div style="position: absolute; left: 30%; right: 18%; top: 18px; height: 4px; border-radius: 2px; background: #FF8A3D66"></div>
+        <div style="position: absolute; left: calc(30% - 2px); top: 6px; width: 4px; height: 28px; border-radius: 2px; background: #EDEDE8"></div>
+        <div style="position: absolute; left: calc(82% - 2px); top: 6px; width: 4px; height: 28px; border-radius: 2px; background: #EDEDE8"></div>
+        <div style="position: absolute; left: {{randX}}%; top: 12px; width: 2px; height: 16px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></div>
+      </div>
+      <div style="position: absolute; left: 24px; right: 24px; top: 346px; display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 12px; color: #B9B9B3"><span>07:00</span><span style="color: #EDEDE8">10:00 — 20:00</span><span>24:00</span></div>
+    </sc-if>
+    <span style="position: absolute; left: 24px; top: 404px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88">PREVIEW · LOCK SCREEN</span>
+    <div style="position: absolute; left: 20px; right: 20px; top: 428px; border-radius: 22px; background: #2A2A2EE6; padding: 14px; display: flex; gap: 12px">
+      <div style="position: relative; flex: 0 0 38px; height: 38px; border-radius: 9px; background: #050505; overflow: hidden">
+        <div style="position: absolute; left: 13px; top: 0; width: 30px; height: 38px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, #FF8A3D66, transparent)"></div>
+        <div style="position: absolute; left: 12px; top: 8px; width: 2px; height: 22px; background: #FFD2AE"></div>
+      </div>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #B9B9B3"><span style="font-weight: 600; color: #EDEDE8">SLIVER</span><span>{{notifTime}}</span></div>
+        <span style="font-size: 15px; line-height: 1.35">{{notifBody}}</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- 6 account -->
+  <sc-if value="{{s6}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 24px; top: 150px; display: flex; align-items: center; gap: 10px; color: #8FC7A4; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9.5a4.3 4.3 0 0 1-.5 8.5z"></path><path d="M12 15v-4M10 13l2-2 2 2"></path></svg>OPTIONAL · BACKUP
+    </div>
+    <h1 style="position: absolute; left: 24px; right: 24px; top: 190px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">Save your<br>seconds.</h1>
+    <p style="position: absolute; left: 24px; right: 24px; top: 304px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">Back up to a private folder in <em>your</em> Google Drive. We never store your videos — only which second belongs to which day.</p>
+    <div style="position: absolute; left: 20px; right: 20px; top: 470px; display: flex; flex-direction: column; gap: 10px">
+      <a href="Camera.dc.html" style="height: 54px; border-radius: 27px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 16px">Continue with Google</a>
+    </div>
+  </sc-if>
+
+  <!-- CTA -->
+  <sc-if value="{{ctaButton}}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{primary}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{ctaLabel}}</button>
+  </sc-if>
+  <sc-if value="{{ctaLink}}" hint-placeholder-val="{{ false }}">
+    <a href="Camera.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{ctaLabel}}</a>
+  </sc-if>
+  <sc-if value="{{hasSecondary}}" hint-placeholder-val="{{ false }}">
+    <sc-if value="{{secLinks}}" hint-placeholder-val="{{ false }}">
+      <a href="Camera.dc.html" style="position: absolute; left: 20px; right: 20px; top: 776px; height: 44px; display: flex; align-items: center; justify-content: center; color: #B9B9B3; text-decoration: none; font-size: 15px">{{secLabel}}</a>
+    </sc-if>
+    <sc-if value="{{secButton}}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 776px; height: 44px; border: 0; background: transparent; color: {{secColor}}; font-family: Geist, sans-serif; font-size: 15px; font-weight: {{secWeight}}">{{secLabel}}</button>
+    </sc-if>
+  </sc-if>
+
+  <!-- simulated system dialog -->
+  <sc-if value="{{dialog}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; background: #000000A6"></div>
+    <span style="position: absolute; left: 0; right: 0; top: 268px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #8E8E88">SYSTEM DIALOG (iOS)</span>
+    <div role="dialog" aria-label="{{dlgTitle}}" style="position: absolute; left: 60px; width: 270px; top: 290px; border-radius: 14px; background: #2A2A2E; overflow: hidden; text-align: center">
+      <div style="padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 16px; font-weight: 600; line-height: 1.3">{{dlgTitle}}</span>
+        <span style="font-size: 13px; line-height: 1.35; color: #D0D0CC">{{dlgBody}}</span>
+      </div>
+      <sc-for list="{{dlgButtons}}" as="db" hint-placeholder-count="2">
+        <button onClick="{{next}}" style="display: block; width: 100%; height: 44px; border: 0; border-top: 1px solid #3A3A40; background: transparent; color: #6CA8FF; font-family: Geist, -apple-system, sans-serif; font-size: 16px; font-weight: {{db.w}}">{{db.n}}</button>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startStep":{"editor":"int","min":0,"max":7,"default":0},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: (props && props.startStep) || 0, dialog: null, rem: 'fixed', time: 2, bf: [true, true, false, true, true, false, true], t: 0, fmt: 'cinema' };
+  }
+  componentDidMount() { this._iv = setInterval(() => this.setState({ t: (this.state.t + 50) % 4000 }), 50); }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state, s = st.step;
+    const go = (n) => this.setState({ step: Math.max(0, Math.min(6, n)), dialog: null });
+    const next = () => go(s + 1);
+    const p = (Math.sin(st.t / 4000 * Math.PI * 2) + 1) / 2;
+    const times = ['09:00', '13:00', '19:30', '21:30'];
+    const bfDays = [['WED 4', '#4E5A63'], ['THU 5', '#7A6A50'], ['FRI 6', '#3A3A40'], ['SAT 7', '#A07050'], ['SUN 8', '#506A7A'], ['MON 9', '#3A3A40'], ['', '']];
+    const hasVid = [true, true, false, true, true, false];
+    const dlg = {
+      camera: { t: '“SLIVER” Would Like to Access the Camera', b: 'To record your daily second.', btn: [{ n: 'Don’t Allow', w: 400 }, { n: 'Allow', w: 600 }] },
+      photos: { t: '“SLIVER” Would Like Full Access to Your Photo Library', b: 'To import videos and photos for days you missed.', btn: [{ n: 'Limit Access…', w: 400 }, { n: 'Allow Full Access', w: 600 }, { n: 'Don’t Allow', w: 400 }] },
+      notif: { t: '“SLIVER” Would Like to Send You Notifications', b: 'Notifications may include alerts, sounds and icon badges.', btn: [{ n: 'Don’t Allow', w: 400 }, { n: 'Allow', w: 600 }] }
+    }[st.dialog || 'camera'];
+    const kept = st.bf.slice(0, 6).filter((v, i) => v && hasVid[i]).length;
+    const ctaLabels = ['Continue', 'Continue', 'Set it up', 'Allow camera & mic', 'Allow photo access', 'Turn on reminders', '', 'Add ' + kept + ' days'];
+    const secLabels = ['', '', '', 'Not now', 'Not now', 'No reminders', 'Skip — start as guest', 'Start fresh'];
+    return {
+      slits: [0, 1, 2, 3, 4, 5, 6].map((i) => ({ h: i === s ? 22 : 14, bg: i <= s ? '#FFD2AE' : '#3A3A40', glow: i === s ? '0 0 8px #FF8A3D' : 'none' })),
+      back: () => go(s - 1), backVis: s > 0 ? 'visible' : 'hidden',
+      skip: () => go(3), skipVis: s < 3 ? 'visible' : 'hidden',
+      posterW: st.fmt === 'cinema' ? 320 : 180, posterH: st.fmt === 'cinema' ? 180 : 320,
+      fmtCinema: () => this.setState({ fmt: 'cinema' }), fmtStory: () => this.setState({ fmt: 'story' }),
+      cinemaOn: String(st.fmt === 'cinema'), storyOn: String(st.fmt === 'story'),
+      cinemaBg: st.fmt === 'cinema' ? '#EDEDE8' : 'transparent', cinemaColor: st.fmt === 'cinema' ? '#0A0A0B' : '#8E8E88',
+      storyBg: st.fmt === 'story' ? '#EDEDE8' : 'transparent', storyColor: st.fmt === 'story' ? '#0A0A0B' : '#8E8E88',
+      s0: s === 0, s1: s === 1, s2: s === 2, s3: s === 3, s4: s === 4, s5: s === 5, s6: s === 6, s7: s === 7,
+      slitW: (3 + 3 * p).toFixed(1), slitGlow: (60 + 80 * p).toFixed(0),
+      strip: ['#2A2A2F', '#3A3530', '#55483C', '#6A5544', '#5A4A3C', '#45403A', '#38363A', '#2E2E33', '#26262B', '#202024'],
+      perm: s === 3 || s === 4,
+      permLabel: s === 3 ? 'CAMERA & MICROPHONE' : 'PHOTO LIBRARY',
+      permTitle: s === 3 ? 'To catch today’s second.' : 'For the moments you already shot.',
+      permBody: s === 3 ? 'The camera records your day. The microphone keeps its sound — you can mute any second, any time.' : 'Forgot to open SLIVER? Pull in a video or photo from your library and give that day its second.',
+      permPoints: s === 3 ? ['Nothing is uploaded unless you turn on backup', 'Recording only while you hold or tap'] : ['We only read what you choose to import', 'Limited access works fine too'],
+      isFixed: st.rem === 'fixed', isRandom: st.rem === 'random',
+      setFixed: () => this.setState({ rem: 'fixed' }), setRandom: () => this.setState({ rem: 'random' }),
+      fixedBg: st.rem === 'fixed' ? '#EDEDE8' : 'transparent', fixedColor: st.rem === 'fixed' ? '#0A0A0B' : '#B9B9B3',
+      randBg: st.rem === 'random' ? '#EDEDE8' : 'transparent', randColor: st.rem === 'random' ? '#0A0A0B' : '#B9B9B3',
+      times: times.map((n, i) => ({ n, pick: () => this.setState({ time: i }), border: i === st.time ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: i === st.time ? '#FF8A3D1F' : '#111113', color: i === st.time ? '#EDEDE8' : '#B9B9B3' })),
+      randX: (30 + 52 * p).toFixed(1),
+      notifTime: st.rem === 'fixed' ? times[st.time] : 'now',
+      notifBody: st.rem === 'fixed' ? 'Your second for today? Whatever’s in front of you counts.' : 'Right now. Whatever you’re looking at — that’s today.',
+      foundN: String(hasVid.filter(Boolean).length),
+      bf: bfDays.slice(0, 7).map((d, i) => i < 6 ? ({
+        d: d[0], label: d[0] + (hasVid[i] ? ', video found' : ', nothing found'),
+        on: String(st.bf[i] && hasVid[i]),
+        toggle: () => { if (!hasVid[i]) return; const b = st.bf.slice(); b[i] = !b[i]; this.setState({ bf: b }); },
+        bg: hasVid[i] ? 'linear-gradient(160deg, ' + d[1] + ', #0A0A0B)' : '#111113',
+        border: hasVid[i] && st.bf[i] ? '2px solid #FF8A3D' : '1px solid #1F1F22',
+        ring: '#EDEDE8', dot: st.bf[i] ? '#FF8A3D' : 'transparent', check: hasVid[i] ? 'block' : 'none'
+      }) : null).filter(Boolean),
+      ctaButton: s !== 6 && s !== 7, ctaLink: s === 7,
+      ctaLabel: ctaLabels[s],
+      primary: () => { if (s === 3) this.setState({ dialog: 'camera' }); else if (s === 4) this.setState({ dialog: 'photos' }); else if (s === 5) this.setState({ dialog: 'notif' }); else next(); },
+      hasSecondary: s >= 3, secLinks: s === 6, secButton: s >= 3 && s < 6,
+      secLabel: secLabels[s], secColor: s === 6 ? '#EDEDE8' : '#B9B9B3', secWeight: s === 6 ? 500 : 400,
+      next,
+      dialog: !!st.dialog, dlgTitle: dlg.t, dlgBody: dlg.b, dlgButtons: dlg.btn
+    };
+  }
+}
+</script>
+</body>
+</html>

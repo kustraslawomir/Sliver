@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Filter renderer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div role="img" aria-label="{{alt}}" style="position: relative; width: {{fw}}px; height: {{fh}}px; overflow: hidden; border-radius: {{radius}}px; background: #050505; isolation: isolate">
+  <div style="position: absolute; left: {{ox}}px; top: {{oy}}px; width: 350px; height: 420px; transform-origin: 0 0; transform: scale({{sc}})">
+
+    <div style="position: absolute; inset: 0; filter: {{filter}}">
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, #3A2A22 0%, #1A1210 100%)"></div>
+      <div style="position: absolute; left: 26px; top: 36px; width: 170px; height: 210px; box-sizing: border-box; border: 6px solid #120C0A; border-radius: 4px; background: linear-gradient(180deg, #4E6E98 0%, #B98A9A 45%, #F09A5E 75%, #F7CF86 100%)"></div>
+      <div style="position: absolute; left: 112px; top: 168px; width: 42px; height: 42px; border-radius: 21px; background: #FFE9B8; box-shadow: 0 0 30px #FFB060"></div>
+      <div style="position: absolute; left: 32px; top: 42px; width: 158px; height: 198px; background: repeating-linear-gradient(180deg, transparent 0px, transparent 13px, #120C0ACC 13px, #120C0ACC 16px)"></div>
+      <div style="position: absolute; left: 226px; top: 52px; width: 98px; height: 38px; box-sizing: border-box; border: 2px solid #5AF0E0; border-radius: 10px; box-shadow: 0 0 10px #5AF0E0, inset 0 0 8px #5AF0E055; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.2em; color: #C8FFF8; text-shadow: 0 0 8px #5AF0E0">OPEN</div>
+      <div style="position: absolute; left: 300px; top: 104px; width: 14px; height: 14px; border-radius: 7px; background: #FF4FA8; box-shadow: 0 0 12px #FF4FA8"></div>
+      <div style="position: absolute; left: 192px; top: 196px; width: 46px; height: 46px; border-radius: 23px; background: #4E7A44"></div>
+      <div style="position: absolute; left: 220px; top: 214px; width: 34px; height: 34px; border-radius: 17px; background: #3A6236"></div>
+      <div style="position: absolute; left: 170px; top: 220px; width: 230px; height: 230px; background: radial-gradient(closest-side, #FFB07055, transparent)"></div>
+      <div style="position: absolute; left: 168px; top: 250px; width: 150px; height: 190px; border-radius: 75px 75px 0 0; background: linear-gradient(100deg, #6A4430 0%, #2A1A12 45%, #120C0A 100%)"></div>
+      <div style="position: absolute; left: 204px; top: 176px; width: 76px; height: 86px; border-radius: 38px / 43px; background: radial-gradient(70% 70% at 30% 40%, #F0C4A0 0%, #C68A62 35%, #4A2C1E 75%, #1E140E 100%)"></div>
+      <div style="position: absolute; left: 0; top: 330px; width: 350px; height: 90px; background: linear-gradient(180deg, #4A3020 0%, #1E130C 30%, #0C0806 100%)"></div>
+      <div style="position: absolute; left: 74px; top: 292px; width: 44px; height: 48px; border-radius: 4px 4px 10px 10px; background: linear-gradient(90deg, #F4EBDD 0%, #D8C8B4 60%, #8A7A68 100%)"></div>
+      <div style="position: absolute; left: 116px; top: 302px; width: 16px; height: 22px; box-sizing: border-box; border: 4px solid #CDBDA8; border-left: 0; border-radius: 0 10px 10px 0"></div>
+      <div style="position: absolute; left: 144px; top: 316px; width: 70px; height: 12px; background: #B84A3A"></div>
+      <div style="position: absolute; left: 148px; top: 306px; width: 62px; height: 10px; background: #2E5A7A"></div>
+    </div>
+
+    <div style="position: absolute; inset: 0; background: {{tint}}; mix-blend-mode: soft-light; opacity: {{tintO}}"></div>
+    <div style="position: absolute; inset: 0; background: {{tempC}}; mix-blend-mode: soft-light; opacity: {{tempO}}"></div>
+    <div style="position: absolute; inset: 0; background: #404040; mix-blend-mode: screen; opacity: {{shUp}}"></div>
+    <div style="position: absolute; inset: 0; background: #000000; mix-blend-mode: multiply; opacity: {{shDown}}"></div>
+    <div style="position: absolute; inset: 0; background: #B8B8B8; mix-blend-mode: darken; opacity: {{hlDown}}"></div>
+    <div style="position: absolute; inset: 0; background: #2E2E2E; mix-blend-mode: lighten; opacity: {{fade}}"></div>
+    <div style="position: absolute; inset: 0; background: repeating-linear-gradient(180deg, transparent 0px, transparent 2px, #00000055 2px, #00000055 3px); opacity: {{scan}}"></div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 40%, #000000 100%); opacity: {{vig}}"></div>
+    <div style="position: absolute; inset: 0; background-image: radial-gradient(#FFFFFF 0.5px, transparent 0.8px), radial-gradient(#000000 0.5px, transparent 0.8px); background-size: 3px 3px, 4px 4px; background-position: 0 0, 1px 2px; mix-blend-mode: overlay; opacity: {{grain}}"></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"look":{"editor":"int","min":0,"max":8,"default":1},"intensity":{"editor":"range","min":0,"max":100,"default":100},"compare":{"editor":"boolean","default":false},"frameW":{"editor":"int","default":350},"frameH":{"editor":"int","default":420},"radius":{"editor":"int","default":0},"adj":{"editor":null},"$preview":{"width":350,"height":420}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Original', 'Noir', 'Blackout', 'Night Neon', 'Cold Steel', 'Ember', 'VHS 94', 'Hard Light', 'Ghost'];
+    const P = [
+      {},
+      { g: 1, c: 1.35, b: 0.92, grain: 0.35, vig: 0.5, sharp: 0.3 },
+      { c: 1.6, b: 0.7, s: 0.75, vig: 0.65, sharp: 0.4, grain: 0.12 },
+      { s: 1.7, c: 1.2, b: 0.88, h: -12, tint: '#7A2AC8', tintO: 0.45, vig: 0.4, grain: 0.2 },
+      { s: 0.45, c: 1.18, b: 0.95, tint: '#3A8AC8', tintO: 0.55, sharp: 0.6, vig: 0.25 },
+      { sep: 0.3, s: 1.35, c: 1.08, tint: '#FF7A2A', tintO: 0.45, grain: 0.22, vig: 0.3 },
+      { s: 1.35, c: 0.85, b: 1.05, bl: 0.7, tint: '#B04AC8', tintO: 0.2, fade: 0.35, grain: 0.55, scan: 0.8 },
+      { c: 1.65, b: 1.06, s: 1.12, sharp: 0.9, vig: 0.2 },
+      { g: 0.65, b: 1.15, c: 0.72, fade: 0.55, grain: 0.3, bl: 0.3 }
+    ];
+    const N = { b: 1, c: 1, s: 1, sep: 0, g: 0, h: 0, bl: 0, tintO: 0, grain: 0, vig: 0, fade: 0, scan: 0, sharp: 0 };
+    const cmp = !!this.props.compare;
+    const look = cmp ? 0 : (this.props.look ?? 1);
+    const k = cmp ? 0 : (this.props.intensity ?? 100) / 100;
+    const p = P[look] || {};
+    const v = {};
+    Object.keys(N).forEach((key) => { const t = p[key] ?? N[key]; v[key] = N[key] + (t - N[key]) * k; });
+    const a = cmp ? {} : (this.props.adj || {});
+    const A = (x) => (a[x] || 0) / 100;
+    const clamp = (x) => Math.max(0, Math.min(1, x));
+    let c = v.c * (1 + A('contrast') / 2);
+    const s = Math.max(0, v.s * (1 + A('sat')));
+    let b = v.b;
+    let bl = v.bl;
+    const sharp = v.sharp + A('sharp');
+    if (sharp > 0) c *= 1 + 0.22 * sharp; else bl += -sharp * 1.6;
+    const hl = A('highlights');
+    if (hl > 0) b *= 1 + 0.15 * hl;
+    const sh = A('shadows');
+    const temp = A('temp');
+    const fw = this.props.frameW ?? 350, fh = this.props.frameH ?? 420;
+    const sc = Math.max(fw / 350, fh / 420);
+    return {
+      alt: 'Sample frame, ' + names[look] + ' look',
+      fw, fh, radius: this.props.radius ?? 0,
+      sc: sc.toFixed(4), ox: ((fw - 350 * sc) / 2).toFixed(1), oy: ((fh - 420 * sc) / 2).toFixed(1),
+      filter: 'brightness(' + b.toFixed(3) + ') contrast(' + c.toFixed(3) + ') saturate(' + s.toFixed(3) + ') sepia(' + v.sep.toFixed(3) + ') grayscale(' + v.g.toFixed(3) + ') hue-rotate(' + v.h.toFixed(1) + 'deg) blur(' + bl.toFixed(2) + 'px)',
+      tint: p.tint || '#000000', tintO: v.tintO.toFixed(3),
+      tempC: temp > 0 ? '#FF8A3D' : '#3A7AFF', tempO: (Math.abs(temp) * 0.6).toFixed(3),
+      shUp: (sh > 0 ? sh * 0.55 : 0).toFixed(3), shDown: (sh < 0 ? -sh * 0.35 : 0).toFixed(3),
+      hlDown: (hl < 0 ? -hl * 0.8 : 0).toFixed(3),
+      fade: clamp(v.fade + A('fade') * 0.7).toFixed(3),
+      scan: v.scan.toFixed(3),
+      vig: clamp(v.vig + A('vig') * 0.8).toFixed(3),
+      grain: clamp(v.grain + A('grain') * 0.8).toFixed(3)
+    };
+  }
+}
+</script>
+</body>
+</html>

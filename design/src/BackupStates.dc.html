@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Backup states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 2970px; height: 844px; display: flex; gap: 40px">
+  <sc-for list="{{states}}" as="s" hint-placeholder-count="7">
+    <div style="flex: 0 0 390px; height: 844px; border-radius: 44px; overflow: hidden; border: 1px solid #26262A; box-sizing: border-box">
+      <dc-import name="Backup" state="{{s}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2970,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return { states: ['progress', 'uptodate', 'paused', 'failed', 'full', 'revoked', 'offline'] }; }
+}
+</script>
+</body>
+</html>

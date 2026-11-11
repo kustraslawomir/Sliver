@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Eight looks overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}</style>
+</helmet>
+<div style="width: 1440px; height: 1500px; box-sizing: border-box; padding: 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 44px">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / STAGE 4 · LOOKS / OVERVIEW</span>
+      <span>8 PRESETS · 1 SAMPLE FRAME · 100% INTENSITY</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 58px; line-height: 1; letter-spacing: -0.02em">Same frame.<br>Eight looks.</h1>
+        <p style="margin: 0; max-width: 620px; font-size: 16px; line-height: 1.55; color: #B9B9B3">Each look is a recipe of the nine adjustment parameters, scaled by one intensity slider — so a look at 40% is the same look, just quieter. Everything on this board is rendered by the same engine the editor uses.</p>
+      </div>
+      <div style="display: flex; gap: 14px; align-items: flex-end">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88; padding-bottom: 6px">ORIGINAL</span>
+        <div style="border-radius: 14px; overflow: hidden; border: 1px solid #26262A">
+          <dc-import name="Frame" look="{{ 0 }}" intensity="{{ 100 }}" adj="{{empty}}" frame-w="{{ 130 }}" frame-h="{{ 156 }}" radius="{{ 13 }}" hint-size="130px,156px"></dc-import>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 20px">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="8">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="border-radius: 18px; overflow: hidden; border: {{c.border}}">
+          <dc-import name="Frame" look="{{c.i}}" intensity="{{ 100 }}" adj="{{empty}}" frame-w="{{ 307 }}" frame-h="{{ 369 }}" radius="{{ 17 }}" hint-size="307px,369px"></dc-import>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline">
+          <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 26px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{c.n}}</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: {{c.numColor}}">{{c.num}}</span>
+        </div>
+        <span style="font-size: 14px; line-height: 1.45; color: #B9B9B3">{{c.d}}</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88">{{c.r}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; padding-top: 20px; border-top: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8E8E88">
+    <span>ALL 8 LOOKS INCLUDED · RENDERED ON-DEVICE · WORKS OFFLINE</span>
+    <span>NEXT: STAGE 5 — ARCHIVE</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const L = [
+      ['Noir', 'Silver black & white with live grain. For faces, rain and anything after dark.', 'B&W · CON +35 · GRAIN 35 · VIG 50 · SHARP +30'],
+      ['Blackout', 'Crushed blacks — only the strongest light survives. Our most cinematic.', 'CON +60 · EXP −30 · SAT −25 · VIG 65'],
+      ['Night Neon', 'Saturated magenta–cyan. Made for city nights and signage.', 'SAT +70 · VIOLET TINT 45 · VIG 40'],
+      ['Cold Steel', 'Desaturated blue steel with crisp edges. Winter, concrete, mornings.', 'SAT −55 · STEEL TINT 55 · SHARP +60'],
+      ['Ember', 'Tungsten warmth — the colour of the brand. Kitchens, golden hour, skin.', 'WARM 45 · SEPIA 30 · SAT +35 · GRAIN 22'],
+      ['VHS 94', 'Soft, bleeding, scanlined home video. Childhood in one second.', 'BLUR 0.7 · FADE 35 · GRAIN 55 · SCANLINES'],
+      ['Hard Light', 'Midday punch and maximum clarity. Sport, beaches, motion.', 'CON +65 · SHARP +90 · EXP +6'],
+      ['Ghost', 'Washed, airy, half-remembered. Best for the On-this-day feeling.', 'B&W 65 · FADE 55 · CON −28 · SOFT 0.3']
+    ];
+    return {
+      empty: {},
+      cards: L.map((l, i) => ({
+        i: i + 1, n: l[0], d: l[1], r: l[2],
+        num: String(i + 1).padStart(2, '0') + (i === 4 ? ' · HOUSE LOOK' : ''),
+        numColor: i === 4 ? '#FF8A3D' : '#8E8E88',
+        border: i === 4 ? '1px solid #FF8A3D88' : '1px solid #26262A'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

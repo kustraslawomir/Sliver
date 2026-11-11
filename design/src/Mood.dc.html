@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLIVER moodboard and taglines</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#08080A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1160px; box-sizing: border-box; padding: 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 36px">
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; color: #8E8E88">
+      <span>SLIVER / STAGE 1 · BRAND / 04 — MOOD &amp; VOICE</span>
+      <span>REFERENCES · LIGHT · TEXTURE · TYPE</span>
+    </div>
+    <h1 style="margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 51px; line-height: 1.05; letter-spacing: -0.02em">A dark room, one light on.</h1>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="4">
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #0D0D0F; padding: 24px; display: flex; flex-direction: column; gap: 14px; min-height: 340px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #FF8A3D">{{c.label}}</span>
+        <sc-for list="{{c.lines}}" as="l" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 3px; padding-bottom: 10px; border-bottom: 1px solid #1A1A1D">
+            <span style="font-size: 15px; font-weight: 500; color: #EDEDE8">{{l.t}}</span>
+            <span style="font-size: 13px; line-height: 1.45; color: #9E9E98">{{l.d}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; gap: 32px; align-items: stretch">
+    <div style="flex: 1 1 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px">
+      <sc-for list="{{swatches}}" as="s" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="height: 64px; border-radius: 14px; border: 1px solid #26262A; background: {{s.hex}}; box-shadow: {{s.glow}}"></div>
+          <span style="font-size: 13px; color: #EDEDE8">{{s.name}}</span>
+          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">{{s.hex}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex: 0 0 360px; box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 20px; background: #0D0D0F; padding: 18px 22px; display: flex; flex-direction: column; justify-content: center; gap: 6px">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">Year in Seconds</span>
+      <span style="font-family: Geist, sans-serif; font-size: 15px; color: #B9B9B3">Your seconds live in your Drive.</span>
+      <span style="font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.08em; color: #FF8A3D">DAY 142 · 00:01.00</span>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">TAGLINES — 3 OPTIONS</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+      <div style="box-sizing: border-box; border: 1px solid #FF8A3D55; border-radius: 24px; background: #050505; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">One second.<br>Every day.</span>
+        <span style="font-size: 14px; line-height: 1.45; color: #9E9E98">Primary. The rule in four words — App Store, onboarding 1, ads. <span style="color: #FF8A3D">Recommended lead.</span></span>
+      </div>
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #050505; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">A sliver of<br>every day.</span>
+        <span style="font-size: 14px; line-height: 1.45; color: #9E9E98">Brand sign-off. Explains the name — film end cards, splash, share watermark.</span>
+      </div>
+      <div style="box-sizing: border-box; border: 1px solid #1F1F22; border-radius: 24px; background: #050505; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+        <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 32px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">Watch your year<br>add up.</span>
+        <span style="font-size: 14px; line-height: 1.45; color: #9E9E98">Payoff line. Sells the premiere, not the chore — Year in Seconds, paywall, December push.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cards: [
+        { label: 'REFERENCES', lines: [
+          { t: 'A24 title cards', d: 'White serif on black, nothing else. The premiere screen.' },
+          { t: 'Halide · Nothing OS', d: 'Instrument-grade camera UI, mono labels, ruthless restraint.' },
+          { t: 'Leica · VSCO', d: 'Quiet premium, film emulation as taste, not effect.' },
+          { t: 'Wong Kar-wai / C. Doyle', d: 'Sodium light, step-printed motion, memory as texture.' }
+        ]},
+        { label: 'LIGHT', lines: [
+          { t: 'One practical source', d: 'Door ajar, streetlight through blinds, a phone screen in bed.' },
+          { t: 'Tungsten, ~2700K', d: 'Ember is the colour of that light. Glows are bloom, never neon.' },
+          { t: 'Crushed blacks', d: 'Shadows fall to #050505, not to grey. Darkness is a material.' },
+          { t: 'Light = attention', d: 'The only glowing thing on screen is what you act on.' }
+        ]},
+        { label: 'TEXTURE', lines: [
+          { t: 'Fine 35mm grain', d: '3–5% overlay, static in UI; alive only during playback.' },
+          { t: '1px hairlines', d: '#26262A borders instead of shadows or fills.' },
+          { t: 'Large radii', d: '24–52px on sheets and cards, echoing the phone body.' },
+          { t: 'No glassmorphism', d: 'Blur only over the live viewfinder, where it earns its place.' }
+        ]},
+        { label: 'TYPE', lines: [
+          { t: 'Instrument Serif', d: 'Display: film titles, big moments, the premiere.' },
+          { t: 'Geist', d: 'UI text. Neutral grotesk, light weights for the wordmark.' },
+          { t: 'Geist Mono', d: 'Dates, timecodes, streaks — the "camera readout" voice.' },
+          { t: 'Voice', d: 'Short, warm, lowercase-calm. Never guilt, never hype.' }
+        ]}
+      ],
+      swatches: [
+        { name: 'Void', hex: '#050505', glow: 'none' },
+        { name: 'Ink', hex: '#0B0B0D', glow: 'none' },
+        { name: 'Graphite', hex: '#141417', glow: 'none' },
+        { name: 'Hairline', hex: '#26262A', glow: 'none' },
+        { name: 'Ash', hex: '#8E8E88', glow: 'none' },
+        { name: 'Bone', hex: '#EDEDE8', glow: 'none' },
+        { name: 'Ember', hex: '#FF8A3D', glow: '0 0 18px #FF8A3D55' },
+        { name: 'Ember core', hex: '#FFD2AE', glow: '0 0 18px #FF8A3D77' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

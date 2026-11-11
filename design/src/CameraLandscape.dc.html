@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Camera, landscape</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 844px; height: 390px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
+
+  <!-- viewfinder -->
+  <div style="position: absolute; inset: 0; background: radial-gradient(60% 70% at 40% 35%, #C99A6A 0%, #6B4A30 35%, #241812 70%, #0C0907 100%)">
+    <div style="position: absolute; left: 150px; top: 40px; width: 230px; height: 170px; border-radius: 6px; background: linear-gradient(180deg, #F2D6B0 0%, #B98A5E 100%); opacity: 0.85"></div>
+    <div style="position: absolute; left: 150px; top: 40px; width: 230px; height: 170px; background: repeating-linear-gradient(180deg, transparent 0px, transparent 14px, #3A2618AA 14px, #3A2618AA 17px)"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 270px; height: 120px; background: linear-gradient(180deg, #2A1C13 0%, #0C0907 100%)"></div>
+    <div style="position: absolute; left: 470px; top: 120px; width: 84px; height: 92px; border-radius: 42px / 46px; background: radial-gradient(70% 70% at 30% 40%, #F0C4A0 0%, #C68A62 35%, #4A2C1E 75%, #1E140E 100%)"></div>
+    <div style="position: absolute; left: 430px; top: 200px; width: 170px; height: 200px; border-radius: 85px 85px 0 0; background: #140E0A"></div>
+    <div style="position: absolute; left: 640px; top: 240px; width: 60px; height: 40px; border-radius: 0 0 12px 12px; background: #E9D9C4; opacity: 0.8"></div>
+  </div>
+
+  <!-- 16:9 frame (693 wide inside 844) -->
+  <div style="position: absolute; left: 0; top: 0; width: 75px; height: 390px; background: #050505B3"></div>
+  <div style="position: absolute; right: 0; top: 0; width: 76px; height: 390px; background: #050505B3"></div>
+  <sc-if value="{{grid}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 306px; top: 0; width: 1px; height: 390px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 537px; top: 0; width: 1px; height: 390px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 75px; top: 130px; width: 693px; height: 1px; background: #FFFFFF33"></div>
+    <div style="position: absolute; left: 75px; top: 260px; width: 693px; height: 1px; background: #FFFFFF33"></div>
+  </sc-if>
+
+  <!-- top chips -->
+  <div style="position: absolute; left: 91px; top: 16px; display: flex; gap: 8px">
+    <span style="display: flex; align-items: center; gap: 10px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em">TUE · 10 NOV</span>
+    <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8FC7A4"><span style="width: 6px; height: 6px; border-radius: 3px; background: #8FC7A4"></span>CINEMA 16:9 · FULL FRAME</span>
+  </div>
+  <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
+    <span role="timer" style="position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 15px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D"></span>{{elapsed}}</span>
+  </sc-if>
+  <span style="position: absolute; left: 91px; bottom: 16px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">NOIR ▾</span>
+
+  <!-- left rail (portrait top bar, rotated) -->
+  <div style="position: absolute; left: 15px; top: 0; height: 390px; display: flex; flex-direction: column; justify-content: center; gap: 12px">
+    <a href="Archive.dc.html" aria-label="Archive" style="width: 44px; height: 44px; border-radius: 22px; background: #FFFFFF14; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></a>
+    <button onClick="{{toggleGrid}}" aria-label="Grid" aria-pressed="{{gridStr}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF14; color: {{gridColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><path d="M9 3v18M15 3v18M3 9h18M3 15h18"></path></svg></button>
+    <button aria-label="Flash off" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF14; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"></path></svg></button>
+  </div>
+
+  <!-- right rail (portrait bottom controls, rotated) -->
+  <div style="position: absolute; right: 8px; top: 0; height: 390px; width: 64px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 22px 0; box-sizing: border-box">
+    <button aria-label="Flip camera" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF1A; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0; visibility: {{sideVis}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></button>
+    <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{startRec}}" aria-label="Record" style="width: 64px; height: 64px; border-radius: 32px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 48px; height: 48px; border-radius: 24px; background: #FF8A3D"></span></button>
+    </sc-if>
+    <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
+      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 64px; height: 64px; box-sizing: border-box; border-radius: 32px; border: 3px solid #FF8A3D; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px #FF8A3D66"><span style="width: 24px; height: 24px; border-radius: 7px; background: #FF8A3D"></span></a>
+    </sc-if>
+    <a href="Gallery.dc.html" aria-label="Open gallery" style="width: 44px; height: 44px; border-radius: 11px; border: 1.5px solid #EDEDE8; box-sizing: border-box; background: linear-gradient(160deg, #6A7A86, #1A2026); visibility: {{sideVis}}"></a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { rec: false, ms: 0, grid: false }; }
+  componentDidMount() { this._iv = setInterval(() => { if (this.state.rec) this.setState({ ms: this.state.ms + 100 }); }, 100); }
+  componentWillUnmount() { clearInterval(this._iv); }
+  renderVals() {
+    const st = this.state;
+    const s = Math.floor(st.ms / 1000), ds = Math.floor((st.ms % 1000) / 100);
+    return {
+      idle: !st.rec, recording: st.rec,
+      startRec: () => this.setState({ rec: true, ms: 0 }),
+      elapsed: '00:' + String(s).padStart(2, '0') + '.' + ds,
+      sideVis: st.rec ? 'hidden' : 'visible',
+      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#FF8A3D' : '#EDEDE8',
+      toggleGrid: () => this.setState({ grid: !st.grid })
+    };
+  }
+}
+</script>
+</body>
+</html>

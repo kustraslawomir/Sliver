@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trim and Pick</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
+
+  <!-- header -->
+  <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
+    <a href="CameraV2.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    <button onClick="{{openDays}}" style="height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid #26262A; background: #111113; color: #EDEDE8; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">FOR {{day}} ▾</button>
+    <button onClick="{{toggleAudio}}" aria-label="{{audioLabel}}" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #26262A; background: transparent; color: {{audioColor}}; display: flex; align-items: center; justify-content: center; padding: 0">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="{{audioPath}}"></path></svg>
+    </button>
+  </div>
+
+  <!-- preview -->
+  <div style="position: absolute; left: 20px; top: 106px; width: 350px; height: 380px; border-radius: 24px; overflow: hidden; border: 1px solid #1A1A1D; transform-origin: 0 0; transform: {{flyTransform}}; opacity: {{flyOpacity}}; transition: transform 650ms cubic-bezier(0.3, 0, 0, 1), opacity 650ms ease">
+    <div style="position: absolute; inset: 0; background: {{previewBg}}; transform: scale({{loopScale}})">
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(180deg, transparent, #050505CC)"></div>
+      <div style="position: absolute; left: {{subjectX}}px; top: 150px; width: 64px; height: 64px; border-radius: 32px; background: #0A0806E6"></div>
+      <div style="position: absolute; left: {{subjectBodyX}}px; top: 210px; width: 104px; height: 190px; border-radius: 52px 52px 0 0; background: #0A0806E6"></div>
+    </div>
+    <span style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: {{badgeColor}}; background: #050505CC; border: 1px solid {{badgeLine}}; border-radius: 999px; padding: 7px 11px">{{badge}}</span>
+    <span style="position: absolute; right: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #B9B9B3; background: #050505CC; border-radius: 999px; padding: 7px 10px">{{audioTag}}</span>
+    <sc-if value="{{reframe}}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; left: 0; right: 0; top: 0; height: {{bandY}}px; background: #050505B8; pointer-events: none"></div>
+      <div style="position: absolute; left: 0; right: 0; top: {{bandBot}}px; bottom: 0; background: #050505B8; pointer-events: none"></div>
+      <div onPointerDown="{{bandDown}}" onPointerMove="{{bandMove}}" onPointerUp="{{bandUp}}" onPointerCancel="{{bandUp}}" role="slider" aria-label="Reframe for Cinema 16:9" aria-valuetext="{{bandLabel}}" tabindex="0" style="position: absolute; left: 0; right: 0; top: {{bandY}}px; height: 197px; box-sizing: border-box; border-top: 1px solid #EDEDE8AA; border-bottom: 1px solid #EDEDE8AA; touch-action: none; cursor: ns-resize">
+        <span style="position: absolute; left: 12px; top: 10px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #EDEDE8; background: #050505B3; border-radius: 999px; padding: 5px 8px">{{bandLabel}}</span>
+        <span style="position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); height: 28px; padding: 0 12px; border-radius: 14px; background: #EDEDE8; color: #0A0A0B; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; display: flex; align-items: center; white-space: nowrap">⇅ DRAG TO REFRAME</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{dateOn}}" hint-placeholder-val="{{ true }}">
+      <span style="position: absolute; right: 16px; top: {{stampTop}}px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">{{stamp}}</span>
+    </sc-if>
+    <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 2px; border-radius: 1px; background: #FFFFFF26"><div style="height: 2px; width: {{loopPct}}%; background: #EDEDE8"></div></div>
+  </div>
+
+  <!-- timecode row -->
+  <sc-if value="{{notSaved}}" hint-placeholder-val="{{ true }}">
+  <div style="position: absolute; left: 20px; right: 20px; top: 496px; height: 32px; display: flex; align-items: center; justify-content: space-between">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.06em">DAY 142 · <span style="color: {{tcColor}}">{{fromTc}}</span></span>
+  </div>
+
+  <!-- minimap -->
+  <sc-if value="{{hasMinimap}}" hint-placeholder-val="{{ true }}">
+    <div onClick="{{jump}}" role="presentation" style="position: absolute; left: 20px; top: 536px; width: 350px; height: 16px; border-radius: 4px; overflow: hidden; display: flex; cursor: pointer">
+      <sc-for list="{{mini}}" as="m" hint-placeholder-count="35">
+        <div style="flex: 1 1 0; height: 16px; background: {{m}}"></div>
+      </sc-for>
+      <div style="position: absolute; left: {{miniX}}px; top: 0; width: {{miniW}}px; height: 16px; box-sizing: border-box; border: 1.5px solid #EDEDE8; border-radius: 3px"></div>
+    </div>
+  </sc-if>
+
+  <!-- strip -->
+  <sc-if value="{{notShort}}" hint-placeholder-val="{{ true }}">
+    <div onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" role="slider" aria-label="Choose the part you keep" aria-valuetext="{{fromTc}}" tabindex="0" style="position: absolute; left: 20px; top: 560px; width: 350px; height: 86px; overflow: hidden; touch-action: none; cursor: grab">
+      <div style="position: absolute; left: 0; top: 0; height: 86px; width: {{stripW}}px; transform: translateX({{stripX}}px); transition: {{stripTransition}}">
+        <div style="position: absolute; left: 0; top: 18px; display: flex; gap: 2px">
+          <sc-for list="{{frames}}" as="f" hint-placeholder-count="14">
+            <div style="flex: 0 0 auto; width: {{f.w}}px; height: 56px; border-radius: 4px; background: {{f.bg}}"></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="position: absolute; left: 0; top: 18px; width: 143px; height: 56px; background: #050505A8; pointer-events: none"></div>
+      <div style="position: absolute; left: 207px; top: 18px; width: 143px; height: 56px; background: #050505A8; pointer-events: none"></div>
+      <div style="position: absolute; left: 143px; top: 10px; width: 64px; height: 72px; box-sizing: border-box; border: {{frameBorder}}; border-radius: 10px; box-shadow: {{frameGlow}}; transform: scale({{frameScale}}); transition: transform 160ms cubic-bezier(0.2, 0, 0, 1), box-shadow 400ms ease; pointer-events: none"></div>
+    </div>
+    <span style="position: absolute; left: 20px; right: 20px; top: 648px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8E8E88">{{stripHint}}</span>
+  </sc-if>
+
+  <!-- short clip -->
+  <sc-if value="{{isShort}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 540px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; gap: 14px">
+        <div style="position: relative; width: 64px; height: 72px; box-sizing: border-box; border: 1.5px solid #8E8E88; border-radius: 10px; display: flex; align-items: center; padding: 6px"><div style="width: 34px; height: 56px; border-radius: 4px; background: #5A4A3A"></div></div>
+        <span style="font-size: 14px; line-height: 1.4; color: #B9B9B3">This clip is 0.64s. We'll stretch it to a full second — pick how.</span>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <sc-for list="{{fills}}" as="fl" hint-placeholder-count="3">
+          <button onClick="{{fl.pick}}" style="height: 40px; padding: 0 14px; border-radius: 20px; border: {{fl.border}}; background: {{fl.bg}}; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 14px">{{fl.n}}</button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- options row -->
+  <div style="position: absolute; left: 20px; right: 20px; top: 666px; display: flex; gap: 8px; align-items: center">
+    <button onClick="{{toggleSpeed}}" style="height: 36px; padding: 0 12px; border-radius: 18px; border: 1px solid {{speedLine}}; background: {{speedBg}}; color: #EDEDE8; font-family: 'Geist Mono', monospace; font-size: 12px">{{speedLabel}}</button>
+  </div>
+
+  <!-- CTA -->
+  <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</button>
+  <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
+    <a href="CameraV2.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Retake</a>
+    <a href="Looks.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Filters</a>
+    <button onClick="{{openDays}}" style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Replace day</button>
+  </div>
+  </sc-if>
+
+  <!-- coach mark -->
+  <sc-if value="{{showCoach}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 70px; top: 460px; width: 250px; box-sizing: border-box; border-radius: 18px; background: #EDEDE8; color: #0A0A0B; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 12px 40px #000000">
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 18px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em">Drag to choose the part you keep.</span>
+      <span style="font-size: 13px; color: #3A3A40">We already picked one for you. ✦</span>
+    </div>
+    <div style="position: absolute; left: 188px; top: 548px; width: 14px; height: 14px; background: #EDEDE8; transform: rotate(45deg)"></div>
+  </sc-if>
+
+  <!-- saved -->
+  <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 540px; display: flex; flex-direction: column; gap: 14px">
+      <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">THIS WEEK</span>
+      <div style="display: flex; justify-content: space-between">
+        <sc-for list="{{week}}" as="w" hint-placeholder-count="7">
+          <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+            <div style="width: 44px; height: 58px; box-sizing: border-box; border-radius: 10px; border: {{w.border}}; background: {{w.bg}}; box-shadow: {{w.glow}}; transition: background 300ms ease 550ms"></div>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: {{w.color}}">{{w.d}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+        <a href="ProjectHubSaved.dc.html" style="position: absolute; left: 20px; right: 20px; top: 752px; height: 56px; border-radius: 28px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 17px; font-weight: 500">Done</a>
+  </sc-if>
+
+  <!-- day sheet -->
+  <sc-if value="{{daySheet}}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{closeDays}}" style="position: absolute; inset: 0; background: #000000B3"></div>
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 32px 32px 0 0; background: #18181B; border-top: 1px solid #3A3A40; padding: 10px 20px 32px; display: flex; flex-direction: column; gap: 4px">
+      <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40; margin-bottom: 12px"></div>
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; padding-bottom: 8px; font-weight: 600; letter-spacing: -0.02em">Save to which day?</span>
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+        <button onClick="{{d.pick}}" style="height: 52px; display: flex; align-items: center; gap: 12px; border: 0; border-top: 1px solid #26262A; background: transparent; color: #EDEDE8; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 0">
+          <span style="width: 8px; height: 8px; border-radius: 4px; background: {{d.dot}}"></span>
+          <span style="flex-grow: 1; text-align: left">{{d.n}}</span>
+          <span style="font-family: Geist, sans-serif; font-size: 13px; letter-spacing: 0; color: #8E8E88">{{d.note}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["normal","long","short"],"default":"normal"},"startDay":{"editor":"text","default":"TUE · 10 NOV"},"reframe":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { bandY: 92, bandAuto: true, pos: null, mode: 'auto', sug: 0, audio: true, speed: 1, dateOn: true, saved: false, coach: true, drag: false, lock: false, t: 0, daySheet: false, day: (props && props.startDay) || 'TUE · 10 NOV', fill: 0 };
+  }
+  componentDidMount() { this._iv = setInterval(() => this.setState({ t: (this.state.t + 40) % 1000 }), 40); }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._lt); }
+  cfg() {
+    const v = this.props.variant || 'normal';
+    if (v === 'long') return { v, len: 272, sugs: [131.4, 48.2, 219.7] };
+    if (v === 'short') return { v, len: 0.64, sugs: [0] };
+    return { v, len: 14.2, sugs: [4.2, 9.1, 1.6] };
+  }
+  col(t, k) {
+    const h = 24 + 16 * Math.sin(t * 0.37);
+    const l = 14 + 16 * (0.5 + 0.5 * Math.sin(t * 0.61 + 1.2)) + (k || 0);
+    return 'hsl(' + h.toFixed(0) + ', 22%, ' + l.toFixed(0) + '%)';
+  }
+  fmt(s) {
+    const m = Math.floor(s / 60), r = s - m * 60;
+    const ss = Math.floor(r), cs = Math.round((r - ss) * 100) % 100;
+    return String(m).padStart(2, '0') + ':' + String(ss).padStart(2, '0') + '.' + String(cs).padStart(2, '0');
+  }
+  renderVals() {
+    const c = this.cfg(), st = this.state;
+    const win = st.speed;
+    const pps = 64 / win;
+    const maxPos = Math.max(0, c.len - win);
+    const pos = Math.min(st.pos == null ? c.sugs[0] : st.pos, maxPos);
+    const lock = (p, extra) => { this.setState(Object.assign({ pos: p, lock: true }, extra || {})); clearTimeout(this._lt); this._lt = setTimeout(() => this.setState({ lock: false }), 400); };
+    const n = Math.ceil(c.len);
+    const frames = [];
+    for (let i = 0; i < n; i++) { const w = Math.min(1, c.len - i) * pps - 2; frames.push({ w: Math.max(4, w), bg: this.col(i + 0.5) }); }
+    const marks = c.sugs.map((s, i) => ({ x: s * pps + 32 - 3, o: i === st.sug && st.mode === 'auto' ? 1 : 0.5 }));
+    const mini = []; for (let i = 0; i < 35; i++) mini.push(this.col((i + 0.5) * c.len / 35, -4));
+    const short = c.v === 'short';
+    const auto = st.mode === 'auto';
+    const tc = pos + win / 2;
+    const subj = 60 + 150 * (0.5 + 0.5 * Math.sin(tc * 0.8));
+    const today = st.day === 'TUE · 10 NOV';
+    const dayNames = ['WED · 4 NOV', 'THU · 5 NOV', 'FRI · 6 NOV', 'SAT · 7 NOV', 'SUN · 8 NOV', 'MON · 9 NOV', 'TUE · 10 NOV'];
+    const filled = { 'WED · 4 NOV': 1, 'THU · 5 NOV': 1, 'SAT · 7 NOV': 1, 'SUN · 8 NOV': 1 };
+    return {
+      day: st.day,
+      notSaved: !st.saved, saved: st.saved,
+      hasSugs: !short, isShort: short, notShort: !short, hasMinimap: !short,
+      sugLabel: (st.sug + 1) + '/3',
+      badge: short ? '0.64S CLIP' : (auto ? '✦ AUTO-PICKED' : 'CUSTOM'),
+      badgeColor: auto && !short ? '#FF8A3D' : '#EDEDE8',
+      badgeLine: auto && !short ? '#FF8A3D55' : '#3A3A40',
+      audioTag: st.audio ? 'SOUND ON' : 'MUTED',
+      audioLabel: st.audio ? 'Mute original sound' : 'Keep original sound',
+      audioColor: st.audio ? '#EDEDE8' : '#8E8E88',
+      audioPath: st.audio ? 'M16.5 8.5a5 5 0 0 1 0 7' : 'M17 9l5 6M22 9l-5 6',
+      toggleAudio: () => this.setState({ audio: !st.audio }),
+      previewBg: 'radial-gradient(120% 90% at ' + (30 + 40 * Math.sin(tc * 0.3)).toFixed(0) + '% 20%, ' + this.col(tc, 18) + ' 0%, ' + this.col(tc, 2) + ' 45%, #070605 100%)',
+      subjectX: subj.toFixed(0), subjectBodyX: (subj - 20).toFixed(0),
+      loopScale: (1 + 0.03 * st.t / 1000).toFixed(4),
+      loopPct: (st.t / 10).toFixed(1),
+      fromTc: short ? '00:00.00 → 00:01.00' : 'FROM ' + this.fmt(pos),
+      tcColor: st.drag ? '#FF8A3D' : '#B9B9B3',
+      tryAnother: () => { const s = (st.sug + 1) % 3; lock(c.sugs[s], { sug: s, mode: 'auto', coach: false }); },
+      mini, miniMarks: c.sugs.map((s) => ({ x: (s / c.len * 350).toFixed(1) })),
+      miniX: (pos / c.len * 350).toFixed(1), miniW: Math.max(3, win / c.len * 350).toFixed(1),
+      jump: (e) => { const r = e.currentTarget.getBoundingClientRect(); const p = (e.clientX - r.left) / r.width * c.len - win / 2; lock(Math.max(0, Math.min(maxPos, p)), { mode: 'custom', coach: false }); },
+      stripW: (c.len * pps).toFixed(0), stripX: (143 - pos * pps).toFixed(1),
+      stripTransition: st.drag ? 'none' : 'transform 320ms cubic-bezier(0.3, 0, 0, 1)',
+      frames, marks,
+      frameBorder: st.drag ? '2.5px solid #FFD2AE' : (st.lock ? '3px solid #FF8A3D' : '2.5px solid #FF8A3D'),
+      frameGlow: st.lock ? '0 0 0 4px #FF8A3D33, 0 0 24px #FF8A3D, 0 0 60px #FF8A3D88' : (st.drag ? '0 0 18px #FF8A3D, 0 0 48px #FF8A3D88' : '0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55'),
+      frameScale: st.drag ? 1.04 : 1,
+      stripHint: c.v === 'long' ? 'DRAG STRIP · TAP OVERVIEW TO JUMP · PINCH TO ZOOM' : 'DRAG THE STRIP TO CHOOSE YOUR SECOND',
+      down: (e) => { const r = e.currentTarget.getBoundingClientRect(); this._sc = r.width / 350; this._sx = e.clientX; this._sp = pos; this._d = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} this.setState({ drag: true, coach: false, mode: 'custom' }); },
+      move: (e) => { if (!this._d) return; const dx = (e.clientX - this._sx) / this._sc; const np = Math.max(0, Math.min(maxPos, this._sp - dx / pps)); this.setState({ pos: np }); },
+      up: () => { if (!this._d) return; this._d = false; const p = this.state.pos == null ? pos : this.state.pos; let hit = -1; c.sugs.forEach((s, i) => { if (Math.abs(s - p) < 0.15) hit = i; }); this.setState({ drag: false }); if (hit >= 0) lock(c.sugs[hit], { sug: hit, mode: 'auto' }); else lock(p, { mode: 'custom' }); },
+      fills: ['Slow to fit', 'Loop', 'Hold last frame'].map((nm, i) => ({ n: nm, pick: () => this.setState({ fill: i }), border: i === st.fill ? '1px solid #FF8A3D' : '1px solid #26262A', bg: i === st.fill ? '#FF8A3D1F' : 'transparent' })),
+      speedLabel: st.speed === 1 ? '1× SPEED' : '0.5× SLOW-MO',
+      speedLine: st.speed === 1 ? '#26262A' : '#FF8A3D', speedBg: st.speed === 1 ? 'transparent' : '#FF8A3D1F',
+      toggleSpeed: () => this.setState({ speed: st.speed === 1 ? 0.5 : 1 }),
+      dateOn: st.dateOn, dateStr: String(st.dateOn),
+      stamp: st.day.split(' · ')[1] + ' 2026',
+      dateLabel: st.dateOn ? 'DATE ON' : 'DATE OFF',
+      dateLine: st.dateOn ? '#FF8A3D' : '#26262A', dateBg: st.dateOn ? '#FF8A3D1F' : 'transparent',
+      toggleDate: () => this.setState({ dateOn: !st.dateOn }),
+      reframe: !!this.props.reframe,
+      bandY: st.bandY.toFixed(0), bandBot: (st.bandY + 197).toFixed(0),
+      bandLabel: st.bandAuto ? 'CINEMA 16:9 · CENTERED' : 'CINEMA 16:9 · CUSTOM',
+      bandDown: (e) => { const r = e.currentTarget.getBoundingClientRect(); this._bsc = r.height / 197; this._by = e.clientY; this._bs = st.bandY; this._bd = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} },
+      bandMove: (e) => { if (!this._bd) return; const dy = (e.clientY - this._by) / this._bsc; this.setState({ bandY: Math.max(0, Math.min(183, this._bs + dy)), bandAuto: false }); },
+      bandUp: () => { this._bd = false; },
+      stampTop: this.props.reframe ? (st.bandY + 197 - 30).toFixed(0) : '336',
+      showCoach: st.coach && !short && !st.saved,
+      save: () => this.setState({ saved: true, coach: false }),
+      undo: () => this.setState({ saved: false }),
+      flyTransform: st.saved ? 'translate(' + (today ? 301 : 6 + dayNames.indexOf(st.day) * 49.2) + 'px, 471px) scale(0.126, 0.153)' : 'none',
+      flyOpacity: st.saved ? 0 : 1,
+      week: dayNames.map((d) => {
+        const isDay = d === st.day, isToday = d === 'TUE · 10 NOV';
+        const has = filled[d] || isDay;
+        return { d: d.split(' · ')[1].replace(' NOV', ''), bg: has ? (isDay ? 'linear-gradient(160deg, ' + this.col(tc, 14) + ', #0A0806)' : 'linear-gradient(160deg, #4E5A63, #121518)') : '#111113', border: isToday ? '2px solid #FF8A3D' : '1px solid #1F1F22', glow: isDay ? '0 0 16px #FF8A3D66' : 'none', color: isToday ? '#FF8A3D' : '#8E8E88' };
+      }),
+      daySheet: st.daySheet,
+      openDays: () => this.setState({ daySheet: true }),
+      closeDays: () => this.setState({ daySheet: false }),
+      days: dayNames.slice().reverse().map((d) => ({ n: d === 'TUE · 10 NOV' ? d + ' · TODAY' : d, dot: filled[d] ? '#8E8E88' : (d === st.day ? '#FF8A3D' : '#26262A'), note: filled[d] ? 'Has a clip · replace' : 'Empty', pick: () => this.setState({ day: d, daySheet: false }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Widgets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>body{margin:0;background:#08080A}</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; padding: 56px 72px; background: #08080A; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; display: flex; gap: 63px">
+
+  <!-- iOS home -->
+  <div style="flex: 0 0 390px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">iOS · HOME SCREEN · SMALL &amp; MEDIUM</span>
+    <div style="position: relative; height: 844px; border-radius: 52px; overflow: hidden; border: 1px solid #26262A; background: linear-gradient(170deg, #2A3440 0%, #12161C 60%, #0A0C10 100%)">
+      <div style="position: absolute; left: 24px; top: 80px; display: flex; gap: 22px">
+        <div style="width: 158px; height: 158px; box-sizing: border-box; border-radius: 26px; background: #050505; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8E8E88">TUE 10 NOV</span>
+          <span aria-hidden="true" style="align-self: center; width: 3px; height: 44px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 10px #FF8A3D, 0 0 24px #FF8A3D"></span>
+          <span style="font-size: 13px; line-height: 1.2">Today's clip is waiting</span>
+        </div>
+        <div style="width: 158px; height: 158px; box-sizing: border-box; border-radius: 26px; overflow: hidden; position: relative; background: linear-gradient(160deg, #8A6A48, #1A120B)">
+          <span style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #EDEDE8">TODAY ✓</span>
+          <span style="position: absolute; left: 14px; bottom: 14px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #FF9A4D">10 NOV 2026</span>
+        </div>
+      </div>
+      <div style="position: absolute; left: 24px; top: 262px; width: 338px; height: 158px; box-sizing: border-box; border-radius: 26px; background: #050505; padding: 14px; display: flex; gap: 14px">
+        <div style="flex: 0 0 98px; border-radius: 14px; border: 1.5px dashed #FF8A3D; display: flex; align-items: center; justify-content: center"><span style="width: 2px; height: 34px; background: #FFD2AE; box-shadow: 0 0 10px #FF8A3D"></span></div>
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="display: flex; flex-direction: column; gap: 3px">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8E8E88">THIS WEEK</span>
+            <span style="font-size: 14px">Tap to film today</span>
+          </div>
+          <div style="display: flex; gap: 4px">
+            <sc-for list="{{week}}" as="w" hint-placeholder-count="7">
+              <span style="flex: 1 1 0; height: 44px; box-sizing: border-box; border-radius: 6px; background: {{w.bg}}; border: {{w.border}}"></span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="position: absolute; left: 24px; right: 24px; top: 450px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px 22px">
+        <sc-for list="{{apps}}" as="a" hint-placeholder-count="8">
+          <span style="height: 64px; border-radius: 15px; background: {{a}}"></span>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS lock -->
+  <div style="flex: 0 0 390px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">iOS · LOCK SCREEN WIDGET + CONTROL</span>
+    <div style="position: relative; height: 844px; border-radius: 52px; overflow: hidden; border: 1px solid #26262A; background: radial-gradient(90% 60% at 30% 20%, #3A2A20 0%, #120E0C 60%, #060505 100%)">
+      <div style="position: absolute; left: 0; right: 0; top: 70px; display: flex; flex-direction: column; align-items: center; gap: 2px">
+        <span style="font-size: 17px; font-weight: 500; color: #EDEDE8CC">Tuesday 10 November</span>
+        <span style="font-size: 84px; font-weight: 600; letter-spacing: -0.02em; line-height: 1">19:30</span>
+      </div>
+      <div style="position: absolute; left: 0; right: 0; top: 200px; display: flex; justify-content: center; gap: 12px">
+        <span style="width: 64px; height: 64px; border-radius: 32px; background: #FFFFFF26; display: flex; align-items: center; justify-content: center"><span style="width: 2.5px; height: 30px; border-radius: 2px; background: #FFFFFF"></span></span>
+        <span style="width: 158px; height: 64px; box-sizing: border-box; border-radius: 18px; background: #FFFFFF26; padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px"><span style="font-size: 12px; font-weight: 600">SLIVER</span><span style="font-size: 12px; color: #FFFFFFCC">Today's clip is waiting</span></span>
+      </div>
+      <div style="position: absolute; left: 44px; bottom: 44px; width: 50px; height: 50px; border-radius: 25px; background: #FFFFFF26; display: flex; align-items: center; justify-content: center"><span style="width: 2.5px; height: 22px; border-radius: 2px; background: #FFFFFF"></span></div>
+      <div style="position: absolute; right: 44px; bottom: 44px; width: 50px; height: 50px; border-radius: 25px; background: #FFFFFF26; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"></path></svg></div>
+      <span style="position: absolute; left: 30px; bottom: 104px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #FFFFFFAA">SLIVER CONTROL</span>
+    </div>
+  </div>
+
+  <!-- Android -->
+  <div style="flex: 0 0 390px; display: flex; flex-direction: column; gap: 12px">
+    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #8E8E88">ANDROID · 2×2 WIDGET + QUICK SETTINGS TILE</span>
+    <div style="position: relative; height: 844px; border-radius: 40px; overflow: hidden; border: 1px solid #26262A; background: linear-gradient(170deg, #1E2420 0%, #0C0F0D 100%)">
+      <div style="position: absolute; left: 16px; right: 16px; top: 40px; box-sizing: border-box; border-radius: 28px; background: #1E1E22; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-size: 12px; color: #EDEDE8AA">Quick Settings</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+          <span style="height: 60px; border-radius: 20px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-size: 14px; font-weight: 600"><span style="width: 2.5px; height: 22px; border-radius: 2px; background: #0A0A0B"></span>SLIVER</span>
+          <span style="height: 60px; border-radius: 20px; background: #2A2A2E"></span>
+          <span style="height: 60px; border-radius: 20px; background: #2A2A2E"></span>
+          <span style="height: 60px; border-radius: 20px; background: #2A2A2E"></span>
+        </div>
+      </div>
+      <div style="position: absolute; left: 20px; top: 280px; width: 170px; height: 170px; box-sizing: border-box; border-radius: 28px; background: #050505; padding: 16px; display: flex; flex-direction: column; justify-content: space-between">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #8E8E88">TUE 10 NOV</span>
+        <span aria-hidden="true" style="align-self: center; width: 3px; height: 46px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 10px #FF8A3D, 0 0 24px #FF8A3D"></span>
+        <span style="font-size: 13px; line-height: 1.2">Today's clip is waiting</span>
+      </div>
+      <div style="position: absolute; left: 210px; top: 280px; width: 160px; height: 170px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px">
+        <span style="border-radius: 50%; background: #2E3A34"></span><span style="border-radius: 50%; background: #3A2E2E"></span>
+        <span style="border-radius: 50%; background: #2E2E3A"></span><span style="border-radius: 50%; background: #3A3A2E"></span>
+      </div>
+      <p style="position: absolute; left: 20px; right: 20px; top: 490px; margin: 0; font-size: 13px; line-height: 1.5; color: #B9B9B3">The tile works from the lock screen pull-down too, so it's the Android stand-in for a lock-screen camera shortcut.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pal = ['#4E5A63', '#7A6A50', null, '#506A7A', '#6A5A7A', null, 'today'];
+    return {
+      week: pal.map((p) => ({ bg: p === 'today' ? 'transparent' : (p ? 'linear-gradient(160deg, ' + p + ', #0C0B0A)' : '#141417'), border: p === 'today' ? '1.5px solid #FF8A3D' : '0' })),
+      apps: ['#3A4A5A', '#5A3A3A', '#3A5A4A', '#5A5A3A', '#4A3A5A', '#3A3A3A', '#5A4A3A', '#3A5A5A']
+    };
+  }
+}
+</script>
+</body>
+</html>
