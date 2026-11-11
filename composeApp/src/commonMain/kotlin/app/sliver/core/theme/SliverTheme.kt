@@ -10,12 +10,32 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import sliver.composeapp.generated.resources.Res
+import sliver.composeapp.generated.resources.geist_medium
+import sliver.composeapp.generated.resources.geist_mono_medium
+import sliver.composeapp.generated.resources.geist_mono_regular
+import sliver.composeapp.generated.resources.geist_regular
+import sliver.composeapp.generated.resources.geist_semibold
+import org.jetbrains.compose.resources.Font
 import androidx.compose.ui.unit.dp
 
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
 @Composable
 fun SliverTheme(reducedMotion: Boolean = false, content: @Composable () -> Unit) {
+    val sans = FontFamily(
+        Font(Res.font.geist_regular, FontWeight.Normal),
+        Font(Res.font.geist_medium, FontWeight.Medium),
+        Font(Res.font.geist_semibold, FontWeight.SemiBold),
+    )
+    val mono = FontFamily(
+        Font(Res.font.geist_mono_regular, FontWeight.Normal),
+        Font(Res.font.geist_mono_medium, FontWeight.Medium),
+    )
+    SliverFonts.Sans = sans
+    SliverFonts.Mono = mono
     CompositionLocalProvider(LocalReducedMotion provides reducedMotion, content = content)
 }
 

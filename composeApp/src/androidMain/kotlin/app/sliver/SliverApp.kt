@@ -25,7 +25,6 @@ import org.koin.core.context.startKoin
 class SliverApp : Application(), KoinComponent {
     override fun onCreate() {
         super.onCreate()
-        app.sliver.core.theme.installGeistFonts(this)
         startKoin {
             androidContext(this@SliverApp)
             modules(commonModule, platformModule)

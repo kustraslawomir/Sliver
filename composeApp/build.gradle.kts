@@ -27,6 +27,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.components.resources)
             implementation(libs.koin.core)
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.coroutines.core)
