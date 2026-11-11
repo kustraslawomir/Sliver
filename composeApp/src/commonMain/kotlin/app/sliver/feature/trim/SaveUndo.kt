@@ -4,7 +4,9 @@ import app.sliver.core.ui.UndoToastState
 import app.sliver.data.db.Day
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
+import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.feature.films.ensureDefaultFilm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 const val UNDO_WINDOW_MS = 6000L
 
 /** Outlives the Trim screen: owns the "Saved" toast, the undo, and tmp cleanup once the window closes. */
-class SaveUndo(private val days: DayRepository, private val files: FileStore) {
+class SaveUndo(private val days: DayRepository, private val files: FileStore, private val films: FilmRepository) {
     val toast = UndoToastState()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -48,6 +50,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore) {
             if (previous != null && backup != null) restore(previous, backup)
             throw e
         }
+        runCatching { films.ensureDefaultFilm(request.date, request.format) }
         val p = Pending(request, previous, backup)
         pending = p
         p.timer = scope.launch {

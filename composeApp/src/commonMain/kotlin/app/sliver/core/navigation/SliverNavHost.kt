@@ -28,6 +28,7 @@ import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.archive.DayDetailScreen
 import app.sliver.feature.backfill.BackfillScreen
 import app.sliver.feature.camera.CameraScreen
+import app.sliver.feature.films.FilmsScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.looks.LooksScreen
 import app.sliver.feature.trim.SaveUndo
@@ -68,6 +69,7 @@ fun SliverNavHost() {
                         Route.Archive -> ArchiveScreen(::go)
                         Route.DayDetail -> DayDetailScreen(::go, onBack = { nav.popBackStack() })
                         Route.FillThePast -> BackfillScreen(onBack = { nav.popBackStack() })
+                        Route.Films -> FilmsScreen(::go)
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }
