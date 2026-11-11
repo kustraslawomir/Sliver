@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.sliver.core.log.logDebug
 import app.sliver.data.DaySource
 import app.sliver.data.toParams
 import app.sliver.data.files.FileStore
@@ -102,7 +103,8 @@ class BackfillExecutor(
     private suspend fun fill(item: BackfillItem, date: LocalDate, appSettings: app.sliver.data.settings.AppSettings): Boolean {
         var tmp: String? = null
         return try {
-            val path = gallery.copyToTmp(item.uri).also { tmp = it }
+            val path = if ("://" in item.uri) gallery.copyToTmp(item.uri) else item.uri
+            tmp = path
             val start = if (item.video) media.autoPickMs(path, media.durationMs(path)) else 0L
             days.saveSecond(
                 SaveSecondRequest(
@@ -116,6 +118,7 @@ class BackfillExecutor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            logDebug("Backfill", "fill ${item.date} failed: $e")
             false
         } finally {
             tmp?.let(files::delete)

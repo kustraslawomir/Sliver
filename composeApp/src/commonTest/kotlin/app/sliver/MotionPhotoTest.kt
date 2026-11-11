@@ -56,6 +56,12 @@ class MotionPhotoTest {
         assertNull(found.presentationUs)
     }
 
+    @Test fun headCheckSkipsPlainPhotos() {
+        assertEquals(true, MotionPhoto.declaresMotion(jpeg(xmp(500), mp4(500))))
+        assertEquals(false, MotionPhoto.declaresMotion(jpeg(xmp(500, flag = "0"), mp4(500))))
+        assertEquals(false, MotionPhoto.declaresMotion(ByteArray(1000)))
+    }
+
     @Test fun windowCenteredOnTimestampOrMidpoint() {
         assertEquals(1000L, MotionPhoto.windowStartMs(1_500_000, 3000))
         assertEquals(0L, MotionPhoto.windowStartMs(100_000, 3000))

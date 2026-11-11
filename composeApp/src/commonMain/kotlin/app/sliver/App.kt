@@ -1,5 +1,6 @@
 package app.sliver
 
+import app.sliver.core.ui.NoticeHost
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +24,7 @@ fun App() {
             var splash by remember { mutableStateOf(true) }
             Box {
                 SliverNavHost()
+                NoticeHost()
                 if (splash) SplashOverlay { splash = false }
             }
         }

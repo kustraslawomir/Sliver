@@ -55,25 +55,47 @@ class AndroidGalleryProvider(private val context: Context, private val files: Fi
         }
     }.getOrNull()
 
-    override suspend fun copyToTmp(uri: String): String = withContext(Dispatchers.IO) {
+    override suspend fun copyToTmp(uri: String): String = copy(uri, files.newTmpPath(System.currentTimeMillis()))
+
+    override suspend fun keep(uri: String): String {
+        val dir = java.io.File(context.filesDir, "backfill").apply { mkdirs() }
+        return copy(uri, java.io.File(dir, "${System.nanoTime()}.mp4").path)
+    }
+
+    private suspend fun copy(uri: String, base: String): String = withContext(Dispatchers.IO) {
         val source = Uri.parse(uri)
         val isImage = resolver.getType(source)?.startsWith("image/") == true
-        val base = files.newTmpPath(System.currentTimeMillis())
         val path = if (isImage) base.removeSuffix(".mp4") + ".jpg" else base
-        val input = checkNotNull(resolver.openInputStream(source)) { "Cannot open media" }
-        input.use { i -> java.io.File(path).outputStream().use { o -> i.copyTo(o) } }
+        try {
+            val input = checkNotNull(resolver.openInputStream(source)) { "Cannot open media" }
+            input.use { i -> java.io.File(path).outputStream().use { o -> i.copyTo(o) } }
+        } catch (e: Throwable) {
+            java.io.File(path).delete()
+            throw e
+        }
         path
+    }
+
+    private fun readHead(input: java.io.InputStream): ByteArray {
+        val buf = ByteArray(MotionPhoto.HEAD_BYTES)
+        var n = 0
+        while (n < buf.size) {
+            val r = input.read(buf, n, buf.size - n)
+            if (r < 0) break
+            n += r
+        }
+        return buf.copyOf(n)
     }
 
     override suspend fun extractMotionVideo(uri: String): MotionClip? = withContext(Dispatchers.IO) {
         val source = Uri.parse(uri)
         if (resolver.getType(source)?.startsWith("image/") != true) return@withContext null
-        runCatching {
-            val bytes = resolver.openInputStream(source)?.use { it.readBytes() } ?: return@runCatching null
-            val video = MotionPhoto.find(bytes) ?: return@runCatching null
-            val path = files.newTmpPath(System.currentTimeMillis())
-            java.io.File(path).outputStream().use { it.write(bytes, video.offset, video.length) }
-            MotionClip(path, video.presentationUs)
-        }.getOrNull()
+        val head = resolver.openInputStream(source)?.use { readHead(it) } ?: return@withContext null
+        if (!MotionPhoto.declaresMotion(head)) return@withContext null
+        val bytes = resolver.openInputStream(source)?.use { it.readBytes() } ?: return@withContext null
+        val video = MotionPhoto.find(bytes) ?: return@withContext null
+        val path = files.newTmpPath(System.currentTimeMillis())
+        java.io.File(path).outputStream().use { it.write(bytes, video.offset, video.length) }
+        MotionClip(path, video.presentationUs)
     }
 }

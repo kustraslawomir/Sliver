@@ -7,6 +7,12 @@ object MotionPhoto {
     private val itemTag = Regex("""<Container:Item\b[^>]*?/?>""", RegexOption.DOT_MATCHES_ALL)
     private val presentation = Regex("""MotionPhotoPresentationTimestampUs\s*=\s*"(-?\d+)"""")
 
+    /** Cheap pre-check on the first [HEAD_BYTES] of a file: only files that declare a Motion Photo need to be read in full. */
+    fun declaresMotion(head: ByteArray): Boolean =
+        xmpOf(head)?.let { Regex("""MotionPhoto\s*=\s*"1"""").containsMatchIn(it) } == true
+
+    const val HEAD_BYTES = 256 * 1024
+
     /** Finds the video of a Motion Photo 1.0 (JPEG: trailing bytes; HEIC/AVIF: `mpvd` box). Legacy MicroVideo is ignored. */
     fun find(bytes: ByteArray): MotionVideo? {
         val xmp = xmpOf(bytes) ?: return null
@@ -25,7 +31,7 @@ object MotionPhoto {
     }
 
     private fun xmpOf(bytes: ByteArray): String? {
-        val head = bytes.decodeToString(0, minOf(bytes.size, 256 * 1024), throwOnInvalidSequence = false)
+        val head = bytes.decodeToString(0, minOf(bytes.size, HEAD_BYTES), throwOnInvalidSequence = false)
         val start = head.indexOf("<x:xmpmeta")
         if (start < 0) return null
         val end = head.indexOf("</x:xmpmeta>", start)

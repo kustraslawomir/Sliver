@@ -38,6 +38,7 @@ import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.Notices
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.DaySource
@@ -80,8 +81,12 @@ fun BackfillScreen(onBack: () -> Unit) {
     val pick = rememberMultiMediaPicker { uris ->
         scanning = true
         scope.launch {
-            scanned = runCatching { gallery.describe(uris) }.getOrDefault(emptyList())
+            val described = runCatching { gallery.describe(uris) }
+            scanned = described.getOrDefault(emptyList())
             scanning = false
+            val unreadable = uris.size - (scanned?.size ?: 0)
+            if (described.isFailure) Notices.show("Couldn't read the selected items.")
+            else if (unreadable > 0) Notices.show("Could not read $unreadable ${if (unreadable == 1) "item" else "items"}.")
         }
     }
 
@@ -141,7 +146,13 @@ fun BackfillScreen(onBack: () -> Unit) {
             PrimaryButton(fillLabel(picked.size), {
                 if (picked.isEmpty()) return@PrimaryButton
                 scope.launch {
-                    store.start(picked)
+                    val kept = picked.mapNotNull { item ->
+                        runCatching { gallery.keep(item.uri) }.getOrNull()?.let { item.copy(uri = it) }
+                    }
+                    val failed = picked.size - kept.size
+                    if (failed > 0) Notices.show("Could not read $failed ${if (failed == 1) "item" else "items"}.")
+                    if (kept.isEmpty()) return@launch
+                    store.start(kept)
                     runner.start()
                 }
             }, Modifier.fillMaxWidth())

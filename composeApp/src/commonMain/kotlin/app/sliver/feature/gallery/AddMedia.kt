@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.Route
+import app.sliver.core.ui.Notices
 import app.sliver.data.DaySource
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.launch
@@ -33,7 +34,10 @@ fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
             val video = motion != null || provider.isVideo(uri)
             val path = motion?.path ?: runCatching { provider.copyToTmp(uri) }.getOrNull()
             busy = false
-            if (path == null) return@launch
+            if (path == null) {
+                Notices.show("Couldn't read that item. Pick another.")
+                return@launch
+            }
             CaptureSession.path = path
             CaptureSession.forDate = forDate
             CaptureSession.motion = motion != null
