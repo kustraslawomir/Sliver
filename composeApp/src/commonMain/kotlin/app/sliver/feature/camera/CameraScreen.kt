@@ -113,7 +113,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val engine = rememberCameraEngine()
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val thumb = rememberLatestGalleryThumb()
     val days = remember { koin.get<DayRepository>() }
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
@@ -312,7 +311,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(thumb, iconRot) { onNavigate(Route.GalleryPicker) }
+                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(iconRot) { onNavigate(Route.GalleryPicker) }
                 RecordButton(
                     photo = cam.mode == CameraMode.PHOTO,
                     recording = recording,
@@ -373,7 +372,7 @@ private fun CinemaBandDim() {
 }
 
 @Composable
-private fun AddMediaButton(thumb: ImageBitmap?, rotation: Float, onClick: () -> Unit) {
+private fun AddMediaButton(rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "add-upright")
     Column(
         Modifier.width(64.dp).semantics { contentDescription = "Add media"; role = Role.Button }
@@ -384,7 +383,6 @@ private fun AddMediaButton(thumb: ImageBitmap?, rotation: Float, onClick: () -> 
             Modifier.size(52.dp).clip(SliverShapes.M).background(SliverColors.Surface1)
                 .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
         ) {
-            if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
             Box(
                 Modifier.align(Alignment.BottomEnd).size(20.dp).clip(CircleShape).background(SliverColors.Accent),
                 Alignment.Center,

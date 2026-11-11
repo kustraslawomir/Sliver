@@ -141,37 +141,3 @@ actual fun CameraPreview(
     AndroidView({ view }, modifier)
 }
 
-@Composable
-actual fun rememberLatestGalleryThumb(): ImageBitmap? {
-    val context = LocalContext.current
-    var thumb by remember { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(Unit) {
-        thumb = withContext(Dispatchers.IO) { runCatching { latestThumb(context) }.getOrNull() }
-    }
-    return thumb
-}
-
-private fun latestThumb(context: Context): ImageBitmap? {
-    val args = Bundle().apply {
-        putString(
-            android.content.ContentResolver.QUERY_ARG_SQL_SELECTION,
-            "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (${MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE},${MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO})",
-        )
-        putStringArray(android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS, arrayOf(MediaStore.Files.FileColumns.DATE_ADDED))
-        putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, android.content.ContentResolver.QUERY_SORT_DIRECTION_DESCENDING)
-        putInt(android.content.ContentResolver.QUERY_ARG_LIMIT, 1)
-    }
-    val collection = MediaStore.Files.getContentUri("external")
-    val projection = arrayOf(MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.MEDIA_TYPE)
-    context.contentResolver.query(collection, projection, args, null)?.use { c ->
-        if (!c.moveToFirst()) return null
-        val base = if (c.getInt(1) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        } else {
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        }
-        val uri = ContentUris.withAppendedId(base, c.getLong(0))
-        return context.contentResolver.loadThumbnail(uri, Size(192, 192), null).asImageBitmap()
-    }
-    return null
-}

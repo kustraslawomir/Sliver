@@ -2,12 +2,12 @@ package app.sliver.core.permissions
 
 import androidx.compose.runtime.Composable
 
-enum class PermissionKind { CameraMic, Photos, Notifications }
+enum class PermissionKind { CameraMic, Notifications }
 
 enum class PermissionStatus {
-    NotAsked, Granted, Partial, Denied;
+    NotAsked, Granted, Denied;
 
-    val isUsable get() = this == Granted || this == Partial
+    val isUsable get() = this == Granted
 }
 
 interface PermissionController {
@@ -27,11 +27,6 @@ fun PermissionKind.copy() = when (this) {
         "Let SLIVER see and hear your day",
         "One clip a day. Camera and microphone stay on your phone.",
         "Allow camera & mic",
-    )
-    PermissionKind.Photos -> PermissionCopy(
-        "Add moments from your gallery",
-        "Pick the clips you want in your film. Limited access is fine.",
-        "Allow photos",
     )
     PermissionKind.Notifications -> PermissionCopy(
         "A gentle nudge each day",

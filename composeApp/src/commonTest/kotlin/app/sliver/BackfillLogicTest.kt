@@ -20,8 +20,8 @@ class BackfillLogicTest {
     private val d1 = LocalDate(2026, 10, 1)
     private val d2 = LocalDate(2026, 10, 2)
 
-    private fun video(uri: String, date: LocalDate, ms: Long) = GalleryItem(uri, true, date, ms, false)
-    private fun photo(uri: String, date: LocalDate) = GalleryItem(uri, false, date, 0, false)
+    private fun video(uri: String, date: LocalDate, ms: Long) = GalleryItem(uri, true, date, ms)
+    private fun photo(uri: String, date: LocalDate) = GalleryItem(uri, false, date, 0)
 
     @Test
     fun longestVideoWins() {

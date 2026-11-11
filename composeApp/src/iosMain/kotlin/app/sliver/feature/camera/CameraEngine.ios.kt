@@ -20,4 +20,3 @@ actual fun CameraPreview(
 ): Unit = TODO("iOS later")
 
 @Composable
-actual fun rememberLatestGalleryThumb(): ImageBitmap? = TODO("iOS later")

@@ -29,10 +29,6 @@ expect fun CameraPreview(
     onReady: () -> Unit,
 )
 
-/** Thumbnail of the newest gallery item, or null when unavailable. */
-@Composable
-expect fun rememberLatestGalleryThumb(): ImageBitmap?
-
 /** Hand-off from capture to Trim / PhotoTrim until those screens take a route argument. */
 object CaptureSession {
     var path: String? = null

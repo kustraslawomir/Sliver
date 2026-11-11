@@ -48,7 +48,6 @@ fun PermissionPrePrompt(kind: PermissionKind, onAllow: () -> Unit, onSkip: (() -
 fun PermissionDenied(kind: PermissionKind, onOpenSettings: () -> Unit, onAlternative: (() -> Unit)? = null) {
     val (title, body) = when (kind) {
         PermissionKind.CameraMic -> "Camera access is off" to "Turn it on in Settings to record your clip, or add one from your gallery."
-        PermissionKind.Photos -> "Photo access is off" to "Turn it on in Settings to pick clips from your gallery."
         PermissionKind.Notifications -> "Reminders are off" to "Turn notifications on in Settings to get your daily nudge."
     }
     PermissionLayout(title, body) {

@@ -1,34 +1,15 @@
 package app.sliver.feature.gallery
 
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.icons.SliverIcons
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import app.sliver.core.theme.SliverShapes
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,82 +17,55 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import app.sliver.core.navigation.AppNavigator
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
-import app.sliver.core.permissions.PermissionController
-import app.sliver.core.permissions.PermissionGate
-import app.sliver.core.permissions.PermissionKind
-import app.sliver.core.permissions.PermissionStatus
-import app.sliver.core.permissions.rememberPermissionController
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Chip
-import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.PrimaryButton
 import app.sliver.data.DaySource
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.trim.dayLabel
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
+/** Context for the system Photo Picker: says which day the pick is for, then launches the picker. */
 @Composable
 fun GalleryScreen(onNavigate: (Route) -> Unit) {
     val navigator = LocalNavigator.current
-    val controller = rememberPermissionController()
-    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        PermissionGate(PermissionKind.Photos, controller, onSkip = { navigator.back() }) { status ->
-            GalleryContent(status, controller, onNavigate, navigator)
-        }
-    }
-}
-
-@Composable
-private fun GalleryContent(
-    status: PermissionStatus,
-    controller: PermissionController,
-    onNavigate: (Route) -> Unit,
-    navigator: AppNavigator,
-) {
     val provider = remember { KoinPlatform.getKoin().get<GalleryProvider>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
     val forDate = remember { CaptureSession.forDate }
-    var items by remember { mutableStateOf<List<GalleryItem>?>(null) }
-    var album by remember { mutableStateOf(GalleryAlbum.Recents) }
-    var filter by remember { mutableStateOf(GalleryFilter.All) }
-    var picking by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
-    LaunchedEffect(status) { items = provider.load() }
-
-    fun pick(item: GalleryItem) {
-        if (picking) return
-        picking = true
+    val launchPicker = rememberMediaPicker { uri ->
+        if (busy) return@rememberMediaPicker
+        busy = true
+        failed = false
         scope.launch {
-            val path = runCatching { provider.copyToTmp(item.uri) }.getOrNull()
-            picking = false
-            if (path == null) return@launch
+            val video = provider.isVideo(uri)
+            val path = runCatching { provider.copyToTmp(uri) }.getOrNull()
+            busy = false
+            if (path == null) {
+                failed = true
+                return@launch
+            }
             CaptureSession.path = path
             CaptureSession.forDate = forDate
-            if (item.isVideo) {
-                CaptureSession.source = DaySource.GALLERY
-                onNavigate(Route.Trim)
-            } else {
-                CaptureSession.source = DaySource.PHOTO
-                onNavigate(Route.PhotoTrim)
-            }
+            CaptureSession.source = if (video) DaySource.GALLERY else DaySource.PHOTO
+            onNavigate(if (video) Route.Trim else Route.PhotoTrim)
         }
     }
 
-    val groups = remember(items, album, filter) { visibleGroups(items.orEmpty(), album, filter) }
-
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+    Column(Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
@@ -122,72 +76,17 @@ private fun GalleryContent(
             SliverText("Add media", SliverType.Headline, Modifier.weight(1f), SliverColors.TextPrimary, maxLines = 1)
             if (forDate != null) Chip("FOR " + dayLabel(forDate, today).uppercase(), selected = true, onClick = {})
         }
-        if (status == PermissionStatus.Partial) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                SliverText("Limited access", SliverType.BodySmall, color = SliverColors.TextSecondary)
-                Row {
-                    GhostButton("Select more", onClick = { controller.request(PermissionKind.Photos) })
-                    GhostButton("Allow all", onClick = controller::openSettings)
-                }
-            }
-        }
-        LazyRow(
-            Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2),
-            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier.fillMaxSize().padding(SliverSpace.Gutter),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            items(GalleryAlbum.entries) { Chip(it.label, album == it, { album = it }) }
-            item { Box(Modifier.width(1.dp).height(20.dp).background(SliverColors.LineHairline)) }
-            items(GalleryFilter.entries) { Chip(it.label, filter == it, { filter = it }) }
-        }
-        if (items != null && groups.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                SliverText("Nothing here yet.", SliverType.BodySmall, color = SliverColors.TextSecondary)
-            }
-        }
-        LazyVerticalGrid(
-            GridCells.Fixed(3),
-            Modifier.weight(1f).fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            groups.forEach { group ->
-                item(key = "h" + group.date, span = { GridItemSpan(maxLineSpan) }) {
-                    SliverText(
-                        dayHeader(group.date),
-                        SliverType.MonoS,
-                        Modifier.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
-                        SliverColors.TextSecondary,
-                    )
-                }
-                items(group.items, key = { it.uri }) { Cell(it, provider) { pick(it) } }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Cell(item: GalleryItem, provider: GalleryProvider, onClick: () -> Unit) {
-    var thumb by remember(item.uri) { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(item.uri) { thumb = provider.thumbnail(item.uri, 256) }
-    Box(Modifier.aspectRatio(1f).background(SliverColors.Surface1).clickable(onClick = onClick)) {
-        thumb?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
-        if (item.isVideo) {
-            Row(
-                Modifier.align(Alignment.BottomEnd).padding(SliverSpace.S1)
-                    .clip(SliverShapes.Pill).background(Color.Black.copy(alpha = 0.55f))
-                    .padding(horizontal = SliverSpace.S2, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
-            ) {
-                SliverIcon(SliverIcons.Play, SliverColors.TextPrimary, size = 12.dp)
-                SliverText(durationLabel(item.durationMs), SliverType.MonoS, color = SliverColors.TextPrimary, maxLines = 1)
-            }
+            SliverText(
+                if (forDate != null) "Pick the photo or video for this day." else "Pick a photo or video.",
+                SliverType.Body, color = SliverColors.TextSecondary,
+            )
+            if (failed) SliverText("Could not read that file. Try another.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            PrimaryButton(if (busy) "Preparing..." else "Choose from gallery", { if (!busy) launchPicker() }, Modifier.fillMaxWidth())
         }
     }
 }

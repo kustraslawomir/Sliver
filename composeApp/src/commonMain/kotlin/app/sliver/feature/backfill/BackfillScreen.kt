@@ -29,11 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import app.sliver.core.permissions.PermissionController
-import app.sliver.core.permissions.PermissionGate
-import app.sliver.core.permissions.PermissionKind
-import app.sliver.core.permissions.PermissionStatus
-import app.sliver.core.permissions.rememberPermissionController
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -51,21 +46,12 @@ import app.sliver.feature.archive.MonthNames
 import app.sliver.feature.archive.YearMonth
 import app.sliver.feature.gallery.GalleryItem
 import app.sliver.feature.gallery.GalleryProvider
+import app.sliver.feature.gallery.rememberMultiMediaPicker
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
 @Composable
 fun BackfillScreen(onBack: () -> Unit) {
-    val controller = rememberPermissionController()
-    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        PermissionGate(PermissionKind.Photos, controller, onSkip = onBack) { status ->
-            BackfillContent(status, controller, onBack)
-        }
-    }
-}
-
-@Composable
-private fun BackfillContent(status: PermissionStatus, controller: PermissionController, onBack: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val store = remember { koin.get<BackfillStore>() }
     val executor = remember { koin.get<BackfillExecutor>() }
@@ -91,12 +77,20 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
     }
     val picked = remember(candidates, off) { candidates?.let { selectedCandidates(it, off) }.orEmpty() }
 
+    val pick = rememberMultiMediaPicker { uris ->
+        scanning = true
+        scope.launch {
+            scanned = runCatching { gallery.describe(uris) }.getOrDefault(emptyList())
+            scanning = false
+        }
+    }
+
     LaunchedEffect(batch?.finished) {
         if (batch?.finished == false) runner.start()
     }
 
     Column(
-        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
             .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
@@ -120,21 +114,8 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
             return@Column
         }
 
-        if (status == PermissionStatus.Partial) {
-            Row(
-                Modifier.fillMaxWidth().clip(SliverShapes.M).background(SliverColors.Surface1).padding(SliverSpace.S3),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                SliverText(
-                    "Limited access. Only the photos you shared can be found.",
-                    SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextSecondary,
-                )
-                GhostButton("Allow all", onClick = controller::openSettings)
-            }
-        }
-
         SliverText(
-            "Add days you never captured, using videos from your gallery by the date they were taken. " +
+            "Add days you never captured, using videos and photos you pick, by the date they were taken. " +
                 "Everything stays on your phone, and days that already have a clip are never touched.",
             SliverType.Body, color = SliverColors.TextSecondary,
         )
@@ -145,16 +126,16 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
         SwitchRow("Use photos too", usePhotos, { usePhotos = it }, caption = "Days with only photos get a 1 s clip.")
 
         if (candidates == null) {
-            PrimaryButton(if (scanning) "Scanning..." else "Scan my gallery", {
-                if (scanning) return@PrimaryButton
-                scanning = true
-                scope.launch {
-                    scanned = runCatching { gallery.load() }.getOrDefault(emptyList())
-                    scanning = false
-                }
+            PrimaryButton(if (scanning) "Reading dates..." else "Select photos and videos", {
+                if (!scanning) pick()
             }, Modifier.fillMaxWidth())
+            SliverText(
+                "Select photos and videos from the days you missed.",
+                SliverType.BodySmall, color = SliverColors.TextSecondary,
+            )
         } else if (candidates.isEmpty()) {
             SliverText("Nothing to fill in this range.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            GhostButton("Select other items", { scanned = null }, Modifier.fillMaxWidth())
         } else {
             Mosaic(yearRows(candidates), off) { m -> off = if (m in off) off - m else off + m }
             PrimaryButton(fillLabel(picked.size), {

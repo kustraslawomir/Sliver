@@ -1,16 +1,14 @@
 package app.sliver.feature.gallery
 
-import android.content.ContentUris
 import android.content.Context
+import android.media.ExifInterface
+import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import android.util.Size
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import app.sliver.data.files.FileStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
@@ -18,50 +16,43 @@ import kotlin.time.Instant
 class AndroidGalleryProvider(private val context: Context, private val files: FileStore) : GalleryProvider {
     private val resolver get() = context.contentResolver
 
-    override suspend fun load(): List<GalleryItem> = withContext(Dispatchers.IO) {
-        val zone = TimeZone.currentSystemDefault()
-        val hasFavorite = Build.VERSION.SDK_INT >= 30
-        val projection = buildList {
-            add(MediaStore.Files.FileColumns._ID)
-            add(MediaStore.Files.FileColumns.MEDIA_TYPE)
-            add(MediaStore.MediaColumns.DATE_TAKEN)
-            add(MediaStore.MediaColumns.DATE_ADDED)
-            add(MediaStore.MediaColumns.DURATION)
-            if (hasFavorite) add(MediaStore.MediaColumns.IS_FAVORITE)
-        }.toTypedArray()
-        val image = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-        val video = MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
-        val selection = MediaStore.Files.FileColumns.MEDIA_TYPE + " IN (" + image + "," + video + ")"
-        val result = mutableListOf<GalleryItem>()
-        resolver.query(
-            MediaStore.Files.getContentUri("external"), projection, selection, null,
-            "COALESCE(" + MediaStore.MediaColumns.DATE_TAKEN + ", " + MediaStore.MediaColumns.DATE_ADDED + "*1000) DESC",
-        )?.use { c ->
-            val id = c.getColumnIndexOrThrow(projection[0])
-            val type = c.getColumnIndexOrThrow(projection[1])
-            val taken = c.getColumnIndexOrThrow(projection[2])
-            val added = c.getColumnIndexOrThrow(projection[3])
-            val dur = c.getColumnIndexOrThrow(projection[4])
-            val fav = if (hasFavorite) c.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_FAVORITE) else -1
-            while (c.moveToNext()) {
-                val isVideo = c.getInt(type) == video
-                val base = if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                val ms = if (c.isNull(taken) || c.getLong(taken) == 0L) c.getLong(added) * 1000 else c.getLong(taken)
-                result += GalleryItem(
-                    uri = ContentUris.withAppendedId(base, c.getLong(id)).toString(),
-                    isVideo = isVideo,
-                    date = Instant.fromEpochMilliseconds(ms).toLocalDateTime(zone).date,
-                    durationMs = if (isVideo) c.getLong(dur) else 0L,
-                    favorite = fav >= 0 && c.getInt(fav) == 1,
-                )
-            }
+    override suspend fun isVideo(uri: String): Boolean = resolver.getType(Uri.parse(uri))?.startsWith("video/") == true
+
+    override suspend fun describe(uris: List<String>): List<GalleryItem> = withContext(Dispatchers.IO) {
+        uris.mapNotNull { raw ->
+            val uri = Uri.parse(raw)
+            val video = isVideo(raw)
+            val duration = if (video) retrieve(uri, MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L else 0L
+            val date = (if (video) videoDate(uri) else imageDate(uri)) ?: columnDate(uri)
+            date?.let { GalleryItem(raw, video, it, duration) }
         }
-        result
     }
 
-    override suspend fun thumbnail(uri: String, sizePx: Int): ImageBitmap? = withContext(Dispatchers.IO) {
-        runCatching { resolver.loadThumbnail(Uri.parse(uri), Size(sizePx, sizePx), null).asImageBitmap() }.getOrNull()
-    }
+    private fun imageDate(uri: Uri): LocalDate? = runCatching {
+        resolver.openInputStream(uri)?.use { parseExifDate(ExifInterface(it).getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)) }
+    }.getOrNull()
+
+    private fun videoDate(uri: Uri): LocalDate? =
+        parseVideoDate(retrieve(uri, MediaMetadataRetriever.METADATA_KEY_DATE), TimeZone.currentSystemDefault())
+
+    private fun retrieve(uri: Uri, key: Int): String? = runCatching {
+        val r = MediaMetadataRetriever()
+        try {
+            r.setDataSource(context, uri)
+            r.extractMetadata(key)
+        } finally {
+            r.release()
+        }
+    }.getOrNull()
+
+    private fun columnDate(uri: Uri): LocalDate? = runCatching {
+        val projection = arrayOf(MediaStore.MediaColumns.DATE_TAKEN, MediaStore.MediaColumns.DATE_MODIFIED)
+        resolver.query(uri, projection, null, null, null)?.use { c ->
+            if (!c.moveToFirst()) return@use null
+            val ms = c.getLong(0).takeIf { it > 0 } ?: (c.getLong(1) * 1000).takeIf { it > 0 }
+            ms?.let { Instant.fromEpochMilliseconds(it).toLocalDateTime(TimeZone.currentSystemDefault()).date }
+        }
+    }.getOrNull()
 
     override suspend fun copyToTmp(uri: String): String = withContext(Dispatchers.IO) {
         val source = Uri.parse(uri)

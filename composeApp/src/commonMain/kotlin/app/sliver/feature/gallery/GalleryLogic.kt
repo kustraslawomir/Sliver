@@ -1,45 +1,35 @@
 package app.sliver.feature.gallery
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 data class GalleryItem(
     val uri: String,
     val isVideo: Boolean,
     val date: LocalDate,
     val durationMs: Long,
-    val favorite: Boolean,
 )
 
-enum class GalleryFilter(val label: String) { All("All"), Videos("Videos"), Photos("Photos") }
-
-enum class GalleryAlbum(val label: String) { Recents("Recents"), Favorites("Favorites") }
-
-data class DayGroup(val date: LocalDate, val items: List<GalleryItem>)
-
-/** Newest first; items must already be sorted by taken time descending. */
-fun visibleGroups(items: List<GalleryItem>, album: GalleryAlbum, filter: GalleryFilter): List<DayGroup> {
-    val shown = items.filter {
-        (album == GalleryAlbum.Recents || it.favorite) &&
-            when (filter) {
-                GalleryFilter.All -> true
-                GalleryFilter.Videos -> it.isVideo
-                GalleryFilter.Photos -> !it.isVideo
-            }
-    }
-    val groups = mutableListOf<DayGroup>()
-    for (item in shown) {
-        val last = groups.lastOrNull()
-        if (last != null && last.date == item.date) groups[groups.lastIndex] = last.copy(items = last.items + item)
-        else groups += DayGroup(item.date, listOf(item))
-    }
-    return groups
+/** EXIF 'yyyy:MM:dd HH:mm:ss' (camera local time). */
+fun parseExifDate(raw: String?): LocalDate? {
+    val m = raw?.let { Regex("""^(\d{4}):(\d{2}):(\d{2})[ T]""").find(it.trim()) } ?: return null
+    val (y, mo, d) = m.destructured
+    return runCatching { LocalDate(y.toInt(), mo.toInt(), d.toInt()) }.getOrNull()
 }
 
-fun durationLabel(ms: Long): String {
-    val s = (ms / 1000).coerceAtLeast(0)
-    return (s / 60).toString() + ":" + (s % 60).toString().padStart(2, '0')
+/** MediaMetadataRetriever date, 'yyyyMMdd'T'HHmmss.SSS'Z'' in UTC, shown in [zone]. */
+fun parseVideoDate(raw: String?, zone: TimeZone): LocalDate? {
+    val m = raw?.let { Regex("""^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})""").find(it.trim()) } ?: return null
+    val (y, mo, d, h, mi, s) = m.destructured
+    return runCatching {
+        val utc = LocalDateTime(y.toInt(), mo.toInt(), d.toInt(), h.toInt(), mi.toInt(), s.toInt())
+        val instant = Instant.fromEpochSeconds(utc.toInstantUtcSeconds())
+        instant.toLocalDateTime(zone).date
+    }.getOrNull()
 }
 
-/** 'MON 9 NOV' */
-fun dayHeader(date: LocalDate): String =
-    "${date.dayOfWeek.name.take(3)} ${date.day} ${date.month.name.take(3)}"
+private fun LocalDateTime.toInstantUtcSeconds(): Long =
+    date.toEpochDays() * 86_400L + hour * 3_600L + minute * 60L + second

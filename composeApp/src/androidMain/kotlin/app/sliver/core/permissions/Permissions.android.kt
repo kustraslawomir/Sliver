@@ -24,15 +24,6 @@ import androidx.lifecycle.LifecycleEventObserver
 private fun permissionsFor(kind: PermissionKind, sdk: Int): List<String> = when (kind) {
     PermissionKind.CameraMic -> listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
     PermissionKind.Notifications -> if (sdk >= 33) listOf(Manifest.permission.POST_NOTIFICATIONS) else emptyList()
-    PermissionKind.Photos -> when {
-        sdk >= 34 -> listOf(
-            Manifest.permission.READ_MEDIA_IMAGES,
-            Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
-        )
-        sdk >= 33 -> listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
-        else -> listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
 }
 
 private class AndroidPermissionController(
@@ -49,7 +40,6 @@ private class AndroidPermissionController(
         val perms = permissionsFor(kind, sdk)
         val asked = prefs.getBoolean(kind.name, false)
         return when {
-            kind == PermissionKind.Photos -> photoStatus(sdk, perms.filter(::granted).toSet(), asked)
             perms.all(::granted) -> PermissionStatus.Granted
             asked -> PermissionStatus.Denied
             else -> PermissionStatus.NotAsked
