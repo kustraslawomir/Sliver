@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -35,27 +35,27 @@ private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) = composed {
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
-        modifier.fillMaxWidth().height(56.dp)
+        modifier.fillMaxWidth().heightIn(min = 56.dp)
             .then(if (enabled) SliverGlow.cta(SliverShapes.Pill) else Modifier)
             .clip(SliverShapes.Pill)
             .background(if (enabled) SliverColors.Accent else SliverColors.Surface3)
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, color = if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2), color = if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
     }
 }
 
 @Composable
 fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
-        modifier.fillMaxWidth().height(54.dp)
+        modifier.fillMaxWidth().heightIn(min = 54.dp)
             .clip(SliverShapes.Pill)
             .border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, color = if (enabled) SliverColors.TextPrimary else SliverColors.TextDisabled)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2), color = if (enabled) SliverColors.TextPrimary else SliverColors.TextDisabled)
     }
 }
 
@@ -68,7 +68,7 @@ fun GhostButton(
     enabled: Boolean = true,
 ) {
     Box(
-        modifier.height(44.dp).clip(SliverShapes.Pill).press(enabled, onClick).padding(horizontal = SliverSpace.S4),
+        modifier.heightIn(min = 48.dp).clip(SliverShapes.Pill).press(enabled, onClick).padding(horizontal = SliverSpace.S4),
         contentAlignment = Alignment.Center,
     ) {
         val color = when {
@@ -80,7 +80,7 @@ fun GhostButton(
     }
 }
 
-/** 44x44 hit area; [overCamera] adds the void scrim behind the icon. */
+/** 48x48 hit area; [overCamera] adds the void scrim behind the icon. */
 @Composable
 fun IconButton44(
     onClick: () -> Unit,
@@ -91,7 +91,7 @@ fun IconButton44(
 ) {
     val source = remember { MutableInteractionSource() }
     Box(
-        modifier.size(44.dp).clip(CircleShape)
+        modifier.size(48.dp).clip(CircleShape)
             .then(if (overCamera) Modifier.background(SliverColors.BgVoid.copy(alpha = 0.5f)) else Modifier)
             .semantics { this.contentDescription = contentDescription }
             .clickable(source, null, role = Role.Button, onClick = rememberTapGate(onClick)),

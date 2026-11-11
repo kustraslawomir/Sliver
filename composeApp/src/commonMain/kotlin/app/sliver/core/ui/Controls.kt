@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,17 +60,22 @@ fun Chip(
     trailing: ImageVector? = null,
 ) {
     Box(
-        modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
-            .background(if (selected) SliverColors.AccentTint else Color.Transparent)
-            .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineHairline, SliverShapes.Pill)
+        modifier.heightIn(min = 48.dp)
             .semantics { this.selected = selected }
-            .clickable(role = Role.Button, onClick = rememberTapGate(onClick))
-            .padding(horizontal = SliverSpace.S4),
+            .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
         contentAlignment = Alignment.Center,
     ) {
         val color = if (selected) SliverColors.Accent else SliverColors.TextSecondary
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
-            SliverText(text, SliverType.BodySmall, maxLines = 1, color = color)
+        Row(
+            Modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
+                .background(if (selected) SliverColors.AccentTint else Color.Transparent)
+                .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineHairline, SliverShapes.Pill)
+                .padding(horizontal = SliverSpace.S4),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
+        ) {
+            if (selected) SliverIcon(SliverIcons.Check, color, size = 16.dp)
+            SliverText(text, SliverType.BodySmall, Modifier.weight(1f, fill = false), maxLines = 2, color = color)
             if (trailing != null) SliverIcon(trailing, color, size = 16.dp)
         }
     }
@@ -103,7 +109,7 @@ fun SliverTextField(
 @Composable
 fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth().height(44.dp).clip(SliverShapes.Pill)
+        modifier.fillMaxWidth().heightIn(min = 48.dp).clip(SliverShapes.Pill)
             .background(SliverColors.Surface1)
             .border(1.dp, SliverColors.LineHairline, SliverShapes.Pill)
             .padding(4.dp),
@@ -112,7 +118,7 @@ fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit
             val on = i == selectedIndex
             val bg by animateColorAsState(if (on) SliverColors.TextPrimary else Color.Transparent, SliverMotion.standard(SliverMotion.Quick))
             Box(
-                Modifier.weight(1f).height(36.dp).clip(SliverShapes.Pill).background(bg)
+                Modifier.weight(1f).heightIn(min = 40.dp).clip(SliverShapes.Pill).background(bg)
                     .semantics { selected = on }
                     .clickable(role = Role.Tab) { onSelect(i) },
                 contentAlignment = Alignment.Center,
@@ -176,7 +182,7 @@ fun SliverSlider(
     fun fromX(x: Float) = if (widthPx > 0) snap(x / widthPx) else value
 
     Box(
-        modifier.fillMaxWidth().height(32.dp)
+        modifier.fillMaxWidth().height(48.dp)
             .onSizeChanged { widthPx = it.width }
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(value, 0f..1f, steps)

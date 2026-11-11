@@ -37,6 +37,8 @@ import app.sliver.core.ui.SecondaryButton
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.BackupState
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import app.sliver.data.auth.AccountDeleter
 import app.sliver.data.auth.AccountManager
 import app.sliver.data.backup.ArchiveExporter
@@ -239,7 +241,15 @@ private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            Box(Modifier.size(8.dp).background(dot, SliverShapes.Pill))
+            SliverIcon(
+                when (ui) {
+                    BackupUi.UP_TO_DATE -> SliverIcons.Check
+                    BackupUi.BACKING_UP -> SliverIcons.CloudUpload
+                    BackupUi.PAUSED_WIFI, BackupUi.OFFLINE -> SliverIcons.Pause
+                    BackupUi.FAILED, BackupUi.DRIVE_FULL, BackupUi.REVOKED -> SliverIcons.X
+                },
+                dot, size = 20.dp,
+            )
             SliverText(copy.title, SliverType.Headline)
         }
         SliverText(copy.body, SliverType.BodySmall)

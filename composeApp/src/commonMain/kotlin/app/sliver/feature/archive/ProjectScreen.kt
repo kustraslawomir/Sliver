@@ -1,6 +1,9 @@
 package app.sliver.feature.archive
 
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import app.sliver.feature.trim.SaveUndo
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.ui.ClipDrop
 import app.sliver.core.ui.clipDropTarget
@@ -113,6 +116,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     val controller = rememberPermissionController()
     val scope = rememberCoroutineScope()
+    val undo = remember { koin.get<SaveUndo>() }
     var yearView by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(today.toYearMonth()) }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
@@ -139,6 +143,16 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             CellState.EMPTY -> addFor = date
             CellState.FILLED, CellState.BACKFILLED -> openDay(date)
         }
+    }
+
+    fun replaceDay(date: LocalDate) {
+        CaptureSession.forDate = date
+        onNavigate(if (date == today) Route.Camera else Route.GalleryPicker)
+    }
+
+    fun removeDay(date: LocalDate) {
+        val d = byDate[date] ?: return
+        scope.launch { undo.remove(d, dayLabel(date, today)) }
     }
 
     fun fromGallery(date: LocalDate) {
@@ -208,7 +222,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     shown, canGoPrev(shown, first), canGoNext(shown, today),
                     { shown = shown.plusMonths(-1) }, { shown = shown.plusMonths(1) },
                 )
-                MonthGrid(shown, byDate, today, fresh, ::onCell)
+                MonthGrid(shown, byDate, today, fresh, ::onCell, ::replaceDay, ::removeDay)
             }
             if (!wide) FilmsSection(onNavigate)
         }
@@ -286,7 +300,10 @@ private fun MonthHeader(
 }
 
 @Composable
-private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, fresh: Set<LocalDate>, onCell: (LocalDate) -> Unit) {
+private fun MonthGrid(
+    shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, fresh: Set<LocalDate>,
+    onCell: (LocalDate) -> Unit, onReplace: (LocalDate) -> Unit, onRemove: (LocalDate) -> Unit,
+) {
     val weeks = remember(shown) { monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } } }
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
@@ -298,7 +315,7 @@ private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: Loca
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1 + 1.dp)) {
                 week.forEach { date ->
                     Box(Modifier.weight(1f).height(60.dp)) {
-                        if (date != null) DayCell(date, today, byDate[date], date in fresh) { onCell(date) }
+                        if (date != null) DayCell(date, today, byDate[date], date in fresh, { onReplace(date) }, { onRemove(date) }) { onCell(date) }
                     }
                 }
             }
@@ -307,7 +324,7 @@ private fun MonthGrid(shown: YearMonth, byDate: Map<LocalDate, Day>, today: Loca
 }
 
 @Composable
-private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean, onClick: () -> Unit) {
+private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean, onReplace: () -> Unit, onRemove: () -> Unit, onClick: () -> Unit) {
     val scale = remember { Animatable(1f) }
     LaunchedEffect(isNew) {
         if (isNew) {
@@ -323,7 +340,16 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean
     )
     val ring = if (state == CellState.TODAY) base.border(2.dp, SliverColors.Accent, shape) else base
     Box(
-        ring.clipDropTarget(date).graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = scale.value }.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
+        ring.clipDropTarget(date).graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = scale.value }.semantics(mergeDescendants = true) {
+                contentDescription = cellDescription(date, day != null) + if (state == CellState.TODAY) ", today" else ""
+                if (day != null) {
+                    customActions = listOf(
+                        CustomAccessibilityAction("Open") { onClick(); true },
+                        CustomAccessibilityAction("Replace clip") { onReplace(); true },
+                        CustomAccessibilityAction("Remove clip") { onRemove(); true },
+                    )
+                }
+            }
             .then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)),
     ) {
         val thumb = if (day != null) rememberPhoto(day.thumb) else null
@@ -337,6 +363,9 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean
             Modifier.align(Alignment.BottomStart).padding(SliverSpace.S1 + 2.dp),
             if (state == CellState.FUTURE) SliverColors.TextDisabled else SliverColors.TextPrimary,
         )
+        if (state == CellState.TODAY) {
+            Box(Modifier.align(Alignment.TopStart).padding(SliverSpace.S2).size(6.dp).clip(SliverShapes.Pill).background(SliverColors.AccentCore))
+        }
         if (state == CellState.BACKFILLED) {
             SliverIcon(SliverIcons.ImagePlus, SliverColors.AccentCore, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S1), size = 12.dp)
         }
