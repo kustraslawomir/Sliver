@@ -21,11 +21,19 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.runtime.remember
+import app.sliver.core.ui.UndoToastHost
 import app.sliver.feature.camera.CameraScreen
+import app.sliver.feature.trim.SaveUndo
+import app.sliver.feature.trim.TrimScreen
+import app.sliver.feature.trim.UNDO_WINDOW_MS
+import org.koin.mp.KoinPlatform
 
 @Composable
 fun SliverNavHost() {
     val nav = rememberNavController()
+    val undo = remember { KoinPlatform.getKoin().get<SaveUndo>() }
     val entry by nav.currentBackStackEntryAsState()
     val current = Route.fromPath(entry?.destination?.route)
 
@@ -45,10 +53,19 @@ fun SliverNavHost() {
         NavHost(nav, startDestination = Route.start(OnboardingFlag.done).path) {
             Route.entries.forEach { route ->
                 composable(route.path) {
-                    if (route == Route.Camera) CameraScreen(::go) else PlaceholderScreen(route, ::go)
+                    when (route) {
+                        Route.Camera -> CameraScreen(::go)
+                        Route.Trim -> TrimScreen(::go)
+                        else -> PlaceholderScreen(route, ::go)
+                    }
                 }
             }
         }
+        UndoToastHost(
+            undo.toast,
+            Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),
+            durationMs = UNDO_WINDOW_MS,
+        )
         if (current?.tabBar == true) {
             SliverTabBar(current, ::go, Modifier.align(Alignment.BottomCenter))
         }

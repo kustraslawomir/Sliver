@@ -8,6 +8,8 @@ import app.sliver.data.export.AndroidClipExporter
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.files.FileStore
+import app.sliver.feature.trim.AndroidTrimMedia
+import app.sliver.feature.trim.TrimMedia
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -18,6 +20,7 @@ actual val platformModule: Module = module {
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { AndroidClipExporter(get<Context>()) }
+    single<TrimMedia> { AndroidTrimMedia() }
     single {
         PreferenceDataStoreFactory.create { get<Context>().filesDir.resolve("settings.preferences_pb") }
     }
