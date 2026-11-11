@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="record_today"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_slit"
+        android:shortcutShortLabel="@string/shortcut_record"
+        android:shortcutLongLabel="@string/shortcut_record">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="app.sliver"
+            android:targetClass="app.sliver.MainActivity">
+            <extra android:name="deeplink" android:value="camera" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="add_from_gallery"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_slit"
+        android:shortcutShortLabel="@string/shortcut_gallery"
+        android:shortcutLongLabel="@string/shortcut_gallery">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="app.sliver"
+            android:targetClass="app.sliver.MainActivity">
+            <extra android:name="deeplink" android:value="gallery" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="make_film"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_slit"
+        android:shortcutShortLabel="@string/shortcut_film"
+        android:shortcutLongLabel="@string/shortcut_film">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="app.sliver"
+            android:targetClass="app.sliver.MainActivity">
+            <extra android:name="deeplink" android:value="film-new" />
+        </intent>
+    </shortcut>
+</shortcuts>

@@ -68,6 +68,12 @@ class AppNavigator(private val nav: NavController) {
         when (target) {
             DeepLinkTarget.Camera -> Unit
             DeepLinkTarget.Backup -> listOf(Route.Project, Route.Settings, Route.Backup).forEach(::push)
+            DeepLinkTarget.Project -> push(Route.Project)
+            DeepLinkTarget.Gallery -> push(Route.GalleryPicker)
+            DeepLinkTarget.MakeFilm -> {
+                FilmNav.editId = null
+                listOf(Route.Project, Route.FilmBuilder).forEach(::push)
+            }
             DeepLinkTarget.FillThePast -> listOf(Route.Project, Route.FillThePast).forEach(::push)
             is DeepLinkTarget.Film -> {
                 FilmNav.id = target.id

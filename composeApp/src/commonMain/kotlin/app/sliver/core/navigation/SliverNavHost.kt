@@ -74,15 +74,17 @@ fun SliverNavHost() {
     val go = navigator::go
 
     val link by DeepLink.target.collectAsState()
-    LaunchedEffect(link) {
-        navigator.openStack(link ?: return@LaunchedEffect)
-        DeepLink.target.value = null
-    }
 
     val onboardingDone by produceState<Boolean?>(null) {
         value = KoinPlatform.getKoin().get<SettingsRepository>().settings.first().onboardingDone
     }
     val done = onboardingDone ?: return Box(Modifier.fillMaxSize().background(SliverColors.BgBase))
+    // The graph exists only once NavHost has composed; a cold-start link must wait for it. Before onboarding, links are dropped.
+    LaunchedEffect(link) {
+        val target = link ?: return@LaunchedEffect
+        if (done) navigator.openStack(target)
+        DeepLink.target.value = null
+    }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
     CompositionLocalProvider(LocalNavigator provides navigator, LocalWindowSize provides WindowSize(maxWidth, maxHeight)) {

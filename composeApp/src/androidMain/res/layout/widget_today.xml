@@ -20,21 +20,29 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="2dp"
-            android:importantForAccessibility="no"
-            android:src="@drawable/widget_slit" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             android:gravity="center"
             android:text="Today's clip is waiting"
             android:textColor="#EDEDE8"
             android:textSize="13sp" />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/widget_slit_hit"
+        android:layout_width="56dp"
+        android:layout_height="64dp"
+        android:layout_gravity="top|end"
+        android:contentDescription="Record today">
+
+        <ImageView
+            android:layout_width="4dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_slit" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/widget_captured"

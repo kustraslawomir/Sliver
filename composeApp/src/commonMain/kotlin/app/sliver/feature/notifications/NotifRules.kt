@@ -81,6 +81,9 @@ sealed interface DeepLinkTarget {
     data object Camera : DeepLinkTarget
     data object Backup : DeepLinkTarget
     data object FillThePast : DeepLinkTarget
+    data object Project : DeepLinkTarget
+    data object Gallery : DeepLinkTarget
+    data object MakeFilm : DeepLinkTarget
     data class Film(val id: String) : DeepLinkTarget
     data class Day(val date: LocalDate) : DeepLinkTarget
 }
@@ -89,6 +92,9 @@ fun DeepLinkTarget.encode(): String = when (this) {
     DeepLinkTarget.Camera -> "camera"
     DeepLinkTarget.Backup -> "backup"
     DeepLinkTarget.FillThePast -> "fill"
+    DeepLinkTarget.Project -> "project"
+    DeepLinkTarget.Gallery -> "gallery"
+    DeepLinkTarget.MakeFilm -> "film-new"
     is DeepLinkTarget.Film -> "film:$id"
     is DeepLinkTarget.Day -> "day:$date"
 }
@@ -98,6 +104,9 @@ fun parseDeepLink(raw: String?): DeepLinkTarget? = when {
     raw == "camera" -> DeepLinkTarget.Camera
     raw == "backup" -> DeepLinkTarget.Backup
     raw == "fill" -> DeepLinkTarget.FillThePast
+    raw == "project" -> DeepLinkTarget.Project
+    raw == "gallery" -> DeepLinkTarget.Gallery
+    raw == "film-new" -> DeepLinkTarget.MakeFilm
     raw.startsWith("film:") -> DeepLinkTarget.Film(raw.removePrefix("film:"))
     raw.startsWith("day:") -> runCatching { LocalDate.parse(raw.removePrefix("day:")) }.getOrNull()?.let(DeepLinkTarget::Day)
     else -> null

@@ -36,6 +36,8 @@ fun cameraIntent(context: Context): Intent =
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         .putExtra(EXTRA_DEEPLINK, DeepLinkTarget.Camera.encode())
 
+fun projectIntent(context: Context): Intent = cameraIntent(context).putExtra(EXTRA_DEEPLINK, DeepLinkTarget.Project.encode())
+
 private fun decodeThumb(path: String) = runCatching {
     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeFile(path, bounds)
@@ -52,16 +54,17 @@ suspend fun refreshTodayWidgets(context: Context) {
     val today = todayLocal()
     val day = KoinPlatform.getKoin().get<DayRepository>().getDay(today)
     val thumb = day?.thumb?.takeIf { File(it).exists() }?.let(::decodeThumb)
-    val tap = PendingIntent.getActivity(
-        context, 0, cameraIntent(context), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-    )
+    val flags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    val openProject = PendingIntent.getActivity(context, 2, projectIntent(context), flags)
+    val record = PendingIntent.getActivity(context, 0, cameraIntent(context), flags)
     val views = RemoteViews(context.packageName, R.layout.widget_today).apply {
         val captured = day != null
         setViewVisibility(R.id.widget_waiting, if (captured) View.GONE else View.VISIBLE)
         setViewVisibility(R.id.widget_captured, if (captured) View.VISIBLE else View.GONE)
         setViewVisibility(R.id.widget_thumb, if (thumb != null) View.VISIBLE else View.GONE)
         if (thumb != null) setImageViewBitmap(R.id.widget_thumb, thumb)
-        setOnClickPendingIntent(R.id.widget_root, tap)
+        setOnClickPendingIntent(R.id.widget_root, openProject)
+        setOnClickPendingIntent(R.id.widget_slit_hit, record)
     }
     manager.updateAppWidget(ids, views)
     scheduleMidnight(context, today.plus(DatePeriod(days = 1)).atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds())

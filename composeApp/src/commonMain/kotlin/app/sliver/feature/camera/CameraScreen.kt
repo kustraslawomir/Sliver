@@ -225,6 +225,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
     }
 
+    VolumeKeyEffect(saved?.volumeKeyRecords == true && ready) { onTap() }
+
     val side = LocalWindowSize.current.sideBySide
     Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
         Box(

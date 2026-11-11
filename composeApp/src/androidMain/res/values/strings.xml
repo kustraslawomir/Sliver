@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_record">Record today</string>
+    <string name="shortcut_gallery">Add from gallery</string>
+    <string name="shortcut_film">Make a film</string>
+</resources>

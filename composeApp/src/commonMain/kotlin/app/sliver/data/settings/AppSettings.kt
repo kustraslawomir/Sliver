@@ -51,6 +51,7 @@ data class AppSettings(
     val newFilmFormat: FilmFormat = FilmFormat.CINEMA,
     val dateStamp: Boolean = true,
     val saveFullRecordings: Boolean = false,
+    val volumeKeyRecords: Boolean = false,
     val reminder: ReminderSettings = ReminderSettings(),
     val notif: NotifSettings = NotifSettings(),
     val camera: CameraSettings = CameraSettings(),

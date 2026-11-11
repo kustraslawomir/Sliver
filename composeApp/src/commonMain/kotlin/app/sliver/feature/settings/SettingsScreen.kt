@@ -104,6 +104,9 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             { on -> update { it.copy(saveFullRecordings = on) } },
         )
 
+        // DECISION: the volume-key option lives in Settings (not on the Camera toolbar) and only acts while Camera is open.
+        SwitchRow("Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } })
+
         Group("More")
         NavRow("Notifications", null) { onGo(Route.Notifications) }
         NavRow("Fill empty days", null) { onGo(Route.FillThePast) }

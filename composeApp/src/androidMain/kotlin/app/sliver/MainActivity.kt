@@ -26,6 +26,12 @@ class MainActivity : ComponentActivity() {
         setContent { App() }
     }
 
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent): Boolean =
+        app.sliver.feature.camera.VolumeKeys.dispatch(event) || super.onKeyDown(keyCode, event)
+
+    override fun onKeyUp(keyCode: Int, event: android.view.KeyEvent): Boolean =
+        app.sliver.feature.camera.VolumeKeys.dispatch(event) || super.onKeyUp(keyCode, event)
+
     override fun onResume() {
         super.onResume()
         AuthHost.activity = this

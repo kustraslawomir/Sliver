@@ -31,6 +31,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val newFilmFormat = stringPreferencesKey("newFilmFormat")
         val dateStamp = booleanPreferencesKey("dateStamp")
         val saveFullRecordings = booleanPreferencesKey("saveFullRecordings")
+        val volumeKeyRecords = booleanPreferencesKey("volumeKeyRecords")
         val reminderMode = stringPreferencesKey("reminder.mode")
         val reminderTime = stringPreferencesKey("reminder.time")
         val reminderWindowStart = stringPreferencesKey("reminder.windowStart")
@@ -72,6 +73,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
             newFilmFormat = enum(K.newFilmFormat, d.newFilmFormat),
             dateStamp = this[K.dateStamp] ?: d.dateStamp,
             saveFullRecordings = this[K.saveFullRecordings] ?: d.saveFullRecordings,
+            volumeKeyRecords = this[K.volumeKeyRecords] ?: d.volumeKeyRecords,
             reminder = ReminderSettings(
                 mode = enum(K.reminderMode, d.reminder.mode),
                 time = this[K.reminderTime]?.let(LocalTime::parse) ?: d.reminder.time,
@@ -121,6 +123,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.newFilmFormat, s.newFilmFormat.name)
         put(K.dateStamp, s.dateStamp)
         put(K.saveFullRecordings, s.saveFullRecordings)
+        put(K.volumeKeyRecords, s.volumeKeyRecords)
         put(K.reminderMode, s.reminder.mode.name)
         put(K.reminderTime, s.reminder.time.toString())
         put(K.reminderWindowStart, s.reminder.windowStart.toString())
