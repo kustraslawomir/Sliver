@@ -1,5 +1,7 @@
 # HANDOFF
 
+- T23: built-in music tracks (drift, pulse, dusk, spark) are referenced as `assets/music/<id>.aac` but the silent AAC files are not generated (no tooling; python denied). A missing asset plays silence; add files to `composeApp/src/androidMain/assets/music/`.
+
 - T02: fonts (Instrument Serif, Geist, Geist Mono) could not be downloaded (no network access). `SliverFonts` in `core/theme/SliverType.kt` uses system Serif/SansSerif/Monospace as placeholders. To finish: add the OFL .ttf files to `composeApp/src/commonMain/composeResources/font/`, enable `compose.components.resources`, and build the three FontFamilies there.
 - T02: no Material3 dependency; theme is token-based on Compose foundation, so no Material color scheme exists to leak.
 - T02: gallery is toggled by `SHOW_GALLERY` in `App.kt`.
