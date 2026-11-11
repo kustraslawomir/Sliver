@@ -102,3 +102,12 @@ object AudioFit {
     /** True when an audio sample starting at [ptsUs] still ends within [limitUs]. */
     fun keep(ptsUs: Long, sampleRate: Int, limitUs: Long = SECOND_MS * 1000): Boolean = ptsUs + frameUs(sampleRate) <= limitUs
 }
+
+/** True when presentation times (us, in display order) have frame gaps that differ by more than 25%. */
+fun isVariableFrameRate(timesUs: List<Long>): Boolean {
+    val gaps = timesUs.sorted().zipWithNext { a, b -> b - a }.filter { it > 0 }
+    if (gaps.size < 3) return false
+    val sorted = gaps.sorted()
+    val median = sorted[sorted.size / 2]
+    return sorted.last() - sorted.first() > median / 4 && sorted.count { kotlin.math.abs(it - median) > median / 4 } > gaps.size / 10
+}
