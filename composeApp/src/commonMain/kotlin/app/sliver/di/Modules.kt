@@ -1,7 +1,12 @@
 package app.sliver.di
 
 import app.sliver.data.auth.AccountManager
+import app.sliver.data.auth.GoogleAuth
+import app.sliver.data.backup.DriveClient
+import app.sliver.data.backup.InMemoryDriveClient
+import app.sliver.data.backup.RestDriveClient
 import app.sliver.data.db.SliverDatabase
+import io.ktor.client.engine.HttpClientEngine
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepository
@@ -25,6 +30,10 @@ val commonModule: Module = module {
     single<FilmRepository> { FilmRepositoryImpl(get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }
+    single<DriveClient> {
+        val auth = get<GoogleAuth>()
+        if (auth.isFake) InMemoryDriveClient() else RestDriveClient(get<HttpClientEngine>(), auth::accessToken)
+    }
     single { ReminderCoordinator(get(), get(), get()) }
 }
 

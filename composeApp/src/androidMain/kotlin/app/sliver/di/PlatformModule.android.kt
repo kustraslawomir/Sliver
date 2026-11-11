@@ -30,6 +30,8 @@ import app.sliver.feature.notifications.ReminderScheduler
 import app.sliver.feature.trim.AndroidTrimMedia
 import app.sliver.feature.trim.TrimMedia
 import androidx.media3.common.util.UnstableApi
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -56,6 +58,7 @@ actual val platformModule: Module = module {
         if (googleConfigured) AndroidGoogleAuth(get<Context>(), BuildConfig.GOOGLE_WEB_CLIENT_ID) else FakeGoogleAuth()
     }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
+    single<HttpClientEngine> { OkHttp.create() }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }
     single {
         PreferenceDataStoreFactory.create { get<Context>().filesDir.resolve("settings.preferences_pb") }

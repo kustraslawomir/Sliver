@@ -34,10 +34,12 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.room.runtime)
             implementation(libs.datastore.preferences)
+            implementation(libs.ktor.client.core)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
             implementation(libs.androidx.camera.core)
             implementation(libs.androidx.camera.camera2)
@@ -58,6 +60,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
         getByName("androidUnitTest").dependencies {
             implementation(libs.robolectric)
