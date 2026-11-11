@@ -1,6 +1,9 @@
 package app.sliver
 
 import app.sliver.feature.camera.displaySize
+import app.sliver.feature.camera.focusFraction
+import app.sliver.feature.camera.focusRingCenter
+import app.sliver.feature.camera.clipLongEnough
 import app.sliver.feature.camera.formatTimer
 import app.sliver.feature.camera.surfaceRotation
 import app.sliver.feature.camera.nextSelfTimer
@@ -17,10 +20,10 @@ class CameraLogicTest {
 
     @Test
     fun timerFormatsMinutesAndSeconds() {
-        assertEquals("00:00", formatTimer(0))
-        assertEquals("00:07", formatTimer(7_999))
-        assertEquals("02:05", formatTimer(125_000))
-        assertEquals("00:00", formatTimer(-5))
+        assertEquals("0:00", formatTimer(0))
+        assertEquals("0:07", formatTimer(7_999))
+        assertEquals("2:05", formatTimer(125_000))
+        assertEquals("0:00", formatTimer(-5))
     }
 
     @Test
@@ -40,5 +43,25 @@ class CameraLogicTest {
         assertEquals(1080 to 1920, displaySize(1920, 1080, 90))
         assertEquals(1920 to 1080, displaySize(1080, 1920, 270))
         assertEquals(1920 to 1080, displaySize(1920, 1080, 180))
+    }
+
+    @Test
+    fun focusPointIsNormalisedAndClamped() {
+        assertEquals(0.25f to 0.5f, focusFraction(100f, 200f, 400f, 400f))
+        assertEquals(1f to 0f, focusFraction(900f, -10f, 400f, 400f))
+        assertEquals(0.5f to 0.5f, focusFraction(10f, 10f, 0f, 0f))
+    }
+
+    @Test
+    fun focusRingStaysInsideViewfinder() {
+        assertEquals(44f to 44f, focusRingCenter(2f, 1f, 400f, 800f, 88f))
+        assertEquals(356f to 756f, focusRingCenter(399f, 799f, 400f, 800f, 88f))
+        assertEquals(200f to 300f, focusRingCenter(200f, 300f, 400f, 800f, 88f))
+    }
+
+    @Test
+    fun clipIsLongEnoughAtOneSecond() {
+        assertEquals(false, clipLongEnough(999))
+        assertEquals(true, clipLongEnough(1000))
     }
 }

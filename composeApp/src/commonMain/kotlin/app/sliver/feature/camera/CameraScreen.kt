@@ -9,6 +9,10 @@ import app.sliver.core.ui.clipDropTarget
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.sp
+import app.sliver.core.designsystem.blurSupported
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
@@ -166,6 +170,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
     }
 
+    var failed by remember { mutableStateOf(false) }
+
     fun finish(result: Result<String>, route: Route) {
         recording = false
         holding = false
@@ -175,7 +181,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             CaptureSession.forDate = null
             onNavigate(route)
         }.onFailure {
-            koin.get<app.sliver.feature.trim.SaveUndo>().toast.show("That recording didn't work. Try again.")
+            failed = true
         }
     }
 
@@ -187,6 +193,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         elapsedMs = 0
         recording = true
+        failed = false
         if (saved?.coachRecordSeen == false) scope.launch { repo.update { it.copy(coachRecordSeen = true) } }
         engine.startRecording(files.newTmpPath(Clock.System.now().toEpochMilliseconds())) { finish(it, Route.Trim) }
     }
@@ -239,10 +246,19 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
+            FocusOverlay(!recording && ready, engine::focus)
             countdown?.let {
                 SliverText(it.toString(), SliverType.DisplayXL, Modifier.align(Alignment.Center))
             }
         }
+
+        Box(
+            Modifier.align(Alignment.TopCenter).fillMaxWidth().height(150.dp).background(
+                Brush.verticalGradient(
+                    0f to Color.Black.copy(alpha = 0.7f), 0.55f to Color.Black.copy(alpha = 0.35f), 1f to Color.Transparent,
+                ),
+            ),
+        )
 
         Column(
             Modifier.align(Alignment.TopCenter).statusBarsPadding().widthIn(max = MaxContentWidth)
@@ -253,25 +269,21 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (recording) {
-                    SliverText(
-                        formatTimer(elapsedMs), SliverType.MonoL,
-                        Modifier.clip(CircleShape).background(SliverColors.BgVoid.copy(alpha = 0.5f))
-                            .padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S1),
-                        SliverColors.Accent,
-                    )
+                    val long = clipLongEnough(elapsedMs)
+                    LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
+                    TimerPill(formatTimer(elapsedMs), long, Modifier.align(Alignment.CenterVertically))
                 } else {
-                    Chip(
-                        project?.name ?: "My ${today.year}", selected = false,
+                    CameraChip(
+                        project?.name ?: "My ${today.year}",
                         onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
                         modifier = Modifier.weight(1f, fill = false),
                     )
                     Spacer(Modifier.weight(1f))
-                    val hasToday = todayDay != null
-                    Chip(
-                        "TODAY", selected = hasToday,
+                    CameraChip(
+                        "Today", leading = SliverIcons.Calendar,
                         modifier = Modifier.clipDropTarget(today),
                         onClick = {
-                            if (hasToday) {
+                            if (todayDay != null) {
                                 ArchiveSession.selected = today
                                 onNavigate(Route.DayDetail)
                             } else {
@@ -284,6 +296,14 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             if (saved?.coachRecordSeen == false && !recording) {
                 SliverText(
                     "Tap to record. Any length \u2014 you'll pick the best part next.", SliverType.BodySmall,
+                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                        .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
+                    SliverColors.TextPrimary,
+                )
+            }
+            if (failed && !recording) {
+                SliverText(
+                    "That recording didn't work. Try again.", SliverType.BodySmall,
                     Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
                         .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
                     SliverColors.TextPrimary,
@@ -319,6 +339,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     }
                 }
             }
+            Box(Modifier.alpha(if (recording) 0f else 1f)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+            ) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -340,6 +365,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                 { if (!recording) update { s -> s.copy(mode = if (it == 0) CameraMode.PHOTO else CameraMode.VIDEO) } },
                 Modifier.width(168.dp),
             )
+            }
+            if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
+            }
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
                 verticalAlignment = Alignment.CenterVertically,
@@ -347,8 +375,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             ) {
                 if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(iconRot) { onNavigate(Route.GalleryPicker) }
                 RecordButton(
-                    photo = cam.mode == CameraMode.PHOTO,
-                    recording = recording,
+                    state = when {
+                        recording -> RecordState.Recording
+                        cam.mode == CameraMode.PHOTO -> RecordState.Photo
+                        else -> RecordState.VideoIdle
+                    },
                     holding = holding,
                     enabled = ready,
                     onTap = ::onTap,
@@ -427,55 +458,6 @@ private fun AddMediaButton(rotation: Float, onClick: () -> Unit) {
 }
 
 @Composable
-private fun RecordButton(
-    photo: Boolean,
-    recording: Boolean,
-    holding: Boolean,
-    enabled: Boolean,
-    onTap: () -> Unit,
-    onHoldStart: () -> Unit,
-    onHoldEnd: () -> Unit,
-) {
-    val reduced = LocalReducedMotion.current
-    val ring by animateColorAsState(
-        if (recording) SliverColors.Accent else SliverColors.TextPrimary, motionSpec(reduced, SliverMotion.standard(SliverMotion.Quick)), label = "ring",
-    )
-    val inner by animateDpAsState(if (recording) 28.dp else 62.dp, motionSpec(reduced, SliverMotion.springLockIn()), label = "record-size")
-    val corner by animateDpAsState(if (recording) 6.dp else 31.dp, motionSpec(reduced, SliverMotion.springLockIn()), label = "record-corner")
-    val scale = if (holding) 1.2f else 1f
-    Box(
-        Modifier.size(80.dp).scale(scale)
-            .semantics { contentDescription = if (recording) "Stop" else "Record"; role = Role.Button }
-            .pointerInput(enabled) {
-                if (!enabled) return@pointerInput
-                detectTapGestures(onPress = {
-                    coroutineScope {
-                        var held = false
-                        val job = launch {
-                            delay(HOLD_THRESHOLD_MS)
-                            held = true
-                            onHoldStart()
-                        }
-                        val released = tryAwaitRelease()
-                        job.cancel()
-                        when {
-                            held -> onHoldEnd()
-                            released -> onTap()
-                        }
-                    }
-                })
-            }
-            .border(3.dp, ring, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            Modifier.size(inner).clip(RoundedCornerShape(corner.coerceAtLeast(0.dp)))
-                .background(if (photo && !recording) SliverColors.TextPrimary else SliverColors.Accent),
-        )
-    }
-}
-
-@Composable
 private fun GridOverlay() {
     Canvas(Modifier.fillMaxSize()) {
         val c = Color.White.copy(alpha = 0.35f)
@@ -485,5 +467,46 @@ private fun GridOverlay() {
             drawLine(c, Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
             drawLine(c, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
         }
+    }
+}
+
+@Composable
+private fun CameraChip(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leading: ImageVector? = null,
+    trailing: ImageVector? = null,
+) {
+    val plate = Color.Black.copy(alpha = if (blurSupported()) 0.55f else 0.7f)
+    Box(
+        modifier.height(48.dp).clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            Modifier.height(36.dp).clip(SliverShapes.Pill).background(plate).padding(horizontal = SliverSpace.S3),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (leading != null) SliverIcon(leading, Color.White, size = 18.dp)
+            SliverText(text, SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f, fill = false), Color.White, maxLines = 1)
+            if (trailing != null) SliverIcon(trailing, Color.White.copy(alpha = 0.7f), size = 14.dp)
+        }
+    }
+}
+
+@Composable
+private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifier) {
+    val color = if (clipOk) SliverColors.Accent else SliverColors.TextSecondary
+    Row(
+        modifier.height(34.dp).clip(SliverShapes.Pill).background(SliverColors.BgVoid.copy(alpha = 0.7f))
+            .border(1.dp, if (clipOk) SliverColors.Accent.copy(alpha = 0.4f) else SliverColors.LineStrong, SliverShapes.Pill)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+    ) {
+        Box(Modifier.size(8.dp).background(SliverColors.Accent, CircleShape))
+        SliverText(time, SliverType.MonoL, color = color, maxLines = 1)
+        if (clipOk) SliverText("\u00B7 CLIP OK", SliverType.MonoS, color = color, maxLines = 1)
     }
 }

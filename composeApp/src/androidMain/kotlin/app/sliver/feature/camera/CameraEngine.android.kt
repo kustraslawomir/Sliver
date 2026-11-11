@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.util.Size
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
@@ -39,6 +40,7 @@ import app.sliver.data.settings.Lens
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class AndroidCameraEngine(private val context: Context) : CameraEngine {
     private val executor = ContextCompat.getMainExecutor(context)
@@ -47,6 +49,17 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     private var imageCapture: ImageCapture? = null
     private var recording: Recording? = null
     override var deviceDegrees: Int = 0
+    private var previewView: PreviewView? = null
+
+    override fun focus(x: Float, y: Float, lock: Boolean) {
+        val view = previewView ?: return
+        val control = camera?.cameraControl ?: return
+        val point = view.meteringPointFactory.createPoint(x, y)
+        val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE).apply {
+            if (lock) disableAutoCancel() else setAutoCancelDuration(FOCUS_AUTO_CANCEL_S, TimeUnit.SECONDS)
+        }.build()
+        control.startFocusAndMetering(action)
+    }
 
     fun bind(
         provider: ProcessCameraProvider,
@@ -56,6 +69,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         lens: Lens,
         torch: Boolean,
     ) {
+        previewView = view
         val selector = if (lens == Lens.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
         val preview = Preview.Builder().build().also { it.surfaceProvider = view.surfaceProvider }
         provider.unbindAll()

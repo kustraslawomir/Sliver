@@ -47,10 +47,10 @@ object TurnHintSession {
     var shown = false
 }
 
-/** mm:ss, e.g. 00:07. */
+/** m:ss, e.g. 0:07. */
 fun formatTimer(elapsedMs: Long): String {
     val total = (elapsedMs / 1000).coerceAtLeast(0)
-    return "${(total / 60).toString().padStart(2, '0')}:${(total % 60).toString().padStart(2, '0')}"
+    return "${total / 60}:${(total % 60).toString().padStart(2, '0')}"
 }
 
 /** Surface.ROTATION_* value (0, 1, 2, 3 = 0, 90, 180, 270) for OrientationEventListener degrees. */
@@ -67,3 +67,25 @@ fun surfaceRotation(degrees: Int): Int {
 /** Size a player shows for a stored [width] x [height] video with container [rotationDegrees] metadata. */
 fun displaySize(width: Int, height: Int, rotationDegrees: Int): Pair<Int, Int> =
     if (rotationDegrees % 180 == 0) width to height else height to width
+
+const val FOCUS_LOCK_HOLD_MS = 600L
+const val FOCUS_DIM_AFTER_MS = 1200L
+const val FOCUS_AUTO_CANCEL_S = 3L
+const val FOCUS_RING_START_DP = 88
+const val FOCUS_RING_END_DP = 64
+const val FOCUS_LOCK_PILL_OFFSET_DP = 54
+
+/** Tap position inside the viewfinder, clamped to its bounds, as 0..1 fractions. */
+fun focusFraction(x: Float, y: Float, width: Float, height: Float): Pair<Float, Float> =
+    if (width <= 0f || height <= 0f) 0.5f to 0.5f
+    else (x / width).coerceIn(0f, 1f) to (y / height).coerceIn(0f, 1f)
+
+/** Ring is not drawn past the viewfinder edge: keeps the centre of a ring of [ringDp] fully visible. */
+fun focusRingCenter(x: Float, y: Float, width: Float, height: Float, ringPx: Float): Pair<Float, Float> {
+    val half = ringPx / 2f
+    return x.coerceIn(half.coerceAtMost(width / 2f), (width - half).coerceAtLeast(width / 2f)) to
+        y.coerceIn(half.coerceAtMost(height / 2f), (height - half).coerceAtLeast(height / 2f))
+}
+
+/** The clip-length pill turns ember once a recording is at least 1 s. */
+fun clipLongEnough(elapsedMs: Long): Boolean = elapsedMs >= 1000L

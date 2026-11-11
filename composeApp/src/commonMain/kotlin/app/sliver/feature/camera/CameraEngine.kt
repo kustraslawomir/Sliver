@@ -12,6 +12,8 @@ interface CameraEngine {
     /** Records to [path]; [onResult] gets the path on success. */
     fun startRecording(path: String, onResult: (Result<String>) -> Unit)
     fun stopRecording()
+    /** AF+AE at a viewfinder point in px; [lock] keeps it until the next call, otherwise it auto-cancels after 3 s. */
+    fun focus(x: Float, y: Float, lock: Boolean)
     fun takePhoto(path: String, onResult: (Result<String>) -> Unit)
 }
 
