@@ -84,6 +84,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var options by remember {
         mutableStateOf(FilmOptions(custom = today.plus(-13, DateTimeUnit.DAY) to today))
     }
+    var dateTouched by remember { mutableStateOf(false) }
     val editId = remember { FilmNav.takeEditId() }
     var editing by remember { mutableStateOf<Film?>(null) }
     LaunchedEffect(editId) {
@@ -95,7 +96,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         dateTouched = true
     }
     var lowStorage by remember { mutableStateOf(false) }
-    var dateTouched by remember { mutableStateOf(false) }
     val dateOn = if (dateTouched) options.dateOn else app?.dateStamp ?: options.dateOn
     val format = editing?.format ?: app?.newFilmFormat ?: FilmFormat.CINEMA
 
