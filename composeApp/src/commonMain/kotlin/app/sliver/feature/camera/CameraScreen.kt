@@ -179,6 +179,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         elapsedMs = 0
         recording = true
+        if (saved?.coachRecordSeen == false) scope.launch { repo.update { it.copy(coachRecordSeen = true) } }
         engine.startRecording(files.newTmpPath(Clock.System.now().toEpochMilliseconds())) { finish(it, Route.Trim) }
     }
 
@@ -268,6 +269,14 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                         },
                     )
                 }
+            }
+            if (saved?.coachRecordSeen == false && !recording) {
+                SliverText(
+                    "Tap to record. Any length \u2014 you'll pick the best part next.", SliverType.BodySmall,
+                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                        .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
+                    SliverColors.TextPrimary,
+                )
             }
             if (turnHint && bandActive) {
                 SliverText(

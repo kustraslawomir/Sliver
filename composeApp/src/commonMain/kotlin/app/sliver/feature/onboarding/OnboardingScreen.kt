@@ -73,6 +73,7 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
     var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var busy by remember { mutableStateOf(false) }
     val step = steps[index]
+    LaunchedEffect(Unit) { FirstClipTimer.start() }
 
     fun finish() {
         if (busy) return

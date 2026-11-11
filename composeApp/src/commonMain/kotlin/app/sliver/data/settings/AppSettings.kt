@@ -56,6 +56,7 @@ data class AppSettings(
     val camera: CameraSettings = CameraSettings(),
     val onboardingDone: Boolean = false,
     val coachTrimSeen: Boolean = false,
+    val coachRecordSeen: Boolean = false,
     val firstDay: LocalDate? = null,
     val activeProjectId: String? = null,
     val account: AccountSettings = AccountSettings(),

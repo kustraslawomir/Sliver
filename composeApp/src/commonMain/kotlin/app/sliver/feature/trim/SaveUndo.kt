@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.feature.onboarding.FirstClipTimer
 import app.sliver.core.ui.UndoToastState
 import app.sliver.data.db.Day
 import app.sliver.data.files.FileStore
@@ -50,6 +51,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             if (previous != null && backup != null) restore(previous, backup)
             throw e
         }
+        FirstClipTimer.clipSaved()
         runCatching { films.ensureDefaultFilm(request.date, request.format) }
         val p = Pending(request, previous, backup, label)
         pending = p
