@@ -5,3 +5,6 @@
 - T02: gallery is toggled by `SHOW_GALLERY` in `App.kt`.
 - T09: 300 ms/15 s on-device timing not measured (no device); FrameSampler logs timing under tag FrameSampler.
 - T08: `AndroidClipExporter.measureDurationMs` (clip duration check) needs real media and Media3 transcoding, so it can only be tested on a device/emulator (no JVM unit test). Verify manually: export a clip and compare measureDurationMs to 1000 ms.
+
+## T15
+- Run `python3 tools/gen_luts.py` (numpy) to produce composeApp/src/androidMain/assets/luts/*.cube; the agent could not execute python. LUTs live in androidMain assets (compose resources is not a dependency yet).

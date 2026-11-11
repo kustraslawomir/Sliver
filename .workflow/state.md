@@ -11,7 +11,7 @@
 - [x] T11
 - [x] T12
 - [x] T13
-- [ ] T15
+- [x] T15 (LUT .cube files not yet generated: python execution denied; run tools/gen_luts.py)
 - [ ] T16
 - [ ] T17
 - [ ] T18
