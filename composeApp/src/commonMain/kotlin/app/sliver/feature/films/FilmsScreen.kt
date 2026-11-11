@@ -114,6 +114,16 @@ private fun Poster(film: Film, plan: FilmPlan, modifier: Modifier, onClick: () -
         ) {
             cover?.let { PosterCover(it) }
             if (film.live) Badge("Live", Modifier.align(Alignment.TopStart).padding(SliverSpace.S2))
+            val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
+            val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
+            when (val s = state) {
+                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2))
+                RenderState.Failed -> Badge(
+                    "Try again",
+                    Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2).clickable { renderer.start(film.id) },
+                )
+                RenderState.Idle -> Unit
+            }
         }
         SliverText(film.name, SliverType.Headline)
         SliverText(

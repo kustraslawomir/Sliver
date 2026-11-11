@@ -18,3 +18,9 @@
 - T17: Day detail entry to Looks not wired (Day detail screen not built yet). Photo and thumbnail look preview is a CPU approximation (no grain or sharpness); video preview and export use the Media3 chain.
 - T21: batch runs in WorkManager (BackfillWorker) without a foreground notification; progress persists in DataStore so an interrupted run resumes. Undo all deletes days with source BACKFILL on the batch dates. Settings entry point for Fill the past not added (Settings screen not built yet). Photo candidates use STILL motion. Not run on a device.
 - T19: Place chip omitted (Day has no location column or media-location source; needs Room migration plus Geocoder behind an interface). Day files are exported with the look baked in, so Look chip edits save Day.look and preview in-session only.
+
+## T24 film render
+- Not run on a device: the Composition (blur-fill compositor, text date overlay, RgbMatrix dip, music mix) compiles but is unverified. Check a 30-day film with each audio option.
+- DECISION: no chunked resume; a failed render leaves the film unrendered and the poster shows "Try again" (restarts from scratch).
+- DECISION: the film one-look is applied on top of each day baked look. Mismatch.BLUR uses a second blurred sequence plus a per-time compositor scale.
+- Music without a track falls back to ORIGINAL; built-in tracks still missing (see T23), so MUSIC/MIX with built-ins fails until assets exist.

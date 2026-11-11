@@ -198,6 +198,7 @@ fun FilmBuilderScreen(onBack: () -> Unit) {
                     val id = "film-${Clock.System.now().toEpochMilliseconds()}"
                     val film = options.copy(dateOn = dateOn).toFilm(id, filmName(options, range), format, today)
                     films.save(film)
+                    koin.get<FilmRenderer>().start(id)
                     onBack()
                 }
             },
