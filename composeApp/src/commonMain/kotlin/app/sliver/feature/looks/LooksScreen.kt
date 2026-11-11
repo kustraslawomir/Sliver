@@ -1,5 +1,7 @@
 package app.sliver.feature.looks
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -99,7 +101,7 @@ fun LooksScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             SliverText("LOOKS", SliverType.MonoS, color = SliverColors.TextSecondary)
             SliverText(
                 if (showOriginal) "ORIGINAL" else "HOLD = ORIGINAL", SliverType.MonoS,

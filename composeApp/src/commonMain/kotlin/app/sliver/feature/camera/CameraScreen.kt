@@ -1,5 +1,7 @@
 package app.sliver.feature.camera
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -383,7 +385,7 @@ private fun ArchiveButton(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText("DAYS", SliverType.MonoS, color = SliverColors.TextSecondary)
+        SliverIcon(SliverIcons.Calendar, SliverColors.TextSecondary)
     }
 }
 

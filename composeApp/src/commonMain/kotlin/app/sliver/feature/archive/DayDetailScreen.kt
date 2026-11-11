@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,20 +146,20 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+                IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton44(
                         { show(prevDay(current, filled)) }, "Previous day",
                     ) {
-                        SliverText("<", SliverType.MonoL, color = if (prevDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
+                        SliverIcon(SliverIcons.ChevronLeft, if (prevDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
                     }
                     IconButton44(
                         { nextDay(current, filled)?.let { show(it) } }, "Next day",
                     ) {
-                        SliverText(">", SliverType.MonoL, color = if (nextDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
+                        SliverIcon(SliverIcons.ChevronRight, if (nextDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
                     }
                     IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute") {
-                        SliverText(if (muted) "OFF" else "SND", SliverType.MonoS, color = if (muted) SliverColors.TextTertiary else SliverColors.Accent)
+                        SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.Accent)
                     }
                 }
             }

@@ -1,5 +1,7 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -222,10 +224,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                IconButton44(::close, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+                IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
                 Chip("FOR ${dayLabel(day, today).uppercase()} v", selected = false, onClick = { sheet = true })
                 IconButton44({ audio = !audio }, if (audio) "Mute" else "Unmute") {
-                    SliverText(if (audio) "SND" else "OFF", SliverType.MonoS, color = if (audio) SliverColors.Accent else SliverColors.TextTertiary)
+                    SliverIcon(if (audio) SliverIcons.Volume2 else SliverIcons.VolumeX, if (audio) SliverColors.Accent else SliverColors.TextTertiary)
                 }
             }
 

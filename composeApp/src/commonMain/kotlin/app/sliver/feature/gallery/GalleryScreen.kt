@@ -1,5 +1,7 @@
 package app.sliver.feature.gallery
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -100,7 +102,7 @@ private fun GalleryContent(status: PermissionStatus, controller: PermissionContr
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton44({ onNavigate(Route.Camera) }, "Close") {
-                SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary)
+                SliverIcon(SliverIcons.X, SliverColors.TextPrimary)
             }
             if (forDate != null) Chip("FOR " + dayLabel(forDate, today).uppercase(), selected = true, onClick = {})
         }

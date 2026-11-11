@@ -1,5 +1,7 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -137,7 +139,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            IconButton44(::close, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             SliverText("FOR ${dayLabel(day, today).uppercase()}", SliverType.MonoS, color = SliverColors.TextSecondary)
             Box(Modifier.padding(SliverSpace.S6))
         }

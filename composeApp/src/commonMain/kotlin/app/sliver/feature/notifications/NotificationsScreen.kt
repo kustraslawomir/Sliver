@@ -1,5 +1,7 @@
 package app.sliver.feature.notifications
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +76,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
             .padding(horizontal = SliverSpace.Gutter).padding(bottom = SliverSpace.S8),
     ) {
         Row(Modifier.padding(top = SliverSpace.S2), verticalAlignment = Alignment.CenterVertically) {
-            IconButton44(onBack, "Back") { SliverText("<", SliverType.MonoL, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
             SliverText("Notifications", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
         }
 

@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -104,7 +106,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             SliverText("New film", SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
         }
 

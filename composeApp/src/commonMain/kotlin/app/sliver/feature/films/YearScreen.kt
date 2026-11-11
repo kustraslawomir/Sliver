@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,7 +63,7 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
-            IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             if (!unlocked) Badge("Preview", Modifier.padding(start = SliverSpace.S2))
         }
         Column(

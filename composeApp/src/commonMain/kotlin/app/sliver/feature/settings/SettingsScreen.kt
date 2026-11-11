@@ -1,5 +1,7 @@
 package app.sliver.feature.settings
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -130,6 +132,6 @@ private fun NavRow(title: String, value: String?, onClick: () -> Unit) {
     ) {
         SliverText(title, SliverType.Body, Modifier.weight(1f))
         if (value != null) SliverText(value, SliverType.BodySmall, color = SliverColors.TextSecondary)
-        SliverText(">", SliverType.MonoL, color = SliverColors.TextTertiary)
+        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary)
     }
 }

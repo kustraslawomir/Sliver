@@ -1,5 +1,7 @@
 package app.sliver.feature.backfill
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -99,7 +101,7 @@ private fun BackfillContent(status: PermissionStatus, controller: PermissionCont
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton44(onBack, "Back") { SliverText("<", SliverType.MonoL, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
             SliverText("Fill the past", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
         }
 

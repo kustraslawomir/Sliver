@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -172,7 +174,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val path = f?.renderPath
     if (f == null || path == null) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgVoid).statusBarsPadding()) {
-            IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
         }
         return
     }
@@ -227,7 +229,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
-            IconButton44(onBack, "Close") { SliverText("X", SliverType.MonoS, color = SliverColors.TextPrimary) }
+            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             SliverText(f.name, SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
         }
         Box(

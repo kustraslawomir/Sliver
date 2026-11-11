@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -119,7 +121,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                     SliverColors.TextSecondary,
                 )
                 IconButton44({ onNavigate(Route.Settings) }, "Settings") {
-                    SliverText("S", SliverType.MonoS, color = SliverColors.TextPrimary)
+                    SliverIcon(SliverIcons.Settings, SliverColors.TextPrimary)
                 }
             }
             Segmented(listOf("MONTH", "YEAR"), if (yearView) 1 else 0, { yearView = it == 1 })
@@ -175,14 +177,14 @@ private fun MonthHeader(
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton44(onPrev, "Previous month") {
-            SliverText("<", SliverType.MonoL, color = if (canPrev) SliverColors.TextPrimary else SliverColors.TextDisabled)
+            SliverIcon(SliverIcons.ChevronLeft, if (canPrev) SliverColors.TextPrimary else SliverColors.TextDisabled)
         }
         SliverText(
             "${MonthLong[shown.month - 1]} ${shown.year}", SliverType.DisplayM,
             Modifier.weight(1f).padding(horizontal = SliverSpace.S2),
         )
         IconButton44(onNext, "Next month") {
-            SliverText(">", SliverType.MonoL, color = if (canNext) SliverColors.TextPrimary else SliverColors.TextDisabled)
+            SliverIcon(SliverIcons.ChevronRight, if (canNext) SliverColors.TextPrimary else SliverColors.TextDisabled)
         }
     }
 }
