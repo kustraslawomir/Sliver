@@ -4,6 +4,7 @@ enum class Route(val path: String, val title: String, val tabBar: Boolean = fals
     Onboarding("onboarding", "Onboarding"),
     Camera("camera", "Camera"),
     Trim("trim", "Trim & Pick"),
+    PhotoTrim("photo-trim", "Photo trim"),
     GalleryPicker("gallery", "Gallery picker"),
     Looks("looks", "Looks editor"),
     Archive("archive", "Archive", tabBar = true),

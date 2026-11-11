@@ -21,6 +21,7 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
+import app.sliver.feature.camera.CameraScreen
 
 @Composable
 fun SliverNavHost() {
@@ -43,7 +44,9 @@ fun SliverNavHost() {
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
         NavHost(nav, startDestination = Route.start(OnboardingFlag.done).path) {
             Route.entries.forEach { route ->
-                composable(route.path) { PlaceholderScreen(route, ::go) }
+                composable(route.path) {
+                    if (route == Route.Camera) CameraScreen(::go) else PlaceholderScreen(route, ::go)
+                }
             }
         }
         if (current?.tabBar == true) {
