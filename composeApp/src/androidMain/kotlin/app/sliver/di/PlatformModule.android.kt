@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import app.sliver.data.db.SliverDatabase
+import app.sliver.data.export.AndroidClipExporter
+import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.files.FileStore
 import org.koin.core.module.Module
@@ -15,6 +17,7 @@ actual val platformModule: Module = module {
         Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath).build()
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
+    single<ClipExporter> { AndroidClipExporter(get<Context>()) }
     single {
         PreferenceDataStoreFactory.create { get<Context>().filesDir.resolve("settings.preferences_pb") }
     }

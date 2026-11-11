@@ -9,6 +9,7 @@ interface FileStore {
     fun newTmpPath(timestampMillis: Long): String
     fun exists(path: String): Boolean
     fun delete(path: String): Boolean
+    fun move(from: String, to: String): Boolean
     fun freeSpaceBytes(): Long
 
     /** Deletes tmp files older than [maxAgeMillis]; returns number deleted. */

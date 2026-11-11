@@ -7,8 +7,13 @@ import androidx.test.core.app.ApplicationProvider
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
 import app.sliver.data.db.SliverDatabase
+import app.sliver.data.export.ClipExporter
+import app.sliver.data.export.ExportedClip
+import app.sliver.data.export.ShortMode
+import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepositoryImpl
+import app.sliver.data.repo.SaveSecondRequest
 import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.ReminderMode
 import java.io.File
@@ -26,6 +31,17 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+private object FakeExporter : ClipExporter {
+    override suspend fun exportSecond(
+        source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat,
+        videoPath: String, thumbPath: String, shortMode: ShortMode,
+    ): ExportedClip {
+        File(videoPath).writeText("v")
+        File(thumbPath).writeText("t")
+        return ExportedClip(videoPath, thumbPath, 1000)
+    }
+}
+
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36], application = android.app.Application::class)
 class DataLayerTest {
@@ -37,8 +53,19 @@ class DataLayerTest {
     fun setUp() {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder<SliverDatabase>(ctx).allowMainThreadQueries().build()
-        days = DayRepositoryImpl(db.dayDao())
+        days = DayRepositoryImpl(db.dayDao(), FakeExporter, AndroidFileStore(ctx.filesDir, ctx.cacheDir))
         films = FilmRepositoryImpl(db.filmDao())
+    }
+
+    @Test
+    fun saveSecondWritesFilesAndRow() = runTest {
+        val date = LocalDate(2026, 3, 1)
+        val day = days.saveSecond(
+            SaveSecondRequest(date, "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
+        )
+        assertEquals(day.file, days.getDay(date)?.file)
+        assertEquals("v", File(day.file).readText())
+        assertEquals("t", File(day.thumb).readText())
     }
 
     @AfterTest

@@ -13,7 +13,7 @@ import org.koin.dsl.module
 val commonModule: Module = module {
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
-    single<DayRepository> { DayRepositoryImpl(get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
 }
