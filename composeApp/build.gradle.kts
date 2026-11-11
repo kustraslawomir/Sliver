@@ -94,6 +94,13 @@ android {
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
 }
 
+androidComponents {
+    beforeVariants {
+        (it as? com.android.build.api.variant.HasHostTestsBuilder)
+            ?.hostTests?.get(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)?.enable = true
+    }
+}
+
 tasks.withType<Test>().configureEach {
     providers.gradleProperty("genLuts").orNull?.let { systemProperty("genLuts", it) }
 }
