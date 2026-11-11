@@ -72,6 +72,10 @@ fun reminderCopy(kind: NotifKind, date: LocalDate): NotifCopy = when (kind) {
 fun filmReadyCopy(name: String, seconds: Int) = NotifCopy("“$name” is ready", "$seconds seconds. Press play.")
 
 val BackupPausedCopy = NotifCopy("Backup paused", "Your Drive is full. Your seconds are safe on this phone.")
+val BackupStuckCopy = NotifCopy("Backup paused", "We couldn't reach your Drive. Your seconds are safe on this phone.")
+
+fun backupProblemCopy(error: app.sliver.data.backup.BackupError) =
+    if (error == app.sliver.data.backup.BackupError.DRIVE_FULL) BackupPausedCopy else BackupStuckCopy
 
 sealed interface DeepLinkTarget {
     data object Camera : DeepLinkTarget

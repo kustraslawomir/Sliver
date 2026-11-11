@@ -8,6 +8,14 @@ import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
 import app.sliver.data.auth.GoogleAuth
 import app.sliver.data.auth.googleConfigured
+import app.sliver.data.backup.AndroidArchiveExporter
+import app.sliver.data.backup.AndroidBackupScheduler
+import app.sliver.data.backup.AndroidDayFileReader
+import app.sliver.data.backup.AndroidNetworkMonitor
+import app.sliver.data.backup.ArchiveExporter
+import app.sliver.data.backup.BackupScheduler
+import app.sliver.data.backup.DayFileReader
+import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.AndroidClipExporter
 import app.sliver.data.export.AndroidDayShare
@@ -57,6 +65,10 @@ actual val platformModule: Module = module {
     single<GoogleAuth> {
         if (googleConfigured) AndroidGoogleAuth(get<Context>(), BuildConfig.GOOGLE_WEB_CLIENT_ID) else FakeGoogleAuth()
     }
+    single<DayFileReader> { AndroidDayFileReader }
+    single<BackupScheduler> { AndroidBackupScheduler(get<Context>()) }
+    single<NetworkMonitor> { AndroidNetworkMonitor(get<Context>()) }
+    single<ArchiveExporter> { AndroidArchiveExporter(get<Context>(), get(), get(), get()) }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
     single<HttpClientEngine> { OkHttp.create() }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }

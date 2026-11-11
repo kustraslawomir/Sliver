@@ -124,6 +124,15 @@ class RestDriveClient(
         }.checked()
     }
 
+    override suspend fun storageQuota(): DriveQuota {
+        val q = call(HttpMethod.Get, "/drive/v3/about") { parameter("fields", "storageQuota") }
+            .checked().json().jsonObject["storageQuota"]?.jsonObject
+        return DriveQuota(
+            used = q?.get("usage")?.jsonPrimitive?.contentOrNull?.toLongOrNull() ?: 0L,
+            limit = q?.get("limit")?.jsonPrimitive?.contentOrNull?.toLongOrNull(),
+        )
+    }
+
     override suspend fun readManifest(folderId: String): String? =
         list(folderId).firstOrNull { it.name == MANIFEST_NAME }?.let { download(it.id).decodeToString() }
 

@@ -1,6 +1,7 @@
 package app.sliver.data.settings
 
 import app.sliver.data.FilmFormat
+import app.sliver.data.backup.BackupError
 import app.sliver.data.LookPreset
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -39,6 +40,10 @@ data class AccountSettings(
     val driveFolderId: String? = null,
     val autoBackup: Boolean = true,
     val wifiOnly: Boolean = true,
+    val backupError: BackupError? = null,
+    val failingSince: Long? = null,
+    val problemNotified: Boolean = false,
+    val pendingTrash: List<String> = emptyList(),
 )
 
 data class AppSettings(

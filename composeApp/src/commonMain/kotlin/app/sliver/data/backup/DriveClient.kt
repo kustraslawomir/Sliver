@@ -25,7 +25,12 @@ interface DriveClient {
     suspend fun trash(fileId: String)
     suspend fun readManifest(folderId: String): String?
     suspend fun writeManifest(folderId: String, json: String)
+
+    /** about.get storageQuota; [DriveQuota.limit] is null for unlimited plans. */
+    suspend fun storageQuota(): DriveQuota
 }
+
+data class DriveQuota(val used: Long, val limit: Long?)
 
 const val DRIVE_FOLDER_NAME = "SLIVER"
 const val MANIFEST_NAME = "manifest.json"
@@ -35,6 +40,12 @@ class InMemoryDriveClient : DriveClient {
 
     private val entries = LinkedHashMap<String, Entry>()
     private var next = 1
+
+    /** Makes every upload fail with this error (tests, offline/full demos). */
+    var failUploads: BackupError? = null
+    var limitBytes: Long? = null
+
+    override suspend fun storageQuota() = DriveQuota(entries.values.filter { !it.trashed }.sumOf { it.bytes.size.toLong() }, limitBytes)
 
     override suspend fun ensureFolder(storedId: String?): String {
         entries[storedId]?.takeIf { !it.trashed }?.let { return it.file.id }
@@ -50,6 +61,7 @@ class InMemoryDriveClient : DriveClient {
         bytes: ByteArray,
         existingId: String?,
     ): DriveFile {
+        failUploads?.let { throw DriveException(it) }
         val e = existingId?.let { entries[it] }
         if (e == null) return add(name, folderId, appProperties, bytes)
         e.file = e.file.copy(name = name, appProperties = appProperties)

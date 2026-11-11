@@ -5,7 +5,9 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.sliver.data.backup.BackupError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
@@ -52,6 +54,10 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val accountDriveFolderId = stringPreferencesKey("account.driveFolderId")
         val accountAutoBackup = booleanPreferencesKey("account.autoBackup")
         val accountWifiOnly = booleanPreferencesKey("account.wifiOnly")
+        val accountBackupError = stringPreferencesKey("account.backupError")
+        val accountFailingSince = longPreferencesKey("account.failingSince")
+        val accountProblemNotified = booleanPreferencesKey("account.problemNotified")
+        val accountPendingTrash = stringPreferencesKey("account.pendingTrash")
     }
 
     private inline fun <reified E : Enum<E>> Preferences.enum(key: Preferences.Key<String>, default: E): E =
@@ -94,6 +100,10 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
                 driveFolderId = this[K.accountDriveFolderId],
                 autoBackup = this[K.accountAutoBackup] ?: d.account.autoBackup,
                 wifiOnly = this[K.accountWifiOnly] ?: d.account.wifiOnly,
+                backupError = this[K.accountBackupError]?.let { n -> BackupError.entries.firstOrNull { it.name == n } },
+                failingSince = this[K.accountFailingSince],
+                problemNotified = this[K.accountProblemNotified] ?: false,
+                pendingTrash = this[K.accountPendingTrash]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList(),
             ),
         )
     }
@@ -130,5 +140,9 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.accountDriveFolderId, s.account.driveFolderId)
         put(K.accountAutoBackup, s.account.autoBackup)
         put(K.accountWifiOnly, s.account.wifiOnly)
+        put(K.accountBackupError, s.account.backupError?.name)
+        put(K.accountFailingSince, s.account.failingSince)
+        put(K.accountProblemNotified, s.account.problemNotified)
+        put(K.accountPendingTrash, s.account.pendingTrash.joinToString(","))
     }
 }

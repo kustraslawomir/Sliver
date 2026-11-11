@@ -50,3 +50,4 @@ TalkBack/font-scale pass not device-tested. Added icon button descriptions, cale
 3. Credentials -> Create OAuth client ID -> Android: package `app.sliver`, SHA-1 of your debug keystore (`keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`). Repeat for the release keystore.
 4. Credentials -> Create OAuth client ID -> Web application (no redirect needed). Copy its client ID.
 5. Add `GOOGLE_WEB_CLIENT_ID=<web client id>` to `local.properties` (and `.env.local`), rebuild. The app then uses the real Credential Manager + AuthorizationClient.
+- T35: with the fake GoogleAuth, backup runs against InMemoryDriveClient (nothing leaves the device). Real Drive needs GOOGLE_WEB_CLIENT_ID.

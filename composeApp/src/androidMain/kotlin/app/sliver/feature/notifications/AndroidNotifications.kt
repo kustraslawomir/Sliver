@@ -81,7 +81,8 @@ private fun post(context: Context, id: Int, channel: String, copy: NotifCopy, ta
 fun notifyFilmReady(context: Context, filmId: String, name: String, seconds: Int) =
     post(context, 9000 + (filmId.hashCode() and 0xFFF), CH_FILMS, filmReadyCopy(name, seconds), DeepLinkTarget.Film(filmId))
 
-fun notifyBackupPaused(context: Context) = post(context, 9100, CH_BACKUP, BackupPausedCopy, DeepLinkTarget.Backup)
+fun notifyBackupPaused(context: Context, error: app.sliver.data.backup.BackupError) =
+    post(context, 9100, CH_BACKUP, backupProblemCopy(error), DeepLinkTarget.Backup)
 
 class AndroidReminderScheduler(private val context: Context) : ReminderScheduler {
     private val alarms = context.getSystemService(AlarmManager::class.java)

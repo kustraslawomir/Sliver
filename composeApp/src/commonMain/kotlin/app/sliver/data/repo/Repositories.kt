@@ -4,6 +4,7 @@ import app.sliver.data.DaySource
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
+import app.sliver.data.backup.DriveTrashQueue
 import app.sliver.data.db.Day
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.export.ShortMode
@@ -65,6 +66,7 @@ class DayRepositoryImpl(
     private val exporter: ClipExporter,
     private val files: FileStore,
     private val places: PlaceResolver = PlaceResolver { null },
+    private val trash: DriveTrashQueue = DriveTrashQueue {},
 ) : DayRepository {
     override suspend fun saveSecond(request: SaveSecondRequest): Day = with(request) {
         val stamp = takenAt.toEpochMilliseconds()
@@ -81,6 +83,7 @@ class DayRepositoryImpl(
                 date = date, file = file, thumb = thumb, source = daySource, look = look, motion = motion,
                 keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY,
                 takenAt = takenAt, createdAt = Clock.System.now(), place = place,
+                driveFileId = dao.getByDate(date)?.driveFileId,
             )
             dao.upsert(day)
             day
@@ -96,7 +99,10 @@ class DayRepositoryImpl(
     override fun observeCount() = dao.observeCount()
     override suspend fun getDay(date: LocalDate) = dao.getByDate(date)
     override suspend fun save(day: Day) = dao.upsert(day)
-    override suspend fun delete(date: LocalDate) = dao.delete(date)
+    override suspend fun delete(date: LocalDate) {
+        dao.getByDate(date)?.driveFileId?.let { trash.enqueue(it) }
+        dao.delete(date)
+    }
 }
 
 class FilmRepositoryImpl(private val dao: FilmDao) : FilmRepository {

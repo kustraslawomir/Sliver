@@ -2,7 +2,11 @@ package app.sliver.di
 
 import app.sliver.data.auth.AccountManager
 import app.sliver.data.auth.GoogleAuth
+import app.sliver.data.backup.BackupCoordinator
+import app.sliver.data.backup.BackupEngine
 import app.sliver.data.backup.DriveClient
+import app.sliver.data.backup.DriveTrashQueue
+import app.sliver.data.backup.SettingsTrashQueue
 import app.sliver.data.backup.InMemoryDriveClient
 import app.sliver.data.backup.RestDriveClient
 import app.sliver.data.db.SliverDatabase
@@ -23,7 +27,10 @@ import org.koin.dsl.module
 val commonModule: Module = module {
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
-    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get()) }
+    single<DriveTrashQueue> { SettingsTrashQueue(get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get()) }
+    single { BackupEngine(get(), get(), get(), get(), get()) }
+    single { BackupCoordinator(get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
     single { BackfillStore(get()) }
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }

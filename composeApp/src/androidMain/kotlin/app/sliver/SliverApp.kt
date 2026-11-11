@@ -3,6 +3,7 @@ package app.sliver
 import android.app.Application
 import app.sliver.di.commonModule
 import app.sliver.di.platformModule
+import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.files.FileStore
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.notifications.ensureChannels
@@ -30,6 +31,8 @@ class SliverApp : Application(), KoinComponent {
         ensureChannels(this)
         val coordinator: ReminderCoordinator by inject()
         coordinator.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val backup: BackupCoordinator by inject()
+        backup.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         val days: DayRepository by inject()
         val widgetScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         widgetScope.launch {
