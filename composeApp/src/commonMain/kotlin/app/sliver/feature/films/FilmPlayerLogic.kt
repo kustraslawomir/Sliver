@@ -28,6 +28,11 @@ fun playerTicks(plan: FilmPlan, durationMs: Long): List<Float> {
 /** Holds the film the export, premiere and player screens work on (routes carry no arguments). */
 object FilmNav {
     var id: String? = null
+
+    /** Film the builder should open for editing; consumed once by the builder. */
+    var editId: String? = null
+
+    fun takeEditId(): String? = editId.also { editId = null }
 }
 
 interface FilmShare {

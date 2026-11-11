@@ -70,10 +70,10 @@ fun SplashOverlay(onFinished: () -> Unit) {
     }
     Box(Modifier.fillMaxSize().alpha(fade.value).background(SliverColors.BgVoid), contentAlignment = Alignment.Center) {
         val p = progress.value
-        Box(Modifier.width((220 * p).dp).height(2.dp).clip(SliverShapes.Pill).background(SliverColors.Accent))
+        Box(Modifier.width(2.dp).height((220 * p).dp).clip(SliverShapes.Pill).background(SliverColors.Accent))
         SliverText(
             "SLIVER", SliverType.MonoL,
-            Modifier.alpha(((p - 0.5f) * 2f).coerceIn(0f, 1f)).padding(top = 48.dp),
+            Modifier.alpha(((p - 0.5f) * 2f).coerceIn(0f, 1f)).padding(top = 280.dp),
             SliverColors.TextPrimary,
         )
     }

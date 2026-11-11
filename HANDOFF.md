@@ -97,3 +97,11 @@ BackupEngine/RestoreEngine still treat days as one flat list: the Drive manifest
 - `camera.activeFilmId` setting is now unused (camera follows the active project); left in storage to avoid a settings migration.
 - Navigation (F05) is not verified by hand on a device. Origin of a capture flow is derived from the back stack (first screen below Camera/Gallery/Edit clip/Filters), not stored.
 - SavedStateHandle restores the Edit clip source path, day and trim position; the applied Filters look is not restored after process death.
+
+## F16 status (v1 device-test gaps)
+- 1.000 s clip: fixed in F09/F10 (AAC frames past the second dropped, test added). Unverified on device.
+- Settings gear: SliverIcons in place (F01); no text-as-icon strings left (only "+ Make film" label cleaned).
+- Splash: now a vertical slit growing top to bottom with the wordmark below.
+- Edit film: opens the builder prefilled with the existing film and re-renders under the same id.
+- Live camera preview does not apply the selected filter (CameraX preview has no per-frame shader); the filter is baked when the clip is saved and shown in Edit clip / Filters. Needs an OpenGL/CameraEffect pipeline, not done.
+- Fonts still system families (see F01 fonts above).

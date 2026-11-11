@@ -121,7 +121,7 @@ fun SliverNavHost() {
                             Route.Premiere -> PremiereScreen(
                                 onDone = { nav.navigate(Route.FilmPlayer.path) { popUpTo(Route.Premiere.path) { inclusive = true } } },
                             )
-                            Route.FilmPlayer -> FilmPlayerScreen(onBack = back, onEdit = { go(Route.FilmBuilder) })
+                            Route.FilmPlayer -> FilmPlayerScreen(onBack = back, onEdit = { FilmNav.editId = FilmNav.id; go(Route.FilmBuilder) })
                             Route.YearInSeconds -> YearInSecondsScreen(go, onBack = back)
                             Route.Settings -> SettingsScreen(go, onBack = back)
                             Route.Backup -> BackupScreen(onBack = back, onRestore = { go(Route.Restore) })

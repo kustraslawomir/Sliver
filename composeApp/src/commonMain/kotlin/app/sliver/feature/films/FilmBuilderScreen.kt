@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
 import app.sliver.data.export.stampText
 import app.sliver.data.info
+import app.sliver.data.db.Film
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.settings.SettingsRepository
@@ -82,10 +84,20 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var options by remember {
         mutableStateOf(FilmOptions(custom = today.plus(-13, DateTimeUnit.DAY) to today))
     }
+    val editId = remember { FilmNav.takeEditId() }
+    var editing by remember { mutableStateOf<Film?>(null) }
+    LaunchedEffect(editId) {
+        val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
+        editing = f
+        options = FilmOptions(
+            f.rangeType, (f.rangeFrom ?: today) to (f.rangeTo ?: today), f.audio, f.track, f.cut, f.dateOn, f.look,
+        )
+        dateTouched = true
+    }
     var lowStorage by remember { mutableStateOf(false) }
     var dateTouched by remember { mutableStateOf(false) }
     val dateOn = if (dateTouched) options.dateOn else app?.dateStamp ?: options.dateOn
-    val format = app?.newFilmFormat ?: FilmFormat.CINEMA
+    val format = editing?.format ?: app?.newFilmFormat ?: FilmFormat.CINEMA
 
     val range = rangeFor(options.rangeType, today, options.custom)
     val plan = remember(all, range) { buildFilmPlan(all, range.first, range.second) }
@@ -107,7 +119,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText("New film", SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
+            SliverText(if (editId != null) "Edit film" else "New film", SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
         }
 
         val ratio = if (format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
@@ -209,8 +221,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             {
                 lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
                 if (!lowStorage) scope.launch {
-                    val id = "film-${Clock.System.now().toEpochMilliseconds()}"
-                    val film = options.copy(dateOn = dateOn).toFilm(id, filmName(options, range), format, today)
+                    val old = editing
+                    val id = old?.id ?: "film-${Clock.System.now().toEpochMilliseconds()}"
+                    val film = options.copy(dateOn = dateOn).toFilm(id, old?.name ?: filmName(options, range), old?.format ?: format, today)
+                        .let { if (old != null) it.copy(projectId = old.projectId) else it }
                     films.save(film)
                     koin.get<FilmRenderer>().start(id)
                     onSaved(id)

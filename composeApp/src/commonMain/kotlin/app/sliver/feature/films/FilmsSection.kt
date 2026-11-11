@@ -67,7 +67,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             SliverText("Films", SliverType.DisplayM, Modifier.weight(1f))
-            SecondaryButton("+ Make film", { onNavigate(Route.FilmBuilder) })
+            SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) })
         }
         if (teaser != TeaserState.HIDDEN) {
             YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
