@@ -3,8 +3,8 @@ package app.sliver.data.files
 import kotlinx.datetime.LocalDate
 
 interface FileStore {
-    fun dayPath(date: LocalDate): String
-    fun thumbPath(date: LocalDate): String
+    fun dayPath(projectId: String, date: LocalDate): String
+    fun thumbPath(projectId: String, date: LocalDate): String
     fun filmPath(filmId: String): String
     fun newTmpPath(timestampMillis: Long): String
     fun exists(path: String): Boolean

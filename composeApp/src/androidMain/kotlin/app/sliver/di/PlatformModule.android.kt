@@ -3,6 +3,7 @@ package app.sliver.di
 import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
+import app.sliver.data.db.Migration2To3
 import app.sliver.BuildConfig
 import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
@@ -58,7 +59,8 @@ actual val platformModule: Module = module {
     single<DayShare> { dayShare(get<Context>()) }
     single {
         val ctx = get<Context>()
-        Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath).build()
+        Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath)
+            .addMigrations(Migration2To3).build()
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }

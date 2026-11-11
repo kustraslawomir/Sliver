@@ -14,7 +14,12 @@ import kotlin.time.Instant
 import app.sliver.data.db.DayDao
 import app.sliver.data.db.Film
 import app.sliver.data.db.FilmDao
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 
 interface DayRepository {
@@ -61,8 +66,10 @@ interface FilmRepository {
     suspend fun delete(id: String)
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DayRepositoryImpl(
     private val dao: DayDao,
+    private val projects: ProjectRepository,
     private val exporter: ClipExporter,
     private val files: FileStore,
     private val places: PlaceResolver = PlaceResolver { null },
@@ -76,14 +83,15 @@ class DayRepositoryImpl(
             val clip = if (isPhoto) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
             else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val place = places.resolve(source)
-            val file = files.dayPath(date)
-            val thumb = files.thumbPath(date)
+            val projectId = projects.activeId()
+            val file = files.dayPath(projectId, date)
+            val thumb = files.thumbPath(projectId, date)
             check(files.move(tmpVideo, file) && files.move(tmpThumb, thumb)) { "Could not move export into place" }
             val day = Day(
-                date = date, file = file, thumb = thumb, source = daySource, look = look, motion = motion,
+                projectId = projectId, date = date, file = file, thumb = thumb, source = daySource, look = look, motion = motion,
                 keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY,
                 takenAt = takenAt, createdAt = Clock.System.now(), place = place,
-                driveFileId = dao.getByDate(date)?.driveFileId,
+                driveFileId = dao.getByDate(projectId, date)?.driveFileId,
             )
             dao.upsert(day)
             day
@@ -93,23 +101,29 @@ class DayRepositoryImpl(
         }
     }
 
-    override fun observeRange(from: LocalDate, to: LocalDate) = dao.observeRange(from, to)
-    override fun observeAll() = dao.observeAll()
-    override fun observeDay(date: LocalDate) = dao.observeByDate(date)
-    override fun observeCount() = dao.observeCount()
-    override suspend fun getDay(date: LocalDate) = dao.getByDate(date)
-    override suspend fun save(day: Day) = dao.upsert(day)
+    private val activeIds = projects.active.filterNotNull().map { it.id }.distinctUntilChanged()
+
+    override fun observeRange(from: LocalDate, to: LocalDate) = activeIds.flatMapLatest { dao.observeRange(it, from, to) }
+    override fun observeAll() = activeIds.flatMapLatest { dao.observeAll(it) }
+    override fun observeDay(date: LocalDate) = activeIds.flatMapLatest { dao.observeByDate(it, date) }
+    override fun observeCount() = activeIds.flatMapLatest { dao.observeCount(it) }
+    override suspend fun getDay(date: LocalDate) = dao.getByDate(projects.activeId(), date)
+    override suspend fun save(day: Day) = dao.upsert(day.copy(projectId = day.projectId.ifEmpty { projects.activeId() }))
     override suspend fun delete(date: LocalDate) {
-        dao.getByDate(date)?.driveFileId?.let { trash.enqueue(it) }
-        dao.delete(date)
+        val projectId = projects.activeId()
+        dao.getByDate(projectId, date)?.driveFileId?.let { trash.enqueue(it) }
+        dao.delete(projectId, date)
     }
 }
 
-class FilmRepositoryImpl(private val dao: FilmDao) : FilmRepository {
-    override fun observeAll() = dao.observeAll()
+@OptIn(ExperimentalCoroutinesApi::class)
+class FilmRepositoryImpl(private val dao: FilmDao, private val projects: ProjectRepository) : FilmRepository {
+    private val activeIds = projects.active.filterNotNull().map { it.id }.distinctUntilChanged()
+
+    override fun observeAll() = activeIds.flatMapLatest { dao.observeAll(it) }
     override fun observeFilm(id: String) = dao.observeById(id)
-    override fun observeCount() = dao.observeCount()
+    override fun observeCount() = activeIds.flatMapLatest { dao.observeCount(it) }
     override suspend fun getFilm(id: String) = dao.getById(id)
-    override suspend fun save(film: Film) = dao.upsert(film)
+    override suspend fun save(film: Film) = dao.upsert(film.copy(projectId = film.projectId.ifEmpty { projects.activeId() }))
     override suspend fun delete(id: String) = dao.delete(id)
 }

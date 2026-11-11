@@ -57,5 +57,6 @@ data class AppSettings(
     val onboardingDone: Boolean = false,
     val coachTrimSeen: Boolean = false,
     val firstDay: LocalDate? = null,
+    val activeProjectId: String? = null,
     val account: AccountSettings = AccountSettings(),
 )

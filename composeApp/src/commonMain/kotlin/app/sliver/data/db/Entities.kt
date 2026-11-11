@@ -15,9 +15,22 @@ import app.sliver.data.Motion
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 
-@Entity(tableName = "day")
+@Entity(tableName = "project")
+data class Project(
+    @PrimaryKey val id: String,
+    val name: String,
+    val format: FilmFormat = FilmFormat.CINEMA,
+    val startDate: LocalDate,
+    val endDate: LocalDate? = null,
+    val createdAt: Instant,
+    val archived: Boolean = false,
+    val colorSeed: Int = 0,
+)
+
+// DECISION: projectId "" means "not assigned yet"; repositories stamp the active project on save.
+@Entity(tableName = "day", primaryKeys = ["projectId", "date"])
 data class Day(
-    @PrimaryKey val date: LocalDate,
+    val date: LocalDate,
     val file: String,
     val thumb: String,
     val source: DaySource,
@@ -32,6 +45,7 @@ data class Day(
     val driveFileId: String? = null,
     val backup: BackupState = BackupState.PENDING,
     val place: String? = null,
+    val projectId: String = "",
 )
 
 @Entity(tableName = "film")
@@ -51,4 +65,5 @@ data class Film(
     val mismatch: Mismatch = Mismatch.CENTER,
     val renderPath: String? = null,
     val renderedAt: Instant? = null,
+    val projectId: String = "",
 )

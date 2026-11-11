@@ -18,6 +18,8 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.FilmRepositoryImpl
+import app.sliver.data.repo.ProjectRepository
+import app.sliver.data.repo.ProjectRepositoryImpl
 import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.backfill.BackfillExecutor
@@ -28,17 +30,19 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 val commonModule: Module = module {
+    single { get<SliverDatabase>().projectDao() }
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
     single<DriveTrashQueue> { SettingsTrashQueue(get()) }
-    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get()) }
+    single<ProjectRepository> { ProjectRepositoryImpl(get(), get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     single { BackupEngine(get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
-    single { RestoreEngine(get(), get(), get(), get(), get(), get()) }
+    single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
     single { BackfillStore(get()) }
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }
-    single<FilmRepository> { FilmRepositoryImpl(get()) }
+    single<FilmRepository> { FilmRepositoryImpl(get(), get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }
     single {

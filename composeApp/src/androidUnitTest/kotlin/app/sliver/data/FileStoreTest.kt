@@ -13,8 +13,8 @@ class FileStoreTest {
     private val store = AndroidFileStore(File(base, "files"), File(base, "cache"))
 
     @Test fun paths() {
-        assertTrue(store.dayPath(LocalDate(2026, 11, 10)).endsWith("days/2026-11-10.mp4"))
-        assertTrue(store.thumbPath(LocalDate(2026, 11, 10)).endsWith("thumbs/2026-11-10.jpg"))
+        assertTrue(store.dayPath("p1", LocalDate(2026, 11, 10)).endsWith("days/p1-2026-11-10.mp4"))
+        assertTrue(store.thumbPath("p1", LocalDate(2026, 11, 10)).endsWith("thumbs/p1-2026-11-10.jpg"))
         assertTrue(store.filmPath("abc").endsWith("films/abc.mp4"))
     }
 

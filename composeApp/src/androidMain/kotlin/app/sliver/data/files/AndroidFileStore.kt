@@ -12,8 +12,8 @@ class AndroidFileStore(filesDir: File, cacheDir: File) : FileStore {
     private val films = File(filesDir, "films").apply { mkdirs() }
     private val tmp = File(cacheDir, "tmp").apply { mkdirs() }
 
-    override fun dayPath(date: LocalDate) = File(days, "$date.mp4").path
-    override fun thumbPath(date: LocalDate) = File(thumbs, "$date.jpg").path
+    override fun dayPath(projectId: String, date: LocalDate) = File(days, "$projectId-$date.mp4").path
+    override fun thumbPath(projectId: String, date: LocalDate) = File(thumbs, "$projectId-$date.jpg").path
     override fun filmPath(filmId: String) = File(films, "$filmId.mp4").path
     override fun newTmpPath(timestampMillis: Long) = File(tmp, "rec_$timestampMillis.mp4").path
     override fun exists(path: String) = File(path).exists()

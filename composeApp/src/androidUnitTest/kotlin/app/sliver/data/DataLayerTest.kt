@@ -13,6 +13,7 @@ import app.sliver.data.export.ShortMode
 import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepositoryImpl
+import app.sliver.data.repo.ProjectRepositoryImpl
 import app.sliver.data.repo.SaveSecondRequest
 import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.ReminderMode
@@ -23,6 +24,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Instant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
@@ -54,13 +58,19 @@ class DataLayerTest {
     private lateinit var db: SliverDatabase
     private lateinit var days: DayRepositoryImpl
     private lateinit var films: FilmRepositoryImpl
+    private lateinit var projects: ProjectRepositoryImpl
 
     @BeforeTest
     fun setUp() {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder<SliverDatabase>(ctx).allowMainThreadQueries().build()
-        days = DayRepositoryImpl(db.dayDao(), FakeExporter, AndroidFileStore(ctx.filesDir, ctx.cacheDir))
-        films = FilmRepositoryImpl(db.filmDao())
+        projects = ProjectRepositoryImpl(db.projectDao(), DataStoreSettingsRepository(
+            PreferenceDataStoreFactory.create(scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)) {
+                File.createTempFile("prefs", ".preferences_pb").apply { delete() }
+            },
+        ))
+        days = DayRepositoryImpl(db.dayDao(), projects, FakeExporter, AndroidFileStore(ctx.filesDir, ctx.cacheDir))
+        films = FilmRepositoryImpl(db.filmDao(), projects)
     }
 
     @Test
@@ -86,7 +96,7 @@ class DataLayerTest {
     fun insertReplaceDelete() = runTest {
         val d = day("2026-11-10", look = LookParams(LookPreset.NOIR, grain = 40))
         days.save(d)
-        assertEquals(d, days.getDay(d.date))
+        assertEquals(d.copy(projectId = projects.activeId()), days.getDay(d.date))
         assertEquals(1, days.observeCount().first())
 
         days.save(d.copy(file = "days/new.mp4"))
@@ -96,6 +106,19 @@ class DataLayerTest {
         days.delete(d.date)
         assertNull(days.getDay(d.date))
         assertEquals(0, days.observeCount().first())
+    }
+
+    @Test
+    fun clipsAreScopedToActiveProject() = runTest {
+        val first = projects.activeId()
+        days.save(day("2026-11-10"))
+        val second = projects.create("Lisbon", FilmFormat.STORY, LocalDate.parse("2026-11-01"))
+        assertEquals(second.id, projects.activeId())
+        assertNull(days.getDay(LocalDate.parse("2026-11-10")))
+        days.save(day("2026-11-10", file = "days/lisbon.mp4"))
+        projects.setActive(first)
+        assertEquals("days/2026-11-10.mp4", days.getDay(LocalDate.parse("2026-11-10"))?.file)
+        assertEquals(1, days.observeCount().first())
     }
 
     @Test
@@ -112,7 +135,7 @@ class DataLayerTest {
             rangeFrom = LocalDate.parse("2026-11-01"), rangeTo = LocalDate.parse("2026-11-07"), look = LookPreset.EMBER,
         )
         films.save(f)
-        assertEquals(f, films.getFilm("a"))
+        assertEquals(f.copy(projectId = projects.activeId()), films.getFilm("a"))
         films.save(f.copy(name = "Renamed"))
         assertEquals(listOf("Renamed"), films.observeAll().first().map { it.name })
         films.delete("a")

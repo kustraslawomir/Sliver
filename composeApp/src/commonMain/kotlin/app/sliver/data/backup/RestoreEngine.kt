@@ -12,6 +12,7 @@ import app.sliver.data.Mismatch
 import app.sliver.data.Motion
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
@@ -127,6 +128,7 @@ class RestoreEngine(
     private val settings: SettingsRepository,
     private val files: FileStore,
     private val writer: RestoredDayWriter,
+    private val projects: ProjectRepository,
 ) {
     private val lock = Mutex()
     private val _progress = MutableStateFlow<BackupProgress?>(null)
@@ -173,8 +175,9 @@ class RestoreEngine(
         val bytes = drive.download(item.fileId)
         val tmpVideo = files.newTmpPath(Clock.System.now().toEpochMilliseconds())
         val tmpThumb = "$tmpVideo.jpg"
-        val file = files.dayPath(item.date)
-        val thumb = files.thumbPath(item.date)
+        val projectId = projects.activeId()
+        val file = files.dayPath(projectId, item.date)
+        val thumb = files.thumbPath(projectId, item.date)
         val color = try {
             writer.write(bytes, tmpVideo, tmpThumb)
         } catch (e: Exception) {
