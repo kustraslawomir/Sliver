@@ -11,6 +11,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,12 +68,13 @@ fun SliverBottomSheet(
             exit = slideOutVertically(SliverMotion.exit(SliverMotion.Base)) { it },
         ) {
             Column(
-                Modifier.fillMaxWidth()
+                Modifier.widthIn(max = MaxContentWidth).fillMaxWidth()
                     .then(SliverGlow.sheet(SliverShapes.SheetTop))
                     .clip(SliverShapes.SheetTop)
                     .background(SliverColors.Surface2)
                     .border(1.dp, SliverColors.LineHairline, SliverShapes.SheetTop)
                     .clickable(remember { MutableInteractionSource() }, null) {}
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
                     .padding(horizontal = SliverSpace.Gutter)
                     .padding(top = SliverSpace.S3, bottom = SliverSpace.S6),
             ) {

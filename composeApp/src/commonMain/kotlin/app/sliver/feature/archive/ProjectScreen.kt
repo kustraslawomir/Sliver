@@ -18,6 +18,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
+import app.sliver.core.ui.LocalWindowSize
+import app.sliver.core.ui.MaxContentWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -108,9 +115,13 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var projectsOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
 
+    val wide = !LocalWindowSize.current.isCompact
+    var paneDay by rememberSaveable { mutableStateOf<String?>(null) }
+    val pane = paneDay?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
     fun openDay(date: LocalDate) {
         ArchiveSession.selected = date
-        onNavigate(Route.DayDetail)
+        if (wide) paneDay = date.toString() else onNavigate(Route.DayDetail)
     }
 
     fun onCell(date: LocalDate) {
@@ -132,8 +143,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
+        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
         Column(
-            Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())
+            (if (wide) Modifier.weight(1f) else Modifier.widthIn(max = MaxContentWidth).fillMaxWidth())
+                .fillMaxHeight().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
                 .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4)
                 .padding(bottom = SliverSpace.S6),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
@@ -192,7 +205,20 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 )
                 MonthGrid(shown, byDate, today, fresh, ::onCell)
             }
-            FilmsSection(onNavigate)
+            if (!wide) FilmsSection(onNavigate)
+        }
+        if (wide) {
+            Box(Modifier.weight(1.3f).fillMaxHeight()) {
+                if (pane != null) {
+                    key(pane) { DayDetailScreen(onNavigate, onBack = { paneDay = null }) }
+                } else {
+                    Column(
+                        Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
+                            .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
+                    ) { FilmsSection(onNavigate) }
+                }
+            }
+        }
         }
 
         ProjectsSheet(projectsOpen, { projectsOpen = false })

@@ -88,9 +88,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import app.sliver.core.ui.StorageFullOverlay
+import app.sliver.core.ui.LocalWindowSize
+import app.sliver.core.ui.MaxContentWidth
+import androidx.compose.foundation.layout.widthIn
 import app.sliver.core.ui.isStorageLow
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
+
+private val SideControlsWidth = 280.dp
 
 @Composable
 fun CameraScreen(onNavigate: (Route) -> Unit) {
@@ -213,8 +218,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
     }
 
+    val side = LocalWindowSize.current.sideBySide
     Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
-        Box(Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 248.dp).clip(RoundedCornerShape(24.dp))) {
+        Box(
+            Modifier.fillMaxSize().statusBarsPadding()
+                .padding(bottom = if (side) 0.dp else 248.dp, end = if (side) SideControlsWidth else 0.dp)
+                .clip(RoundedCornerShape(24.dp)),
+        ) {
             CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
@@ -224,7 +234,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
 
         Column(
-            Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
+            Modifier.align(Alignment.TopCenter).statusBarsPadding().widthIn(max = MaxContentWidth)
+                .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3)
+                .then(if (side) Modifier.padding(end = SideControlsWidth) else Modifier),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
         ) {
@@ -270,9 +282,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         ProjectsSheet(projectsOpen, { projectsOpen = false })
 
         Column(
-            Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),
+            (if (side) Modifier.align(Alignment.CenterEnd).width(SideControlsWidth).statusBarsPadding()
+            else Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth).fillMaxWidth())
+                .navigationBarsPadding().padding(bottom = SliverSpace.S4),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S3, if (side) Alignment.CenterVertically else Alignment.Top),
         ) {
             if (filterOpen && !recording) {
                 LazyRow(

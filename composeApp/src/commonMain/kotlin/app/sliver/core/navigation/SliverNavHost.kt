@@ -9,6 +9,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
+import app.sliver.core.ui.LocalWindowSize
+import app.sliver.core.ui.MaxContentWidth
+import app.sliver.core.ui.WindowSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -79,7 +84,8 @@ fun SliverNavHost() {
     }
     val done = onboardingDone ?: return Box(Modifier.fillMaxSize().background(SliverColors.BgBase))
 
-    CompositionLocalProvider(LocalNavigator provides navigator) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
+    CompositionLocalProvider(LocalNavigator provides navigator, LocalWindowSize provides WindowSize(maxWidth, maxHeight)) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
             NavHost(
                 nav, startDestination = Route.start(done).path,
@@ -92,6 +98,7 @@ fun SliverNavHost() {
                     composable(route.path) { entry ->
                         ConsumeSavedClip(entry, route, undo, navigator)
                         val back = navigator::back
+                        CappedWidth(route in CappedRoutes) {
                         when (route) {
                             Route.Camera -> CameraScreen(go)
                             Route.Trim -> {
@@ -136,6 +143,7 @@ fun SliverNavHost() {
                                 },
                             )
                         }
+                        }
                     }
                 }
             }
@@ -145,6 +153,21 @@ fun SliverNavHost() {
                 durationMs = UNDO_WINDOW_MS,
             )
         }
+    }
+    }
+}
+
+private val CappedRoutes = setOf(
+    Route.GalleryPicker, Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,
+    Route.FilmBuilder, Route.Export, Route.Premiere, Route.YearInSeconds, Route.Onboarding,
+)
+
+/** Lists and forms stop growing at [MaxContentWidth] and sit centered on big windows. */
+@Composable
+private fun CappedWidth(capped: Boolean, content: @Composable () -> Unit) {
+    if (!capped) return content()
+    Box(Modifier.fillMaxSize(), Alignment.TopCenter) {
+        Box(Modifier.widthIn(max = MaxContentWidth).fillMaxSize()) { content() }
     }
 }
 

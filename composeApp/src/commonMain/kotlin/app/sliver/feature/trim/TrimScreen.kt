@@ -22,10 +22,14 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxHeight
+import app.sliver.core.ui.LocalWindowSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -102,6 +106,8 @@ private const val KEY_START_MS = "trim.startMs"
 private const val SECOND_DP = 72
 private const val HINT_MS = 3_000L
 private val StripHeight = 72.dp
+
+private val SideColumnWidth = 400.dp
 
 @Composable
 fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
@@ -265,8 +271,11 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 }
             }
 
+            val sideBySide = LocalWindowSize.current.sideBySide
+            @Composable
+            fun Preview(m: Modifier) {
             Box(
-                Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
+                m.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
                     .clip(SliverShapes.S).background(SliverColors.Surface1),
             ) {
                 if (!ready) {
@@ -292,7 +301,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     )
                 }
             }
+            }
 
+            @Composable
+            fun Controls() {
             if (duration != null && showMinimap(duration)) {
                 Minimap(startMs, windowMs, duration) { release(minimapJump(it, duration, speed)); custom = true }
             }
@@ -349,6 +361,17 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     )
                     GhostButton("Filters", ::openLooks, Modifier.weight(1f))
                 }
+            }
+            }
+
+            if (sideBySide) {
+                Row(Modifier.weight(1f).fillMaxWidth()) {
+                    Preview(Modifier.weight(1f).fillMaxHeight())
+                    Column(Modifier.width(SideColumnWidth).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) { Controls() }
+                }
+            } else {
+                Preview(Modifier.weight(1f).fillMaxWidth())
+                Controls()
             }
         }
         DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
