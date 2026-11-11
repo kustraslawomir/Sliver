@@ -46,6 +46,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     private var videoCapture: VideoCapture<Recorder>? = null
     private var imageCapture: ImageCapture? = null
     private var recording: Recording? = null
+    override var deviceDegrees: Int = 0
 
     fun bind(
         provider: ProcessCameraProvider,
@@ -76,6 +77,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     @SuppressLint("MissingPermission")
     override fun startRecording(path: String, onResult: (Result<String>) -> Unit) {
         val vc = videoCapture ?: return onResult(Result.failure(IllegalStateException("camera not ready")))
+        vc.targetRotation = surfaceRotation(deviceDegrees)
         recording = vc.output.prepareRecording(context, FileOutputOptions.Builder(File(path)).build())
             .withAudioEnabled()
             .start(executor) { event ->
@@ -95,6 +97,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
 
     override fun takePhoto(path: String, onResult: (Result<String>) -> Unit) {
         val ic = imageCapture ?: return onResult(Result.failure(IllegalStateException("camera not ready")))
+        ic.targetRotation = surfaceRotation(deviceDegrees)
         ic.takePicture(
             ImageCapture.OutputFileOptions.Builder(File(path)).build(),
             executor,

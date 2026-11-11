@@ -52,3 +52,18 @@ fun formatTimer(elapsedMs: Long): String {
     val total = (elapsedMs / 1000).coerceAtLeast(0)
     return "${(total / 60).toString().padStart(2, '0')}:${(total % 60).toString().padStart(2, '0')}"
 }
+
+/** Surface.ROTATION_* value (0, 1, 2, 3 = 0, 90, 180, 270) for OrientationEventListener degrees. */
+fun surfaceRotation(degrees: Int): Int {
+    val d = ((degrees % 360) + 360) % 360
+    return when {
+        d >= 315 || d < 45 -> 0
+        d < 135 -> 3
+        d < 225 -> 2
+        else -> 1
+    }
+}
+
+/** Size a player shows for a stored [width] x [height] video with container [rotationDegrees] metadata. */
+fun displaySize(width: Int, height: Int, rotationDegrees: Int): Pair<Int, Int> =
+    if (rotationDegrees % 180 == 0) width to height else height to width

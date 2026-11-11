@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -122,6 +123,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
     var projectsOpen by remember { mutableStateOf(false) }
     val rotation = rememberDeviceRotation()
+    SideEffect { engine.deviceDegrees = rotation }
     val iconRot = iconRotation(rotation)
     val bandActive = format == FilmFormat.CINEMA && isUpright(rotation)
     var turnHint by remember { mutableStateOf(false) }

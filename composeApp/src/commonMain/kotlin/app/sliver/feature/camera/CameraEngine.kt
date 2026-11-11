@@ -7,6 +7,8 @@ import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.Lens
 
 interface CameraEngine {
+    /** Latest OrientationEventListener degrees; applied as target rotation before each capture. */
+    var deviceDegrees: Int
     /** Records to [path]; [onResult] gets the path on success. */
     fun startRecording(path: String, onResult: (Result<String>) -> Unit)
     fun stopRecording()
