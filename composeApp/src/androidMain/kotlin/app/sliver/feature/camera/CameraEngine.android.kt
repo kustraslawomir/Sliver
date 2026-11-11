@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.util.Size
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -42,6 +43,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+private const val TAG = "SliverFocus"
+
 class AndroidCameraEngine(private val context: Context) : CameraEngine {
     private val executor = ContextCompat.getMainExecutor(context)
     private var camera: Camera? = null
@@ -51,14 +54,46 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     override var deviceDegrees: Int = 0
     private var previewView: PreviewView? = null
 
-    override fun focus(x: Float, y: Float, lock: Boolean) {
-        val view = previewView ?: return
-        val control = camera?.cameraControl ?: return
+    override fun focus(x: Float, y: Float, lock: Boolean, onResult: (Boolean) -> Unit) {
+        val view = previewView
+        val cam = camera
+        if (view == null || cam == null) {
+            Log.d(TAG, "focus: skipped, preview=${view != null} camera=${cam != null}")
+            return onResult(false)
+        }
         val point = view.meteringPointFactory.createPoint(x, y)
-        val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE).apply {
+        val flags = FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE or FocusMeteringAction.FLAG_AWB
+        val action = FocusMeteringAction.Builder(point, flags).apply {
             if (lock) disableAutoCancel() else setAutoCancelDuration(FOCUS_AUTO_CANCEL_S, TimeUnit.SECONDS)
         }.build()
-        control.startFocusAndMetering(action)
+        val supported = cam.cameraInfo.isFocusMeteringSupported(action)
+        Log.d(TAG, "focus: point=($x,$y) view=${view.width}x${view.height} lock=$lock supported=$supported")
+        if (!supported) return onResult(false)
+        Log.d(TAG, "startFocusAndMetering called lock=$lock")
+        val future = cam.cameraControl.startFocusAndMetering(action)
+        future.addListener({
+            val ok = runCatching { future.get().isFocusSuccessful }.onFailure { Log.d(TAG, "focus future failed: $it") }.getOrDefault(false)
+            Log.d(TAG, "startFocusAndMetering result: focusSuccessful=$ok lock=$lock")
+            onResult(ok)
+        }, executor)
+    }
+
+    override fun exposureRange(): ExposureRange? {
+        val state = camera?.cameraInfo?.exposureState ?: return null
+        if (!state.isExposureCompensationSupported) return null
+        val r = state.exposureCompensationRange
+        if (r.lower == 0 && r.upper == 0) return null
+        return ExposureRange(r.lower, r.upper, state.exposureCompensationStep.toFloat())
+    }
+
+    override fun setExposureIndex(index: Int) {
+        val control = camera?.cameraControl ?: return
+        val future = control.setExposureCompensationIndex(index)
+        Log.d(TAG, "setExposureCompensationIndex($index) requested")
+        future.addListener({
+            val applied = runCatching { future.get() }.getOrNull()
+            Log.d(TAG, "setExposureCompensationIndex applied=$applied current=${camera?.cameraInfo?.exposureState?.exposureCompensationIndex}")
+        }, executor)
     }
 
     fun bind(
@@ -86,6 +121,8 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
             provider.bindToLifecycle(owner, selector, preview, ic)
         }
         if (mode == CameraMode.VIDEO) camera?.cameraControl?.enableTorch(torch)
+        camera?.cameraControl?.setExposureCompensationIndex(0)
+        Log.d(TAG, "bind: mode=$mode lens=$lens exposureRange=${exposureRange()}")
     }
 
     @SuppressLint("MissingPermission")

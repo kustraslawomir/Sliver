@@ -1,6 +1,5 @@
 package app.sliver.core.navigation
 
-import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.ClipDrop
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.Lifecycle
@@ -9,8 +8,6 @@ import app.sliver.feature.archive.ArchiveSession
 import app.sliver.feature.films.FilmNav
 import app.sliver.feature.notifications.DeepLinkTarget
 import kotlinx.datetime.LocalDate
-
-const val SAVED_CLIP_KEY = "clipSaved"
 
 /** Screens that belong to a capture flow; the first screen below them is where the flow started. */
 private val CaptureRoutes = setOf(Route.Camera, Route.GalleryPicker, Route.Trim, Route.PhotoTrim, Route.Looks)
@@ -53,13 +50,18 @@ class AppNavigator(private val nav: NavController) {
         }
     }
 
-    /** Pops to the screen that opened the capture flow and hands it a one-shot "clip saved" result. */
+    /** Save lands on the Project screen: capture screens are popped, Back from Project goes to Camera. Replace flows return to Clip detail. */
     fun finishFlow(date: LocalDate) {
         val stack = nav.currentBackStack.value.mapNotNull { route(it.destination.route) }
         val origin = stack.lastOrNull { it !in CaptureRoutes } ?: Route.Camera
-        if (origin == Route.Project || (origin == Route.Camera && date == todayLocal())) ClipDrop.pending = date
-        runCatching { nav.getBackStackEntry(origin.path).savedStateHandle[SAVED_CLIP_KEY] = date.toString() }
-        if (origin == Route.Camera) popToCamera() else nav.popBackStack(origin.path, inclusive = false)
+        ClipDrop.pending = date
+        when (origin) {
+            Route.Project, Route.DayDetail -> nav.popBackStack(origin.path, inclusive = false)
+            else -> nav.navigate(Route.Project.path) {
+                popUpTo(Route.Camera.path) { inclusive = false }
+                launchSingleTop = true
+            }
+        }
     }
 
     /** Notification, widget and tile entries: always Camera at the bottom, then the stack from NAVIGATION.md. */

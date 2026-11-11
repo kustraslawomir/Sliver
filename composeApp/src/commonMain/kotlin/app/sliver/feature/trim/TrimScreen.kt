@@ -162,6 +162,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     var cropY by remember { mutableStateOf(0.5f) }
     var sheet by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
+    var saveFailed by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
@@ -257,13 +258,13 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
                 look = look ?: settings.settings.first().defaultLook.toParams(),
             )
-            val result = runCatching { undo.save(request, dayLabel(day, today)) }
+            val result = runCatching { undo.save(request) }
             if (result.isSuccess) {
                 done = true
                 navigator.finishFlow(day)
             } else {
                 result.exceptionOrNull()?.let { println("SliverSave failed: $it") }
-                undo.toast.show("Couldn't save the clip. Try again.")
+                saveFailed = true
                 saving = false
             }
         }
@@ -371,7 +372,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     }
                 }
                 PrimaryButton(
-                    if (saving) "Saving…" else if (!ready) "Preparing…" else "Save clip", ::useSecond,
+                    if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again" else "Save clip", ::useSecond,
                     enabled = ready && !saving,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
@@ -436,7 +437,7 @@ private fun Filmstrip(
     BoxWithConstraints(
         Modifier.fillMaxWidth().height(StripHeight).background(SliverColors.Surface1).semantics {
             contentDescription = "Trim position"
-            stateDescription = "Starts at ${start / 1000}.${start / 100 % 10} seconds"
+            stateDescription = "Starts at ${start / 1000}.${start / 100 % 10} s"
             val maxStart = (durationMs - windowMs).coerceAtLeast(0).toFloat()
             progressBarRangeInfo = ProgressBarRangeInfo(start.toFloat(), 0f..maxStart.coerceAtLeast(1f), (maxStart / 100).toInt().coerceAtLeast(1) - 1)
             setProgress { v ->

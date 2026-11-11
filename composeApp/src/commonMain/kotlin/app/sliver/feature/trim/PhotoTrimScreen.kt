@@ -141,7 +141,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
                 look = look ?: settings.settings.first().defaultLook.toParams(),
             )
-            val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
+            val ok = runCatching { undo.save(request) }.isSuccess
             saving = false
             if (ok) {
                 done = true

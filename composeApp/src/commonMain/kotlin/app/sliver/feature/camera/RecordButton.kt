@@ -1,6 +1,6 @@
 package app.sliver.feature.camera
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -36,6 +36,9 @@ import kotlinx.coroutines.launch
 enum class RecordState { Photo, VideoIdle, Recording }
 
 private const val BREATH_MS = 1600
+
+/** CSS ease-in-out, as in design sv-breathe (1600 ms, 0%/100% = 14/32 px, 50% = 20/44 px). */
+private val EaseInOut = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 private val Disc = 72.dp
 
 /** Option D "Ember": 72 dp disc in an 80 dp hit area, glow drawn as a radial gradient (no blur). */
@@ -52,7 +55,7 @@ fun RecordButton(
     val reduced = LocalReducedMotion.current
     val breath = if (state == RecordState.Recording && !reduced) {
         val t by rememberInfiniteTransition(label = "breath").animateFloat(
-            0f, 1f, infiniteRepeatable(tween(BREATH_MS / 2, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "breath",
+            0f, 1f, infiniteRepeatable(tween(BREATH_MS / 2, easing = EaseInOut), RepeatMode.Reverse), label = "breath",
         )
         t
     } else 0f

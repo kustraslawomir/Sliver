@@ -7,6 +7,7 @@ import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.EXTRA_DEEPLINK
 import app.sliver.feature.notifications.parseDeepLink
 import androidx.activity.ComponentActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.result.contract.ActivityResultContracts
 import app.sliver.data.auth.AuthHost
 import androidx.activity.SystemBarStyle
@@ -15,6 +16,7 @@ import androidx.activity.enableEdgeToEdge
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),

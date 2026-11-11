@@ -4,20 +4,16 @@ import app.sliver.feature.camera.displaySize
 import app.sliver.feature.camera.focusFraction
 import app.sliver.feature.camera.focusRingCenter
 import app.sliver.feature.camera.clipLongEnough
+import app.sliver.feature.camera.exposureFraction
+import app.sliver.feature.camera.exposureIndexAt
+import app.sliver.feature.camera.exposureOnRight
+import app.sliver.feature.camera.formatEv
 import app.sliver.feature.camera.formatTimer
 import app.sliver.feature.camera.surfaceRotation
-import app.sliver.feature.camera.nextSelfTimer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CameraLogicTest {
-    @Test
-    fun selfTimerCyclesOff3_10() {
-        assertEquals(3, nextSelfTimer(0))
-        assertEquals(10, nextSelfTimer(3))
-        assertEquals(0, nextSelfTimer(10))
-    }
-
     @Test
     fun timerFormatsMinutesAndSeconds() {
         assertEquals("0:00", formatTimer(0))
@@ -63,5 +59,28 @@ class CameraLogicTest {
     fun clipIsLongEnoughAtOneSecond() {
         assertEquals(false, clipLongEnough(999))
         assertEquals(true, clipLongEnough(1000))
+    }
+
+    @Test
+    fun exposureMapsTrackToIndex() {
+        assertEquals(12, exposureIndexAt(0f, -12, 12))
+        assertEquals(-12, exposureIndexAt(1f, -12, 12))
+        assertEquals(0, exposureIndexAt(0.5f, -12, 12))
+        assertEquals(12, exposureIndexAt(-3f, -12, 12))
+        assertEquals(0.5f, exposureFraction(0, -12, 12))
+        assertEquals(0f, exposureFraction(12, -12, 12))
+    }
+
+    @Test
+    fun evLabelIsSigned() {
+        assertEquals("+0.7", formatEv(2, 1f / 3f))
+        assertEquals("-1.3", formatEv(-4, 1f / 3f))
+        assertEquals("0.0", formatEv(0, 1f / 3f))
+    }
+
+    @Test
+    fun exposureSliderGoesToTheRoomierSide() {
+        assertEquals(true, exposureOnRight(100f, 400f))
+        assertEquals(false, exposureOnRight(300f, 400f))
     }
 }

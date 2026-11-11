@@ -8,11 +8,6 @@ import kotlinx.datetime.toLocalDateTime
 
 const val HOLD_THRESHOLD_MS = 300L
 
-val SelfTimerOptions = listOf(0, 3, 10)
-
-fun nextSelfTimer(current: Int): Int =
-    SelfTimerOptions[(SelfTimerOptions.indexOf(current) + 1) % SelfTimerOptions.size]
-
 const val CINEMA_ASPECT = 16f / 9f
 const val TURN_HINT_MS = 3500L
 
@@ -89,3 +84,25 @@ fun focusRingCenter(x: Float, y: Float, width: Float, height: Float, ringPx: Flo
 
 /** The clip-length pill turns ember once a recording is at least 1 s. */
 fun clipLongEnough(elapsedMs: Long): Boolean = elapsedMs >= 1000L
+
+const val EXPOSURE_HIDE_AFTER_MS = 3000L
+const val EXPOSURE_TRACK_DP = 120
+
+/** Exposure index for a thumb at [fraction] of the track (0 = top = brightest, 1 = bottom = darkest). */
+fun exposureIndexAt(fraction: Float, min: Int, max: Int): Int =
+    (max - fraction.coerceIn(0f, 1f) * (max - min)).let { kotlin.math.round(it).toInt() }.coerceIn(min, max)
+
+/** Inverse of [exposureIndexAt]: thumb position for an index. */
+fun exposureFraction(index: Int, min: Int, max: Int): Float =
+    if (max <= min) 0.5f else ((max - index).toFloat() / (max - min)).coerceIn(0f, 1f)
+
+/** Signed EV text, e.g. "+0.7", "-1.3", "0.0". */
+fun formatEv(index: Int, step: Float): String {
+    val tenths = kotlin.math.round(index * step * 10f).toInt()
+    val sign = if (tenths > 0) "+" else if (tenths < 0) "-" else ""
+    val a = kotlin.math.abs(tenths)
+    return "$sign${a / 10}.${a % 10}"
+}
+
+/** The slider sits on the side of the focus point with more room. */
+fun exposureOnRight(focusX: Float, width: Float): Boolean = focusX < width / 2f

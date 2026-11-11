@@ -1,5 +1,6 @@
 package app.sliver.feature.notifications
 
+import app.sliver.R
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -71,7 +72,7 @@ private fun post(context: Context, id: Int, channel: String, copy: NotifCopy, ta
     ensureChannels(context)
     val open = openTargetIntent(context, id, target)
     val n = NotificationCompat.Builder(context, channel)
-        .setSmallIcon(android.R.drawable.ic_menu_camera)
+        .setSmallIcon(R.drawable.ic_stat_sliver)
         .setContentTitle(copy.title)
         .setContentText(copy.body)
         .setAutoCancel(true)

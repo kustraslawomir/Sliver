@@ -5,9 +5,11 @@ import androidx.compose.animation.core.animateDpAsState
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.motionSpec
-import app.sliver.core.ui.clipDropTarget
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.semantics.selected
+import app.sliver.core.ui.SwitchRow
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
@@ -131,7 +133,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
-    var filterOpen by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
     var flipTurns by remember { mutableIntStateOf(0) }
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
@@ -154,10 +156,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     var recording by remember { mutableStateOf(false) }
     var holding by remember { mutableStateOf(false) }
     var elapsedMs by remember { mutableLongStateOf(0L) }
-    var timerSec by remember { mutableIntStateOf(0) }
-    var countdown by remember { mutableStateOf<Int?>(null) }
-    var countdownJob by remember { mutableStateOf<Job?>(null) }
-
     fun update(change: (CameraSettings) -> CameraSettings) {
         scope.launch { repo.update { it.copy(camera = change(it.camera)) } }
     }
@@ -210,27 +208,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         engine.takePhoto(path) { finish(it, Route.PhotoTrim) }
     }
 
-    fun withSelfTimer(action: () -> Unit) {
-        if (timerSec == 0) return action()
-        countdownJob = scope.launch {
-            for (s in timerSec downTo 1) {
-                countdown = s
-                delay(1000)
-            }
-            countdown = null
-            action()
-        }
-    }
-
     fun onTap() {
         when {
-            countdown != null -> {
-                countdownJob?.cancel()
-                countdown = null
-            }
             recording -> stopRecording()
-            cam.mode == CameraMode.PHOTO -> withSelfTimer(::capturePhoto)
-            else -> withSelfTimer(::startRecording)
+            cam.mode == CameraMode.PHOTO -> capturePhoto()
+            else -> startRecording()
         }
     }
 
@@ -246,10 +228,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
-            FocusOverlay(!recording && ready, engine::focus)
-            countdown?.let {
-                SliverText(it.toString(), SliverType.DisplayXL, Modifier.align(Alignment.Center))
-            }
+            FocusOverlay(!recording && ready, cam.lens to cam.mode, engine::exposureRange, engine::focus, engine::setExposureIndex)
         }
 
         Box(
@@ -281,7 +260,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     Spacer(Modifier.weight(1f))
                     CameraChip(
                         "Today", leading = SliverIcons.Calendar,
-                        modifier = Modifier.clipDropTarget(today),
                         onClick = {
                             if (todayDay != null) {
                                 ArchiveSession.selected = today
@@ -291,6 +269,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                             }
                         },
                     )
+                    LightToggle(cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
+                    IconButton44({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, Color.White) }
                 }
             }
             if (saved?.coachRecordSeen == false && !recording) {
@@ -320,6 +300,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
 
         ProjectsSheet(projectsOpen, { projectsOpen = false })
+        SliverBottomSheet(menuOpen, { menuOpen = false }) {
+            Column {
+                SwitchRow("Grid", cam.grid, { on -> update { it.copy(grid = on) } })
+            }
+        }
 
         Column(
             (if (side) Modifier.align(Alignment.CenterEnd).width(SideControlsWidth).statusBarsPadding()
@@ -328,44 +313,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3, if (side) Alignment.CenterVertically else Alignment.Top),
         ) {
-            if (filterOpen && !recording) {
-                LazyRow(
-                    Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = SliverSpace.Gutter),
-                    horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-                ) {
-                    items(LookPreset.entries) { look ->
-                        Chip(look.info.label, selected = look == cam.look, onClick = { update { it.copy(look = look) } })
-                    }
-                }
-            }
             Box(Modifier.alpha(if (recording) 0f else 1f)) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
-            ) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                ToolButton(SliverIcons.Grid3x3, "Grid", cam.grid, iconRot) { update { it.copy(grid = !it.grid) } }
-                ToolButton(SliverIcons.Timer, if (timerSec == 0) "Timer" else "${timerSec}s", timerSec != 0, iconRot) {
-                    if (!recording) timerSec = nextSelfTimer(timerSec)
-                }
-                ToolButton(if (cam.flash) SliverIcons.Zap else SliverIcons.ZapOff, "Light", cam.flash, iconRot) {
-                    update { it.copy(flash = !it.flash) }
-                }
-                ToolButton(SliverIcons.SlidersHorizontal, "Filter", filterOpen || cam.look != LookPreset.NATURAL, iconRot) {
-                    filterOpen = !filterOpen
-                }
-            }
             Segmented(
                 listOf("PHOTO", "VIDEO"),
                 if (cam.mode == CameraMode.PHOTO) 0 else 1,
                 { if (!recording) update { s -> s.copy(mode = if (it == 0) CameraMode.PHOTO else CameraMode.VIDEO) } },
                 Modifier.width(168.dp),
             )
-            }
             if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
             }
             Row(
@@ -384,7 +338,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     enabled = ready,
                     onTap = ::onTap,
                     onHoldStart = {
-                        if (cam.mode == CameraMode.VIDEO && !recording && countdown == null) {
+                        if (cam.mode == CameraMode.VIDEO && !recording) {
                             holding = true
                             startRecording()
                         }
@@ -412,20 +366,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
 }
 
 @Composable
-private fun ToolButton(icon: ImageVector, label: String, active: Boolean, rotation: Float, onClick: () -> Unit) {
-    val tint = if (active) SliverColors.Accent else SliverColors.TextPrimary
-    val turn by animateFloatAsState(rotation, tween(240), label = "tool-upright")
-    Column(
-        Modifier.width(64.dp).clip(SliverShapes.S).clickable(role = Role.Button, onClick = rememberTapGate(onClick))
-            .semantics { contentDescription = label }.padding(vertical = SliverSpace.S1),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(Modifier.size(44.dp), Alignment.Center) { SliverIcon(icon, tint, Modifier.rotate(turn)) }
-        SliverText(label, SliverType.Caption, color = tint, maxLines = 1)
-    }
-}
-
-@Composable
 private fun CinemaBandDim() {
     Canvas(Modifier.fillMaxSize()) {
         val band = cinemaBandFraction(size.width, size.height) * size.height
@@ -444,14 +384,15 @@ private fun AddMediaButton(rotation: Float, onClick: () -> Unit) {
             .clickable(onClick = rememberTapGate(onClick)),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            Modifier.size(52.dp).clip(SliverShapes.M).background(SliverColors.Surface1)
-                .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
-        ) {
+        Box(Modifier.size(52.dp)) {
             Box(
-                Modifier.align(Alignment.BottomEnd).size(20.dp).clip(CircleShape).background(SliverColors.Accent),
+                Modifier.fillMaxSize().clip(SliverShapes.M).background(SliverColors.Surface1)
+                    .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
+            )
+            Box(
+                Modifier.align(Alignment.TopEnd).offset(x = 7.dp, y = (-7).dp).size(22.dp).clip(CircleShape).background(SliverColors.Accent),
                 Alignment.Center,
-            ) { SliverIcon(SliverIcons.Plus, SliverColors.BgVoid, Modifier.rotate(turn), size = 14.dp) }
+            ) { SliverIcon(SliverIcons.Plus, SliverColors.OnAccent, Modifier.rotate(turn), size = 14.dp) }
         }
         SliverText("ADD", SliverType.Caption, color = SliverColors.TextSecondary, maxLines = 1)
     }
@@ -508,5 +449,18 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         Box(Modifier.size(8.dp).background(SliverColors.Accent, CircleShape))
         SliverText(time, SliverType.MonoL, color = color, maxLines = 1)
         if (clipOk) SliverText("\u00B7 CLIP OK", SliverType.MonoS, color = color, maxLines = 1)
+    }
+}
+
+@Composable
+private fun LightToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
+    val turn by animateFloatAsState(rotation, tween(240), label = "light-upright")
+    Box(
+        Modifier.size(44.dp).clip(CircleShape)
+            .semantics { contentDescription = if (on) "Light on" else "Light off"; role = Role.Switch; selected = on }
+            .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
+        Alignment.Center,
+    ) {
+        SliverIcon(if (on) SliverIcons.Zap else SliverIcons.ZapOff, if (on) Color.White else Color.White.copy(alpha = 0.7f), Modifier.rotate(turn))
     }
 }

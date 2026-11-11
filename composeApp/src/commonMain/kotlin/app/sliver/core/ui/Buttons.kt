@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,29 +35,29 @@ private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) = composed {
 }
 
 @Composable
-fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true) {
     Box(
-        modifier.fillMaxWidth().heightIn(min = 56.dp)
+        modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier).height(48.dp)
             .then(if (enabled) Modifier.glow(SliverShapes.Pill, *Glow.cta) else Modifier)
             .clip(SliverShapes.Pill)
             .background(if (enabled) SliverColors.Accent else SliverColors.Surface3)
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2), color = if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled, maxLines = 1, softWrap = false)
     }
 }
 
 @Composable
-fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true) {
     Box(
-        modifier.fillMaxWidth().heightIn(min = 54.dp)
+        modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier).height(48.dp)
             .clip(SliverShapes.Pill)
             .border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2), color = if (enabled) SliverColors.TextPrimary else SliverColors.TextDisabled)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.TextPrimary else SliverColors.TextDisabled, maxLines = 1, softWrap = false)
     }
 }
 
@@ -77,7 +78,7 @@ fun GhostButton(
             destructive -> SliverColors.Error
             else -> SliverColors.TextSecondary
         }
-        SliverText(text, SliverType.Headline, color = color)
+        SliverText(text, SliverType.Headline, color = color, maxLines = 1, softWrap = false)
     }
 }
 

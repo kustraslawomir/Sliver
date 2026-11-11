@@ -54,9 +54,7 @@ Product: one-clip-a-day video diary, organised in projects. Read before coding:
 - State is never shown by color alone: add an icon, label or shape.
 
 ## Test device
-Use the emulator `emulator-5554` (AVD tracker13, API 35): always set `ANDROID_SERIAL=emulator-5554`. Never touch other attached phones.
-
-# Add to CLAUDE.md
+Use the Samsung (adb serial `adb-RFCY30SW5QZ-XscZaw._adb-tls-connect._tcp`, model SM_*) via `ANDROID_SERIAL`. The emulator is dropped (too slow). Privacy: never screenshot or commit images of the live camera preview, the system Photo Picker showing real media, or anything outside the SliverDemo folders (Movies/SliverDemo, Pictures/SliverDemo). Never import, pull or delete the user's real media; install only the debug app.
 
 ## Design fidelity (non-negotiable)
 - UI tasks follow `PROMPT.md` in the pixel-perfect pack: inventory → build → screenshot → compare → checklist.

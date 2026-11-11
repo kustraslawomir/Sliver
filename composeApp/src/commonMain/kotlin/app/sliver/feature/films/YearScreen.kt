@@ -74,7 +74,7 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         ) {
             Box(Modifier.fillMaxWidth(0.6f).height(2.dp).background(SliverColors.AccentCore))
             SliverText("$year", SliverType.DisplayL)
-            SliverText("in Seconds", SliverType.Headline, color = SliverColors.TextSecondary)
+            SliverText("in clips", SliverType.Headline, color = SliverColors.TextSecondary)
         }
         Column(
             Modifier.padding(horizontal = SliverSpace.Gutter),

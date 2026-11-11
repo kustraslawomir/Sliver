@@ -39,6 +39,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.core.splashscreen)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
             implementation(libs.androidx.camera.core)

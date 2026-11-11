@@ -75,7 +75,7 @@ fun Chip(
             horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
         ) {
             if (selected) SliverIcon(SliverIcons.Check, color, size = 16.dp)
-            SliverText(text, SliverType.BodySmall, Modifier.weight(1f, fill = false), maxLines = 2, color = color)
+            SliverText(text, SliverType.BodySmall, Modifier.weight(1f, fill = false), maxLines = 1, softWrap = false, color = color)
             if (trailing != null) SliverIcon(trailing, color, size = 16.dp)
         }
     }

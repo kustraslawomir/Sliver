@@ -14,7 +14,7 @@ enum class Route(val path: String, val title: String) {
     Export("export", "Export"),
     FilmPlayer("film-player", "Film player"),
     Premiere("premiere", "Premiere"),
-    YearInSeconds("year-in-seconds", "Year in Seconds"),
+    YearInSeconds("year-in-seconds", "Year in clips"),
     Settings("settings", "Settings"),
     Backup("backup", "Backup & account"),
     Restore("restore", "Restore"),

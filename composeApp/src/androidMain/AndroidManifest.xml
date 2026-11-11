@@ -21,11 +21,12 @@
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Sliver"
         android:theme="@style/Theme.Sliver">
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.Sliver.Splash"
             android:exported="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -61,8 +62,8 @@
         <service
             android:name=".feature.widget.SliverTileService"
             android:exported="true"
-            android:icon="@android:drawable/ic_menu_camera"
-            android:label="SLIVER"
+            android:icon="@drawable/ic_stat_sliver"
+            android:label="Sliver"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />

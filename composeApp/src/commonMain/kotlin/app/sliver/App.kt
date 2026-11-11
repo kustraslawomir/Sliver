@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.SliverNavHost
 import app.sliver.core.theme.SliverTheme
 import app.sliver.core.theme.rememberReducedMotion
-import app.sliver.core.ui.ClipDropOverlay
 import app.sliver.core.ui.SplashOverlay
 import app.sliver.debug.ComponentGallery
 
@@ -24,7 +23,6 @@ fun App() {
             var splash by remember { mutableStateOf(true) }
             Box {
                 SliverNavHost()
-                ClipDropOverlay()
                 if (splash) SplashOverlay { splash = false }
             }
         }

@@ -67,7 +67,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             SliverText("Films", SliverType.DisplayM, Modifier.weight(1f))
-            SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) })
+            SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) }, fullWidth = false)
         }
         if (teaser != TeaserState.HIDDEN) {
             YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
@@ -93,7 +93,7 @@ private fun YearTeaser(year: Int, unlocked: Boolean, onClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
     ) {
         Badge(if (unlocked) "Ready" else "Unlocks 26 Dec")
-        SliverText("Your $year in Seconds", SliverType.DisplayM)
+        SliverText("Your $year in clips", SliverType.DisplayM)
         SliverText(
             if (unlocked) "Your year, one clip at a time." else "Keep going. It opens on 26 December.",
             SliverType.BodySmall,

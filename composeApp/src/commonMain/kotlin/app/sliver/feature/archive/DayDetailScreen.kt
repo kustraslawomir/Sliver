@@ -120,7 +120,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     fun remove(d: app.sliver.data.db.Day) {
         val next = nextDay(d.date, filled) ?: prevDay(d.date, filled)
         scope.launch {
-            undo.remove(d, dayLabel(d.date, today))
+            undo.remove(d)
             show(next)
         }
     }

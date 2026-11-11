@@ -26,8 +26,9 @@ fun SliverText(
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
+    softWrap: Boolean = true,
 ) {
-    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), maxLines = maxLines)
+    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines)
 }
 
 /** Neutral sheet shadow only; ember glow lives in core/designsystem/Glow.kt. */

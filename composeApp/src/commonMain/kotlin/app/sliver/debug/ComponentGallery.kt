@@ -35,8 +35,6 @@ import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
 import app.sliver.core.ui.SliverSlider
 import app.sliver.core.ui.SwitchRow
-import app.sliver.core.ui.UndoToastHost
-import app.sliver.core.ui.rememberUndoToastState
 
 @Composable
 fun ComponentGallery() {
@@ -45,7 +43,6 @@ fun ComponentGallery() {
     var sw by remember { mutableStateOf(true) }
     var slider by remember { mutableStateOf(0.4f) }
     var sheet by remember { mutableStateOf(false) }
-    val toast = rememberUndoToastState()
 
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
         Column(
@@ -76,10 +73,8 @@ fun ComponentGallery() {
                 SliverFrame(SliverFrameState.Locked, Modifier.size(56.dp, 72.dp))
             }
             SecondaryButton("Open sheet", { sheet = true })
-            GhostButton("Show toast", { toast.show("Clip deleted", onAction = {}) })
             Box(Modifier.height(SliverSpace.S9))
         }
-        UndoToastHost(toast, Modifier.align(Alignment.BottomCenter).padding(bottom = SliverSpace.S10))
         SliverBottomSheet(sheet, { sheet = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
                 SliverText("Sheet title", SliverType.DisplayM)

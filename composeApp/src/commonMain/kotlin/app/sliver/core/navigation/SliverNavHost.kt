@@ -58,10 +58,7 @@ import app.sliver.feature.notifications.NotificationsScreen
 import app.sliver.feature.onboarding.OnboardingScreen
 import app.sliver.feature.settings.SettingsScreen
 import app.sliver.feature.trim.PhotoTrimScreen
-import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.trim.TrimScreen
-import app.sliver.feature.trim.UNDO_WINDOW_MS
-import app.sliver.core.ui.UndoToastHost
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
@@ -70,7 +67,6 @@ import org.koin.mp.KoinPlatform
 fun SliverNavHost() {
     val nav = rememberNavController()
     val navigator = remember(nav) { AppNavigator(nav) }
-    val undo = remember { KoinPlatform.getKoin().get<SaveUndo>() }
     val go = navigator::go
 
     val link by DeepLink.target.collectAsState()
@@ -98,7 +94,6 @@ fun SliverNavHost() {
             ) {
                 Route.entries.forEach { route ->
                     composable(route.path) { entry ->
-                        ConsumeSavedClip(entry, route, undo, navigator)
                         val back = navigator::back
                         CappedWidth(route in CappedRoutes) {
                         when (route) {
@@ -149,11 +144,6 @@ fun SliverNavHost() {
                     }
                 }
             }
-            UndoToastHost(
-                undo.toast,
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),
-                durationMs = UNDO_WINDOW_MS,
-            )
         }
     }
     }
@@ -178,22 +168,6 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isVertical(): Bool
     val from = initialState.destination.route
     val to = targetState.destination.route
     return setOf(from, to) == setOf(Route.Camera.path, Route.Project.path)
-}
-
-/** Shows the "Clip saved" toast on the screen a capture flow returned to. */
-@Composable
-private fun ConsumeSavedClip(entry: NavBackStackEntry, route: Route, undo: SaveUndo, navigator: AppNavigator) {
-    val saved by entry.savedStateHandle.getStateFlow<String?>(SAVED_CLIP_KEY, null).collectAsState()
-    LaunchedEffect(saved) {
-        val date = saved?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return@LaunchedEffect
-        entry.savedStateHandle[SAVED_CLIP_KEY] = null
-        undo.announceSaved(
-            onView = if (route == Route.DayDetail) null else ({
-                ArchiveSession.selected = date
-                navigator.go(Route.DayDetail)
-            }),
-        )
-    }
 }
 
 /** CaptureSession is in-memory; mirror it into the entry's SavedStateHandle so Edit clip reopens after process death. */
