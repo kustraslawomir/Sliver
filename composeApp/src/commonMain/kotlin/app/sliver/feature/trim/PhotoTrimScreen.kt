@@ -22,6 +22,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -43,7 +44,11 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.data.DaySource
+import app.sliver.data.LookParams
 import app.sliver.data.Motion
+import app.sliver.data.toParams
+import app.sliver.feature.looks.LookSession
+import app.sliver.feature.looks.rememberLookRenderer
 import app.sliver.data.export.PhotoMotion
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.files.FileStore
@@ -54,6 +59,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
+
+private const val PHOTO_EDGE = 1080
 
 /** Decodes a downsampled bitmap of the still at [path] (file path or content URI). */
 @Composable
@@ -72,11 +79,27 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val settings = remember { koin.get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
-    val day = remember { CaptureSession.forDate ?: today }
-    var motion by remember { mutableStateOf(Motion.ZOOM) }
+    val resume = remember { LookSession.takeResume() }
+    val day = remember { resume?.day ?: CaptureSession.forDate ?: today }
+    var motion by remember { mutableStateOf(resume?.motion ?: Motion.ZOOM) }
+    var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
     var saving by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
-    val photo = rememberPhoto(path)
+    val rawPhoto = rememberPhoto(path)
+    val renderer = rememberLookRenderer()
+    val photo by produceState(rawPhoto, rawPhoto, look) {
+        val p = rawPhoto
+        value = if (p == null || look == null || look == LookParams()) p else renderer.render(p, look!!, PHOTO_EDGE)
+    }
+    LaunchedEffect(Unit) { if (look == null) look = settings.settings.first().defaultLook.toParams() }
+
+    fun openLooks() {
+        LookSession.isPhoto = true
+        LookSession.params = look ?: LookParams()
+        LookSession.resume = LookSession.Resume(day = day, motion = motion)
+        done = true
+        onNavigate(Route.Looks)
+    }
 
     DisposableEffect(Unit) {
         onDispose { if (!done && isTmp(path)) files.delete(path) }
@@ -97,6 +120,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
+                look = look ?: settings.settings.first().defaultLook.toParams(),
             )
             val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
             saving = false
@@ -140,7 +164,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             PrimaryButton(if (saving) "Saving..." else "Use this second", ::useSecond, enabled = photo != null && !saving)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 GhostButton("Retake", ::close, Modifier.weight(1f))
-                GhostButton("Looks", { onNavigate(Route.Looks) }, Modifier.weight(1f))
+                GhostButton("Looks", ::openLooks, Modifier.weight(1f))
             }
         }
     }

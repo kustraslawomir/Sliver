@@ -64,8 +64,8 @@ class DayRepositoryImpl(
         val tmpVideo = files.newTmpPath(stamp)
         val tmpThumb = "$tmpVideo.jpg"
         try {
-            if (daySource == DaySource.PHOTO) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb)
-            else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode)
+            if (daySource == DaySource.PHOTO) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
+            else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val file = files.dayPath(date)
             val thumb = files.thumbPath(date)
             check(files.move(tmpVideo, file) && files.move(tmpThumb, thumb)) { "Could not move export into place" }

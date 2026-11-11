@@ -120,6 +120,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         format: FilmFormat,
         videoPath: String,
         thumbPath: String,
+        look: LookParams,
     ): ExportedClip {
         val uri = if (source.contains("://")) Uri.parse(source) else Uri.fromFile(File(source))
         val (outW, outH) = if (format == FilmFormat.STORY) 1080 to 1920 else 1920 to 1080
@@ -133,6 +134,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
                     },
                 )
             }
+            addAll(LookEffects.build(context, look, forExport = true))
         }
         val item = EditedMediaItem.Builder(MediaItem.Builder().setUri(uri).setImageDurationMs(SECOND_MS).build())
             .setFrameRate(PhotoMotion.FPS)

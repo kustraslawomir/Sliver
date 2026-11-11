@@ -35,6 +35,7 @@ interface ClipExporter {
         format: FilmFormat,
         videoPath: String,
         thumbPath: String,
+        look: LookParams = LookParams(),
     ): ExportedClip
 }
 

@@ -44,6 +44,7 @@ private object FakeExporter : ClipExporter {
 
     override suspend fun photoToSecond(
         source: String, motion: app.sliver.data.Motion, format: FilmFormat, videoPath: String, thumbPath: String,
+        look: LookParams,
     ) = exportSecond(source, 0, 1f, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
 }
 

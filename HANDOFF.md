@@ -13,3 +13,4 @@
 - DECISION: LookEffects.build(context, params, forExport, animateGrain) in androidMain/data/look. LUT intensity is blended with identity on the CPU (SingleColorLut cannot mix); sharpen, grain, vignette and fade are one custom GL pass. Wired into TrimPlayer (setVideoEffects) and AndroidClipExporter.exportSecond (look param, default Natural); no caller passes a per-clip look yet.
 - DECISION: camera live preview does not apply the look yet (CameraX 1.5.1 has no stable Media3 effect bridge; a SurfaceProcessor GL pipeline is left for later). Frame rate and visual parity not verified on device.
 - photoToSecond does not apply a look yet.
+- T17: Day detail entry to Looks not wired (Day detail screen not built yet). Photo and thumbnail look preview is a CPU approximation (no grain or sharpness); video preview and export use the Media3 chain.

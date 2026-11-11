@@ -61,6 +61,9 @@ import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
 import app.sliver.core.ui.StripDim
 import app.sliver.data.DaySource
+import app.sliver.data.LookParams
+import app.sliver.data.toParams
+import app.sliver.feature.looks.LookSession
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
@@ -100,17 +103,20 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val filled by remember { days.observeRange(week.last(), today) }.collectAsState(emptyList())
     val saved by remember { settings.settings }.collectAsState(null)
 
+    val resume = remember { LookSession.takeResume() }
+    var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
+
     var durationMs by remember { mutableStateOf<Long?>(null) }
     var thumbs by remember { mutableStateOf<List<ImageBitmap>>(emptyList()) }
-    var startMs by remember { mutableStateOf(0L) }
-    var committedMs by remember { mutableStateOf(0L) }
-    var custom by remember { mutableStateOf(false) }
+    var startMs by remember { mutableStateOf(resume?.startMs ?: 0L) }
+    var committedMs by remember { mutableStateOf(resume?.startMs ?: 0L) }
+    var custom by remember { mutableStateOf(resume?.custom ?: false) }
     var dragging by remember { mutableStateOf(false) }
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
-    var speed by remember { mutableStateOf(1f) }
-    var audio by remember { mutableStateOf(true) }
-    var shortMode by remember { mutableStateOf(ShortMode.SLOW_TO_FIT) }
-    var day by remember { mutableStateOf(CaptureSession.forDate ?: today) }
+    var speed by remember { mutableStateOf(resume?.speed ?: 1f) }
+    var audio by remember { mutableStateOf(resume?.audio ?: true) }
+    var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
+    var day by remember { mutableStateOf(resume?.day ?: CaptureSession.forDate ?: today) }
     val daySource = remember { CaptureSession.source }
     var sheet by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
@@ -121,10 +127,13 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     }
 
     LaunchedEffect(path) {
+        if (look == null) look = settings.settings.first().defaultLook.toParams()
         val d = media.durationMs(path)
-        val pick = media.autoPickMs(path, d)
-        startMs = pick
-        committedMs = pick
+        if (resume == null) {
+            val pick = media.autoPickMs(path, d)
+            startMs = pick
+            committedMs = pick
+        }
         durationMs = d
         if (!isShortClip(d)) thumbs = media.thumbnails(path, d, thumbCount(d))
     }
@@ -152,6 +161,18 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
         onNavigate(Route.Camera)
     }
 
+    fun openLooks() {
+        val duration = durationMs ?: return
+        LookSession.isPhoto = false
+        LookSession.startMs = committedMs
+        LookSession.windowMs = if (isShortClip(duration)) duration else (SECOND_MS * speed).toLong()
+        LookSession.speed = speed
+        LookSession.params = look ?: LookParams()
+        LookSession.resume = LookSession.Resume(startMs, custom, speed, audio, shortMode, day)
+        done = true
+        onNavigate(Route.Looks)
+    }
+
     fun useSecond() {
         if (saving || duration == null) return
         saving = true
@@ -160,6 +181,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = startMs, speed = speed, cropY = null, format = format,
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = audio,
+                look = look ?: settings.settings.first().defaultLook.toParams(),
             )
             val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
             saving = false
@@ -189,7 +211,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                     .clip(SliverShapes.S).background(SliverColors.Surface1),
             ) {
                 if (duration != null) {
-                    TrimPlayer(path, committedMs, windowMs, speed, audio, dragging, Modifier.fillMaxSize())
+                    TrimPlayer(path, committedMs, windowMs, speed, audio, dragging, Modifier.fillMaxSize(), look ?: LookParams())
                     Badge(
                         if (custom) "Custom" else "✦ Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),
@@ -253,7 +275,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     GhostButton("Retake", ::close, Modifier.weight(1f))
-                    GhostButton("Looks", { onNavigate(Route.Looks) }, Modifier.weight(1f))
+                    GhostButton("Looks", ::openLooks, Modifier.weight(1f))
                 }
             }
         }
