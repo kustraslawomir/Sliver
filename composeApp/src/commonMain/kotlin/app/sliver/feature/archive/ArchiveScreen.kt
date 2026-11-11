@@ -40,6 +40,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.monthGrid
 import app.sliver.core.time.todayLocal
+import app.sliver.core.ui.EdgeState
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
@@ -119,6 +120,13 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
                 }
             }
             Segmented(listOf("MONTH", "YEAR"), if (yearView) 1 else 0, { yearView = it == 1 })
+
+            if (all.isEmpty() && app != null) {
+                EdgeState(
+                    "Your year starts today", "Record one second a day. Your archive fills in here.",
+                    Modifier.fillMaxWidth(), "Record today's second",
+                ) { CaptureSession.forDate = null; onNavigate(Route.Camera) }
+            }
 
             memory?.let { m ->
                 byDate[m.date]?.let { MemoryCard(it, m.kind, today) { openDay(m.date) } }

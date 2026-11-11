@@ -40,7 +40,11 @@ import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.SliverSlider
+import app.sliver.core.ui.STORAGE_FULL_BODY
+import app.sliver.core.ui.STORAGE_FULL_TITLE
 import app.sliver.core.ui.SwitchRow
+import app.sliver.core.ui.isStorageLow
+import app.sliver.data.files.FileStore
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmCut
 import app.sliver.data.FilmFormat
@@ -76,6 +80,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var options by remember {
         mutableStateOf(FilmOptions(custom = today.plus(-13, DateTimeUnit.DAY) to today))
     }
+    var lowStorage by remember { mutableStateOf(false) }
     var dateTouched by remember { mutableStateOf(false) }
     val dateOn = if (dateTouched) options.dateOn else app?.dateStamp ?: options.dateOn
     val format = app?.newFilmFormat ?: FilmFormat.CINEMA
@@ -191,10 +196,17 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             LookChips(options.look) { options = options.copy(look = it) }
         }
 
+        if (lowStorage) {
+            SliverText(
+                "$STORAGE_FULL_TITLE. $STORAGE_FULL_BODY", SliverType.Caption,
+                Modifier.padding(horizontal = SliverSpace.Gutter), SliverColors.Error,
+            )
+        }
         PrimaryButton(
             "Save film",
             {
-                scope.launch {
+                lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
+                if (!lowStorage) scope.launch {
                     val id = "film-${Clock.System.now().toEpochMilliseconds()}"
                     val film = options.copy(dateOn = dateOn).toFilm(id, filmName(options, range), format, today)
                     films.save(film)

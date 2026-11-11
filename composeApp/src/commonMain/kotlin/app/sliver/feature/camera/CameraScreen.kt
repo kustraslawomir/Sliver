@@ -74,6 +74,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import app.sliver.core.ui.StorageFullOverlay
+import app.sliver.core.ui.isStorageLow
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
 
@@ -152,7 +154,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
         }
     }
 
+    var storageFull by remember { mutableStateOf(false) }
+    fun storageOk(): Boolean = !isStorageLow(files.freeSpaceBytes()).also { storageFull = it }
+
     fun startRecording() {
+        if (!storageOk()) return
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         elapsedMs = 0
         recording = true
@@ -165,6 +171,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     }
 
     fun capturePhoto() {
+        if (!storageOk()) return
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         val path = files.newTmpPath(Clock.System.now().toEpochMilliseconds()).removeSuffix(".mp4") + ".jpg"
         engine.takePhoto(path) { finish(it, Route.PhotoTrim) }
@@ -308,6 +315,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                 Box(Modifier.size(52.dp))
             }
         }
+        if (storageFull) StorageFullOverlay({ storageFull = false })
     }
 }
 

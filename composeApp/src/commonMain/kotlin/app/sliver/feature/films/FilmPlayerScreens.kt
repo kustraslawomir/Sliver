@@ -46,6 +46,10 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.STORAGE_FULL_BODY
+import app.sliver.core.ui.STORAGE_FULL_TITLE
+import app.sliver.core.ui.isStorageLow
+import app.sliver.data.files.FileStore
 import app.sliver.core.ui.SliverSlider
 import app.sliver.data.FilmFormat
 import app.sliver.data.export.stampText
@@ -90,8 +94,15 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
             RenderState.Failed, RenderState.Idle -> if (state == RenderState.Idle && film?.renderPath != null || film == null) {
                 SliverText("Finishing up", SliverType.BodySmall, Modifier.padding(top = SliverSpace.S2), SliverColors.TextSecondary)
             } else {
-                SliverText("Rendering stopped. Your days are untouched.", SliverType.BodySmall, Modifier.padding(vertical = SliverSpace.S4), SliverColors.TextSecondary)
-                PrimaryButton("Try again", { id?.let(renderer::start) }, Modifier.fillMaxWidth())
+                var low by remember { mutableStateOf(isStorageLow(koin.get<FileStore>().freeSpaceBytes())) }
+                SliverText(
+                    if (low) "$STORAGE_FULL_TITLE. $STORAGE_FULL_BODY" else "Rendering stopped. Your days are untouched.",
+                    SliverType.BodySmall, Modifier.padding(vertical = SliverSpace.S4), SliverColors.TextSecondary,
+                )
+                PrimaryButton("Try again", {
+                    low = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
+                    if (!low) id?.let(renderer::start)
+                }, Modifier.fillMaxWidth())
                 GhostButton("Back", onBack)
             }
         }
