@@ -17,7 +17,28 @@ A private, cinematic video diary. Capture a single second of each day, watch you
 ---
 
 <!-- SCREENSHOTS:START -->
-> Screenshots are generated from the real app (`/update-readme`) once it has been run on a device or emulator.
+<div align="center">
+
+<table>
+<tr>
+<td align="center"><img src="docs/screenshots/01a-onboarding-concept.png" width="170"><br><sub>One second. Every day.</sub></td>
+<td align="center"><img src="docs/screenshots/02-archive-month.png" width="170"><br><sub>Your month of seconds</sub></td>
+<td align="center"><img src="docs/screenshots/03-archive-year.png" width="170"><br><sub>The whole year at a glance</sub></td>
+<td align="center"><img src="docs/screenshots/04-day-detail.png" width="170"><br><sub>Every day, full screen</sub></td>
+<td align="center"><img src="docs/screenshots/06-looks-neon.png" width="170"><br><sub>Looks, with live preview</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screenshots/08-films-library.png" width="170"><br><sub>Films library</sub></td>
+<td align="center"><img src="docs/screenshots/09-film-builder.png" width="170"><br><sub>Film builder</sub></td>
+<td align="center"><img src="docs/screenshots/10-film-player.png" width="170"><br><sub>Premiere and share</sub></td>
+<td align="center"><img src="docs/screenshots/01d-onboarding-reminder.png" width="170"><br><sub>Gentle daily reminder</sub></td>
+<td align="center"><img src="docs/screenshots/11-settings.png" width="170"><br><sub>Settings</sub></td>
+</tr>
+</table>
+
+<sub>Screens captured from the debug build on a real Android phone, with generated demo clips.</sub>
+
+</div>
 <!-- SCREENSHOTS:END -->
 
 ## What it is
@@ -81,4 +102,8 @@ Optional setup is listed in [`HANDOFF.md`](HANDOFF.md) once generated: royalty-f
 
 ## Status
 
-Built task by task from [`tasks/`](tasks/INDEX.md) by an automated agent workflow. Track progress in [`.workflow/state.md`](.workflow/state.md).
+v0.1: all 37 planned tasks are built; **151 unit tests pass** and the debug build installs and runs on a real Android phone (camera, trim, archive, looks, film builder, render, settings).
+
+Known gaps: fonts are system placeholders until the OFL fonts are added; the four music tracks are generated stand-ins; Google sign-in and Drive backup run against fakes until an OAuth client is configured; the live camera preview does not apply looks yet. Details in [`HANDOFF.md`](HANDOFF.md).
+
+Built task by task from [`tasks/`](tasks/INDEX.md) by an automated agent workflow.

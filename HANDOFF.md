@@ -76,3 +76,10 @@ Without `GOOGLE_WEB_CLIENT_ID` the app uses `FakeGoogleAuth` and an in-memory Dr
 ./gradlew :composeApp:assembleDebug :composeApp:testDebugUnitTest :composeApp:lintDebug
 ```
 Emulator: create an API 34+ AVD (Android Studio Device Manager or `avdmanager`), start it, then `./gradlew installDebug`. Use a virtual camera scene for the camera and add a few videos/photos to the gallery for Trim, Fill the past and Archive.
+
+## Device test (Xiaomi M2101K9G, Android 13)
+Walked through onboarding → camera record → trim → save → archive → day detail → looks → film builder → render → player → settings. No crashes in logcat.
+- Fixed: camera had no way to reach Archive/Films/Settings (added a DAYS button, bottom-right); floating tab bar overlapped the 3-button system nav (now inset).
+- Added: four synthesized built-in music tracks (replace with real ones any time, same file names).
+- Open: saved day clip is 1.033 s (31 frames at 30 fps), spec says 1.000 s. Settings gear on Archive renders as the letter "S" (no icon). Camera screen has no looks strip. Fonts still system placeholders.
+- Not tested on device: Google sign-in, Drive backup/restore, reminders firing, widget and tile, TalkBack.
