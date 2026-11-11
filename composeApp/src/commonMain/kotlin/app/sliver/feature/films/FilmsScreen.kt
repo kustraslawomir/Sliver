@@ -93,7 +93,7 @@ private fun YearTeaser(year: Int, unlocked: Boolean, onClick: () -> Unit) {
     Column(
         Modifier.fillMaxWidth().clip(SliverShapes.L).background(SliverColors.Surface1)
             .border(1.dp, SliverColors.AccentLine, SliverShapes.L)
-            .then(if (unlocked) Modifier.clickable(onClick = onClick) else Modifier)
+            .clickable(onClick = onClick)
             .padding(SliverSpace.S4),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
     ) {

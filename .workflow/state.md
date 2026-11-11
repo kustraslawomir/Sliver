@@ -23,7 +23,7 @@
 - [x] T14
 - [x] T24 (not device-tested, see HANDOFF)
 - [x] T25 (not device-tested, see HANDOFF)
-- [ ] T26
+- [x] T26
 - [ ] T27
 - [ ] T28
 - [ ] T29

@@ -33,6 +33,7 @@ import app.sliver.feature.films.FilmBuilderScreen
 import app.sliver.feature.films.FilmNav
 import app.sliver.feature.films.FilmPlayerScreen
 import app.sliver.feature.films.PremiereScreen
+import app.sliver.feature.films.YearInSecondsScreen
 import app.sliver.feature.films.FilmsScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.looks.LooksScreen
@@ -93,6 +94,7 @@ fun SliverNavHost() {
                             onBack = { nav.popBackStack() },
                             onEdit = { go(Route.FilmBuilder) },
                         )
+                        Route.YearInSeconds -> YearInSecondsScreen(::go, onBack = { nav.popBackStack() })
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }
