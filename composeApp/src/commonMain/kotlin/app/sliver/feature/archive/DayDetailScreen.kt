@@ -1,5 +1,6 @@
 package app.sliver.feature.archive
 
+import app.sliver.feature.gallery.rememberAddMedia
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalDensity
 import app.sliver.core.designsystem.Glow
@@ -95,9 +96,11 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
+    val addMedia = rememberAddMedia(onNavigate)
+
     fun replace(d: LocalDate) {
         CaptureSession.forDate = d
-        onNavigate(if (d == today) Route.Camera else Route.GalleryPicker)
+        if (d == today) onNavigate(Route.Camera) else addMedia(d)
     }
 
     fun remove(d: app.sliver.data.db.Day) {

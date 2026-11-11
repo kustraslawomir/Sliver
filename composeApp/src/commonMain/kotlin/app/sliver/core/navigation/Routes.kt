@@ -5,7 +5,6 @@ enum class Route(val path: String, val title: String) {
     Camera("camera", "Camera"),
     Trim("trim", "Edit clip"),
     PhotoTrim("photo-trim", "Photo trim"),
-    GalleryPicker("gallery", "Gallery picker"),
     Project("project", "Project"),
     DayDetail("day", "Clip detail"),
     FillThePast("fill-the-past", "Fill empty days"),

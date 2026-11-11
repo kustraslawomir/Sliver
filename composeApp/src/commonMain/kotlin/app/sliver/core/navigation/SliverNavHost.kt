@@ -50,7 +50,6 @@ import app.sliver.feature.films.FilmNav
 import app.sliver.feature.films.FilmPlayerScreen
 import app.sliver.feature.films.PremiereScreen
 import app.sliver.feature.films.YearInSecondsScreen
-import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.NotificationsScreen
@@ -105,7 +104,6 @@ fun SliverNavHost() {
                                 restoreCapture(entry.savedStateHandle)
                                 PhotoTrimScreen(go)
                             }
-                            Route.GalleryPicker -> GalleryScreen(go)
                             Route.Project -> ProjectScreen(go, onBack = back)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
                             Route.FillThePast -> BackfillScreen(onBack = back)
@@ -148,7 +146,7 @@ fun SliverNavHost() {
 }
 
 private val CappedRoutes = setOf(
-    Route.GalleryPicker, Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,
+    Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,
     Route.FilmBuilder, Route.Export, Route.Premiere, Route.YearInSeconds, Route.Onboarding,
 )
 

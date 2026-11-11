@@ -1,5 +1,6 @@
 package app.sliver.feature.archive
 
+import app.sliver.feature.gallery.rememberAddMedia
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -142,9 +143,11 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
+    val addMedia = rememberAddMedia(onNavigate)
+
     fun replaceDay(date: LocalDate) {
         CaptureSession.forDate = date
-        onNavigate(if (date == today) Route.Camera else Route.GalleryPicker)
+        if (date == today) onNavigate(Route.Camera) else addMedia(date)
     }
 
     fun removeDay(date: LocalDate) {
@@ -153,9 +156,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 
     fun fromGallery(date: LocalDate) {
-        CaptureSession.forDate = date
         addFor = null
-        onNavigate(Route.GalleryPicker)
+        addMedia(date)
     }
 
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
@@ -250,8 +252,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverText(dayLabel(date, today), SliverType.DisplayM)
                 SliverText("Nothing saved for this day yet.", SliverType.BodySmall)
-                PrimaryButton("Video from gallery", { fromGallery(date) }, Modifier.fillMaxWidth())
-                SecondaryButton("Photo", { fromGallery(date) }, Modifier.fillMaxWidth())
+                PrimaryButton("Choose from Photos", { fromGallery(date) }, Modifier.fillMaxWidth())
                 GhostButton("Leave it open", { addFor = null }, Modifier.fillMaxWidth())
             }
         }

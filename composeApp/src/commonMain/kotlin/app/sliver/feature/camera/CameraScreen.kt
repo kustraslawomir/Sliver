@@ -1,5 +1,6 @@
 package app.sliver.feature.camera
 
+import app.sliver.feature.gallery.rememberAddMedia
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import app.sliver.core.theme.LocalReducedMotion
@@ -111,16 +112,17 @@ private val SideControlsWidth = 280.dp
 
 @Composable
 fun CameraScreen(onNavigate: (Route) -> Unit) {
+    val addMedia = rememberAddMedia(onNavigate)
     PermissionGate(
         PermissionKind.CameraMic,
-        onDeniedAlternative = { onNavigate(Route.GalleryPicker) },
+        onDeniedAlternative = { addMedia(null) },
     ) {
-        CameraContent(onNavigate)
+        CameraContent(onNavigate, addMedia)
     }
 }
 
 @Composable
-private fun CameraContent(onNavigate: (Route) -> Unit) {
+private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.datetime.LocalDate?) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val files = remember { koin.get<FileStore>() }
@@ -327,7 +329,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(iconRot) { onNavigate(Route.GalleryPicker) }
+                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(iconRot) { addMedia(null) }
                 RecordButton(
                     state = when {
                         recording -> RecordState.Recording
