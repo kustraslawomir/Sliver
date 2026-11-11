@@ -13,4 +13,5 @@ actual fun TrimPlayer(
     paused: Boolean,
     modifier: Modifier,
     look: app.sliver.data.LookParams,
+    onAspect: (Float) -> Unit,
 ): Unit = TODO("iOS later")

@@ -247,8 +247,9 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     .clip(SliverShapes.S).background(SliverColors.Surface1),
             ) {
                 if (duration != null) {
-                    TrimPlayer(path, committedMs, windowMs, speed, audio, dragging, Modifier.fillMaxSize(), look ?: LookParams())
-                    if (reframe) ReframeBand(cropY, { cropY = it })
+                    ClipPlayer(
+                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, audio, dragging, look ?: LookParams(),
+                    ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
                     Badge(
                         if (custom) "Custom" else "Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),

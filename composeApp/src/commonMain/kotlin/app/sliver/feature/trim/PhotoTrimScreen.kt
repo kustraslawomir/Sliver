@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -91,6 +92,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     var motion by remember { mutableStateOf(resume?.motion ?: Motion.ZOOM) }
     var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
     var saving by remember { mutableStateOf(false) }
+    val project by remember { projects.active }.collectAsState(null)
     var done by remember { mutableStateOf(false) }
     val rawPhoto = rememberPhoto(path)
     val renderer = rememberLookRenderer()
@@ -131,7 +133,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         if (saving) return
         saving = true
         scope.launch {
-            val format = projects.active.first()?.format ?: FilmFormat.CINEMA
+            val format = project?.format ?: FilmFormat.CINEMA
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
@@ -157,9 +159,10 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             SliverText("FOR ${dayLabel(day, today).uppercase()}", SliverType.MonoS, color = SliverColors.TextSecondary)
             Box(Modifier.padding(SliverSpace.S6))
         }
-        Box(
+        ClipFrame(
+            if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
             Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
-                .clip(SliverShapes.S).background(SliverColors.Surface1).clipToBounds(),
+                .clip(SliverShapes.S).clipToBounds(),
         ) {
             photo?.let {
                 val scale = if (motion == Motion.ZOOM) PhotoMotion.zoomScale(progress) else 1f

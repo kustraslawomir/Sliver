@@ -44,7 +44,7 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.looks.LookSession
 import app.sliver.feature.trim.SaveUndo
-import app.sliver.feature.trim.TrimPlayer
+import app.sliver.feature.trim.ClipPlayer
 import app.sliver.feature.trim.dayLabel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -126,9 +126,8 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
         if (day != null) {
-            TrimPlayer(
-                day.file, 0, 1000, 1f, audio = !muted, paused = false, modifier = Modifier.fillMaxSize(),
-                look = previewLook ?: LookParams(),
+            ClipPlayer(
+                day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, look = previewLook ?: LookParams(),
             )
             if (app?.dateStamp == true) {
                 SliverText(

@@ -59,6 +59,7 @@ import app.sliver.data.FilmFormat
 import app.sliver.data.export.stampText
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
+import app.sliver.feature.camera.rememberDeviceRotation
 import app.sliver.feature.trim.rememberPhoto
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
@@ -204,6 +205,8 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val dateLabel = if (onTitleCard || plan.days.isEmpty()) f.name else stampText(plan.days[dayIndexAtMs(pos, plan.seconds)].date)
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
+    val landscape = rememberDeviceRotation().let { it in 60..120 || it in 240..300 }
+    LaunchedEffect(landscape) { fullscreen = landscape }
     FullscreenLandscape(fullscreen)
 
     @Composable

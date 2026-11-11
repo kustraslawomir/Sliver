@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import app.sliver.data.export.FrameSampler
+import app.sliver.feature.camera.displaySize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -27,7 +28,12 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
             val w = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
             val h = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
             val rot = key(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION).toInt()
-            if (w <= 0f || h <= 0f) 1f else if (rot % 180 != 0) h / w else w / h
+            if (w <= 0f || h <= 0f) {
+                1f
+            } else {
+                val (dw, dh) = displaySize(w.toInt(), h.toInt(), rot)
+                dw.toFloat() / dh
+            }
         } finally {
             r.release()
         }

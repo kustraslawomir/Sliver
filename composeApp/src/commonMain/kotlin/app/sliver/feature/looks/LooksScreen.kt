@@ -51,7 +51,7 @@ import app.sliver.data.info
 import app.sliver.data.toParams
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.trim.TrimMedia
-import app.sliver.feature.trim.TrimPlayer
+import app.sliver.feature.trim.ClipPlayer
 import app.sliver.feature.trim.rememberPhoto
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
@@ -123,9 +123,9 @@ fun LooksScreen(onBack: () -> Unit) {
             if (isPhoto) {
                 (photoShown ?: photo)?.let { Image(it, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
             } else {
-                TrimPlayer(
-                    path, LookSession.startMs, LookSession.windowMs, LookSession.speed, audio = false, paused = false,
-                    modifier = Modifier.fillMaxSize(), look = if (showOriginal) LookParams() else params,
+                ClipPlayer(
+                    path, LookSession.startMs, LookSession.windowMs, Modifier.fillMaxSize(),
+                    speed = LookSession.speed, look = if (showOriginal) LookParams() else params,
                 )
             }
         }

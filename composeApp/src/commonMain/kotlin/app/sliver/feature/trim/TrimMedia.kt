@@ -14,7 +14,7 @@ interface TrimMedia {
 }
 
 /**
- * Looping preview of [windowMs] of [path] starting at [startMs], played at [speed]. [windowMs] is the source span
+ * Looping preview of [windowMs] of [path] starting at [startMs], played at [speed]; [onAspect] reports the display width / height. [windowMs] is the source span
  * (1000 * speed, or the whole clip when short); [paused] freezes it while the strip is dragged.
  */
 @Composable
@@ -27,4 +27,5 @@ expect fun TrimPlayer(
     paused: Boolean,
     modifier: Modifier,
     look: LookParams = LookParams(),
+    onAspect: (Float) -> Unit = {},
 )
