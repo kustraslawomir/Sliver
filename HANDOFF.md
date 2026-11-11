@@ -35,3 +35,4 @@
 - Exact alarms use SCHEDULE_EXACT_ALARM when granted, otherwise a 20 min window. No in-app prompt for the exact-alarm permission.
 - Notifications screen is Route.Notifications; main Settings screen is still the placeholder. notifyBackupPaused has no caller until the backup task exists.
 - Running late and On this day are planned with the reminder (7-day horizon, replanned on app open, settings change, day saved, alarm fire, boot).
+- T31: widget uses AppWidgetProvider/RemoteViews instead of Glance (no new dependency); widget and QS tile not device-tested; midnight refresh uses an inexact alarm.

@@ -28,7 +28,7 @@
 - [x] T28 (alarms not device-tested, see HANDOFF)
 - [x] T29 (Account/Backup rows route to Backup placeholder until T33)
 - [x] T30 (splash overlay + v31 splash theme, not device-tested)
-- [ ] T31
+- [x] T31 (RemoteViews widget, not device-tested, see HANDOFF)
 - [ ] T32
 - [ ] T33
 - [ ] T34
