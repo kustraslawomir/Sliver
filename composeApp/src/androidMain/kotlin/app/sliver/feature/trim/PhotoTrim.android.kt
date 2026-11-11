@@ -18,6 +18,8 @@ private const val MAX_EDGE = 1600
 actual fun rememberPhoto(path: String): ImageBitmap? {
     val context = LocalContext.current
     val photo by produceState<ImageBitmap?>(null, path) {
+        val key = ThumbCache.keyFor(path)
+        ThumbCache.get(key)?.let { value = it.first(); return@produceState }
         value = withContext(Dispatchers.IO) {
             runCatching {
                 val uri = if (path.contains("://")) Uri.parse(path) else Uri.fromFile(File(path))
@@ -27,7 +29,7 @@ actual fun rememberPhoto(path: String): ImageBitmap? {
                     if (longest > MAX_EDGE) decoder.setTargetSampleSize((longest + MAX_EDGE - 1) / MAX_EDGE)
                 }.asImageBitmap()
             }.getOrNull()
-        }
+        }?.also { ThumbCache.put(key, listOf(it)) }
     }
     return photo
 }

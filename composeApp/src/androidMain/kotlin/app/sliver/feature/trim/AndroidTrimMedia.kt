@@ -48,6 +48,8 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
 
     override suspend fun thumbnails(path: String, durationMs: Long, count: Int, onEach: (ImageBitmap) -> Unit): List<ImageBitmap> =
         withContext(Dispatchers.IO) {
+            val key = ThumbCache.keyFor(path, "#$count")
+            ThumbCache.get(key)?.let { cached -> cached.forEach(onEach); return@withContext cached }
             val r = MediaMetadataRetriever()
             try {
                 r.setDataSource(path)
@@ -61,7 +63,7 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
                     }
                     (bmp?.asImageBitmap() ?: android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap())
                         .also(onEach)
-                }
+                }.also { ThumbCache.put(key, it) }
             } finally {
                 r.release()
             }

@@ -1,0 +1,17 @@
+# Hand-written startup profile: launch -> Camera -> record -> Edit clip -> Save. Regenerate with a Macrobenchmark on a real device.
+HSPLapp/sliver/MainActivity;->**(**)**
+HSPLapp/sliver/core/navigation/**->**(**)**
+HSPLapp/sliver/core/theme/**->**(**)**
+HSPLapp/sliver/core/ui/**->**(**)**
+HSPLapp/sliver/core/icons/**->**(**)**
+HSPLapp/sliver/feature/camera/**->**(**)**
+HSPLapp/sliver/feature/trim/**->**(**)**
+HSPLapp/sliver/feature/onboarding/**->**(**)**
+HSPLapp/sliver/data/repo/**->**(**)**
+HSPLapp/sliver/data/settings/**->**(**)**
+Lapp/sliver/core/navigation/**;
+Lapp/sliver/core/theme/**;
+Lapp/sliver/core/ui/**;
+Lapp/sliver/feature/camera/**;
+Lapp/sliver/feature/trim/**;
+Lapp/sliver/data/repo/**;
