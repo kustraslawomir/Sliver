@@ -162,7 +162,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
             if (all.isEmpty() && app != null) {
                 EdgeState(
-                    "Your year starts today", "Record one second a day. Your archive fills in here.",
+                    "Your year starts today", "Record one clip a day. Your archive fills in here.",
                     Modifier.fillMaxWidth(), "Record today's clip",
                 ) { CaptureSession.forDate = null; onNavigate(Route.Camera) }
             }

@@ -95,7 +95,7 @@ private fun YearTeaser(year: Int, unlocked: Boolean, onClick: () -> Unit) {
         Badge(if (unlocked) "Ready" else "Unlocks 26 Dec")
         SliverText("Your $year in Seconds", SliverType.DisplayM)
         SliverText(
-            if (unlocked) "Your year, one second at a time." else "Keep going. It opens on 26 December.",
+            if (unlocked) "Your year, one clip at a time." else "Keep going. It opens on 26 December.",
             SliverType.BodySmall,
         )
     }

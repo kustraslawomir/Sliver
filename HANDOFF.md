@@ -105,3 +105,15 @@ BackupEngine/RestoreEngine still treat days as one flat list: the Drive manifest
 - Edit film: opens the builder prefilled with the existing film and re-renders under the same id.
 - Live camera preview does not apply the selected filter (CameraX preview has no per-frame shader); the filter is baked when the clip is saved and shown in Edit clip / Filters. Needs an OpenGL/CameraEffect pipeline, not done.
 - Fonts still system families (see F01 fonts above).
+
+## v1.1 QA
+Code-level pass (no device). Walked every NAVIGATION.md row against SliverNavHost/AppNavigator/screens: duplicate taps are de-duplicated in AppNavigator (single-flight + launchSingleTop); flow-origin pop, discard sheet (Edit clip/Photo clip BackHandler), render-in-background prompt (Player BackHandler), deep-link stacks are all present. Not verified by running.
+Fixed: leftover "second" copy in empty state, permission pre-prompt and Year in Seconds subtitle; "+ Make film" text glyph; ember fills on onboarding progress/slit (now neutral).
+No FontFamily.Default / MaterialTheme.typography in screens; fonts are still system families via SliverFonts.
+Bigger, not fixed:
+- Live camera preview ignores the selected filter.
+- Geist / Geist Mono / Instrument Serif TTFs missing.
+- Backup/restore not per project (F03 gap).
+- Applied Filters look is lost after process death.
+- Photos permission pre-prompt lives in the media picker gate (first open), reminders permission only via the Project card; Settings reminder toggle path not re-checked.
+- Needs device: rotation, both lenses, 2 and 5 minute videos, gallery photo, process death.

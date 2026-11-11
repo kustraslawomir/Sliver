@@ -25,7 +25,7 @@ data class PermissionCopy(val title: String, val body: String, val allow: String
 fun PermissionKind.copy() = when (this) {
     PermissionKind.CameraMic -> PermissionCopy(
         "Let SLIVER see and hear your day",
-        "One second of video, every day. Camera and microphone stay on your phone.",
+        "One clip a day. Camera and microphone stay on your phone.",
         "Allow camera & mic",
     )
     PermissionKind.Photos -> PermissionCopy(
