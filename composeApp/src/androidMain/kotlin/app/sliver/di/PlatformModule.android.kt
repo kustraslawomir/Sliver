@@ -9,6 +9,8 @@ import app.sliver.data.export.AndroidDayShare
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.export.DayShare
 import app.sliver.data.files.AndroidFileStore
+import app.sliver.data.repo.AndroidPlaceResolver
+import app.sliver.data.repo.PlaceResolver
 import app.sliver.data.files.FileStore
 import app.sliver.feature.backfill.AndroidBackfillRunner
 import app.sliver.feature.backfill.BackfillRunner
@@ -27,6 +29,7 @@ private fun clipExporter(ctx: Context): ClipExporter = AndroidClipExporter(ctx)
 private fun dayShare(ctx: Context): DayShare = AndroidDayShare(ctx)
 
 actual val platformModule: Module = module {
+    single<PlaceResolver> { AndroidPlaceResolver(get<Context>()) }
     single<DayShare> { dayShare(get<Context>()) }
     single {
         val ctx = get<Context>()

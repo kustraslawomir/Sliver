@@ -16,7 +16,7 @@ import org.koin.dsl.module
 val commonModule: Module = module {
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
-    single<DayRepository> { DayRepositoryImpl(get(), get(), get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get()) }
     single { SaveUndo(get(), get()) }
     single { BackfillStore(get()) }
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }

@@ -31,6 +31,7 @@ data class Day(
     val createdAt: Instant,
     val driveFileId: String? = null,
     val backup: BackupState = BackupState.PENDING,
+    val place: String? = null,
 )
 
 @Entity(tableName = "film")

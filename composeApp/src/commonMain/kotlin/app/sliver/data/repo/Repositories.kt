@@ -46,6 +46,11 @@ data class SaveSecondRequest(
     val isPhoto: Boolean = daySource == DaySource.PHOTO,
 )
 
+/** Best-effort place name for a media source that carries a location; null when absent or unresolvable. */
+fun interface PlaceResolver {
+    suspend fun resolve(source: String): String?
+}
+
 interface FilmRepository {
     fun observeAll(): Flow<List<Film>>
     fun observeFilm(id: String): Flow<Film?>
@@ -59,6 +64,7 @@ class DayRepositoryImpl(
     private val dao: DayDao,
     private val exporter: ClipExporter,
     private val files: FileStore,
+    private val places: PlaceResolver = PlaceResolver { null },
 ) : DayRepository {
     override suspend fun saveSecond(request: SaveSecondRequest): Day = with(request) {
         val stamp = takenAt.toEpochMilliseconds()
@@ -67,13 +73,14 @@ class DayRepositoryImpl(
         try {
             val clip = if (isPhoto) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
             else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
+            val place = places.resolve(source)
             val file = files.dayPath(date)
             val thumb = files.thumbPath(date)
             check(files.move(tmpVideo, file) && files.move(tmpThumb, thumb)) { "Could not move export into place" }
             val day = Day(
                 date = date, file = file, thumb = thumb, source = daySource, look = look, motion = motion,
                 keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY,
-                takenAt = takenAt, createdAt = Clock.System.now(),
+                takenAt = takenAt, createdAt = Clock.System.now(), place = place,
             )
             dao.upsert(day)
             day

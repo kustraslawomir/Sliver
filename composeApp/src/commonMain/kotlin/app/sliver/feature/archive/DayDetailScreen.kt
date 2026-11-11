@@ -176,6 +176,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 if (day != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                         Chip(day.look.preset.name.replace('_', ' ') + " v", selected = false, onClick = { openLooks(day) })
+                        day.place?.let { Chip(it, selected = false, onClick = {}) }
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
