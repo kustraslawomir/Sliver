@@ -15,7 +15,9 @@ import app.sliver.data.files.FileStore
 import app.sliver.feature.backfill.AndroidBackfillRunner
 import app.sliver.feature.backfill.BackfillRunner
 import app.sliver.feature.films.AndroidFilmRenderer
+import app.sliver.feature.films.AndroidFilmShare
 import app.sliver.feature.films.FilmRenderer
+import app.sliver.feature.films.FilmShare
 import app.sliver.feature.gallery.AndroidGalleryProvider
 import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.trim.AndroidTrimMedia
@@ -42,6 +44,7 @@ actual val platformModule: Module = module {
     single<TrimMedia> { AndroidTrimMedia() }
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
+    single<FilmShare> { AndroidFilmShare(get<Context>()) }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }
     single {
         PreferenceDataStoreFactory.create { get<Context>().filesDir.resolve("settings.preferences_pb") }

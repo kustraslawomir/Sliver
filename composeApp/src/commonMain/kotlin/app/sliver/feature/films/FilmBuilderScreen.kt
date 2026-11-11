@@ -63,7 +63,7 @@ private val RangeTypes = listOf(FilmRangeType.WEEK, FilmRangeType.MONTH, FilmRan
 private val Audios = listOf(FilmAudio.ORIGINAL, FilmAudio.MUSIC, FilmAudio.MIX)
 
 @Composable
-fun FilmBuilderScreen(onBack: () -> Unit) {
+fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
@@ -199,7 +199,7 @@ fun FilmBuilderScreen(onBack: () -> Unit) {
                     val film = options.copy(dateOn = dateOn).toFilm(id, filmName(options, range), format, today)
                     films.save(film)
                     koin.get<FilmRenderer>().start(id)
-                    onBack()
+                    onSaved(id)
                 }
             },
             Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),

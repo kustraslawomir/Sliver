@@ -13,6 +13,7 @@ import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.text.SpannableString
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
@@ -191,7 +192,7 @@ class FilmComposer(
 
     private fun compose(film: Film, clips: List<Clip>, card: File, outW: Int, outH: Int): Composition {
         val outAspect = outW.toFloat() / outH
-        val audio = audioPlan(film.audio, film.track)
+        val audio = audioPlan(film.audio, film.track?.takeIf { trackAvailable(it) })
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
         val filmLook = film.look?.let { LookEffects.build(context, it.toParams(), forExport = true) }.orEmpty()
 
@@ -271,6 +272,15 @@ class FilmComposer(
         val builder = Composition.Builder(sequences)
         if (blur) builder.setVideoCompositorSettings(fitCompositor(clips, outW, outH))
         return builder.build()
+    }
+
+    /** A built-in track whose asset is missing is skipped (the film keeps its original sound) instead of failing the render. */
+    private fun trackAvailable(ref: String): Boolean {
+        if (!ref.startsWith(ASSET_PREFIX)) return true
+        val path = ref.removePrefix(ASSET_PREFIX)
+        val present = runCatching { context.assets.open(path).close() }.isSuccess
+        if (!present) Log.w("FilmComposer", "Music asset $path missing, rendering without music")
+        return present
     }
 
     /** Keeps each day's video letterboxed over the blurred background; the day under [presentationTimeUs] sets the scale. */

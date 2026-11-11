@@ -22,7 +22,7 @@
 - [x] T23 (built-in music assets missing, see HANDOFF)
 - [x] T14
 - [x] T24 (not device-tested, see HANDOFF)
-- [ ] T25
+- [x] T25 (not device-tested, see HANDOFF)
 - [ ] T26
 - [ ] T27
 - [ ] T28

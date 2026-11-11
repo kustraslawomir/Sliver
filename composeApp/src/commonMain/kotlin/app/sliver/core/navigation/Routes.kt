@@ -12,6 +12,7 @@ enum class Route(val path: String, val title: String, val tabBar: Boolean = fals
     FillThePast("fill-the-past", "Fill the past"),
     Films("films", "Films", tabBar = true),
     FilmBuilder("film-builder", "Film builder"),
+    Export("export", "Export"),
     FilmPlayer("film-player", "Film player"),
     Premiere("premiere", "Premiere"),
     YearInSeconds("year-in-seconds", "Year in Seconds"),

@@ -75,7 +75,10 @@ fun FilmsScreen(onNavigate: (Route) -> Unit) {
             list.chunked(2).forEach { row ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     row.forEach { film ->
-                        Poster(film, film.plan(all), Modifier.weight(1f)) { onNavigate(Route.FilmPlayer) }
+                        Poster(film, film.plan(all), Modifier.weight(1f)) {
+                            FilmNav.id = film.id
+                            onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
+                        }
                     }
                     if (row.size == 1) Box(Modifier.weight(1f))
                 }

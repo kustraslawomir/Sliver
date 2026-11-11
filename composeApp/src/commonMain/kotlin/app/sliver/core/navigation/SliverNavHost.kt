@@ -28,7 +28,11 @@ import app.sliver.feature.archive.ArchiveScreen
 import app.sliver.feature.archive.DayDetailScreen
 import app.sliver.feature.backfill.BackfillScreen
 import app.sliver.feature.camera.CameraScreen
+import app.sliver.feature.films.ExportScreen
 import app.sliver.feature.films.FilmBuilderScreen
+import app.sliver.feature.films.FilmNav
+import app.sliver.feature.films.FilmPlayerScreen
+import app.sliver.feature.films.PremiereScreen
 import app.sliver.feature.films.FilmsScreen
 import app.sliver.feature.gallery.GalleryScreen
 import app.sliver.feature.looks.LooksScreen
@@ -71,7 +75,24 @@ fun SliverNavHost() {
                         Route.DayDetail -> DayDetailScreen(::go, onBack = { nav.popBackStack() })
                         Route.FillThePast -> BackfillScreen(onBack = { nav.popBackStack() })
                         Route.Films -> FilmsScreen(::go)
-                        Route.FilmBuilder -> FilmBuilderScreen(onBack = { nav.popBackStack() })
+                        Route.FilmBuilder -> FilmBuilderScreen(
+                            onBack = { nav.popBackStack() },
+                            onSaved = { id ->
+                                FilmNav.id = id
+                                nav.navigate(Route.Export.path) { popUpTo(Route.FilmBuilder.path) { inclusive = true } }
+                            },
+                        )
+                        Route.Export -> ExportScreen(
+                            onDone = { nav.navigate(Route.Premiere.path) { popUpTo(Route.Export.path) { inclusive = true } } },
+                            onBack = { nav.popBackStack() },
+                        )
+                        Route.Premiere -> PremiereScreen(
+                            onDone = { nav.navigate(Route.FilmPlayer.path) { popUpTo(Route.Premiere.path) { inclusive = true } } },
+                        )
+                        Route.FilmPlayer -> FilmPlayerScreen(
+                            onBack = { nav.popBackStack() },
+                            onEdit = { go(Route.FilmBuilder) },
+                        )
                         else -> PlaceholderScreen(route, ::go)
                     }
                 }

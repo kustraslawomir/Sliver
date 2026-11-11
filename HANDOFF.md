@@ -24,3 +24,8 @@
 - DECISION: no chunked resume; a failed render leaves the film unrendered and the poster shows "Try again" (restarts from scratch).
 - DECISION: the film one-look is applied on top of each day baked look. Mismatch.BLUR uses a second blurred sequence plus a per-time compositor scale.
 - Music without a track falls back to ORIGINAL; built-in tracks still missing (see T23), so MUSIC/MIX with built-ins fails until assets exist.
+
+## T25
+- Not device-tested: share to YouTube, Save to Photos, fullscreen landscape.
+- Edit film opens the builder for a new film (editing an existing film is not supported yet).
+- Missing built-in music asset (assets/music/<id>.aac) is logged and skipped at render; film keeps original sound.
