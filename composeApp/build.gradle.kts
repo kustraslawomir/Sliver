@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -7,6 +9,10 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.kotlinSerialization)
 }
+
+val googleWebClientId: String = rootProject.file("local.properties").takeIf { it.exists() }
+    ?.let { f -> Properties().apply { f.inputStream().use { load(it) } }.getProperty("GOOGLE_WEB_CLIENT_ID") }
+    .orEmpty().trim()
 
 room { schemaDirectory("$projectDir/schemas") }
 
@@ -44,6 +50,10 @@ kotlin {
             implementation(libs.androidx.media3.exoplayer)
             implementation(libs.androidx.media3.ui)
             implementation(libs.androidx.work.runtime)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play)
+            implementation(libs.googleid)
+            implementation(libs.play.services.auth)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -70,7 +80,9 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
+    buildFeatures.buildConfig = true
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

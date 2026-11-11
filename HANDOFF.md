@@ -39,3 +39,14 @@
 
 ## T32
 TalkBack/font-scale pass not device-tested. Added icon button descriptions, calendar cell labels, trim strip adjustable (+-0.1 s).
+
+## T33 Google sign-in
+- Not device-tested with a real account. With `GOOGLE_WEB_CLIENT_ID` empty the app binds `FakeGoogleAuth` (sign-in simulated, email guest@example.com); onboarding Google step and Settings -> Account/Backup are live in that mode. Route.Backup is a minimal account screen (sign in/out); Drive backup UI comes later.
+- Delete account (Drive folder / local seconds checkboxes) is not built; `AccountManager.revoke()` exists.
+
+### Needs from you: Google sign-in
+1. Google Cloud Console: create/select a project, enable the Google Drive API.
+2. OAuth consent screen: External, add scope `.../auth/drive.file`, add yourself as a test user.
+3. Credentials -> Create OAuth client ID -> Android: package `app.sliver`, SHA-1 of your debug keystore (`keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`). Repeat for the release keystore.
+4. Credentials -> Create OAuth client ID -> Web application (no redirect needed). Copy its client ID.
+5. Add `GOOGLE_WEB_CLIENT_ID=<web client id>` to `local.properties` (and `.env.local`), rebuild. The app then uses the real Credential Manager + AuthorizationClient.

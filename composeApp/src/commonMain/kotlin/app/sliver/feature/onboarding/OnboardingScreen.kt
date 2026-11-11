@@ -41,6 +41,7 @@ import app.sliver.data.FilmFormat
 import app.sliver.data.settings.AppSettings
 import app.sliver.data.settings.ReminderMode
 import app.sliver.data.settings.SettingsRepository
+import app.sliver.feature.backup.GoogleSignInPanel
 import app.sliver.feature.notifications.FixedTimes
 import app.sliver.feature.notifications.NotifKind
 import app.sliver.feature.notifications.NotifPreview
@@ -115,10 +116,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     },
                     onSkip = { update { it.copy(reminder = it.reminder.copy(mode = ReminderMode.OFF)) }; next() },
                 )
-                OnboardingStep.Google -> Pitch("Save your seconds", "Back up to your own Google Drive, or stay a guest.") {
-                    PrimaryButton("Continue with Google", ::next, Modifier.fillMaxWidth())
-                    GhostButton("Skip — start as guest", onClick = ::next)
-                }
+                OnboardingStep.Google -> GoogleSignInPanel("Skip — start as guest", onFinished = ::next)
             }
         }
     }

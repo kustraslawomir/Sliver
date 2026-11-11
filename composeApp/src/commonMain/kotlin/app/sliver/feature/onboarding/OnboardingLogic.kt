@@ -2,8 +2,8 @@ package app.sliver.feature.onboarding
 
 enum class OnboardingStep { Concept, AutoPick, Format, CameraMic, Photos, Reminder, Google }
 
-/** Google step stays hidden until Drive sign-in (T33) exists. */
-const val GOOGLE_AVAILABLE = false
+/** GoogleAuth is always bound (real when configured, otherwise a local fake), so the step is shown. */
+const val GOOGLE_AVAILABLE = true
 
 object OnboardingFlow {
     fun steps(googleAvailable: Boolean = GOOGLE_AVAILABLE): List<OnboardingStep> =

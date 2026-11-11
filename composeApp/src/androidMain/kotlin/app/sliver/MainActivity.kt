@@ -7,6 +7,8 @@ import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.EXTRA_DEEPLINK
 import app.sliver.feature.notifications.parseDeepLink
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import app.sliver.data.auth.AuthHost
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,7 +21,19 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         handleDeepLink(intent)
+        val consent = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { AuthHost.onResult(it.data) }
+        AuthHost.launcher = { consent.launch(it) }
         setContent { App() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AuthHost.activity = this
+    }
+
+    override fun onPause() {
+        if (AuthHost.activity === this) AuthHost.activity = null
+        super.onPause()
     }
 
     override fun onNewIntent(intent: Intent) {

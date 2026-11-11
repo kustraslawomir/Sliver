@@ -1,5 +1,6 @@
 package app.sliver.di
 
+import app.sliver.data.auth.AccountManager
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.DayRepositoryImpl
@@ -23,6 +24,7 @@ val commonModule: Module = module {
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
+    single { AccountManager(get(), get()) }
     single { ReminderCoordinator(get(), get(), get()) }
 }
 

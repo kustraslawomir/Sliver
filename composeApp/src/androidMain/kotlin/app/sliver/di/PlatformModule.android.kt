@@ -3,6 +3,11 @@ package app.sliver.di
 import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
+import app.sliver.BuildConfig
+import app.sliver.data.auth.AndroidGoogleAuth
+import app.sliver.data.auth.FakeGoogleAuth
+import app.sliver.data.auth.GoogleAuth
+import app.sliver.data.auth.googleConfigured
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.AndroidClipExporter
 import app.sliver.data.export.AndroidDayShare
@@ -47,6 +52,9 @@ actual val platformModule: Module = module {
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
     single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }
+    single<GoogleAuth> {
+        if (googleConfigured) AndroidGoogleAuth(get<Context>(), BuildConfig.GOOGLE_WEB_CLIENT_ID) else FakeGoogleAuth()
+    }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }
     single {

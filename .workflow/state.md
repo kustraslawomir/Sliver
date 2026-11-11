@@ -30,7 +30,7 @@
 - [x] T30 (splash overlay + v31 splash theme, not device-tested)
 - [x] T31 (RemoteViews widget, not device-tested, see HANDOFF)
 - [x] T32 (semantics added; manual TalkBack pass not done, see HANDOFF)
-- [ ] T33
+- [x] T33 (fake auth unless GOOGLE_WEB_CLIENT_ID set, see HANDOFF)
 - [ ] T34
 - [ ] T35
 - [ ] T36
