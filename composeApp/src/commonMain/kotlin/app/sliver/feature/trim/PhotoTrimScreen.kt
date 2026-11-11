@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +38,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
-import app.sliver.core.ui.BackHandler
+import app.sliver.core.ui.PredictiveBackHandler
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -127,7 +128,8 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         if (inApp) discardOpen = true else navigator.back()
     }
 
-    BackHandler(onBack = ::close)
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = { backProgress = it }, onBack = { backProgress = 0f; close() })
 
     fun useSecond() {
         if (saving) return
@@ -148,7 +150,10 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         }
     }
 
-    Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
+    Box(
+        Modifier.fillMaxSize().graphicsLayer { (1f - 0.08f * backProgress).let { scaleX = it; scaleY = it } }
+            .background(SliverColors.BgVoid),
+    ) {
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),

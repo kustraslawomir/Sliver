@@ -28,7 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,6 +57,9 @@ fun SliverBottomSheet(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    var back by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(visible) { if (visible) back = 0f }
+    PredictiveBackHandler(visible, { back = it }, onDismiss)
     Box(modifier.fillMaxSize()) {
         AnimatedVisibility(visible, enter = fadeIn(SliverMotion.standard(SliverMotion.Slow)), exit = fadeOut(SliverMotion.exit(SliverMotion.Base))) {
             Box(
@@ -69,6 +75,13 @@ fun SliverBottomSheet(
         ) {
             Column(
                 Modifier.widthIn(max = MaxContentWidth).fillMaxWidth()
+                    .graphicsLayer {
+                        val scale = 1f - 0.1f * back
+                        scaleX = scale
+                        scaleY = scale
+                        translationY = back * 24.dp.toPx()
+                        transformOrigin = TransformOrigin(0.5f, 1f)
+                    }
                     .then(SliverGlow.sheet(SliverShapes.SheetTop))
                     .clip(SliverShapes.SheetTop)
                     .background(SliverColors.Surface2)

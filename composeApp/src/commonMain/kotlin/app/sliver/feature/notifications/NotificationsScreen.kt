@@ -71,7 +71,7 @@ fun NotificationsScreen(onBack: () -> Unit) {
     }
 
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding()
+        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()
             .verticalScroll(rememberScrollState()).navigationBarsPadding()
             .padding(horizontal = SliverSpace.Gutter).padding(bottom = SliverSpace.S8),
     ) {

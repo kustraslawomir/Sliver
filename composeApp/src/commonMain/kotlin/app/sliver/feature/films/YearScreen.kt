@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -58,7 +59,7 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     ).also { films.save(it) }
 
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgVoid).statusBarsPadding().verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().background(SliverColors.BgVoid).statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
             .padding(bottom = SliverSpace.S8),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {

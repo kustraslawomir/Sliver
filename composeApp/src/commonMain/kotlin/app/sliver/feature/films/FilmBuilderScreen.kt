@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -110,7 +111,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val pickAudio = rememberAudioPicker { options = options.copy(audio = options.audio.takeIf { it != FilmAudio.ORIGINAL } ?: FilmAudio.MUSIC, track = it) }
 
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding()
+        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()
             .verticalScroll(rememberScrollState()).padding(bottom = SliverSpace.S8),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
