@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -136,7 +137,7 @@ class UndoToastState {
 fun rememberUndoToastState() = remember { UndoToastState() }
 
 @Composable
-fun UndoToastHost(state: UndoToastState, modifier: Modifier = Modifier, durationMs: Long = 4000) {
+fun UndoToastHost(state: UndoToastState, modifier: Modifier = Modifier, durationMs: Long = 6000) {
     val msg = state.current
     LaunchedEffect(msg) {
         if (msg != null) {
@@ -148,7 +149,7 @@ fun UndoToastHost(state: UndoToastState, modifier: Modifier = Modifier, duration
         AnimatedVisibility(msg != null, enter = fadeIn(SliverMotion.standard()), exit = fadeOut(SliverMotion.exit())) {
             val shown = msg ?: return@AnimatedVisibility
             Row(
-                Modifier.fillMaxWidth().height(56.dp)
+                Modifier.fillMaxWidth().heightIn(min = 56.dp)
                     .then(SliverGlow.sheet(SliverShapes.Pill))
                     .clip(SliverShapes.Pill)
                     .background(SliverColors.Surface2)
@@ -156,7 +157,7 @@ fun UndoToastHost(state: UndoToastState, modifier: Modifier = Modifier, duration
                     .padding(horizontal = SliverSpace.S5),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SliverText(shown.text, SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextPrimary, maxLines = 1)
+                SliverText(shown.text, SliverType.BodySmall, Modifier.weight(1f).padding(vertical = SliverSpace.S2), SliverColors.TextPrimary, maxLines = 3)
                 if (shown.onView != null) {
                     SliverText(
                         "View", SliverType.Headline,

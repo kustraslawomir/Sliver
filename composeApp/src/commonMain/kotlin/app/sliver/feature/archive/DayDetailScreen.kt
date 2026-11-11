@@ -75,7 +75,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val first = app?.firstDay ?: filled.minOrNull() ?: current
 
     var muted by remember { mutableStateOf(false) }
-    var confirm by remember { mutableStateOf(false) }
     var shareOpen by remember { mutableStateOf(false) }
     var sharing by remember { mutableStateOf(false) }
     var shDate by remember(app?.dateStamp) { mutableStateOf(app?.dateStamp ?: true) }
@@ -116,7 +115,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 
     fun remove(d: app.sliver.data.db.Day) {
-        confirm = false
         val next = nextDay(d.date, filled) ?: prevDay(d.date, filled)
         scope.launch {
             undo.remove(d, dayLabel(d.date, today))
@@ -186,7 +184,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     SecondaryButton("Share", { shareOpen = true }, Modifier.weight(1f), enabled = day != null)
                     SecondaryButton("Replace clip", { replace(current) }, Modifier.weight(1f))
-                    GhostButton("Remove", { confirm = true }, Modifier.weight(1f), destructive = true, enabled = day != null)
+                    GhostButton("Remove", { day?.let(::remove) }, Modifier.weight(1f), destructive = true, enabled = day != null)
                 }
             }
         }
@@ -214,15 +212,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     Modifier.fillMaxWidth(),
                     enabled = !sharing,
                 )
-            }
-        }
-
-        SliverBottomSheet(confirm, onDismiss = { confirm = false }) {
-            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                SliverText("Remove this clip?", SliverType.DisplayM)
-                SliverText("${dayLabel(current, today)} will be empty. You can undo for a few seconds.", SliverType.BodySmall)
-                PrimaryButton("Remove", { day?.let(::remove) }, Modifier.fillMaxWidth())
-                GhostButton("Keep it", { confirm = false }, Modifier.fillMaxWidth())
             }
         }
     }
