@@ -225,7 +225,7 @@ private fun NewProject(
 }
 
 @Composable
-private fun FormatCards(selected: FilmFormat, onPick: (FilmFormat) -> Unit) {
+fun FormatCards(selected: FilmFormat, onPick: (FilmFormat) -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
         FilmFormat.entries.forEach { f ->
             val on = f == selected

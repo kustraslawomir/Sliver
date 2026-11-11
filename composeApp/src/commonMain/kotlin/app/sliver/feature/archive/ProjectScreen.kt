@@ -43,6 +43,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.sliver.core.navigation.Route
+import app.sliver.core.permissions.PermissionKind
+import app.sliver.core.permissions.PermissionStatus
+import app.sliver.core.permissions.rememberPermissionController
+import app.sliver.data.settings.ReminderMode
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -93,6 +99,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val fresh = seen?.let { byDate.keys - it } ?: emptySet()
     val memory = remember(byDate, today) { pickMemory(today, byDate.keys) }
 
+    val controller = rememberPermissionController()
+    val scope = rememberCoroutineScope()
     var yearView by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(today.toYearMonth()) }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
@@ -159,6 +167,15 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 ) { CaptureSession.forDate = null; onNavigate(Route.Camera) }
             }
 
+            if (all.size >= REMINDER_CARD_CLIPS && app?.reminder?.mode != ReminderMode.OFF &&
+                controller.status(PermissionKind.Notifications) == PermissionStatus.NotAsked
+            ) {
+                ReminderCard(
+                    onSet = { controller.request(PermissionKind.Notifications) },
+                    onDismiss = { scope.launch { settings.update { it.copy(reminder = it.reminder.copy(mode = ReminderMode.OFF)) } } },
+                )
+            }
+
             memory?.let { m ->
                 byDate[m.date]?.let { MemoryCard(it, m.kind, today) { openDay(m.date) } }
             }
@@ -195,6 +212,22 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 SecondaryButton("Photo", { fromGallery(date) }, Modifier.fillMaxWidth())
                 GhostButton("Leave it open", { addFor = null }, Modifier.fillMaxWidth())
             }
+        }
+    }
+}
+
+private const val REMINDER_CARD_CLIPS = 3
+
+@Composable
+private fun ReminderCard(onSet: () -> Unit, onDismiss: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(SliverShapes.M).background(SliverColors.Surface1).padding(SliverSpace.S4),
+        verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+    ) {
+        SliverText("Want a daily nudge?", SliverType.Headline)
+        Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+            SecondaryButton("Set reminder", onSet, Modifier.weight(1f))
+            GhostButton("No thanks", onDismiss)
         }
     }
 }

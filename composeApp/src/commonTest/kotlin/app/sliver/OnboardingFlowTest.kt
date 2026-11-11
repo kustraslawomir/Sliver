@@ -9,19 +9,12 @@ import kotlin.test.assertTrue
 
 class OnboardingFlowTest {
     @Test
-    fun googleStepHiddenUnlessAvailable() {
-        assertEquals(6, OnboardingFlow.steps(false).size)
-        assertEquals(OnboardingStep.Google, OnboardingFlow.steps(true).last())
+    fun threeScreens() {
+        assertEquals(listOf(OnboardingStep.Welcome, OnboardingStep.Project, OnboardingStep.Camera), OnboardingFlow.steps())
     }
 
     @Test
-    fun skipOnlyOnFirstThreeSteps() {
-        assertTrue(OnboardingFlow.canSkip(OnboardingStep.Format))
-        assertFalse(OnboardingFlow.canSkip(OnboardingStep.CameraMic))
-    }
-
-    @Test
-    fun backNotOnFirstStep() {
+    fun backIsHiddenOnFirstStep() {
         assertFalse(OnboardingFlow.canGoBack(0))
         assertTrue(OnboardingFlow.canGoBack(1))
     }

@@ -1,17 +1,9 @@
 package app.sliver.feature.onboarding
 
-enum class OnboardingStep { Concept, AutoPick, Format, CameraMic, Photos, Reminder, Google }
-
-/** GoogleAuth is always bound (real when configured, otherwise a local fake), so the step is shown. */
-const val GOOGLE_AVAILABLE = true
+enum class OnboardingStep { Welcome, Project, Camera }
 
 object OnboardingFlow {
-    fun steps(googleAvailable: Boolean = GOOGLE_AVAILABLE): List<OnboardingStep> =
-        OnboardingStep.entries.filter { it != OnboardingStep.Google || googleAvailable }
-
-    fun canSkip(step: OnboardingStep) = step.ordinal <= OnboardingStep.Format.ordinal
+    fun steps(): List<OnboardingStep> = OnboardingStep.entries.toList()
 
     fun canGoBack(index: Int) = index > 0
-
-    fun isLast(index: Int, steps: List<OnboardingStep>) = index == steps.lastIndex
 }
