@@ -54,7 +54,7 @@ fun ComponentGallery() {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S5),
         ) {
             SliverText("Gallery", SliverType.DisplayL)
-            SliverText("Display M serif", SliverType.DisplayM)
+            SliverText("Display M", SliverType.DisplayM)
             SliverText("12:04.5 mono", SliverType.MonoL)
             Badge("badge")
             PrimaryButton("Primary", {})

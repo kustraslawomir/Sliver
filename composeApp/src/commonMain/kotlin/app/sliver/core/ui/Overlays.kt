@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverColors
+import app.sliver.core.designsystem.Glow
+import app.sliver.core.designsystem.glow
 import app.sliver.core.theme.SliverGlow
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverShapes
@@ -191,7 +193,7 @@ fun SliverFrame(state: SliverFrameState, modifier: Modifier = Modifier) {
     val color = if (state == SliverFrameState.Dragging) SliverColors.AccentCore else SliverColors.Accent
     Box(
         modifier.scale(scale)
-            .then(SliverGlow.medium(SliverShapes.S))
+            .glow(SliverShapes.S, *Glow.frame, stroke = borderWidth.dp)
             .border(borderWidth.dp, color, SliverShapes.S),
     )
 }

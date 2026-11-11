@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.designsystem.Glow
+import app.sliver.core.designsystem.glow
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -36,14 +38,15 @@ fun SlitLoader(modifier: Modifier = Modifier, width: Dp = 120.dp) {
         v
     }
     val start = if (reduced) (1f - SEGMENT) / 2f else -SEGMENT + t * (1f + SEGMENT)
-    Box(modifier.width(width).height(2.dp).clip(SliverShapes.Pill).background(SliverColors.LineHairline)) {
+    Box(modifier.width(width).height(2.dp).background(SliverColors.LineHairline, SliverShapes.Pill)) {
         Box(
             Modifier.fillMaxHeight().fillMaxWidth(SEGMENT)
                 .layout { m, c ->
                     val p = m.measure(c)
                     layout(p.width, p.height) { p.place((start * c.maxWidth / SEGMENT).toInt(), 0) }
                 }
-                .background(SliverColors.Accent),
+                .glow(SliverShapes.Pill, *Glow.slit)
+                .background(SliverColors.Accent, SliverShapes.Pill),
         )
     }
 }

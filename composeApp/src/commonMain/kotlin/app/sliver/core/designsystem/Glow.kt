@@ -1,0 +1,33 @@
+package app.sliver.core.designsystem
+
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.sliver.core.theme.SliverColors
+
+data class GlowLayer(val color: Color, val blur: Dp, val dy: Dp = 0.dp)
+
+/**
+ * Soft light behind the element, like CSS box-shadow without spread.
+ * CSS "0 0 14px #FF8A3D88" is GlowLayer(Ember.copy(alpha = 0x88 / 255f), 14.dp).
+ * Pass the shape the element is clipped to; [stroke] for outline-only elements.
+ */
+expect fun Modifier.glow(shape: Shape, vararg layers: GlowLayer, stroke: Dp? = null): Modifier
+
+private fun ember(alpha: Int) = SliverColors.Accent.copy(alpha = alpha / 255f)
+
+/** Tokens from design/tokens.json "glow". */
+object Glow {
+    val cta = arrayOf(GlowLayer(ember(0x44), 32.dp, dy = 8.dp))
+    val record = arrayOf(GlowLayer(ember(0x88), 14.dp), GlowLayer(ember(0x33), 32.dp))
+    val recordBreath = arrayOf(GlowLayer(ember(0xAA), 20.dp), GlowLayer(ember(0x44), 44.dp))
+    val photoRecord = arrayOf(GlowLayer(Color.White.copy(alpha = 0x33 / 255f), 16.dp))
+    val frame = arrayOf(GlowLayer(ember(0x99), 14.dp), GlowLayer(ember(0x55), 36.dp))
+    val slit = arrayOf(GlowLayer(ember(0xFF), 12.dp), GlowLayer(ember(0x88), 32.dp))
+    val slitHero = arrayOf(*slit, GlowLayer(ember(0x88), 110.dp))
+    val dot = arrayOf(GlowLayer(ember(0xFF), 8.dp))
+    val lock = arrayOf(GlowLayer(ember(0x99), 10.dp))
+    val stampShadowAlpha = 0x99 / 255f
+}

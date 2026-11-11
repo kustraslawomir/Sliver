@@ -22,7 +22,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.sliver.core.theme.SliverColors
-import app.sliver.core.theme.SliverGlow
+import app.sliver.core.designsystem.Glow
+import app.sliver.core.designsystem.glow
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
@@ -36,7 +37,7 @@ private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) = composed {
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Box(
         modifier.fillMaxWidth().heightIn(min = 56.dp)
-            .then(if (enabled) SliverGlow.cta(SliverShapes.Pill) else Modifier)
+            .then(if (enabled) Modifier.glow(SliverShapes.Pill, *Glow.cta) else Modifier)
             .clip(SliverShapes.Pill)
             .background(if (enabled) SliverColors.Accent else SliverColors.Surface3)
             .press(enabled, onClick),

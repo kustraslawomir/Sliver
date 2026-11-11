@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.designsystem.Glow
+import app.sliver.core.designsystem.glow
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -70,11 +72,6 @@ fun SplashOverlay(onFinished: () -> Unit) {
     }
     Box(Modifier.fillMaxSize().alpha(fade.value).background(SliverColors.BgVoid), contentAlignment = Alignment.Center) {
         val p = progress.value
-        Box(Modifier.width(2.dp).height((220 * p).dp).clip(SliverShapes.Pill).background(SliverColors.Accent))
-        SliverText(
-            "SLIVER", SliverType.MonoL,
-            Modifier.alpha(((p - 0.5f) * 2f).coerceIn(0f, 1f)).padding(top = 280.dp),
-            SliverColors.TextPrimary,
-        )
+        Box(Modifier.width(2.dp).height((220 * p).dp).glow(SliverShapes.Pill, *Glow.slitHero).background(SliverColors.Accent, SliverShapes.Pill))
     }
 }

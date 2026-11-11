@@ -1,5 +1,8 @@
 package app.sliver.feature.archive
 
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
+import app.sliver.core.designsystem.Glow
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
@@ -130,7 +133,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             if (app?.dateStamp == true) {
                 SliverText(
                     "${current.day.toString().padStart(2, '0')}.${current.month.ordinal.plus(1).toString().padStart(2, '0')}.${current.year}",
-                    SliverType.MonoS,
+                    SliverType.MonoS.copy(shadow = Shadow(SliverColors.Accent.copy(alpha = Glow.stampShadowAlpha), blurRadius = 6f * LocalDensity.current.density)),
                     Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = SliverSpace.Gutter),
                     SliverColors.AccentCore,
                 )
