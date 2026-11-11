@@ -1,5 +1,6 @@
 package app.sliver.di
 
+import app.sliver.feature.notifications.ProgressCoordinator
 import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
@@ -65,6 +66,7 @@ actual val platformModule: Module = module {
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }
     single<TrimMedia> { AndroidTrimMedia() }
+    single { ProgressCoordinator(get<Context>(), get(), get(), get()) }
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
     single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }

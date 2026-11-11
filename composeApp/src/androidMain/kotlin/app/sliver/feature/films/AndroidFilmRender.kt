@@ -1,8 +1,5 @@
 package app.sliver.feature.films
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
@@ -64,7 +61,10 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.toParams
+import app.sliver.feature.notifications.DeepLinkTarget
+import app.sliver.feature.notifications.ProgressNotifier
 import app.sliver.feature.notifications.notifyFilmReady
+import app.sliver.feature.notifications.progressDue
 import com.google.common.collect.ImmutableList
 import java.io.File
 import java.io.FileOutputStream
@@ -117,17 +117,25 @@ class AndroidFilmRenderer(private val context: Context) : FilmRenderer {
 /** Foreground job: survives leaving the app. A failed render leaves the film untouched; Try again restarts it. */
 @androidx.annotation.OptIn(UnstableApi::class)
 class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    private var notifier: ProgressNotifier? = null
+    private var months = 1
+
     override suspend fun getForegroundInfo(): ForegroundInfo = foreground(0)
 
     override suspend fun doWork(): Result {
         val id = inputData.getString(KEY_FILM) ?: return Result.failure()
+        notifier = ProgressNotifier(applicationContext, NOTIFICATION_ID, DeepLinkTarget.Film(id), CHANNEL, "Film rendering")
         setForeground(foreground(0))
         val koin = KoinPlatform.getKoin()
+        months = runCatching {
+            val film = koin.get<FilmRepository>().getFilm(id)
+            film?.plan(koin.get<DayRepository>().observeAll().first())?.days?.map { it.date.year * 12 + it.date.monthNumber }?.distinct()?.size
+        }.getOrNull()?.coerceIn(1, 36) ?: 1
         val composer = FilmComposer(applicationContext, koin.get(), koin.get(), koin.get())
         return try {
             val ok = composer.render(id) { percent ->
                 setProgress(Data.Builder().putInt(KEY_PERCENT, percent).build())
-                setForeground(foreground(percent))
+                if (progressDue(lastForeground, System.currentTimeMillis())) setForeground(foreground(percent))
             }
             if (ok) {
                 announceReady(id)
@@ -150,17 +158,12 @@ class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWo
         notifyFilmReady(applicationContext, id, film.name, seconds)
     }
 
+    private var lastForeground: Long? = null
+
     private fun foreground(percent: Int): ForegroundInfo {
-        val nm = applicationContext.getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, "Film rendering", NotificationManager.IMPORTANCE_LOW))
-        val notification = Notification.Builder(applicationContext, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle("Rendering your film")
-            .setContentText("$percent%")
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setProgress(100, percent, false)
-            .build()
+        lastForeground = System.currentTimeMillis()
+        val n = notifier ?: ProgressNotifier(applicationContext, NOTIFICATION_ID, DeepLinkTarget.Camera, CHANNEL, "Film rendering")
+        val notification = n.build("Rendering your film", "$percent%", percent, 100, months)
         val type = if (Build.VERSION.SDK_INT >= 35) ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING
         else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         return ForegroundInfo(NOTIFICATION_ID, notification, type)

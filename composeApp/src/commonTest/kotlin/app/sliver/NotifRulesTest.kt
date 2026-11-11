@@ -74,7 +74,7 @@ class NotifRulesTest {
     }
 
     @Test fun deepLinksRoundTrip() {
-        listOf(DeepLinkTarget.Camera, DeepLinkTarget.Backup, DeepLinkTarget.Film("f1"), DeepLinkTarget.Day(monday)).forEach {
+        listOf(DeepLinkTarget.Camera, DeepLinkTarget.Backup, DeepLinkTarget.FillThePast, DeepLinkTarget.Film("f1"), DeepLinkTarget.Day(monday)).forEach {
             assertEquals(it, parseDeepLink(it.encode()))
         }
         assertNull(parseDeepLink("day:nope"))

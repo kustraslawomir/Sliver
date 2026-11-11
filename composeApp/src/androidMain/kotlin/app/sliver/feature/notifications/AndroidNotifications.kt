@@ -55,19 +55,21 @@ fun ensureChannels(context: Context) {
     )
 }
 
-private fun canNotify(context: Context) = Build.VERSION.SDK_INT < 33 ||
+fun canNotify(context: Context) = Build.VERSION.SDK_INT < 33 ||
     ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+
+fun openTargetIntent(context: Context, requestCode: Int, target: DeepLinkTarget): PendingIntent = PendingIntent.getActivity(
+    context, requestCode,
+    Intent(context, MainActivity::class.java)
+        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        .putExtra(EXTRA_DEEPLINK, target.encode()),
+    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+)
 
 private fun post(context: Context, id: Int, channel: String, copy: NotifCopy, target: DeepLinkTarget) {
     if (!canNotify(context)) return
     ensureChannels(context)
-    val open = PendingIntent.getActivity(
-        context, id,
-        Intent(context, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(EXTRA_DEEPLINK, target.encode()),
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-    )
+    val open = openTargetIntent(context, id, target)
     val n = NotificationCompat.Builder(context, channel)
         .setSmallIcon(android.R.drawable.ic_menu_camera)
         .setContentTitle(copy.title)

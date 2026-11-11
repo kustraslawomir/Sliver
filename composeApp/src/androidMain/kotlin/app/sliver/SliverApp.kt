@@ -5,6 +5,7 @@ import app.sliver.di.commonModule
 import app.sliver.di.platformModule
 import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.files.FileStore
+import app.sliver.feature.notifications.ProgressCoordinator
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.notifications.ensureChannels
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +34,8 @@ class SliverApp : Application(), KoinComponent {
         coordinator.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         val backup: BackupCoordinator by inject()
         backup.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        val progress: ProgressCoordinator by inject()
+        progress.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         val days: DayRepository by inject()
         val widgetScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         widgetScope.launch {

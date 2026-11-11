@@ -80,6 +80,7 @@ fun backupProblemCopy(error: app.sliver.data.backup.BackupError) =
 sealed interface DeepLinkTarget {
     data object Camera : DeepLinkTarget
     data object Backup : DeepLinkTarget
+    data object FillThePast : DeepLinkTarget
     data class Film(val id: String) : DeepLinkTarget
     data class Day(val date: LocalDate) : DeepLinkTarget
 }
@@ -87,6 +88,7 @@ sealed interface DeepLinkTarget {
 fun DeepLinkTarget.encode(): String = when (this) {
     DeepLinkTarget.Camera -> "camera"
     DeepLinkTarget.Backup -> "backup"
+    DeepLinkTarget.FillThePast -> "fill"
     is DeepLinkTarget.Film -> "film:$id"
     is DeepLinkTarget.Day -> "day:$date"
 }
@@ -95,6 +97,7 @@ fun parseDeepLink(raw: String?): DeepLinkTarget? = when {
     raw == null -> null
     raw == "camera" -> DeepLinkTarget.Camera
     raw == "backup" -> DeepLinkTarget.Backup
+    raw == "fill" -> DeepLinkTarget.FillThePast
     raw.startsWith("film:") -> DeepLinkTarget.Film(raw.removePrefix("film:"))
     raw.startsWith("day:") -> runCatching { LocalDate.parse(raw.removePrefix("day:")) }.getOrNull()?.let(DeepLinkTarget::Day)
     else -> null
