@@ -1,5 +1,6 @@
 package app.sliver.feature.backup
 
+import app.sliver.core.ui.SlitLoader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -97,6 +98,7 @@ fun RestoreScreen(onDone: () -> Unit) {
         when (stage) {
             RestoreStage.SCANNING -> {
                 SliverText("Welcome back", SliverType.DisplayM)
+                SlitLoader()
                 SliverText("Looking in your Drive.", SliverType.Body, color = SliverColors.TextSecondary)
             }
             RestoreStage.FOUND -> {

@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.ui.SlitLoader
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
@@ -523,6 +524,7 @@ internal fun dayLabel(date: LocalDate, today: LocalDate): String {
 @Composable
 private fun PrepareSkeleton(progress: Float, info: String, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        SlitLoader()
         SliverText("Preparing video… ${(progress * 100).roundToInt()}%", SliverType.Body, color = SliverColors.TextPrimary)
         if (info.isNotEmpty()) SliverText(info, SliverType.MonoS, color = SliverColors.TextTertiary)
     }

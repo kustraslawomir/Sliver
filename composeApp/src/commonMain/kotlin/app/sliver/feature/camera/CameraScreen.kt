@@ -1,5 +1,11 @@
 package app.sliver.feature.camera
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import app.sliver.core.theme.LocalReducedMotion
+import app.sliver.core.theme.SliverMotion
+import app.sliver.core.theme.motionSpec
+import app.sliver.core.ui.clipDropTarget
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
@@ -259,6 +265,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     val hasToday = todayDay != null
                     Chip(
                         if (hasToday) "TODAY \u2713" else "TODAY", selected = hasToday,
+                        modifier = Modifier.clipDropTarget(today),
                         onClick = {
                             if (hasToday) {
                                 ArchiveSession.selected = today
@@ -425,7 +432,12 @@ private fun RecordButton(
     onHoldStart: () -> Unit,
     onHoldEnd: () -> Unit,
 ) {
-    val ring = if (recording) SliverColors.Accent else SliverColors.TextPrimary
+    val reduced = LocalReducedMotion.current
+    val ring by animateColorAsState(
+        if (recording) SliverColors.Accent else SliverColors.TextPrimary, motionSpec(reduced, SliverMotion.standard(SliverMotion.Quick)), label = "ring",
+    )
+    val inner by animateDpAsState(if (recording) 28.dp else 62.dp, motionSpec(reduced, SliverMotion.springLockIn()), label = "record-size")
+    val corner by animateDpAsState(if (recording) 6.dp else 31.dp, motionSpec(reduced, SliverMotion.springLockIn()), label = "record-corner")
     val scale = if (holding) 1.2f else 1f
     Box(
         Modifier.size(80.dp).scale(scale)
@@ -452,11 +464,10 @@ private fun RecordButton(
             .border(3.dp, ring, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        if (recording) {
-            Box(Modifier.size(28.dp).clip(RoundedCornerShape(6.dp)).background(SliverColors.Accent))
-        } else {
-            Box(Modifier.size(62.dp).clip(CircleShape).background(if (photo) SliverColors.TextPrimary else SliverColors.Accent))
-        }
+        Box(
+            Modifier.size(inner).clip(RoundedCornerShape(corner.coerceAtLeast(0.dp)))
+                .background(if (photo && !recording) SliverColors.TextPrimary else SliverColors.Accent),
+        )
     }
 }
 

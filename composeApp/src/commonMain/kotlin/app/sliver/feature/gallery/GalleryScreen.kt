@@ -1,5 +1,6 @@
 package app.sliver.feature.gallery
 
+import app.sliver.core.ui.SlitLoader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -86,6 +87,7 @@ fun GalleryScreen(onNavigate: (Route) -> Unit) {
                 SliverType.Body, color = SliverColors.TextSecondary,
             )
             if (failed) SliverText("Could not read that file. Try another.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            if (busy) SlitLoader()
             PrimaryButton(if (busy) "Preparing..." else "Choose from gallery", { if (!busy) launchPicker() }, Modifier.fillMaxWidth())
         }
     }

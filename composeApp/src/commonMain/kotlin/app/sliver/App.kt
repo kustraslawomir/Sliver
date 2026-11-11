@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.SliverNavHost
 import app.sliver.core.theme.SliverTheme
+import app.sliver.core.theme.rememberReducedMotion
+import app.sliver.core.ui.ClipDropOverlay
 import app.sliver.core.ui.SplashOverlay
 import app.sliver.debug.ComponentGallery
 
@@ -16,12 +18,13 @@ const val SHOW_GALLERY = false
 
 @Composable
 fun App() {
-    SliverTheme {
+    SliverTheme(reducedMotion = rememberReducedMotion()) {
         if (SHOW_GALLERY) ComponentGallery()
         else {
             var splash by remember { mutableStateOf(true) }
             Box {
                 SliverNavHost()
+                ClipDropOverlay()
                 if (splash) SplashOverlay { splash = false }
             }
         }

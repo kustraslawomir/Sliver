@@ -1,5 +1,10 @@
 package app.sliver.feature.archive
 
+import androidx.compose.runtime.snapshotFlow
+import app.sliver.core.theme.SliverMotion
+import app.sliver.core.ui.ClipDrop
+import app.sliver.core.ui.clipDropTarget
+import kotlinx.coroutines.flow.first
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
@@ -306,8 +311,9 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean
     val scale = remember { Animatable(1f) }
     LaunchedEffect(isNew) {
         if (isNew) {
-            scale.snapTo(0.6f)
-            scale.animateTo(1f, tween(240))
+            scale.snapTo(0f)
+            snapshotFlow { ClipDrop.pending != date }.first { it }
+            scale.animateTo(1f, SliverMotion.springDrop())
         }
     }
     val state = cellState(date, today, day)
@@ -317,7 +323,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, day: Day?, isNew: Boolean
     )
     val ring = if (state == CellState.TODAY) base.border(2.dp, SliverColors.Accent, shape) else base
     Box(
-        ring.graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = scale.value }.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
+        ring.clipDropTarget(date).graphicsLayer { scaleX = scale.value; scaleY = scale.value; alpha = scale.value }.semantics(mergeDescendants = true) { contentDescription = cellDescription(date, day != null) }
             .then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)),
     ) {
         val thumb = if (day != null) rememberPhoto(day.thumb) else null

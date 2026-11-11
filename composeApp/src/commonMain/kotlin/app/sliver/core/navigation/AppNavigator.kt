@@ -1,5 +1,7 @@
 package app.sliver.core.navigation
 
+import app.sliver.core.time.todayLocal
+import app.sliver.core.ui.ClipDrop
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
@@ -55,6 +57,7 @@ class AppNavigator(private val nav: NavController) {
     fun finishFlow(date: LocalDate) {
         val stack = nav.currentBackStack.value.mapNotNull { route(it.destination.route) }
         val origin = stack.lastOrNull { it !in CaptureRoutes } ?: Route.Camera
+        if (origin == Route.Project || (origin == Route.Camera && date == todayLocal())) ClipDrop.pending = date
         runCatching { nav.getBackStackEntry(origin.path).savedStateHandle[SAVED_CLIP_KEY] = date.toString() }
         if (origin == Route.Camera) popToCamera() else nav.popBackStack(origin.path, inclusive = false)
     }
