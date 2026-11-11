@@ -171,3 +171,6 @@ Bigger, not fixed:
 
 ### 1. Auto-pick speed
 Clips over 10 s: coarse pass (2 fps, stretched so it never exceeds 150 frames), then a 10 fps refine of +-1 s around the winner; 8 s timeout falls back to the middle second (`SamplingPlan`, unit-tested). Measured on the Samsung (debug build, SliverDemo clips concatenated to 156 s): 156 s clip scored in 5.5 s (~30 ms/frame); a 10 s clip scored densely (100 frames) takes 3.9 s. Old behaviour on a 30 s clip was 300 frames (~9-11 s at that per-frame cost); now ~90 frames (~3 s).
+
+### 2. Save path
+Exporter: one `render()` (45 s timeout, trim, thumbnail, duration check <= 1080 ms, deletes partial video/.tmp/thumb on any failure, `.hold.jpg` always cleaned); `trimToSecond` throws and checks `renameTo`. Timeout/failure lands in the existing "Couldn't save. Try again" state. `SaveUndo.remove` always deletes the day row (restores files if the row delete throws), shows a notice sheet on failure; parked leftovers are reclaimed by the launch-time `cleanTmp`. `println` replaced by `logDebug` (now debug-build only). Not verified on device (needs the picker with real media); unit tests/lint green.

@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.log.logDebug
 import app.sliver.core.ui.SlitLoader
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -250,7 +251,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 done = true
                 navigator.finishFlow(day)
             } else {
-                result.exceptionOrNull()?.let { println("SliverSave failed: $it") }
+                result.exceptionOrNull()?.let { logDebug("TrimScreen", "save failed: $it") }
                 saveFailed = true
                 saving = false
             }

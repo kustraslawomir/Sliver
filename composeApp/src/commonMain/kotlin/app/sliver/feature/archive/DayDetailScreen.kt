@@ -36,6 +36,7 @@ import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.NoticeSheet
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
 import app.sliver.core.ui.SwitchRow
@@ -103,11 +104,12 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         if (d == today) onNavigate(Route.Camera) else addMedia(d)
     }
 
+    var notice by remember { mutableStateOf<String?>(null) }
+
     fun remove(d: app.sliver.data.db.Day) {
         val next = nextDay(d.date, filled) ?: prevDay(d.date, filled)
         scope.launch {
-            undo.remove(d)
-            show(next)
+            if (runCatching { undo.remove(d) }.isFailure) notice = "Couldn't remove this clip. Try again." else show(next)
         }
     }
 
@@ -174,6 +176,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             }
         }
 
+        NoticeSheet(notice) { notice = null }
         SliverBottomSheet(shareOpen, onDismiss = { if (!sharing) shareOpen = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 SliverText("Share this clip", SliverType.DisplayM)

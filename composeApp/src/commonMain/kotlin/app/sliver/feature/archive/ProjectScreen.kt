@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.customActions
 import app.sliver.feature.trim.SaveUndo
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.ui.ClipDrop
+import app.sliver.core.ui.NoticeSheet
 import kotlinx.coroutines.flow.first
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -115,6 +116,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val controller = rememberPermissionController()
     val scope = rememberCoroutineScope()
     val undo = remember { koin.get<SaveUndo>() }
+    var notice by remember { mutableStateOf<String?>(null) }
     var yearView by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(today.toYearMonth()) }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
@@ -152,7 +154,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     fun removeDay(date: LocalDate) {
         val d = byDate[date] ?: return
-        scope.launch { undo.remove(d) }
+        scope.launch { if (runCatching { undo.remove(d) }.isFailure) notice = "Couldn't remove this clip. Try again." }
     }
 
     fun fromGallery(date: LocalDate) {
@@ -240,6 +242,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
 
         ProjectsSheet(projectsOpen, { projectsOpen = false })
+        NoticeSheet(notice) { notice = null }
         SliverBottomSheet(menuOpen, onDismiss = { menuOpen = false }) {
             val tap = rememberTapGate { menuOpen = false; onNavigate(Route.FillThePast) }
             SliverText(

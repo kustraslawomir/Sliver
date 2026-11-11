@@ -37,7 +37,10 @@ import app.sliver.data.look.LookEffects
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+import app.sliver.core.log.logDebug
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
@@ -103,30 +106,21 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             items += clipItem(if (room) plan.endMs + padMs else plan.endMs)
         }
 
-        var holdFrame: File? = null
-        if (plan.holdMs > 0) {
-            holdFrame = File("$videoPath.hold.jpg")
-            withContext(Dispatchers.IO) { writeLastFrame(uri, info.durationMs, holdFrame) }
-            items += EditedMediaItem.Builder(
-                MediaItem.Builder().setUri(Uri.fromFile(holdFrame)).setImageDurationMs(plan.holdMs).build(),
-            ).setFrameRate(30).setEffects(Effects(emptyList(), videoEffects)).build()
-        }
-
-        val composition = Composition.Builder(
-            listOf(EditedMediaItemSequence.Builder(items).experimentalSetForceAudioTrack(true).build()),
-        ).build()
-
+        val holdFrame = if (plan.holdMs > 0) File("$videoPath.hold.jpg") else null
         try {
-            runTransformer(composition, videoPath)
+            if (holdFrame != null) {
+                withContext(Dispatchers.IO) { writeLastFrame(uri, info.durationMs, holdFrame) }
+                items += EditedMediaItem.Builder(
+                    MediaItem.Builder().setUri(Uri.fromFile(holdFrame)).setImageDurationMs(plan.holdMs).build(),
+                ).setFrameRate(30).setEffects(Effects(emptyList(), videoEffects)).build()
+            }
+            val composition = Composition.Builder(
+                listOf(EditedMediaItemSequence.Builder(items).experimentalSetForceAudioTrack(true).build()),
+            ).build()
+            return render(composition, videoPath, thumbPath)
         } finally {
             holdFrame?.delete()
         }
-        val (duration, color) = withContext(Dispatchers.IO) {
-            trimAudioToSecond(videoPath)
-            val color = writeThumbnail(videoPath, thumbPath)
-            probe(Uri.fromFile(File(videoPath))).durationMs to color
-        }
-        return ExportedClip(videoPath, thumbPath, duration, color)
     }
 
     override suspend fun photoToSecond(
@@ -158,17 +152,33 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         val composition = Composition.Builder(
             listOf(EditedMediaItemSequence.Builder(listOf(item)).experimentalSetForceAudioTrack(true).build()),
         ).build()
-        runTransformer(composition, videoPath)
-        val (duration, color) = withContext(Dispatchers.IO) {
-            trimAudioToSecond(videoPath)
-            val color = writeThumbnail(videoPath, thumbPath)
-            probe(Uri.fromFile(File(videoPath))).durationMs to color
+        return render(composition, videoPath, thumbPath)
+    }
+
+    /** Runs the export, trims to exactly 1 s, writes the thumbnail and checks the result; removes partial output on any failure. */
+    private suspend fun render(composition: Composition, videoPath: String, thumbPath: String): ExportedClip {
+        try {
+            withTimeout(EXPORT_TIMEOUT_MS) { runTransformer(composition, videoPath) }
+            return withContext(Dispatchers.IO) {
+                trimToSecond(videoPath)
+                val color = writeThumbnail(videoPath, thumbPath)
+                val duration = probe(Uri.fromFile(File(videoPath))).durationMs
+                check(duration in 1..SECOND_MS + MAX_OVERSHOOT_MS) { "Exported clip is ${duration}ms" }
+                ExportedClip(videoPath, thumbPath, duration, color)
+            }
+        } catch (e: Throwable) {
+            logDebug(TAG, "export failed: $e")
+            withContext(NonCancellable + Dispatchers.IO) {
+                File(videoPath).delete()
+                File("$videoPath.tmp").delete()
+                File(thumbPath).delete()
+            }
+            throw e
         }
-        return ExportedClip(videoPath, thumbPath, duration, color)
     }
 
     /** Cuts the file to exactly 1.000 s: drops AAC frames and video frames that start past the second. */
-    private fun trimAudioToSecond(path: String) {
+    private fun trimToSecond(path: String) {
         val tmp = File("$path.tmp")
         val extractor = MediaExtractor()
         val muxer = MediaMuxer(tmp.path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
@@ -215,10 +225,11 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             }
             muxer.stop()
             muxer.release()
-            tmp.renameTo(File(path))
+            check(tmp.renameTo(File(path))) { "Could not replace $path with the trimmed file" }
         } catch (e: Exception) {
             runCatching { muxer.release() }
             tmp.delete()
+            throw e
         } finally {
             extractor.release()
         }
@@ -302,7 +313,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             }
             if (isVariableFrameRate(times)) Log.w(TAG, "Variable frame rate source; normalised to ${TARGET_FPS.toInt()} fps on export")
         } catch (e: Exception) {
-            Log.d(TAG, "VFR check skipped: ${e.message}")
+            logDebug(TAG, "VFR check skipped: ${e.message}")
         } finally {
             extractor.release()
         }
@@ -315,6 +326,8 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         const val THUMB_WIDTH = 320
         const val TARGET_FPS = 30f
         const val EXTRA_MS = 100L
+        const val MAX_OVERSHOOT_MS = 80L
+        const val EXPORT_TIMEOUT_MS = 45_000L
         const val TAG = "ClipExport"
     }
 }

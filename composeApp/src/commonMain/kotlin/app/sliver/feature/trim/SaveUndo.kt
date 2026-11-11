@@ -61,12 +61,22 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
         return day
     }
 
-    /** Deletes the day; the files are removed once the (silent) window closes. */
+    /** Deletes the day row first, then its files; leftovers parked in tmp are reclaimed by the launch-time tmp cleanup. Throws if the row cannot be deleted. */
     suspend fun remove(day: Day) {
-        val backup = park(day, day.takenAt.toEpochMilliseconds() + 2) ?: return
-        days.delete(day.date)
-        files.delete(backup.video)
-        files.delete(backup.thumb)
+        val backup = park(day, day.takenAt.toEpochMilliseconds() + 2)
+        try {
+            days.delete(day.date)
+        } catch (e: Throwable) {
+            backup?.let { restore(day, it, save = false) }
+            throw e
+        }
+        if (backup != null) {
+            files.delete(backup.video)
+            files.delete(backup.thumb)
+        } else {
+            files.delete(day.file)
+            files.delete(day.thumb)
+        }
     }
 
     private fun park(day: Day, stamp: Long): Backup? {
@@ -75,9 +85,9 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
         return if (files.move(day.file, video) && files.move(day.thumb, thumb)) Backup(video, thumb) else null
     }
 
-    private suspend fun restore(day: Day, backup: Backup) {
+    private suspend fun restore(day: Day, backup: Backup, save: Boolean = true) {
         files.move(backup.video, day.file)
         files.move(backup.thumb, day.thumb)
-        days.save(day)
+        if (save) days.save(day)
     }
 }
