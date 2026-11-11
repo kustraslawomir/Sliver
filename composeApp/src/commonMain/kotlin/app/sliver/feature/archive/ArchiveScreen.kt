@@ -55,6 +55,9 @@ import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.data.DaySource
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
+import app.sliver.data.repo.ProjectRepository
+import app.sliver.feature.projects.ProjectsSheet
+import app.sliver.core.ui.rememberTapGate
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.trim.dayLabel
@@ -84,6 +87,8 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
     var yearView by remember { mutableStateOf(false) }
     var shown by remember { mutableStateOf(today.toYearMonth()) }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
+    var projectsOpen by remember { mutableStateOf(false) }
 
     fun openDay(date: LocalDate) {
         ArchiveSession.selected = date
@@ -116,10 +121,15 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                SliverText(
-                    secondsHeader(all.size, first), SliverType.MonoS, Modifier.weight(1f),
-                    SliverColors.TextSecondary,
-                )
+                Column(
+                    Modifier.weight(1f).clip(SliverShapes.S).clickable(onClick = rememberTapGate { projectsOpen = true }),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SliverText(project?.name ?: "", SliverType.DisplayM, Modifier.weight(1f, fill = false), maxLines = 1)
+                        SliverIcon(SliverIcons.ChevronDown, SliverColors.TextSecondary)
+                    }
+                    SliverText(secondsHeader(all.size, first), SliverType.MonoS, color = SliverColors.TextSecondary)
+                }
                 IconButton44({ onNavigate(Route.Settings) }, "Settings") {
                     SliverIcon(SliverIcons.Settings, SliverColors.TextPrimary)
                 }
@@ -154,6 +164,7 @@ fun ArchiveScreen(onNavigate: (Route) -> Unit) {
             }
         }
 
+        ProjectsSheet(projectsOpen, { projectsOpen = false })
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {

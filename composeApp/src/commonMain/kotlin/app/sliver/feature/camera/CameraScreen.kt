@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.height
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.data.FilmFormat
-import app.sliver.data.repo.FilmRepository
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -67,6 +66,8 @@ import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.feature.trim.rememberPhoto
 import app.sliver.core.ui.Segmented
+import app.sliver.data.repo.ProjectRepository
+import app.sliver.feature.projects.ProjectsSheet
 import app.sliver.data.files.FileStore
 import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.CameraSettings
@@ -107,11 +108,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
     var replacing by remember { mutableStateOf(false) }
-    val filmRepo = remember { koin.get<FilmRepository>() }
-    val films by remember { filmRepo.observeAll() }.collectAsState(emptyList())
-    val film = activeFilm(films, cam.activeFilmId)
-    val format = film?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
-    var filmMenu by remember { mutableStateOf(false) }
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
+    val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
+    var projectsOpen by remember { mutableStateOf(false) }
     val rotation = rememberDeviceRotation()
     val iconRot = iconRotation(rotation)
     val bandActive = format == FilmFormat.CINEMA && isUpright(rotation)
@@ -242,7 +241,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
         ) {
             if (!recording) {
-                Chip(cameraChipLabel(film, format).uppercase() + " v", selected = false, onClick = { filmMenu = true })
+                Chip(
+                    "${project?.name ?: "My ${today.year}"} · ${format.label()}", selected = false,
+                    onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
+                )
             }
             if (turnHint && bandActive) {
                 SliverText(
@@ -255,33 +257,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             todayDay?.takeIf { !replacing && !recording }?.let { day -> TodayCard(day, { replacing = true }) }
         }
 
-        SliverBottomSheet(filmMenu, { filmMenu = false }) {
-            Column {
-                SliverText("Shoot for which film", SliverType.Headline, color = SliverColors.TextPrimary)
-                films.filter { it.live }.forEach { f ->
-                    Row(
-                        Modifier.fillMaxWidth().height(56.dp).clickable {
-                            update { it.copy(activeFilmId = f.id) }
-                            filmMenu = false
-                        },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        SliverText(f.name, SliverType.Body, color = if (f.id == film?.id) SliverColors.Accent else SliverColors.TextPrimary)
-                        SliverText(f.format.label().uppercase(), SliverType.MonoS, color = SliverColors.TextTertiary)
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth().height(56.dp).clickable {
-                        filmMenu = false
-                        onNavigate(Route.FilmBuilder)
-                    },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SliverText("+ New film", SliverType.Body, color = SliverColors.Accent)
-                }
-            }
-        }
+        ProjectsSheet(projectsOpen, { projectsOpen = false })
 
         Column(
             Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = SliverSpace.S4),

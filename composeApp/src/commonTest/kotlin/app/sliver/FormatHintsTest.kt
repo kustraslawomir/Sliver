@@ -1,10 +1,5 @@
 package app.sliver
 
-import app.sliver.data.FilmFormat
-import app.sliver.data.FilmRangeType
-import app.sliver.data.db.Film
-import app.sliver.feature.camera.activeFilm
-import app.sliver.feature.camera.cameraChipLabel
 import app.sliver.feature.camera.cinemaBandFraction
 import app.sliver.feature.camera.cropYFromTop
 import app.sliver.feature.camera.iconRotation
@@ -13,27 +8,9 @@ import app.sliver.feature.camera.topFromCropY
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class FormatHintsTest {
-    private fun film(id: String, live: Boolean, format: FilmFormat = FilmFormat.CINEMA) =
-        Film(id, id, format, FilmRangeType.YEAR, live = live)
-
-    @Test
-    fun activeFilmFallsBackToFirstLive() {
-        val films = listOf(film("a", false), film("b", true), film("c", true))
-        assertEquals("c", activeFilm(films, "c")?.id)
-        assertEquals("b", activeFilm(films, "a")?.id)
-        assertNull(activeFilm(listOf(film("a", false)), null))
-    }
-
-    @Test
-    fun chipLabelShowsFilmAndFormat() {
-        assertEquals("FOR: b · Story 9:16", cameraChipLabel(film("b", true, FilmFormat.STORY), FilmFormat.CINEMA))
-        assertEquals("FOR: New film · Cinema 16:9", cameraChipLabel(null, FilmFormat.CINEMA))
-    }
-
     @Test
     fun uprightAndIconRotation() {
         assertTrue(isUpright(0))

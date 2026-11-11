@@ -16,6 +16,7 @@ object SliverType {
     val DisplayXL = TextStyle(SliverColors.TextPrimary, 64.sp, FontWeight.Normal, fontFamily = SliverFonts.Serif, lineHeight = 64.sp)
     val DisplayL = TextStyle(SliverColors.TextPrimary, 44.sp, FontWeight.Normal, fontFamily = SliverFonts.Serif, lineHeight = 48.sp)
     val DisplayM = TextStyle(SliverColors.TextPrimary, 30.sp, FontWeight.Normal, fontFamily = SliverFonts.Serif, lineHeight = 34.sp)
+    val DisplayS = TextStyle(SliverColors.TextPrimary, 22.sp, FontWeight.Normal, fontFamily = SliverFonts.Serif, lineHeight = 28.sp)
     val Title = TextStyle(SliverColors.TextPrimary, 22.sp, FontWeight.SemiBold, fontFamily = SliverFonts.Sans, lineHeight = 28.sp)
     val Headline = TextStyle(SliverColors.TextPrimary, 17.sp, FontWeight.Medium, fontFamily = SliverFonts.Sans, lineHeight = 24.sp)
     val Body = TextStyle(SliverColors.TextPrimary, 17.sp, FontWeight.Normal, fontFamily = SliverFonts.Sans, lineHeight = 26.sp)

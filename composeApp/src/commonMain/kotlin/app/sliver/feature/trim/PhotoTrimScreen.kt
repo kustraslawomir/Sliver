@@ -54,6 +54,8 @@ import app.sliver.feature.looks.rememberLookRenderer
 import app.sliver.data.export.PhotoMotion
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.files.FileStore
+import app.sliver.data.FilmFormat
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveSecondRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
@@ -78,6 +80,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val undo = remember { koin.get<SaveUndo>() }
     val files = remember { koin.get<FileStore>() }
+    val projects = remember { koin.get<ProjectRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
@@ -118,7 +121,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         if (saving) return
         saving = true
         scope.launch {
-            val format = settings.settings.first().newFilmFormat
+            val format = projects.active.first()?.format ?: FilmFormat.CINEMA
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,

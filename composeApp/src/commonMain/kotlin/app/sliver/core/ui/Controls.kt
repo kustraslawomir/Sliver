@@ -18,7 +18,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import app.sliver.core.icons.SliverIcon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,18 +51,53 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 
 @Composable
-fun Chip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun Chip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailing: ImageVector? = null,
+) {
     Box(
         modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
             .background(if (selected) SliverColors.AccentTint else Color.Transparent)
             .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineHairline, SliverShapes.Pill)
             .semantics { this.selected = selected }
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(role = Role.Button, onClick = rememberTapGate(onClick))
             .padding(horizontal = SliverSpace.S4),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.BodySmall, color = if (selected) SliverColors.Accent else SliverColors.TextSecondary)
+        val color = if (selected) SliverColors.Accent else SliverColors.TextSecondary
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
+            SliverText(text, SliverType.BodySmall, maxLines = 1, color = color)
+            if (trailing != null) SliverIcon(trailing, color, size = 16.dp)
+        }
     }
+}
+
+@Composable
+fun SliverTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+) {
+    BasicTextField(
+        value, onValueChange,
+        modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.M)
+            .background(SliverColors.Surface1)
+            .border(1.dp, SliverColors.LineStrong, SliverShapes.M)
+            .padding(horizontal = SliverSpace.S4),
+        textStyle = SliverType.Body,
+        singleLine = true,
+        cursorBrush = SolidColor(SliverColors.TextPrimary),
+        decorationBox = { inner ->
+            Box(Modifier.heightIn(min = 56.dp), contentAlignment = Alignment.CenterStart) {
+                if (value.isEmpty()) SliverText(placeholder, SliverType.Body, color = SliverColors.TextTertiary)
+                inner()
+            }
+        },
+    )
 }
 
 @Composable

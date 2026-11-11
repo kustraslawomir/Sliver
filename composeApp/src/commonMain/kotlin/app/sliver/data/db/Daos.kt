@@ -3,6 +3,7 @@ package app.sliver.data.db
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import app.sliver.data.FilmFormat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
@@ -22,7 +23,25 @@ interface ProjectDao {
 
     @Query("DELETE FROM project WHERE id = :id")
     suspend fun delete(id: String)
+
+    @Query("UPDATE project SET name = :name WHERE id = :id")
+    suspend fun rename(id: String, name: String)
+
+    @Query("UPDATE project SET format = :format WHERE id = :id")
+    suspend fun setFormat(id: String, format: FilmFormat)
+
+    @Query("UPDATE project SET archived = :archived WHERE id = :id")
+    suspend fun setArchived(id: String, archived: Boolean)
+
+    @Query(
+        "SELECT projectId, COUNT(*) AS clips, MIN(date) AS since, " +
+            "(SELECT thumb FROM day d2 WHERE d2.projectId = d.projectId ORDER BY d2.date DESC LIMIT 1) AS cover " +
+            "FROM day d GROUP BY projectId",
+    )
+    fun observeStats(): Flow<List<ProjectStats>>
 }
+
+data class ProjectStats(val projectId: String, val clips: Int, val since: LocalDate?, val cover: String?)
 
 @Dao
 interface DayDao {
@@ -40,6 +59,12 @@ interface DayDao {
 
     @Query("SELECT * FROM day WHERE projectId = :projectId ORDER BY date")
     fun observeAll(projectId: String): Flow<List<Day>>
+
+    @Query("SELECT * FROM day WHERE projectId = :projectId")
+    suspend fun listOf(projectId: String): List<Day>
+
+    @Query("DELETE FROM day WHERE projectId = :projectId")
+    suspend fun deleteAll(projectId: String)
 
     @Upsert
     suspend fun upsert(day: Day)
@@ -61,6 +86,12 @@ interface FilmDao {
 
     @Query("SELECT COUNT(*) FROM film WHERE projectId = :projectId")
     fun observeCount(projectId: String): Flow<Int>
+
+    @Query("SELECT * FROM film WHERE projectId = :projectId")
+    suspend fun listOf(projectId: String): List<Film>
+
+    @Query("DELETE FROM film WHERE projectId = :projectId")
+    suspend fun deleteAll(projectId: String)
 
     @Upsert
     suspend fun upsert(film: Film)

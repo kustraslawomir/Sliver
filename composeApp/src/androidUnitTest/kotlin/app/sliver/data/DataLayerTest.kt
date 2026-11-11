@@ -64,12 +64,14 @@ class DataLayerTest {
     fun setUp() {
         val ctx = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder<SliverDatabase>(ctx).allowMainThreadQueries().build()
-        projects = ProjectRepositoryImpl(db.projectDao(), DataStoreSettingsRepository(
+        val files = AndroidFileStore(ctx.filesDir, ctx.cacheDir)
+        val settings = DataStoreSettingsRepository(
             PreferenceDataStoreFactory.create(scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)) {
                 File.createTempFile("prefs", ".preferences_pb").apply { delete() }
             },
-        ))
-        days = DayRepositoryImpl(db.dayDao(), projects, FakeExporter, AndroidFileStore(ctx.filesDir, ctx.cacheDir))
+        )
+        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files) {}
+        days = DayRepositoryImpl(db.dayDao(), projects, FakeExporter, files)
         films = FilmRepositoryImpl(db.filmDao(), projects)
     }
 
@@ -82,6 +84,20 @@ class DataLayerTest {
         assertEquals(day.file, days.getDay(date)?.file)
         assertEquals("v", File(day.file).readText())
         assertEquals("t", File(day.thumb).readText())
+    }
+
+    @Test
+    fun deleteProjectRemovesClipsFilmsAndFiles() = runTest {
+        val first = projects.activeId()
+        val saved = days.saveSecond(
+            SaveSecondRequest(LocalDate(2026, 3, 1), "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
+        )
+        val other = projects.create("Garden", FilmFormat.STORY, LocalDate(2026, 4, 1))
+        assertEquals(other.id, projects.activeId())
+        projects.delete(first)
+        assertEquals(listOf(other.id), projects.projects.first().map { it.id })
+        assertEquals(false, File(saved.file).exists())
+        assertEquals(other.id, projects.activeId())
     }
 
     @AfterTest

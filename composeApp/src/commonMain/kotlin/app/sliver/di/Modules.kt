@@ -34,7 +34,7 @@ val commonModule: Module = module {
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
     single<DriveTrashQueue> { SettingsTrashQueue(get()) }
-    single<ProjectRepository> { ProjectRepositoryImpl(get(), get()) }
+    single<ProjectRepository> { ProjectRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     single { BackupEngine(get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }

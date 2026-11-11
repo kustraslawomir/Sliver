@@ -2,7 +2,6 @@ package app.sliver.feature.camera
 
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookPreset
-import app.sliver.data.db.Film
 import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -25,13 +24,6 @@ const val CINEMA_ASPECT = 16f / 9f
 const val TURN_HINT_MS = 3500L
 
 fun FilmFormat.label(): String = if (this == FilmFormat.CINEMA) "Cinema 16:9" else "Story 9:16"
-
-/** Live film the camera follows: the saved one if still live, else the first live film. */
-fun activeFilm(films: List<Film>, activeId: String?): Film? =
-    films.firstOrNull { it.live && it.id == activeId } ?: films.firstOrNull { it.live }
-
-fun cameraChipLabel(film: Film?, fallback: FilmFormat): String =
-    "FOR: ${film?.name ?: "New film"} · ${(film?.format ?: fallback).label()}"
 
 /** Device is held upright (portrait, either way up) given OrientationEventListener-style degrees. */
 fun isUpright(rotation: Int): Boolean {

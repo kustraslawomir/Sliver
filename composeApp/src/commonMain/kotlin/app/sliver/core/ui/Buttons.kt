@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -27,8 +28,9 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 
-private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) =
-    clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) = composed {
+    clickable(enabled = enabled, role = Role.Button, onClick = rememberTapGate(onClick))
+}
 
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
@@ -92,7 +94,7 @@ fun IconButton44(
         modifier.size(44.dp).clip(CircleShape)
             .then(if (overCamera) Modifier.background(SliverColors.BgVoid.copy(alpha = 0.5f)) else Modifier)
             .semantics { this.contentDescription = contentDescription }
-            .clickable(source, null, role = Role.Button, onClick = onClick),
+            .clickable(source, null, role = Role.Button, onClick = rememberTapGate(onClick)),
         contentAlignment = Alignment.Center,
     ) { content() }
 }

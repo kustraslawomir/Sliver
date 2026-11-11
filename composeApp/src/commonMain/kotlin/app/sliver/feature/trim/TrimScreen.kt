@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import app.sliver.data.FilmFormat
 import app.sliver.data.db.Film
 import app.sliver.data.repo.FilmRepository
-import app.sliver.feature.camera.activeFilm
 import app.sliver.feature.camera.cinemaBandFraction
 import app.sliver.feature.camera.cropYFromTop
 import app.sliver.feature.camera.topFromCropY
@@ -85,6 +84,7 @@ import app.sliver.data.export.SECOND_MS
 import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveSecondRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
@@ -111,7 +111,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val files = remember { koin.get<FileStore>() }
     val settings = remember { koin.get<SettingsRepository>() }
-    val filmRepo = remember { koin.get<FilmRepository>() }
+    val projects = remember { koin.get<ProjectRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -136,7 +136,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
     var day by remember { mutableStateOf(resume?.day ?: CaptureSession.forDate ?: today) }
     val daySource = remember { CaptureSession.source }
-    var film by remember { mutableStateOf<Film?>(null) }
+    var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var clipAspect by remember { mutableStateOf(1f) }
     var cropY by remember { mutableStateOf(0.5f) }
     var sheet by remember { mutableStateOf(false) }
@@ -149,7 +149,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
 
     LaunchedEffect(path) {
         if (look == null) look = settings.settings.first().defaultLook.toParams()
-        film = activeFilm(filmRepo.observeAll().first(), settings.settings.first().camera.activeFilmId)
+        format = projects.active.first()?.format ?: FilmFormat.CINEMA
         clipAspect = media.aspect(path)
         val d = media.durationMs(path)
         if (resume == null) {
@@ -170,7 +170,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
     val duration = durationMs
     val short = duration != null && isShortClip(duration)
     val windowMs = if (short) duration ?: 0 else (SECOND_MS * speed).toLong()
-    val reframe = film?.format == FilmFormat.CINEMA && clipAspect < 1f
+    val reframe = format == FilmFormat.CINEMA && clipAspect < 1f
     val coach =saved?.coachTrimSeen == false && duration != null && !short
 
     fun release(to: Long) {
@@ -201,7 +201,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit) {
         if (saving || duration == null) return
         saving = true
         scope.launch {
-            val format = film?.format ?: settings.settings.first().newFilmFormat
             val request = SaveSecondRequest(
                 date = day, source = path, startMs = startMs, speed = speed,
                 cropY = cropY.takeIf { reframe }, format = format,
