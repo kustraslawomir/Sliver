@@ -40,7 +40,7 @@ class AndroidTrimMedia(private val sampler: FrameSampler = FrameSampler()) : Tri
     }
 
     override suspend fun autoPickMs(path: String, durationMs: Long): Long =
-        if (durationMs <= 1000) 0L else runCatching { sampler.pickBestSecondMs(path, durationMs) }.getOrDefault(0L)
+        if (durationMs <= 1000) 0L else runCatching { sampler.pickBestClipMs(path, durationMs) }.getOrDefault(0L)
 
     override suspend fun fileSizeBytes(path: String): Long = withContext(Dispatchers.IO) {
         if (path.contains("://")) 0L else java.io.File(path).length()

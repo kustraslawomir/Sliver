@@ -70,7 +70,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
             SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) }, fullWidth = false)
         }
         if (teaser != TeaserState.HIDDEN) {
-            YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInSeconds) }
+            YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInClips) }
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
             items(list, key = { it.id }) { film ->
@@ -125,10 +125,10 @@ private fun Poster(film: Film, plan: FilmPlan, modifier: Modifier, onClick: () -
         }
         SliverText(film.name, SliverType.Headline)
         SliverText(
-            "${if (film.format == FilmFormat.CINEMA) "16:9" else "9:16"} · ${formatRuntime(plan.seconds)}",
+            "${if (film.format == FilmFormat.CINEMA) "16:9" else "9:16"} · ${formatRuntime(plan.clips)}",
             SliverType.MonoS,
         )
-        SliverText("${film.rangeText()} · ${plan.seconds} clips", SliverType.Caption)
+        SliverText("${film.rangeText()} · ${plan.clips} clips", SliverType.Caption)
     }
 }
 

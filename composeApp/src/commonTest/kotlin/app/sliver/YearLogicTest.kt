@@ -25,7 +25,7 @@ class YearLogicTest {
 
     @Test fun statsCountOnlyThatYear() {
         val s = yearStats(2026, listOf(day(1, 1), day(1, 2), day(3, 1), day(1, 1, year = 2025)), emptyList())
-        assertEquals(3, s.seconds)
+        assertEquals(3, s.clips)
         assertEquals(listOf(1), s.topMonths)
     }
 
@@ -48,7 +48,7 @@ class YearLogicTest {
 
     @Test fun emptyYear() {
         val s = yearStats(2026, emptyList(), emptyList())
-        assertEquals(0, s.seconds)
+        assertEquals(0, s.clips)
         assertNull(s.favouriteLook)
         assertEquals("None yet", monthsText(s.topMonths))
     }

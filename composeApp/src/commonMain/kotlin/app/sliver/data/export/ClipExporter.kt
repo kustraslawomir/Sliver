@@ -16,7 +16,7 @@ interface ClipExporter {
      * Exports exactly one second of [source] starting at [startMs] into [videoPath] (1080p H.264/AAC)
      * and a 320px JPEG thumbnail into [thumbPath]. [speed] 0.5 takes 500 ms and stretches it to 1 s.
      */
-    suspend fun exportSecond(
+    suspend fun exportClip(
         source: String,
         startMs: Long,
         speed: Float,
@@ -29,7 +29,7 @@ interface ClipExporter {
     ): ExportedClip
 
     /** Turns the still [source] into a 1.000 s, 30 fps clip; ZOOM eases scale 1.00 to 1.08 over the second. */
-    suspend fun photoToSecond(
+    suspend fun photoToClip(
         source: String,
         motion: Motion,
         format: FilmFormat,

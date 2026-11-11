@@ -1,16 +1,14 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.AppScope
 import app.sliver.feature.onboarding.FirstClipTimer
 import app.sliver.data.db.Day
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.feature.films.ensureDefaultFilm
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -18,11 +16,11 @@ const val UNDO_WINDOW_MS = 6000L
 
 /** Outlives the Trim screen: saves a clip (parking the replaced one in tmp) and cleans tmp once the window closes. */
 class SaveUndo(private val days: DayRepository, private val files: FileStore, private val films: FilmRepository) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val scope = AppScope
 
     private class Backup(val video: String, val thumb: String)
 
-    private inner class Pending(val request: SaveSecondRequest, val previous: Day?, val backup: Backup?) {
+    private inner class Pending(val request: SaveClipRequest, val previous: Day?, val backup: Backup?) {
         var timer: Job? = null
 
         fun cleanup() {
@@ -38,13 +36,13 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
     private var pending: Pending? = null
 
     /** Saves the second; the previous day (if any) is parked in tmp so Undo can restore it. */
-    suspend fun save(request: SaveSecondRequest): Day {
+    suspend fun save(request: SaveClipRequest): Day {
         pending?.cleanup()
         pending = null
         val previous = days.getDay(request.date)
         val backup = previous?.let { park(it, request.takenAt.toEpochMilliseconds() + 1) }
         val day = try {
-            days.saveSecond(request)
+            days.saveClip(request)
         } catch (e: Throwable) {
             if (previous != null && backup != null) restore(previous, backup)
             throw e

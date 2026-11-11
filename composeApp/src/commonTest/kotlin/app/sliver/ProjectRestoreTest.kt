@@ -13,7 +13,7 @@ import app.sliver.data.db.Film
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.AccountSettings
 import app.sliver.data.settings.AppSettings
 import app.sliver.data.settings.SettingsRepository
@@ -46,7 +46,7 @@ private class MultiDays : DayRepository {
     override fun observeAllProjects() = observeAll()
     override suspend fun save(day: Day) { rows.value = rows.value + ((day.projectId to day.date) to day) }
     override suspend fun delete(date: LocalDate) = Unit
-    override suspend fun saveSecond(request: SaveSecondRequest): Day = error("unused")
+    override suspend fun saveClip(request: SaveClipRequest): Day = error("unused")
 }
 
 private class SavedFilms : FilmRepository {

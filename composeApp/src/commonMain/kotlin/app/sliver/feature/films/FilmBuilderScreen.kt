@@ -159,7 +159,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 }
             }
             SliverSlider(fraction, { seek = FilmSeek(it) })
-            SliverText("${plan.seconds} clips · ${formatRuntime(plan.seconds)}", SliverType.MonoS, color = SliverColors.TextSecondary)
+            SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.MonoS, color = SliverColors.TextSecondary)
         }
 
         Section("Range") {

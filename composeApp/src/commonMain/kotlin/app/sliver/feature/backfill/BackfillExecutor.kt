@@ -9,7 +9,7 @@ import app.sliver.data.DaySource
 import app.sliver.data.toParams
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.trim.TrimMedia
@@ -106,8 +106,8 @@ class BackfillExecutor(
             val path = if ("://" in item.uri) gallery.copyToTmp(item.uri) else item.uri
             tmp = path
             val start = if (item.video) media.autoPickMs(path, media.durationMs(path)) else 0L
-            days.saveSecond(
-                SaveSecondRequest(
+            days.saveClip(
+                SaveClipRequest(
                     date = date, source = path, startMs = start, speed = 1f, cropY = null,
                     format = appSettings.newFilmFormat, daySource = DaySource.BACKFILL,
                     takenAt = LocalDateTime(date, LocalTime(12, 0)).toInstant(TimeZone.currentSystemDefault()),

@@ -95,7 +95,7 @@ import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.camera.CaptureSession
@@ -240,7 +240,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         if (saving || !ready || durationMs == null) return
         saving = true
         scope.launch {
-            val request = SaveSecondRequest(
+            val request = SaveClipRequest(
                 date = day, source = path, startMs = startMs, speed = speed,
                 cropY = cropY.takeIf { reframe }, format = format,
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,

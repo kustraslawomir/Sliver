@@ -60,7 +60,7 @@ import app.sliver.data.export.SECOND_MS
 import app.sliver.data.files.FileStore
 import app.sliver.data.FilmFormat
 import app.sliver.data.repo.ProjectRepository
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.flow.first
@@ -128,7 +128,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         saving = true
         scope.launch {
             val format = project?.format ?: FilmFormat.CINEMA
-            val request = SaveSecondRequest(
+            val request = SaveClipRequest(
                 date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
                 look = LookParams(),

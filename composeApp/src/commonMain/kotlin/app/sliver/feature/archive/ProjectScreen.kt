@@ -182,7 +182,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                         SliverText(project?.name ?: "", SliverType.DisplayM, Modifier.weight(1f, fill = false), maxLines = 1)
                         SliverIcon(SliverIcons.ChevronDown, SliverColors.TextSecondary)
                     }
-                    SliverText(secondsHeader(all.size, first, project?.format), SliverType.MonoS, color = SliverColors.TextSecondary)
+                    SliverText(clipsHeader(all.size, first, project?.format), SliverType.MonoS, color = SliverColors.TextSecondary)
                 }
                 IconButton44({ onNavigate(Route.Settings) }, "Settings") {
                     SliverIcon(SliverIcons.Settings, SliverColors.TextPrimary)

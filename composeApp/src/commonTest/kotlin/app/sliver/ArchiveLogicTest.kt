@@ -10,7 +10,7 @@ import app.sliver.feature.archive.canGoNext
 import app.sliver.feature.archive.canGoPrev
 import app.sliver.feature.archive.cellState
 import app.sliver.feature.archive.pickMemory
-import app.sliver.feature.archive.secondsHeader
+import app.sliver.feature.archive.clipsHeader
 import app.sliver.feature.archive.yearColors
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -71,8 +71,8 @@ class ArchiveLogicTest {
 
     @Test
     fun header() {
-        assertEquals("1 CLIP · SINCE 3 MAR 2026", secondsHeader(1, LocalDate(2026, 3, 3)))
-        assertEquals("42 CLIPS · SINCE 3 MAR 2026", secondsHeader(42, LocalDate(2026, 3, 3)))
-        assertEquals("2 CLIPS · SINCE 3 MAR 2026 · CINEMA 16:9", secondsHeader(2, LocalDate(2026, 3, 3), FilmFormat.CINEMA))
+        assertEquals("1 CLIP · SINCE 3 MAR 2026", clipsHeader(1, LocalDate(2026, 3, 3)))
+        assertEquals("42 CLIPS · SINCE 3 MAR 2026", clipsHeader(42, LocalDate(2026, 3, 3)))
+        assertEquals("2 CLIPS · SINCE 3 MAR 2026 · CINEMA 16:9", clipsHeader(2, LocalDate(2026, 3, 3), FilmFormat.CINEMA))
     }
 }

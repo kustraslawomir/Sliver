@@ -34,7 +34,7 @@ private const val CH_MEMORIES = "memories"
 private const val EXTRA_KIND = "kind"
 private const val EXTRA_DATE = "date"
 const val EXTRA_DEEPLINK = "deeplink"
-private const val WINDOW_MS = 20 * 60_000L
+private const val WINDOW_MS = 10 * 60_000L
 
 private fun NotifKind.channel() = when (this) {
     NotifKind.ON_THIS_DAY -> CH_MEMORIES
@@ -108,11 +108,7 @@ class AndroidReminderScheduler(private val context: Context) : ReminderScheduler
         plan.forEach { p ->
             val at = p.at.toInstant(zone).toEpochMilliseconds()
             val pi = intent(p.kind, p.at.date, PendingIntent.FLAG_UPDATE_CURRENT)!!
-            if (Build.VERSION.SDK_INT < 31 || alarms.canScheduleExactAlarms()) {
-                alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi)
-            } else {
-                alarms.setWindow(AlarmManager.RTC_WAKEUP, at - WINDOW_MS / 2, WINDOW_MS, pi)
-            }
+            alarms.setWindow(AlarmManager.RTC_WAKEUP, at, WINDOW_MS, pi)
         }
     }
 }

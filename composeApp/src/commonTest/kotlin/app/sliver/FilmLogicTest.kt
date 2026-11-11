@@ -26,19 +26,19 @@ class FilmLogicTest {
     @Test fun planKeepsRangeInOrderSkippingOpenDays() {
         val p = buildFilmPlan(days, LocalDate(2026, 1, 1), LocalDate(2026, 12, 31))
         assertEquals(listOf("f1-2", "f1-9", "f3-5"), p.files)
-        assertEquals(3, p.seconds)
+        assertEquals(3, p.clips)
     }
 
     @Test fun rangeBoundsAreInclusive() {
-        assertEquals(2, buildFilmPlan(days, LocalDate(2026, 1, 2), LocalDate(2026, 1, 9)).seconds)
+        assertEquals(2, buildFilmPlan(days, LocalDate(2026, 1, 2), LocalDate(2026, 1, 9)).clips)
     }
 
     @Test fun emptyPlan() {
-        assertEquals(0, buildFilmPlan(emptyList(), null, null).seconds)
+        assertEquals(0, buildFilmPlan(emptyList(), null, null).clips)
     }
 
     @Test fun yearFilmPlan() {
-        assertEquals(3, yearFilm(2026, FilmFormat.CINEMA).plan(days).seconds)
+        assertEquals(3, yearFilm(2026, FilmFormat.CINEMA).plan(days).clips)
     }
 
     @Test fun runtimeAndRangeText() {

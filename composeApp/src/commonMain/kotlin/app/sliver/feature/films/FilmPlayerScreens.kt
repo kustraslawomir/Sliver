@@ -200,10 +200,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     }
     val plan = remember(f, days) { f.plan(days) }
     val (pos, dur) = position
-    val total = dur.takeIf { it > 0 } ?: (plan.seconds * FILM_FRAME_MS + FILM_TITLE_MS)
+    val total = dur.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
     val ticks = remember(plan, dur) { playerTicks(plan, dur) }
-    val onTitleCard = pos >= plan.seconds * FILM_FRAME_MS
-    val dateLabel = if (onTitleCard || plan.days.isEmpty()) f.name else stampText(plan.days[dayIndexAtMs(pos, plan.seconds)].date)
+    val onTitleCard = pos >= plan.clips * FILM_FRAME_MS
+    val dateLabel = if (onTitleCard || plan.days.isEmpty()) f.name else stampText(plan.days[dayIndexAtMs(pos, plan.clips)].date)
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
     val landscape = rememberDeviceRotation().let { it in 60..120 || it in 240..300 }

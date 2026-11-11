@@ -12,7 +12,7 @@ const val DEFAULT_FILM_ID = "default-year"
 
 /** Day files of a film in date order; open days (no clip) are skipped. */
 data class FilmPlan(val days: List<Day>) {
-    val seconds: Int get() = days.size
+    val clips: Int get() = days.size
     val files: List<String> get() = days.map { it.file }
 }
 

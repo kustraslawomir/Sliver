@@ -49,7 +49,7 @@ import app.sliver.feature.films.FilmBuilderScreen
 import app.sliver.feature.films.FilmNav
 import app.sliver.feature.films.FilmPlayerScreen
 import app.sliver.feature.films.PremiereScreen
-import app.sliver.feature.films.YearInSecondsScreen
+import app.sliver.feature.films.YearInClipsScreen
 import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.NotificationsScreen
@@ -122,7 +122,7 @@ fun SliverNavHost() {
                                 onDone = { nav.navigate(Route.FilmPlayer.path) { popUpTo(Route.Premiere.path) { inclusive = true } } },
                             )
                             Route.FilmPlayer -> FilmPlayerScreen(onBack = back, onEdit = { FilmNav.editId = FilmNav.id; go(Route.FilmBuilder) })
-                            Route.YearInSeconds -> YearInSecondsScreen(go, onBack = back)
+                            Route.YearInClips -> YearInClipsScreen(go, onBack = back)
                             Route.Settings -> SettingsScreen(go, onBack = back)
                             Route.Backup -> BackupScreen(onBack = back, onRestore = { go(Route.Restore) })
                             Route.Restore -> RestoreScreen(onDone = { navigator.openStack(DeepLinkTarget.Camera) })
@@ -147,7 +147,7 @@ fun SliverNavHost() {
 
 private val CappedRoutes = setOf(
     Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,
-    Route.FilmBuilder, Route.Export, Route.Premiere, Route.YearInSeconds, Route.Onboarding,
+    Route.FilmBuilder, Route.Export, Route.Premiere, Route.YearInClips, Route.Onboarding,
 )
 
 /** Lists and forms stop growing at [MaxContentWidth] and sit centered on big windows. */

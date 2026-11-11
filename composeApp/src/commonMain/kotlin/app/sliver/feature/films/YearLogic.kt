@@ -6,7 +6,7 @@ import app.sliver.data.db.Day
 import app.sliver.data.db.Film
 
 data class YearStats(
-    val seconds: Int,
+    val clips: Int,
     val films: Int,
     val topMonths: List<Int>,
     val favouriteLook: LookPreset?,
@@ -19,7 +19,7 @@ fun yearStats(year: Int, days: Collection<Day>, films: Collection<Film>): YearSt
     val looks = mine.groupingBy { it.look.preset }.eachCount()
     val maxLook = looks.values.maxOrNull()
     return YearStats(
-        seconds = mine.size,
+        clips = mine.size,
         films = films.count { it.renderPath != null },
         topMonths = perMonth.filterValues { it == maxMonth }.keys.sorted(),
         favouriteLook = looks.entries.filter { it.value == maxLook }.minByOrNull { it.key.ordinal }?.key,

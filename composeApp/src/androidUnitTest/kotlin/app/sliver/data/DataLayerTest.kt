@@ -14,7 +14,7 @@ import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepositoryImpl
 import app.sliver.data.repo.ProjectRepositoryImpl
-import app.sliver.data.repo.SaveSecondRequest
+import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.ReminderMode
 import java.io.File
@@ -36,7 +36,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 private object FakeExporter : ClipExporter {
-    override suspend fun exportSecond(
+    override suspend fun exportClip(
         source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat,
         videoPath: String, thumbPath: String, shortMode: ShortMode,
         look: LookParams,
@@ -46,10 +46,10 @@ private object FakeExporter : ClipExporter {
         return ExportedClip(videoPath, thumbPath, 1000)
     }
 
-    override suspend fun photoToSecond(
+    override suspend fun photoToClip(
         source: String, motion: app.sliver.data.Motion, format: FilmFormat, videoPath: String, thumbPath: String,
         look: LookParams,
-    ) = exportSecond(source, 0, 1f, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
+    ) = exportClip(source, 0, 1f, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
 }
 
 @RunWith(RobolectricTestRunner::class)
@@ -76,10 +76,10 @@ class DataLayerTest {
     }
 
     @Test
-    fun saveSecondWritesFilesAndRow() = runTest {
+    fun saveClipWritesFilesAndRow() = runTest {
         val date = LocalDate(2026, 3, 1)
-        val day = days.saveSecond(
-            SaveSecondRequest(date, "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
+        val day = days.saveClip(
+            SaveClipRequest(date, "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
         )
         assertEquals(day.file, days.getDay(date)?.file)
         assertEquals("v", File(day.file).readText())
@@ -89,8 +89,8 @@ class DataLayerTest {
     @Test
     fun deleteProjectRemovesClipsFilmsAndFiles() = runTest {
         val first = projects.activeId()
-        val saved = days.saveSecond(
-            SaveSecondRequest(LocalDate(2026, 3, 1), "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
+        val saved = days.saveClip(
+            SaveClipRequest(LocalDate(2026, 3, 1), "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0)),
         )
         val other = projects.create("Garden", FilmFormat.STORY, LocalDate(2026, 4, 1))
         assertEquals(other.id, projects.activeId())

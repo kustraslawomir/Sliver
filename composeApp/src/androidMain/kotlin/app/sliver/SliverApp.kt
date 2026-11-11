@@ -1,5 +1,6 @@
 package app.sliver
 
+import app.sliver.core.AppScope
 import android.app.Application
 import app.sliver.di.commonModule
 import app.sliver.di.platformModule
@@ -32,13 +33,13 @@ class SliverApp : Application(), KoinComponent {
         val store: FileStore by inject()
         ensureChannels(this)
         val coordinator: ReminderCoordinator by inject()
-        coordinator.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        coordinator.start(AppScope)
         val backup: BackupCoordinator by inject()
-        backup.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        backup.start(AppScope)
         val progress: ProgressCoordinator by inject()
-        progress.start(CoroutineScope(SupervisorJob() + Dispatchers.Default))
+        progress.start(AppScope)
         val days: DayRepository by inject()
-        val widgetScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val widgetScope = AppScope
         widgetScope.launch {
             days.observeAll().map { list -> list.map { it.date to it.thumb } }.distinctUntilChanged()
                 .collect { refreshTodayWidgets(this@SliverApp) }

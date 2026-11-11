@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
 @Composable
-fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
+fun YearInClipsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val renderer = remember { koin.get<FilmRenderer>() }
@@ -80,7 +80,7 @@ fun YearInSecondsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Modifier.padding(horizontal = SliverSpace.Gutter),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
-            Stat("Clips kept", "${stats.seconds}")
+            Stat("Clips kept", "${stats.clips}")
             Stat("Films made", "${stats.films}")
             Stat(if (stats.topMonths.size > 1) "Most filmed months" else "Most filmed month", monthsText(stats.topMonths))
             Stat("Favourite filter", stats.favouriteLook?.let(::lookName) ?: "None yet")

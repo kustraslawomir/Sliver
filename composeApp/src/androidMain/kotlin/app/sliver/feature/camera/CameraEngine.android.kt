@@ -1,11 +1,11 @@
 package app.sliver.feature.camera
 
+import app.sliver.core.log.logDebug
 import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.util.Size
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -58,7 +58,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         val view = previewView
         val cam = camera
         if (view == null || cam == null) {
-            Log.d(TAG, "focus: skipped, preview=${view != null} camera=${cam != null}")
+            logDebug(TAG, "focus: skipped, preview=${view != null} camera=${cam != null}")
             return onResult(false)
         }
         val point = view.meteringPointFactory.createPoint(x, y)
@@ -67,13 +67,13 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
             if (lock) disableAutoCancel() else setAutoCancelDuration(FOCUS_AUTO_CANCEL_S, TimeUnit.SECONDS)
         }.build()
         val supported = cam.cameraInfo.isFocusMeteringSupported(action)
-        Log.d(TAG, "focus: point=($x,$y) view=${view.width}x${view.height} lock=$lock supported=$supported")
+        logDebug(TAG, "focus: point=($x,$y) view=${view.width}x${view.height} lock=$lock supported=$supported")
         if (!supported) return onResult(false)
-        Log.d(TAG, "startFocusAndMetering called lock=$lock")
+        logDebug(TAG, "startFocusAndMetering called lock=$lock")
         val future = cam.cameraControl.startFocusAndMetering(action)
         future.addListener({
-            val ok = runCatching { future.get().isFocusSuccessful }.onFailure { Log.d(TAG, "focus future failed: $it") }.getOrDefault(false)
-            Log.d(TAG, "startFocusAndMetering result: focusSuccessful=$ok lock=$lock")
+            val ok = runCatching { future.get().isFocusSuccessful }.onFailure { logDebug(TAG, "focus future failed: $it") }.getOrDefault(false)
+            logDebug(TAG, "startFocusAndMetering result: focusSuccessful=$ok lock=$lock")
             onResult(ok)
         }, executor)
     }
@@ -89,10 +89,10 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     override fun setExposureIndex(index: Int) {
         val control = camera?.cameraControl ?: return
         val future = control.setExposureCompensationIndex(index)
-        Log.d(TAG, "setExposureCompensationIndex($index) requested")
+        logDebug(TAG, "setExposureCompensationIndex($index) requested")
         future.addListener({
             val applied = runCatching { future.get() }.getOrNull()
-            Log.d(TAG, "setExposureCompensationIndex applied=$applied current=${camera?.cameraInfo?.exposureState?.exposureCompensationIndex}")
+            logDebug(TAG, "setExposureCompensationIndex applied=$applied current=${camera?.cameraInfo?.exposureState?.exposureCompensationIndex}")
         }, executor)
     }
 
@@ -122,7 +122,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         }
         if (mode == CameraMode.VIDEO) camera?.cameraControl?.enableTorch(torch)
         camera?.cameraControl?.setExposureCompensationIndex(0)
-        Log.d(TAG, "bind: mode=$mode lens=$lens exposureRange=${exposureRange()}")
+        logDebug(TAG, "bind: mode=$mode lens=$lens exposureRange=${exposureRange()}")
     }
 
     @SuppressLint("MissingPermission")

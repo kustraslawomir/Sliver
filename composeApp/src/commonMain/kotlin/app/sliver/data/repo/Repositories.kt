@@ -36,10 +36,10 @@ interface DayRepository {
     suspend fun delete(date: LocalDate)
 
     /** Exports 1 s of the source, then moves video + thumb into place and upserts the row. */
-    suspend fun saveSecond(request: SaveSecondRequest): Day
+    suspend fun saveClip(request: SaveClipRequest): Day
 }
 
-data class SaveSecondRequest(
+data class SaveClipRequest(
     val date: LocalDate,
     val source: String,
     val startMs: Long,
@@ -79,13 +79,13 @@ class DayRepositoryImpl(
     private val places: PlaceResolver = PlaceResolver { null },
     private val trash: DriveTrashQueue = DriveTrashQueue {},
 ) : DayRepository {
-    override suspend fun saveSecond(request: SaveSecondRequest): Day = with(request) {
+    override suspend fun saveClip(request: SaveClipRequest): Day = with(request) {
         val stamp = takenAt.toEpochMilliseconds()
         val tmpVideo = files.newTmpPath(stamp)
         val tmpThumb = "$tmpVideo.jpg"
         try {
-            val clip = if (isPhoto) exporter.photoToSecond(source, motion, format, tmpVideo, tmpThumb, look)
-            else exporter.exportSecond(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
+            val clip = if (isPhoto) exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look)
+            else exporter.exportClip(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val place = places.resolve(source)
             val projectId = projects.activeId()
             val file = files.dayPath(projectId, date)

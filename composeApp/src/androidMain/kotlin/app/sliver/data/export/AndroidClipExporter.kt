@@ -49,7 +49,7 @@ import kotlin.coroutines.resumeWithException
 @UnstableApi
 class AndroidClipExporter(private val context: Context) : ClipExporter {
 
-    override suspend fun exportSecond(
+    override suspend fun exportClip(
         source: String,
         startMs: Long,
         speed: Float,
@@ -123,7 +123,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         }
     }
 
-    override suspend fun photoToSecond(
+    override suspend fun photoToClip(
         source: String,
         motion: Motion,
         format: FilmFormat,

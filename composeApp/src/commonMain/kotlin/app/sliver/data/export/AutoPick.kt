@@ -3,7 +3,7 @@ package app.sliver.data.export
 import kotlin.math.abs
 
 /** Start (ms) of the 1 s window with the highest summed luminance change; ties go to the window nearest the middle. */
-fun bestSecond(frames: List<FloatArray>, fps: Int): Long {
+fun bestClip(frames: List<FloatArray>, fps: Int): Long {
     val diffs = frames.zipWithNext { a, b ->
         var sum = 0f
         val n = minOf(a.size, b.size)

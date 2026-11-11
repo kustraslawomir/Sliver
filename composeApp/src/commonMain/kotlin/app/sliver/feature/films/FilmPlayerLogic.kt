@@ -21,8 +21,8 @@ fun dayIndexAtMs(positionMs: Long, dayCount: Int): Int =
 
 /** Scrubber tick positions as fractions of the full rendered duration (days plus title card). */
 fun playerTicks(plan: FilmPlan, durationMs: Long): List<Float> {
-    val total = durationMs.takeIf { it > 0 } ?: (plan.seconds * FILM_FRAME_MS + FILM_TITLE_MS)
-    return scrubberTicks(plan).map { it * plan.seconds * FILM_FRAME_MS / total }
+    val total = durationMs.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
+    return scrubberTicks(plan).map { it * plan.clips * FILM_FRAME_MS / total }
 }
 
 /** Holds the film the export, premiere and player screens work on (routes carry no arguments). */
