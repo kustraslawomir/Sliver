@@ -26,7 +26,7 @@ class MigrationTest {
         return JSONObject(json).getJSONObject("database")
     }
 
-    private fun createV2(path: String) {
+    private fun createV2(path: String, withEmptyProjectTable: Boolean = false) {
         val schema = v2Schema()
         val sql = SQLiteDatabase.openOrCreateDatabase(path, null)
         val entities = schema.getJSONArray("entities")
@@ -35,6 +35,13 @@ class MigrationTest {
         }
         sql.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
         sql.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES (42, '${schema.getString("identityHash")}')")
+        if (withEmptyProjectTable) {
+            sql.execSQL(
+                "CREATE TABLE IF NOT EXISTS `project` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `format` TEXT NOT NULL, " +
+                    "`startDate` TEXT NOT NULL, `endDate` TEXT, `createdAt` INTEGER NOT NULL, `archived` INTEGER NOT NULL, " +
+                    "`colorSeed` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+            )
+        }
         for ((date, file) in listOf("2025-03-02" to "a", "2025-03-03" to "b")) {
             sql.execSQL(
                 "INSERT INTO day VALUES ('$date', '$file.mp4', '$file.jpg', 'CAMERA', '{}', 'STILL', 1, 1.0, 0, NULL, 1000, 2000, NULL, 'PENDING', NULL)",
@@ -67,6 +74,33 @@ class MigrationTest {
         assertTrue(days.all { it.projectId == project.id })
         assertEquals("a.mp4", days.first().file)
         assertEquals(project.id, db.filmDao().observeAll(project.id).first().single().projectId)
+        db.close()
+    }
+
+    @Test
+    fun daysWithEmptyProjectTableGetADefaultProject() = runTest {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val path = ctx.getDatabasePath("migration-empty.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
+        createV2(path, withEmptyProjectTable = true)
+
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3).allowMainThreadQueries().build()
+        val project = db.projectDao().observeAll().first().single()
+        assertEquals(2, db.dayDao().observeAll(project.id).first().size)
+        db.close()
+    }
+
+    @Test
+    fun existingProjectIsReusedNotDuplicated() = runTest {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val path = ctx.getDatabasePath("migration-existing.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
+        createV2(path, withEmptyProjectTable = true)
+        SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READWRITE).use {
+            it.execSQL("INSERT INTO project VALUES ('p1', 'Mine', 'CINEMA', '2025-01-01', NULL, 1, 0, 0)")
+        }
+
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3).allowMainThreadQueries().build()
+        assertEquals(listOf("p1"), db.projectDao().observeAll().first().map { it.id })
+        assertEquals(2, db.dayDao().observeAll("p1").first().size)
         db.close()
     }
 }

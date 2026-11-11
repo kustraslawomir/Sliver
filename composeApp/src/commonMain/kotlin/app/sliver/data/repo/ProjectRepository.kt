@@ -30,6 +30,8 @@ interface ProjectRepository {
     suspend fun activeId(): String
     suspend fun create(name: String, format: FilmFormat, startDate: LocalDate): Project
     suspend fun setActive(id: String)
+    /** Adds a project recreated from a backup without making it active. */
+    suspend fun restore(project: Project)
     suspend fun rename(id: String, name: String)
     suspend fun setFormat(id: String, format: FilmFormat)
     suspend fun setArchived(id: String, archived: Boolean)
@@ -75,6 +77,8 @@ class ProjectRepositoryImpl(
         settings.update { it.copy(activeProjectId = project.id) }
         return project
     }
+
+    override suspend fun restore(project: Project) = dao.upsert(project)
 
     override suspend fun setActive(id: String) {
         settings.update { it.copy(activeProjectId = id) }

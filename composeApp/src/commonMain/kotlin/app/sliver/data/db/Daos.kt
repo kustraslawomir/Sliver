@@ -63,6 +63,9 @@ interface DayDao {
     @Query("SELECT * FROM day WHERE projectId = :projectId")
     suspend fun listOf(projectId: String): List<Day>
 
+    @Query("SELECT * FROM day")
+    fun observeEverything(): Flow<List<Day>>
+
     @Query("DELETE FROM day WHERE projectId = :projectId")
     suspend fun deleteAll(projectId: String)
 

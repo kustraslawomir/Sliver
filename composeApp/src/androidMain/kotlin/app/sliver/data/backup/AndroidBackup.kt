@@ -17,6 +17,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.notifications.notifyBackupPaused
 import java.io.BufferedOutputStream
@@ -141,6 +142,7 @@ class AndroidArchiveExporter(
     private val days: DayRepository,
     private val films: FilmRepository,
     private val settings: SettingsRepository,
+    private val projects: ProjectRepository,
 ) : ArchiveExporter {
     override suspend fun exportAll(destination: String, onProgress: (done: Int, total: Int) -> Unit): Result<Unit> =
         withContext(Dispatchers.IO) {
@@ -161,7 +163,7 @@ class AndroidArchiveExporter(
                     }
                     zip.putNextEntry(ZipEntry(MANIFEST_NAME))
                     zip.write(
-                        buildManifest(settings.settings.first(), films.observeAll().first(), System.currentTimeMillis())
+                        buildManifest(settings.settings.first(), films.observeAll().first(), System.currentTimeMillis(), projects.active.first())
                             .encodeToByteArray(),
                     )
                     zip.closeEntry()

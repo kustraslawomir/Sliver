@@ -4,6 +4,8 @@ import app.sliver.data.BackupState
 import app.sliver.data.LookParams
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
+import app.sliver.data.db.Project
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.settings.AppSettings
@@ -47,6 +49,7 @@ class BackupEngine(
     private val films: FilmRepository,
     private val settings: SettingsRepository,
     private val reader: DayFileReader,
+    private val projects: ProjectRepository,
     private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) {
     private val lock = Mutex()
@@ -75,10 +78,12 @@ class BackupEngine(
 
     private suspend fun sync() {
         val account = settings.settings.first().account
-        val folder = drive.ensureFolder(account.driveFolderId)
-        if (folder != account.driveFolderId) {
-            settings.update { s -> s.copy(account = s.account.copy(driveFolderId = folder)) }
+        val root = drive.ensureFolder(account.driveFolderId)
+        if (root != account.driveFolderId) {
+            settings.update { s -> s.copy(account = s.account.copy(driveFolderId = root)) }
         }
+        val project = projects.active.first()
+        val folder = project?.let { drive.ensureSubfolder(root, it.name) } ?: root
         for (id in account.pendingTrash) {
             try {
                 drive.trash(id)
@@ -103,7 +108,7 @@ class BackupEngine(
                 _progress.value = BackupProgress(++done, total)
             }
         }
-        drive.writeManifest(folder, buildManifest(settings.settings.first(), films.observeAll().first(), nowMillis()))
+        drive.writeManifest(folder, buildManifest(settings.settings.first(), films.observeAll().first(), nowMillis(), project))
     }
 
     private suspend fun upload(folder: String, day: Day) {
@@ -128,9 +133,17 @@ class BackupEngine(
     }
 }
 
-fun buildManifest(s: AppSettings, films: List<Film>, nowMillis: Long): String = buildJsonObject {
-    put("version", 1)
+fun buildManifest(s: AppSettings, films: List<Film>, nowMillis: Long, project: Project? = null): String = buildJsonObject {
+    put("version", 2)
     put("updatedAt", nowMillis)
+    if (project != null) {
+        put("projectId", project.id)
+        putJsonObject("project") {
+            put("name", project.name)
+            put("format", project.format.name)
+            put("startDate", project.startDate.toString())
+        }
+    }
     putJsonObject("settings") {
         put("defaultLook", s.defaultLook.name)
         put("newFilmFormat", s.newFilmFormat.name)

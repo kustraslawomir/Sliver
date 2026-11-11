@@ -4,7 +4,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
-/** Wraps all existing days and films into one "My <year>" project and makes day keys per project. */
+/** Wraps all existing days and films into one "My <year>" project (unless a project row already exists) and makes day keys per project. */
 val Migration2To3 = object : Migration(2, 3) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL(
@@ -13,11 +13,12 @@ val Migration2To3 = object : Migration(2, 3) {
                 "`colorSeed` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         )
         connection.execSQL(
-            "INSERT INTO project (id, name, format, startDate, endDate, createdAt, archived, colorSeed) VALUES (" +
+            "INSERT INTO project (id, name, format, startDate, endDate, createdAt, archived, colorSeed) SELECT " +
                 "lower(hex(randomblob(16))), " +
                 "'My ' || COALESCE(strftime('%Y', (SELECT MIN(date) FROM day)), strftime('%Y', 'now')), " +
                 "COALESCE((SELECT format FROM film ORDER BY name LIMIT 1), 'CINEMA'), " +
-                "COALESCE((SELECT MIN(date) FROM day), date('now')), NULL, CAST(strftime('%s', 'now') AS INTEGER) * 1000, 0, 0)",
+                "COALESCE((SELECT MIN(date) FROM day), date('now')), NULL, CAST(strftime('%s', 'now') AS INTEGER) * 1000, 0, 0 " +
+                "WHERE NOT EXISTS (SELECT 1 FROM project)",
         )
         connection.execSQL("ALTER TABLE day RENAME TO day_old")
         connection.execSQL(

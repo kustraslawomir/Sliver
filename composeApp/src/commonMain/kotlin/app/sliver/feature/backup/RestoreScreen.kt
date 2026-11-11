@@ -80,13 +80,13 @@ fun RestoreScreen(onDone: () -> Unit) {
     var failed by remember { mutableStateOf(false) }
     var started by remember { mutableStateOf(false) }
     val progress by engine.progress.collectAsState()
-    val local by remember { repo.observeAll() }.collectAsState(emptyList())
+    val local by remember { repo.observeAllProjects() }.collectAsState(emptyList())
 
     LaunchedEffect(Unit) {
         runCatching { engine.scan() }.onSuccess { scan = it }.onFailure { failed = true }
     }
-    val have = local.map { it.date }.toSet()
-    val missing = scan?.items?.count { it.date !in have } ?: 0
+    val have = local.map { it.projectId to it.date }.toSet()
+    val missing = scan?.items?.count { (it.projectId to it.date) !in have } ?: 0
     val stage = restoreStage(scan, failed, started, progress, missing)
 
     Column(

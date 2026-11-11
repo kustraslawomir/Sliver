@@ -58,6 +58,26 @@ class RestDriveClient(
         return created.getValue("id").jsonPrimitive.content
     }
 
+    override suspend fun ensureSubfolder(parentId: String, name: String): String {
+        val q = "name = '${name.escapeQuery()}' and mimeType = '$FOLDER_MIME' and '$parentId' in parents and trashed = false"
+        query(q).firstOrNull()?.let { return it.id }
+        val created = call(HttpMethod.Post, "/drive/v3/files") {
+            jsonBody(
+                buildJsonObject {
+                    put("name", name)
+                    put("mimeType", FOLDER_MIME)
+                    put("parents", JsonArray(listOf(JsonPrimitive(parentId))))
+                },
+            )
+        }.checked().json().jsonObject
+        return created.getValue("id").jsonPrimitive.content
+    }
+
+    override suspend fun listFolders(parentId: String): List<DriveFile> =
+        query("'$parentId' in parents and mimeType = '$FOLDER_MIME' and trashed = false")
+
+    private fun String.escapeQuery() = replace("\\", "\\\\").replace("'", "\\'")
+
     override suspend fun upload(
         folderId: String,
         name: String,

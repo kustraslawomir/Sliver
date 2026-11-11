@@ -28,6 +28,10 @@ interface DayRepository {
     fun observeDay(date: LocalDate): Flow<Day?>
     fun observeCount(): Flow<Int>
     suspend fun getDay(date: LocalDate): Day?
+    suspend fun getDay(projectId: String, date: LocalDate): Day?
+
+    /** Days of every project; used to tell what a restore still has to fetch. */
+    fun observeAllProjects(): Flow<List<Day>>
     suspend fun save(day: Day)
     suspend fun delete(date: LocalDate)
 
@@ -108,6 +112,8 @@ class DayRepositoryImpl(
     override fun observeDay(date: LocalDate) = activeIds.flatMapLatest { dao.observeByDate(it, date) }
     override fun observeCount() = activeIds.flatMapLatest { dao.observeCount(it) }
     override suspend fun getDay(date: LocalDate) = dao.getByDate(projects.activeId(), date)
+    override suspend fun getDay(projectId: String, date: LocalDate) = dao.getByDate(projectId, date)
+    override fun observeAllProjects() = dao.observeEverything()
     override suspend fun save(day: Day) = dao.upsert(day.copy(projectId = day.projectId.ifEmpty { projects.activeId() }))
     override suspend fun delete(date: LocalDate) {
         val projectId = projects.activeId()

@@ -36,7 +36,7 @@ val commonModule: Module = module {
     single<DriveTrashQueue> { SettingsTrashQueue(get()) }
     single<ProjectRepository> { ProjectRepositoryImpl(get(), get(), get(), get(), get(), get()) }
     single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get()) }
-    single { BackupEngine(get(), get(), get(), get(), get()) }
+    single { BackupEngine(get(), get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
     single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }

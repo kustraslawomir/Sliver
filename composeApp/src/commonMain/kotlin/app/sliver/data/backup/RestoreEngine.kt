@@ -12,6 +12,7 @@ import app.sliver.data.Mismatch
 import app.sliver.data.Motion
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
+import app.sliver.data.db.Project
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
@@ -49,9 +50,35 @@ interface RestoreScheduler {
     fun start()
 }
 
-data class RestoreItem(val fileId: String, val date: LocalDate, val look: LookParams, val source: DaySource, val motion: Motion)
+data class RestoreItem(
+    val fileId: String,
+    val date: LocalDate,
+    val look: LookParams,
+    val source: DaySource,
+    val motion: Motion,
+    /** Target project; null for a legacy backup, which restores into the active project. */
+    val projectId: String? = null,
+)
 
-data class RestoreScan(val folderId: String, val items: List<RestoreItem>)
+/** Project details written into a backup manifest. */
+data class ManifestProject(val id: String, val name: String, val format: FilmFormat, val startDate: LocalDate)
+
+/** A Drive folder holding one project's clips; the legacy flat layout is the root folder with [project] null. */
+data class RestoreSource(val folderId: String, val project: ManifestProject?, val manifest: String?)
+
+data class RestoreScan(val folderId: String, val items: List<RestoreItem>, val sources: List<RestoreSource> = emptyList())
+
+fun parseManifestProject(json: String): ManifestProject? = runCatching {
+    val root = Json.parseToJsonElement(json).jsonObject
+    val id = root["projectId"]?.jsonPrimitive?.contentOrNull ?: return@runCatching null
+    val p = root["project"]?.jsonObject
+    ManifestProject(
+        id = id,
+        name = p?.get("name")?.jsonPrimitive?.contentOrNull ?: "Restored",
+        format = p?.enum<FilmFormat>("format") ?: FilmFormat.CINEMA,
+        startDate = p?.date("startDate") ?: LocalDate(1970, 1, 1),
+    )
+}.getOrNull()
 
 fun parseRestoreItem(file: DriveFile): RestoreItem? {
     val p = file.appProperties
@@ -134,15 +161,24 @@ class RestoreEngine(
     private val _progress = MutableStateFlow<BackupProgress?>(null)
     val progress: StateFlow<BackupProgress?> = _progress
 
-    /** Lists what Drive holds. Items are oldest first. */
+    /** Lists what Drive holds: the legacy flat root plus one subfolder per project. Items are oldest first. */
     suspend fun scan(): RestoreScan {
         val account = settings.settings.first().account
-        val folder = drive.ensureFolder(account.driveFolderId)
-        if (folder != account.driveFolderId) {
-            settings.update { s -> s.copy(account = s.account.copy(driveFolderId = folder)) }
+        val root = drive.ensureFolder(account.driveFolderId)
+        if (root != account.driveFolderId) {
+            settings.update { s -> s.copy(account = s.account.copy(driveFolderId = root)) }
         }
-        val items = drive.list(folder).mapNotNull(::parseRestoreItem).sortedBy { it.date }
-        return RestoreScan(folder, items)
+        val activeId = projects.activeId()
+        val sources = mutableListOf(RestoreSource(root, null, drive.readManifest(root)))
+        for (folder in drive.listFolders(root)) {
+            val manifest = drive.readManifest(folder.id) ?: continue
+            sources += RestoreSource(folder.id, parseManifestProject(manifest), manifest)
+        }
+        val items = sources.flatMap { source ->
+            val projectId = source.project?.id ?: activeId
+            drive.list(source.folderId).mapNotNull(::parseRestoreItem).map { it.copy(projectId = projectId) }
+        }
+        return RestoreScan(root, items.sortedBy { it.date }, sources)
     }
 
     /** Downloads every second Drive has and this phone lacks. A day captured here always wins. Null on success. */
@@ -150,17 +186,22 @@ class RestoreEngine(
         try {
             _progress.value = BackupProgress(0, 0)
             val scan = scan()
-            val todo = scan.items.filter { days.getDay(it.date) == null }
+            val emptyBefore = days.observeCount().first() == 0
+            for (project in scan.sources.mapNotNull { it.project }.distinctBy { it.id }) ensureProject(project)
+            val todo = scan.items.filter { days.getDay(it.projectId ?: projects.activeId(), it.date) == null }
             var done = 0
             _progress.value = BackupProgress(0, todo.size)
             for (item in todo) {
                 restoreDay(item)
                 _progress.value = BackupProgress(++done, todo.size)
             }
-            drive.readManifest(scan.folderId)?.let { manifest ->
-                parseManifestFilms(manifest).filter { films.getFilm(it.id) == null }.forEach { films.save(it) }
+            for (source in scan.sources) {
+                val manifest = source.manifest ?: continue
+                val projectId = source.project?.id ?: projects.activeId()
+                parseManifestFilms(manifest).filter { films.getFilm(it.id) == null }.forEach { films.save(it.copy(projectId = projectId)) }
                 settings.update { applyManifestSettings(it, manifest) }
             }
+            if (emptyBefore) scan.items.firstOrNull { it.projectId != null }?.projectId?.let { projects.setActive(it) }
             null
         } catch (e: CancellationException) {
             throw e
@@ -171,11 +212,16 @@ class RestoreEngine(
         }
     }
 
+    private suspend fun ensureProject(p: ManifestProject) {
+        if (projects.projects.first().any { it.id == p.id }) return
+        projects.restore(Project(p.id, p.name, p.format, p.startDate, createdAt = Clock.System.now()))
+    }
+
     private suspend fun restoreDay(item: RestoreItem) {
         val bytes = drive.download(item.fileId)
         val tmpVideo = files.newTmpPath(Clock.System.now().toEpochMilliseconds())
         val tmpThumb = "$tmpVideo.jpg"
-        val projectId = projects.activeId()
+        val projectId = item.projectId ?: projects.activeId()
         val file = files.dayPath(projectId, item.date)
         val thumb = files.thumbPath(projectId, item.date)
         val color = try {
@@ -185,7 +231,7 @@ class RestoreEngine(
             files.delete(tmpThumb)
             throw e
         }
-        if (days.getDay(item.date) != null || !(files.move(tmpVideo, file) && files.move(tmpThumb, thumb))) {
+        if (days.getDay(projectId, item.date) != null || !(files.move(tmpVideo, file) && files.move(tmpThumb, thumb))) {
             files.delete(tmpVideo)
             files.delete(tmpThumb)
             return
@@ -193,7 +239,7 @@ class RestoreEngine(
         val noon = LocalDateTime(item.date, LocalTime(12, 0)).toInstant(TimeZone.currentSystemDefault())
         days.save(
             Day(
-                date = item.date, file = file, thumb = thumb, source = item.source, look = item.look, motion = item.motion,
+                projectId = projectId, date = item.date, file = file, thumb = thumb, source = item.source, look = item.look, motion = item.motion,
                 color = color, takenAt = noon, createdAt = Clock.System.now(),
                 driveFileId = item.fileId, backup = BackupState.DONE,
             ),

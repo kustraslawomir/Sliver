@@ -11,6 +11,12 @@ interface DriveClient {
     /** Returns [storedId] if that folder still exists, otherwise finds or creates the 'SLIVER' folder. */
     suspend fun ensureFolder(storedId: String? = null): String
 
+    /** Finds or creates the folder [name] directly under [parentId]. */
+    suspend fun ensureSubfolder(parentId: String, name: String): String
+
+    /** Direct subfolders of [parentId]. */
+    suspend fun listFolders(parentId: String): List<DriveFile>
+
     /** Uploads [bytes] as [name] into [folderId]; replaces the content of [existingId] if given. */
     suspend fun upload(
         folderId: String,
@@ -36,7 +42,7 @@ const val DRIVE_FOLDER_NAME = "SLIVER"
 const val MANIFEST_NAME = "manifest.json"
 
 class InMemoryDriveClient : DriveClient {
-    private class Entry(var file: DriveFile, val parent: String?, var bytes: ByteArray, var trashed: Boolean = false)
+    private class Entry(var file: DriveFile, val parent: String?, var bytes: ByteArray, var trashed: Boolean = false, val folder: Boolean = false)
 
     private val entries = LinkedHashMap<String, Entry>()
     private var next = 1
@@ -51,8 +57,15 @@ class InMemoryDriveClient : DriveClient {
         entries[storedId]?.takeIf { !it.trashed }?.let { return it.file.id }
         entries.values.firstOrNull { it.file.name == DRIVE_FOLDER_NAME && it.parent == null && !it.trashed }
             ?.let { return it.file.id }
-        return add(DRIVE_FOLDER_NAME, null, emptyMap(), ByteArray(0)).id
+        return add(DRIVE_FOLDER_NAME, null, emptyMap(), ByteArray(0), folder = true).id
     }
+
+    override suspend fun ensureSubfolder(parentId: String, name: String): String =
+        entries.values.firstOrNull { it.folder && it.parent == parentId && it.file.name == name && !it.trashed }?.file?.id
+            ?: add(name, parentId, emptyMap(), ByteArray(0), folder = true).id
+
+    override suspend fun listFolders(parentId: String) =
+        entries.values.filter { it.folder && it.parent == parentId && !it.trashed }.map { it.file }
 
     override suspend fun upload(
         folderId: String,
@@ -71,7 +84,7 @@ class InMemoryDriveClient : DriveClient {
 
     override suspend fun list(folderId: String) =
         if (entries[folderId]?.trashed == true) emptyList()
-        else entries.values.filter { it.parent == folderId && !it.trashed }.map { it.file }
+        else entries.values.filter { it.parent == folderId && !it.trashed && !it.folder }.map { it.file }
 
     override suspend fun download(fileId: String): ByteArray =
         entries[fileId]?.bytes ?: throw DriveException(BackupError.OTHER, "not found")
@@ -88,9 +101,9 @@ class InMemoryDriveClient : DriveClient {
         upload(folderId, MANIFEST_NAME, emptyMap(), json.encodeToByteArray(), existing?.id)
     }
 
-    private fun add(name: String, parent: String?, props: Map<String, String>, bytes: ByteArray): DriveFile {
+    private fun add(name: String, parent: String?, props: Map<String, String>, bytes: ByteArray, folder: Boolean = false): DriveFile {
         val file = DriveFile("fake-${next++}", name, props)
-        entries[file.id] = Entry(file, parent, bytes)
+        entries[file.id] = Entry(file, parent, bytes, folder = folder)
         return file
     }
 }

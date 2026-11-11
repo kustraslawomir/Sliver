@@ -78,7 +78,7 @@ actual val platformModule: Module = module {
     single<RestoreScheduler> { AndroidRestoreScheduler(get<Context>()) }
     single<BackupScheduler> { AndroidBackupScheduler(get<Context>()) }
     single<NetworkMonitor> { AndroidNetworkMonitor(get<Context>()) }
-    single<ArchiveExporter> { AndroidArchiveExporter(get<Context>(), get(), get(), get()) }
+    single<ArchiveExporter> { AndroidArchiveExporter(get<Context>(), get(), get(), get(), get()) }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
     single<HttpClientEngine> { OkHttp.create() }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }

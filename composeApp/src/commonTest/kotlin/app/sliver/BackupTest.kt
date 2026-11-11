@@ -51,6 +51,8 @@ private class Days(vararg initial: Day) : DayRepository {
     override fun observeDay(date: LocalDate) = rows.map { it[date] }
     override fun observeCount() = rows.map { it.size }
     override suspend fun getDay(date: LocalDate) = rows.value[date]
+    override suspend fun getDay(projectId: String, date: LocalDate) = rows.value[date]
+    override fun observeAllProjects(): Flow<List<Day>> = observeAll()
     override suspend fun save(day: Day) { rows.value = rows.value + (day.date to day) }
     override suspend fun delete(date: LocalDate) { rows.value = rows.value - date }
     override suspend fun saveSecond(request: SaveSecondRequest): Day = error("unused")
@@ -119,16 +121,18 @@ class BackupEngineTest {
         val drive = InMemoryDriveClient()
         val days = Days(day("2025-01-01"), day("2025-01-02"), day("2025-01-03", BackupState.DONE, "x"))
         val settings = Settings()
-        val engine = BackupEngine(drive, days, NoFilms(), settings, reader)
+        val engine = BackupEngine(drive, days, NoFilms(), settings, reader, FakeProjects())
 
         assertNull(engine.run())
 
         val all = days.observeAll().first()
         assertTrue(all.all { it.backup == BackupState.DONE })
         assertNotNull(all[0].driveFileId)
-        val folder = settings.settings.first().account.driveFolderId!!
-        assertEquals(listOf("2025-01-01.mp4", "2025-01-02.mp4", "manifest.json"), drive.list(folder).map { it.name }.sorted())
-        assertNotNull(drive.readManifest(folder))
+        val root = settings.settings.first().account.driveFolderId!!
+        val folder = drive.listFolders(root).single()
+        assertEquals("My 2025", folder.name)
+        assertEquals(listOf("2025-01-01.mp4", "2025-01-02.mp4", "manifest.json"), drive.list(folder.id).map { it.name }.sorted())
+        assertTrue(drive.readManifest(folder.id)!!.contains("\"projectId\":\"p1\""))
         assertNull(engine.progress.value)
     }
 
@@ -136,7 +140,7 @@ class BackupEngineTest {
     fun replacedDayOverwritesExistingDriveFile() = runTest {
         val drive = InMemoryDriveClient()
         val days = Days(day("2025-01-01"))
-        val engine = BackupEngine(drive, days, NoFilms(), Settings(), reader)
+        val engine = BackupEngine(drive, days, NoFilms(), Settings(), reader, FakeProjects())
         engine.run()
         val id = days.getDay(LocalDate.parse("2025-01-01"))!!.driveFileId
         days.save(days.getDay(LocalDate.parse("2025-01-01"))!!.copy(backup = BackupState.PENDING))
@@ -151,9 +155,9 @@ class BackupEngineTest {
         val drive = InMemoryDriveClient()
         val days = Days(day("2025-01-01"))
         val settings = Settings()
-        val engine = BackupEngine(drive, days, NoFilms(), settings, reader)
+        val engine = BackupEngine(drive, days, NoFilms(), settings, reader, FakeProjects())
         engine.run()
-        val folder = settings.settings.first().account.driveFolderId!!
+        val folder = drive.listFolders(settings.settings.first().account.driveFolderId!!).single().id
         val id = days.getDay(LocalDate.parse("2025-01-01"))!!.driveFileId!!
         days.delete(LocalDate.parse("2025-01-01"))
         settings.update { it.copy(account = it.account.copy(pendingTrash = listOf(id))) }
@@ -169,7 +173,7 @@ class BackupEngineTest {
         val drive = InMemoryDriveClient().apply { failUploads = BackupError.DRIVE_FULL }
         val days = Days(day("2025-01-01"))
         val settings = Settings()
-        val engine = BackupEngine(drive, days, NoFilms(), settings, reader, nowMillis = { 42L })
+        val engine = BackupEngine(drive, days, NoFilms(), settings, reader, FakeProjects(), nowMillis = { 42L })
 
         assertEquals(BackupError.DRIVE_FULL, engine.run())
 
