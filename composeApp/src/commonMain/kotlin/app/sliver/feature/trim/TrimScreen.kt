@@ -175,14 +175,23 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         info = clipInfo(d, media.fileSizeBytes(path))
         clipAspect = media.aspect(path)
         durationMs = d
-        if (resume == null && restoredMs == null) {
-            val motion = CaptureSession.motion
-            CaptureSession.motion = false
-            val pick = if (motion) MotionPhoto.windowStartMs(CaptureSession.motionPresentationUs, d) else media.autoPickMs(path, d)
-            startMs = pick
-            committedMs = pick
-        }
+        val motion = CaptureSession.motion
+        CaptureSession.motion = false
         ready = true
+        if (resume == null && restoredMs == null) {
+            if (motion) {
+                MotionPhoto.windowStartMs(CaptureSession.motionPresentationUs, d).let { startMs = it; committedMs = it }
+            } else {
+                // Scoring can take a while on slow decoders: the clip is usable at 0 s meanwhile, and the pick applies only if the user has not moved yet.
+                scope.launch {
+                    val pick = media.autoPickMs(path, d)
+                    if (!custom && startMs == committedMs) {
+                        startMs = pick
+                        committedMs = pick
+                    }
+                }
+            }
+        }
         if (!isShortClip(d)) {
             thumbsTotal = thumbCount(d)
             media.thumbnails(path, d, thumbsTotal) { thumbs = thumbs + it }
@@ -239,7 +248,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
 
     fun useSecond() {
-        if (saving || !ready || duration == null) return
+        if (saving || !ready || durationMs == null) return
         saving = true
         scope.launch {
             val request = SaveSecondRequest(
@@ -248,11 +257,13 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
                 look = look ?: settings.settings.first().defaultLook.toParams(),
             )
-            val ok = runCatching { undo.save(request, dayLabel(day, today)) }.isSuccess
-            if (ok) {
+            val result = runCatching { undo.save(request, dayLabel(day, today)) }
+            if (result.isSuccess) {
                 done = true
                 navigator.finishFlow(day)
             } else {
+                result.exceptionOrNull()?.let { println("SliverSave failed: $it") }
+                undo.toast.show("Couldn't save the clip. Try again.")
                 saving = false
             }
         }

@@ -174,6 +174,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
             CaptureSession.source = app.sliver.data.DaySource.CAMERA
             CaptureSession.forDate = null
             onNavigate(route)
+        }.onFailure {
+            koin.get<app.sliver.feature.trim.SaveUndo>().toast.show("That recording didn't work. Try again.")
         }
     }
 
@@ -266,7 +268,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit) {
                     Spacer(Modifier.weight(1f))
                     val hasToday = todayDay != null
                     Chip(
-                        if (hasToday) "TODAY \u2713" else "TODAY", selected = hasToday,
+                        "TODAY", selected = hasToday,
                         modifier = Modifier.clipDropTarget(today),
                         onClick = {
                             if (hasToday) {
