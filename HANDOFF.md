@@ -1,5 +1,39 @@
 # HANDOFF
 
+## Needs from you (top)
+1. **Geist fonts are missing.** Add OFL files to `composeApp/src/androidMain/res/font/`: `geist_regular.ttf`, `geist_medium.ttf`, `geist_semibold.ttf`, `geist_mono_medium.ttf`. They are wired by resource name in `core/theme/GeistFonts.kt`; until then the system sans/mono fallback is used. Instrument Serif is removed.
+2. Confirm on the phone: the visual brightness change from the exposure slider and real AF lock (logs show the CameraX calls; only the look of the preview needs eyes).
+3. Light / "Replace clip for today" choice: Replace for today still opens Camera; other days open the Photo Picker.
+
+## v1.2.2 design QA
+Legend: ok = matches, no = does not match / not done.
+- ok Titles Geist 600 with tokens tracking (52/36/24); fallback font until files exist (see above)
+- no Geist actually rendering: font files absent
+- ok `core/designsystem/Glow.kt` (shadow-layer modifier + tokens); glow on: primary CTA, trim frame, splash/onboarding slit, slit loader, record button, focus lock ring, date stamp text
+- no glow.dot on progress heads / film markers (progress bars have no head dot in the app); photo-mode white glow only verified in code
+- ok Camera: 150 dp top scrim, 36 dp chips (black 55%, 70% below API 31), "Today" chip, project chip with no format text
+- no Chip blur: Compose has no backdrop blur, so the 12 dp blur is not rendered (plain plate only)
+- ok Tap-to-focus: real CameraX metering AF+AE+AWB (auto-cancel 3 s, lock = disableAutoCancel), ring 88 to 64 dp / 220 ms, dim 35% after 1.2 s or on failure, lock pill and glow.lock, disabled while recording; logs (tag SliverFocus) verified on the Samsung: startFocusAndMetering called, supported=true. A tap with no follow-up stays pending until AF settles or 3 s; a superseded request reports "Cancelled by another startFocusAndMetering" (expected)
+- ok Exposure slider: 120 dp, side with more room, sun icon, EV label while dragging, visible 3 s (stays while locked), resets on lens/mode/torch rebind; `setExposureCompensationIndex` verified applied (index 13 on the Samsung, EV +1.3)
+- ok Record button D: 72 dp disc / 80 dp hit, radial-gradient glow (no blur), stop square 24 dp, breathing 1.6 s ease-in-out (cubic-bezier .42,0,.58,1) between 14px 0x88 + 32px 0x33 and 20px 0xAA + 44px 0x44 (design `sv-breathe`); static under reduced motion; 3 frames in docs/qa/brand/record-glow-breathing.png
+- ok Timer pill grey until 1 s then ember + "CLIP OK" + one CONFIRM haptic; ADD/flip/mode switch hidden while recording
+- ok Save: lands on Project (edit screen popped), cell pops in 0.6 to 1 / 420 ms with 2 dp ember ring, Back goes to Camera, no toast/snackbar anywhere (verified on the Samsung via UI tree)
+- ok Copy: "Save clip", "Your year in clips", "in clips", no "second/Looks" in UI
+- ok Buttons: one line, 48 dp high, chips one line; checked camera at font scale 1.3 (font scale restored to 1.0). Not checked at 1.3: other screens
+- no Landscape: Activity is locked to portrait, so no landscape shots
+- ok ADD badge no longer clipped (drawn in an unclipped wrapper), verified at 1.0 and 1.3
+- ok App icon, splash theme + installSplashScreen, `ic_stat_sliver` on all notifications (code)
+- no Not captured: home screen with themed icons on/off and a notification (would show the user's launcher/shade); splash only captured masked
+- no Design boards are template-driven HTML and render with unresolved placeholders headless; design PNGs in design/png are partial, so comparison is by measuring the HTML
+- no AndroidDayShare draws "SLIVER" as canvas text for the share watermark; left as is
+
+## User decisions applied in this run
+- Timer, Filter strip and countdown removed from Camera; Grid moved into a 3-dots menu (switch, persisted); Light is a plain icon (zap / zap-off, 44 dp, Role.Switch). The design board still shows Timer/Filter/tools row: the decision wins.
+- **Filters dropped for now, restore from git history before commit a78807d.** All entry points and the editor route/screen removed. Stored `look` columns untouched; `LookEffects.build` returns no effects (PARKED flag), so playback/export are unfiltered. Dormant code kept: LUT generator, LookEffects, LookRenderer, LooksLogic/LookSession, settings `defaultLook`.
+- Gallery screen removed; ADD, "Choose from Photos" and Replace open the system Photo Picker directly (`feature/gallery/AddMedia.kt`).
+- Privacy: no camera preview or real media saved under docs/qa; camera shots are masked. A test clip was recorded and saved in the app on the Samsung (app data only).
+
+
 Final verifier run (T01–T37): `assembleDebug`, `testDebugUnitTest` (151 tests) and `lintDebug` all pass. Nothing was run on a device or emulator.
 
 ## Status
