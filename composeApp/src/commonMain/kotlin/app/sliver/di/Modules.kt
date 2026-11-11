@@ -1,6 +1,8 @@
 package app.sliver.di
 
+import app.sliver.data.auth.AccountDeleter
 import app.sliver.data.auth.AccountManager
+import kotlinx.coroutines.flow.first
 import app.sliver.data.auth.GoogleAuth
 import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.backup.BackupEngine
@@ -39,6 +41,10 @@ val commonModule: Module = module {
     single<FilmRepository> { FilmRepositoryImpl(get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }
+    single {
+        val days = get<DayRepository>()
+        AccountDeleter(get(), get(), get()) { days.observeAll().first().forEach { days.delete(it.date) } }
+    }
     single<DriveClient> {
         val auth = get<GoogleAuth>()
         if (auth.isFake) InMemoryDriveClient() else RestDriveClient(get<HttpClientEngine>(), auth::accessToken)

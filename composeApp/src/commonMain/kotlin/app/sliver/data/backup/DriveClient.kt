@@ -70,7 +70,8 @@ class InMemoryDriveClient : DriveClient {
     }
 
     override suspend fun list(folderId: String) =
-        entries.values.filter { it.parent == folderId && !it.trashed }.map { it.file }
+        if (entries[folderId]?.trashed == true) emptyList()
+        else entries.values.filter { it.parent == folderId && !it.trashed }.map { it.file }
 
     override suspend fun download(fileId: String): ByteArray =
         entries[fileId]?.bytes ?: throw DriveException(BackupError.OTHER, "not found")

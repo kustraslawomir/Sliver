@@ -13,7 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-private class MemorySettings : SettingsRepository {
+internal class MemorySettings : SettingsRepository {
     private val state = MutableStateFlow(AppSettings())
     override val settings = state
     override suspend fun update(transform: (AppSettings) -> AppSettings) {

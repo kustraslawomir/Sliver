@@ -37,6 +37,7 @@ import app.sliver.core.ui.SecondaryButton
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.BackupState
+import app.sliver.data.auth.AccountDeleter
 import app.sliver.data.auth.AccountManager
 import app.sliver.data.backup.ArchiveExporter
 import app.sliver.data.backup.BackupEngine
@@ -85,6 +86,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     val days = remember { koin.get<DayRepository>() }
     val drive = remember { koin.get<DriveClient>() }
     val scheduler = remember { koin.get<BackupScheduler>() }
+    val deleter = remember { koin.get<AccountDeleter>() }
     val monitor = remember { koin.get<NetworkMonitor>() }
     val exporter = remember { koin.get<ArchiveExporter>() }
     val scope = rememberCoroutineScope()
@@ -98,6 +100,11 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     var quota by remember { mutableStateOf<DriveQuota?>(null) }
     var exportNote by remember { mutableStateOf<String?>(null) }
     var confirmDisconnect by remember { mutableStateOf(false) }
+    var showDelete by remember { mutableStateOf(false) }
+    var deleteDrive by remember { mutableStateOf(false) }
+    var deleteLocal by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf(false) }
     val pickZip = rememberZipSavePicker { uri ->
         scope.launch {
             exportNote = "Exporting"
@@ -158,10 +165,12 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                         SecondaryButton("Export everything (.zip)", { pickZip("sliver-archive.zip") }, Modifier.fillMaxWidth())
                         exportNote?.let { SliverText(it, SliverType.BodySmall) }
                         SliverText(
-                            "Signed in as ${account.email.orEmpty()}. We keep your email. Your videos: never.",
+                            "Signed in with Google as ${account.email.orEmpty()}.",
                             SliverType.Caption,
                         )
-                        GhostButton("Disconnect", { confirmDisconnect = true }, destructive = true)
+                        InfoRow("What we keep", "Your email. Your videos: never.")
+                        GhostButton("Sign out", { confirmDisconnect = true })
+                        GhostButton("Delete account", { showDelete = true; deleteError = false }, destructive = true)
                     }
                 }
                 else -> GoogleSignInPanel(skipLabel = "Not now", onFinished = onBack, onRestore = onRestore)
@@ -169,14 +178,48 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
         }
         SliverBottomSheet(confirmDisconnect, { confirmDisconnect = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                SliverText("Disconnect Google?", SliverType.Title)
-                SliverText("Backups stop. Files already in your Drive stay where they are.", SliverType.BodySmall)
+                SliverText("Sign out?", SliverType.Title)
+                SliverText("Backup pauses. Nothing is deleted, here or in your Drive.", SliverType.BodySmall)
                 PrimaryButton(
-                    "Disconnect",
+                    "Sign out",
                     { confirmDisconnect = false; scope.launch { manager.signOut() } },
                     Modifier.fillMaxWidth(),
                 )
                 GhostButton("Cancel", { confirmDisconnect = false }, Modifier.fillMaxWidth())
+            }
+        }
+        SliverBottomSheet(showDelete, { if (!deleting) showDelete = false }) {
+            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                SliverText("Delete account?", SliverType.Title)
+                SliverText(
+                    "We revoke SLIVER's access to your Google account and carry on as a guest.",
+                    SliverType.BodySmall,
+                )
+                SwitchRow(
+                    "Delete the SLIVER folder in Drive", deleteDrive, { deleteDrive = it },
+                    caption = "Your backed-up seconds are removed from Drive",
+                )
+                SwitchRow(
+                    "Delete my seconds on this phone", deleteLocal, { deleteLocal = it },
+                    caption = "This can't be undone",
+                )
+                if (deleteError) SliverText("Something went wrong. Nothing more was changed. Try again.", SliverType.Caption)
+                PrimaryButton(
+                    if (deleting) "Deleting" else "Delete account",
+                    {
+                        deleting = true
+                        deleteError = false
+                        scope.launch {
+                            deleter.delete(deleteDrive, deleteLocal).fold(
+                                { showDelete = false; deleteDrive = false; deleteLocal = false },
+                                { deleteError = true },
+                            )
+                            deleting = false
+                        }
+                    },
+                    Modifier.fillMaxWidth(), enabled = !deleting,
+                )
+                GhostButton("Cancel", { showDelete = false }, Modifier.fillMaxWidth())
             }
         }
     }

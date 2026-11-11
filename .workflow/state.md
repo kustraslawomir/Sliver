@@ -34,4 +34,4 @@
 - [x] T34 (Ktor RestDriveClient + InMemoryDriveClient when auth is fake)
 - [x] T35 (BackupEngine + WorkManager worker, 7-state machine, Backup screen, zip export, 24h problem notification)
 - [x] T36 (RestoreEngine + RestoreWorker, Restore screen, local day wins; not device-tested)
-- [ ] T37
+- [x] T37 (sign out + delete account sheet; Drive folder trashed, not device-tested)
