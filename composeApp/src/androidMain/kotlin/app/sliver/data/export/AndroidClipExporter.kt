@@ -3,7 +3,11 @@ package app.sliver.data.export
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
+import android.media.MediaMuxer
 import android.net.Uri
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
@@ -28,6 +32,7 @@ import app.sliver.data.Motion
 import app.sliver.data.look.LookEffects
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.ByteBuffer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -108,6 +113,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             holdFrame?.delete()
         }
         val (duration, color) = withContext(Dispatchers.IO) {
+            trimAudioToSecond(videoPath)
             val color = writeThumbnail(videoPath, thumbPath)
             probe(Uri.fromFile(File(videoPath))).durationMs to color
         }
@@ -145,10 +151,65 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         ).build()
         runTransformer(composition, videoPath)
         val (duration, color) = withContext(Dispatchers.IO) {
+            trimAudioToSecond(videoPath)
             val color = writeThumbnail(videoPath, thumbPath)
             probe(Uri.fromFile(File(videoPath))).durationMs to color
         }
         return ExportedClip(videoPath, thumbPath, duration, color)
+    }
+
+    /** Encoded audio overshoots the video by a few AAC frames; drop them so the file is exactly 1.000 s. */
+    private fun trimAudioToSecond(path: String) {
+        val tmp = File("$path.tmp")
+        val extractor = MediaExtractor()
+        val muxer = MediaMuxer(tmp.path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+        try {
+            extractor.setDataSource(path)
+            val rotation = MediaMetadataRetriever().let { r ->
+                try {
+                    r.setDataSource(path)
+                    r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+                } finally {
+                    r.release()
+                }
+            }
+            muxer.setOrientationHint(rotation)
+            val sampleRates = HashMap<Int, Int>()
+            val outTracks = HashMap<Int, Int>()
+            for (i in 0 until extractor.trackCount) {
+                val format = extractor.getTrackFormat(i)
+                if (format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true) {
+                    sampleRates[i] = format.getInteger(MediaFormat.KEY_SAMPLE_RATE)
+                }
+                outTracks[i] = muxer.addTrack(format)
+                extractor.selectTrack(i)
+            }
+            muxer.start()
+            val buffer = ByteBuffer.allocate(1 shl 20)
+            val info = MediaCodec.BufferInfo()
+            while (true) {
+                buffer.clear()
+                info.size = extractor.readSampleData(buffer, 0)
+                if (info.size < 0) break
+                val track = extractor.sampleTrackIndex
+                val rate = sampleRates[track]
+                if (rate == null || AudioFit.keep(extractor.sampleTime, rate)) {
+                    info.presentationTimeUs = extractor.sampleTime
+                    info.flags = extractor.sampleFlags
+                    info.offset = 0
+                    muxer.writeSampleData(outTracks.getValue(track), buffer, info)
+                }
+                extractor.advance()
+            }
+            muxer.stop()
+            muxer.release()
+            tmp.renameTo(File(path))
+        } catch (e: Exception) {
+            runCatching { muxer.release() }
+            tmp.delete()
+        } finally {
+            extractor.release()
+        }
     }
 
     private suspend fun runTransformer(composition: Composition, outPath: String) = withContext(Dispatchers.Main) {

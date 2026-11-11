@@ -92,3 +92,13 @@ object ClipPlanner {
 }
 
 data class CropRect(val left: Float, val right: Float, val bottom: Float, val top: Float)
+
+/** AAC frames are 1024 samples, so a 1 s clip cannot hold a fractional frame; whole frames must end by the limit. */
+object AudioFit {
+    const val AAC_FRAME_SAMPLES = 1024
+
+    fun frameUs(sampleRate: Int): Long = AAC_FRAME_SAMPLES * 1_000_000L / sampleRate
+
+    /** True when an audio sample starting at [ptsUs] still ends within [limitUs]. */
+    fun keep(ptsUs: Long, sampleRate: Int, limitUs: Long = SECOND_MS * 1000): Boolean = ptsUs + frameUs(sampleRate) <= limitUs
+}
