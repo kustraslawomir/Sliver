@@ -50,6 +50,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val onboardingDone = booleanPreferencesKey("onboardingDone")
         val coachTrimSeen = booleanPreferencesKey("coachTrimSeen")
         val coachRecordSeen = booleanPreferencesKey("coachRecordSeen")
+        val nudgeDismissed = booleanPreferencesKey("nudgeDismissed")
         val firstDay = stringPreferencesKey("firstDay")
         val activeProjectId = stringPreferencesKey("activeProjectId")
         val accountSignedIn = booleanPreferencesKey("account.signedIn")
@@ -98,6 +99,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
             onboardingDone = this[K.onboardingDone] ?: d.onboardingDone,
             coachTrimSeen = this[K.coachTrimSeen] ?: d.coachTrimSeen,
             coachRecordSeen = this[K.coachRecordSeen] ?: d.coachRecordSeen,
+            nudgeDismissed = this[K.nudgeDismissed] ?: d.nudgeDismissed,
             firstDay = this[K.firstDay]?.let(LocalDate::parse),
             activeProjectId = this[K.activeProjectId],
             account = AccountSettings(
@@ -142,6 +144,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.onboardingDone, s.onboardingDone)
         put(K.coachTrimSeen, s.coachTrimSeen)
         put(K.coachRecordSeen, s.coachRecordSeen)
+        put(K.nudgeDismissed, s.nudgeDismissed)
         put(K.firstDay, s.firstDay?.toString())
         put(K.activeProjectId, s.activeProjectId)
         put(K.accountSignedIn, s.account.signedIn)

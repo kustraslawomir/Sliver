@@ -262,14 +262,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     Spacer(Modifier.weight(1f))
                     CameraChip(
                         "Today", leading = SliverIcons.Calendar,
-                        onClick = {
-                            if (todayDay != null) {
-                                ArchiveSession.selected = today
-                                onNavigate(Route.DayDetail)
-                            } else {
-                                onNavigate(Route.Project)
-                            }
-                        },
+                        onClick = { onNavigate(Route.Project) },
                     )
                     LightToggle(cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
                     IconButton44({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, Color.White) }

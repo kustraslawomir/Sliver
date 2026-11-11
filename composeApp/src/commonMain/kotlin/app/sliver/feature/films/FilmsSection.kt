@@ -14,7 +14,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
+import app.sliver.core.icons.HubIcons
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.ui.rememberTapGate
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -56,7 +70,6 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
     val list by remember { films.observeAll() }.collectAsState(emptyList())
     val all by remember { days.observeAll() }.collectAsState(emptyList())
     val app by remember { settings.settings }.collectAsState(null)
-    val teaser = remember { teaserState(today) }
 
     LaunchedEffect(all.isNotEmpty(), app) {
         val first = all.minOfOrNull { it.date }
@@ -64,76 +77,67 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
         if (first != null && format != null) films.ensureDefaultFilm(first, format)
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S4)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            SliverText("Films", SliverType.DisplayM, Modifier.weight(1f))
-            SecondaryButton("Make film", { onNavigate(Route.FilmBuilder) }, fullWidth = false)
+    Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
+            SliverText("Films", SliverType.Title.copy(letterSpacing = (-0.02).em, lineHeight = 22.sp), Modifier.weight(1f))
+            val tap = rememberTapGate { onNavigate(Route.FilmBuilder) }
+            Row(
+                Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
+                    .clickable(role = Role.Button, onClick = tap).padding(start = 10.dp, end = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                SliverIcon(HubIcons.Plus, SliverColors.TextPrimary, size = 16.dp)
+                SliverText("Make film", SliverType.Headline.copy(fontSize = 14.sp, lineHeight = 18.sp), maxLines = 1, softWrap = false)
+            }
         }
-        if (teaser != TeaserState.HIDDEN) {
-            YearTeaser(today.year, teaser == TeaserState.UNLOCKED) { onNavigate(Route.YearInClips) }
-        }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            items(list, key = { it.id }) { film ->
-                Poster(film, film.plan(all), Modifier.width(if (film.format == FilmFormat.CINEMA) 220.dp else 130.dp)) {
-                    FilmNav.id = film.id
-                    onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
+        if (list.isNotEmpty()) {
+            LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                itemsIndexed(list, key = { _, f -> f.id }) { i, film ->
+                    Poster(film, film.plan(all), PosterColors[i % PosterColors.size]) {
+                        FilmNav.id = film.id
+                        onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-private fun YearTeaser(year: Int, unlocked: Boolean, onClick: () -> Unit) {
-    Column(
-        Modifier.fillMaxWidth().clip(SliverShapes.L).background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.AccentLine, SliverShapes.L)
-            .clickable(onClick = onClick)
-            .padding(SliverSpace.S4),
-        verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
-    ) {
-        Badge(if (unlocked) "Ready" else "Unlocks 26 Dec")
-        SliverText("Your $year in clips", SliverType.DisplayM)
-        SliverText(
-            if (unlocked) "Your year, one clip at a time." else "Keep going. It opens on 26 December.",
-            SliverType.BodySmall,
-        )
-    }
-}
+private val PosterColors = listOf(Color(0xFF2A2018), Color(0xFF34201A), Color(0xFF3A2E16))
 
 @Composable
-private fun Poster(film: Film, plan: FilmPlan, modifier: Modifier, onClick: () -> Unit) {
-    val ratio = if (film.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
-    val cover = plan.days.firstOrNull()
-    Column(modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit) {
+    val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
+    val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
+    Column(
+        Modifier.width(132.dp).clickable(role = Role.Button, onClick = rememberTapGate(onClick))
+            .semantics { contentDescription = "${film.name}, ${formatRuntime(plan.clips)}" },
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         Box(
-            Modifier.fillMaxWidth().aspectRatio(ratio).clip(SliverShapes.M).background(SliverColors.Surface2)
-                .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
+            Modifier.fillMaxWidth().height(198.dp).clip(SliverShapes.R14)
+                .background(Brush.verticalGradient(0f to tint, 0.75f to SliverColors.BgVoid, 1f to SliverColors.BgVoid))
+                .border(1.dp, SliverColors.LineHairline, SliverShapes.R14)
+                .padding(12.dp),
         ) {
-            cover?.let { PosterCover(it) }
-            if (film.live) Badge("Live", Modifier.align(Alignment.TopStart).padding(SliverSpace.S2))
-            val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
-            val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
+            Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                SliverText("A FILM BY YOU", mono(8.sp, 0.3.em), color = SliverColors.TextTertiary)
+                SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em))
+            }
             when (val s = state) {
-                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2))
-                RenderState.Failed -> Badge(
-                    "Try again",
-                    Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2).clickable { renderer.start(film.id) },
-                )
+                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart))
+                RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) })
                 RenderState.Idle -> Unit
             }
         }
-        SliverText(film.name, SliverType.Headline)
-        SliverText(
-            "${if (film.format == FilmFormat.CINEMA) "16:9" else "9:16"} · ${formatRuntime(plan.clips)}",
-            SliverType.MonoS,
-        )
-        SliverText("${film.rangeText()} · ${plan.clips} clips", SliverType.Caption)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            SliverText(formatRuntime(plan.clips), mono(10.sp, 0.sp), color = SliverColors.TextPrimary)
+            SliverText(if (film.live) "LIVE" else film.rangeText().uppercase(), mono(10.sp, 0.sp), color = SliverColors.TextTertiary)
+        }
     }
 }
 
-@Composable
-private fun PosterCover(day: Day) {
-    val thumb = rememberPhoto(day.thumb)
-    if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-}
+/** Geist Mono at regular weight, as the Project boards use it. */
+fun mono(size: TextUnit, tracking: TextUnit, color: Color = SliverColors.TextPrimary) =
+    SliverType.MonoS.copy(color = color, fontSize = size, letterSpacing = tracking, fontWeight = FontWeight.Normal, lineHeight = TextUnit.Unspecified)

@@ -1,6 +1,8 @@
 # HANDOFF
 
 ## Needs from you (top)
+- Project screen delete confirmation: design not supplied. The existing F04 dialog (sheet) is unchanged; please provide a board.
+- Archive/Delete in the Project menu are disabled when it is the only open project (existing rule); the board shows them enabled.
 1. **Geist fonts are missing.** Add OFL files to `composeApp/src/androidMain/res/font/`: `geist_regular.ttf`, `geist_medium.ttf`, `geist_semibold.ttf`, `geist_mono_medium.ttf`. They are wired by resource name in `core/theme/GeistFonts.kt`; until then the system sans/mono fallback is used. Instrument Serif is removed.
 2. Confirm on the phone: the visual brightness change from the exposure slider and real AF lock (logs show the CameraX calls; only the look of the preview needs eyes).
 3. Light / "Replace clip for today" choice: Replace for today still opens Camera; other days open the Photo Picker.
@@ -186,3 +188,19 @@ Log.d in CameraEngine/FrameSampler now goes through `logDebug`, which only logs 
 
 ### Not done (needs owner)
 R8 + release signing (keystore), real fonts/music. Save-path and picker changes (items 2 and 4) were built, unit-tested and lint-checked, and the app was installed and launched on the Samsung, but a full save/Fill run was not exercised because it needs the picker on real media.
+
+## v1.2.3 design QA
+Device: Samsung (1080x2340 @420dpi). Shots in docs/qa/project/ (clip cells masked), glow crop docs/qa/glow/project-add-cta.png, fonts docs/qa/fonts-geist-masked.png.
+- [x] Fonts: Geist/Geist Mono via compose resources, no FontFamily.Default/SansSerif left, text visibly Geist on device. Mono is also used at Regular (400) on Project boards.
+- [x] Camera: only Light + menu(Grid); FLIP label under 52dp #FFFFFF1A circle; chip plate #000 70% always.
+- [x] Share image: R.drawable.sliver_wordmark drawn with setBounds/draw. [ ] not visually checked on device (needs a share run); wordmark size 140px@1080 is my choice, the board gives no size.
+- [x] Filters parked: removed "Favourite filter" stat and "or filter" button text on Year screen; no other entries found.
+- [x] Landscape: docs/qa/landscape.md + scripts/check-landscape.sh; awaiting owner recordings.
+- Project screen (month, year+nudge, menu, add sheet): header, segmented control, nudge card, grid cells (58dp, 4/5 gaps, empty/today/future/before-start), year rows, memory card, films posters 132x198, menu 230dp, add sheet with ember CTA glow all built from board values.
+  - [x] Month/year/nudge/menu/add sheet match the PNGs within about 4 dp on header spacing (anchored to status bar inset, not 844dp absolute).
+  - [x] Add sheet: system Photo Picker only (no READ_MEDIA).
+  - [ ] Not verified on device: today-without-clip ember ring, memory card, thumbnails (today had a real clip, masked), film poster row (only default film), disabled Archive/Delete.
+  - [ ] Sheet container is the shared SliverBottomSheet: border is hairline all round, board has a #3A3A40 top border only.
+  - [ ] Dropped from Project screen vs v1.1: backfilled-cell badge, reminder-permission card variants, "Your year in clips" teaser card (not on boards; Year-in-clips route is now unreachable from here).
+  - Camera calendar chip now always opens Project (board: opened from the chip); Day detail is reached from the grid.
+  - No new tables; one new DataStore flag nudgeDismissed.

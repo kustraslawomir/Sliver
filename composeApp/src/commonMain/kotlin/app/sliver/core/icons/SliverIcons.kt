@@ -15,19 +15,51 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-private fun lucide(name: String, vararg paths: String): ImageVector =
+private fun lucide(name: String, vararg paths: String): ImageVector = designIcon(name, 1.5f, false, *paths)
+
+/** Icon from the design's own SVG path data (24 viewBox); [stroke] is the SVG stroke-width, [filled] fills instead. */
+private fun designIcon(name: String, stroke: Float, filled: Boolean, vararg paths: String): ImageVector =
     ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f).apply {
         paths.forEach { d ->
             addPath(
                 PathParser().parsePathString(d).toNodes(),
-                fill = null,
-                stroke = SolidColor(Color.Black),
-                strokeLineWidth = 1.5f,
+                fill = if (filled) SolidColor(Color.Black) else null,
+                stroke = if (filled) null else SolidColor(Color.Black),
+                strokeLineWidth = stroke,
                 strokeLineCap = StrokeCap.Round,
                 strokeLineJoin = StrokeJoin.Round,
             )
         }
     }.build()
+
+/** Project screen icons, copied from design/src/ProjectHub*.dc.html. */
+object HubIcons {
+    val Back = designIcon("hub-back", 1.6f, false, "M6 9l6 6 6-6")
+    val Switcher = designIcon("hub-switcher", 2f, false, "M6 9l6 6 6-6")
+    val Prev = designIcon("hub-prev", 1.8f, false, "M15 18l-6-6 6-6")
+    val Next = designIcon("hub-next", 1.8f, false, "M9 18l6-6-6-6")
+    val Gear = designIcon(
+        "hub-gear", 1.6f, false,
+        "M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z",
+        "M15 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0z",
+    )
+    val More = designIcon(
+        "hub-more", 0f, true,
+        "M6.6 12a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z", "M13.6 12a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z", "M20.6 12a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z",
+    )
+    val Bell = designIcon("hub-bell", 1.6f, false, "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10.3 21a1.9 1.9 0 0 0 3.4 0")
+    val Play = designIcon("hub-play", 0f, true, "M8 5v14l11-7z")
+    val Plus = designIcon("hub-plus", 1.8f, false, "M12 5v14M5 12h14")
+    val Rename = designIcon("hub-rename", 1.6f, false, "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z")
+    val Shape = designIcon("hub-shape", 1.6f, false, "M3 7h18v10H3z")
+    val FillDays = designIcon("hub-fill", 1.6f, false, "M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4 M12 13v5 M9.5 15.5h5")
+    val Archive = designIcon("hub-archive", 1.6f, false, "M3 4h18v4H3z M5 8v12h14V8 M10 12h4")
+    val Trash = designIcon("hub-trash", 1.6f, false, "M3 6h18 M8 6V4h8v2 M6 6l1 14h10l1-14")
+    val Photos = designIcon(
+        "hub-photos", 1.8f, false,
+        "M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z", "M11 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0z", "M21 15l-3.1-3.1a2 2 0 0 0-2.8 0L6 21",
+    )
+}
 
 object SliverIcons {
     val X = lucide("x", "M18 6 6 18", "m6 6 12 12")

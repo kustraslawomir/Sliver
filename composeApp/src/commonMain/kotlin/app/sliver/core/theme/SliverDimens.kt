@@ -24,6 +24,10 @@ object SliverRadius {
     val L = 24.dp
     val Xl = 32.dp
     val Pill = 999.dp
+    val R12 = 12.dp
+    val R14 = 14.dp
+    val R18 = 18.dp
+    val R20 = 20.dp
 }
 
 object SliverShapes {
@@ -32,5 +36,9 @@ object SliverShapes {
     val M = RoundedCornerShape(SliverRadius.M)
     val L = RoundedCornerShape(SliverRadius.L)
     val Pill = RoundedCornerShape(SliverRadius.Pill)
+    val R12 = RoundedCornerShape(SliverRadius.R12)
+    val R14 = RoundedCornerShape(SliverRadius.R14)
+    val R18 = RoundedCornerShape(SliverRadius.R18)
+    val R20 = RoundedCornerShape(SliverRadius.R20)
     val SheetTop = RoundedCornerShape(topStart = SliverRadius.Xl, topEnd = SliverRadius.Xl)
 }

@@ -59,12 +59,16 @@ private sealed interface SheetMode {
     data class Delete(val project: Project) : SheetMode
 }
 
+/** Direct entry into one of the per-project forms, used by the Project screen menu. */
+enum class ProjectAction { Rename, Format, Delete }
+
 /** Projects list, new-project form and the per-project menu, all in one bottom sheet. */
 @Composable
 fun ProjectsSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     initialMenuFor: String? = null,
+    action: ProjectAction? = null,
 ) {
     val repo = remember { KoinPlatform.getKoin().get<ProjectRepository>() }
     val projects by remember { repo.projects }.collectAsState(emptyList())
@@ -74,12 +78,21 @@ fun ProjectsSheet(
     val flight = rememberSingleFlight()
     var mode by remember { mutableStateOf<SheetMode>(SheetMode.List) }
 
-    LaunchedEffect(visible, initialMenuFor, projects.isEmpty()) {
+    LaunchedEffect(visible, initialMenuFor, action, projects.isEmpty(), active?.id) {
         mode = if (visible) {
-            projects.firstOrNull { it.id == initialMenuFor }?.let { SheetMode.Menu(it) } ?: SheetMode.List
+            val target = active.takeIf { action != null }
+            when {
+                target != null -> when (action) {
+                    ProjectAction.Rename -> SheetMode.Rename(target)
+                    ProjectAction.Format -> SheetMode.Format(target)
+                    else -> SheetMode.Delete(target)
+                }
+                else -> projects.firstOrNull { it.id == initialMenuFor }?.let { SheetMode.Menu(it) } ?: SheetMode.List
+            }
         } else SheetMode.List
     }
-    fun backToList() { mode = SheetMode.List }
+    fun backToList() { if (action != null) onDismiss() else mode = SheetMode.List }
+    fun backToMenu(p: Project) { if (action != null) onDismiss() else mode = SheetMode.Menu(p) }
 
     fun run(block: suspend () -> Unit) = flight.launch(scope) {
         block()
@@ -121,17 +134,17 @@ fun ProjectsSheet(
             )
             is SheetMode.Rename -> RenameProject(
                 m.project, flight.running,
-                onBack = { mode = SheetMode.Menu(m.project) },
+                onBack = { backToMenu(m.project) },
                 onSave = { name -> run { repo.rename(m.project.id, name) } },
             )
             is SheetMode.Format -> FormatProject(
                 m.project,
-                onBack = { mode = SheetMode.Menu(m.project) },
+                onBack = { backToMenu(m.project) },
                 onPick = { format -> run { repo.setFormat(m.project.id, format) } },
             )
             is SheetMode.Delete -> ConfirmDelete(
                 m.project, stats[m.project.id]?.clips ?: 0, flight.running,
-                onBack = { mode = SheetMode.Menu(m.project) },
+                onBack = { backToMenu(m.project) },
                 onConfirm = { run { repo.delete(m.project.id) } },
             )
         }

@@ -27,8 +27,9 @@ fun canGoPrev(shown: YearMonth, first: LocalDate) = shown > first.toYearMonth()
 
 fun canGoNext(shown: YearMonth, today: LocalDate) = shown < today.toYearMonth()
 
-fun cellState(date: LocalDate, today: LocalDate, day: Day?): CellState = when {
+fun cellState(date: LocalDate, today: LocalDate, day: Day?, start: LocalDate? = null): CellState = when {
     date > today -> CellState.FUTURE
+    day == null && start != null && date < start -> CellState.FUTURE
     day != null -> if (day.source == app.sliver.data.DaySource.BACKFILL) CellState.BACKFILLED else CellState.FILLED
     date == today -> CellState.TODAY
     else -> CellState.EMPTY
@@ -55,7 +56,7 @@ fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12
 }
 
 fun clipsHeader(count: Int, first: LocalDate, format: FilmFormat? = null): String =
-    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]} ${first.year}" +
+    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]}" +
         (format?.let { " · ${it.label().uppercase()}" } ?: "")
 
 val MonthNames = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
