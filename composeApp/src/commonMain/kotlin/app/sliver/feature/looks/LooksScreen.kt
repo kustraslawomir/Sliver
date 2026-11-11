@@ -134,7 +134,7 @@ fun LooksScreen(onBack: () -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
-            Segmented(listOf("FILTERS", "ADJUST"), tab, { tab = it })
+            Segmented(listOf("PRESETS", "ADJUST"), tab, { tab = it })
             if (tab == 0) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     items(LookPreset.entries) { preset ->
