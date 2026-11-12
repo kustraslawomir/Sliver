@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.rememberAppVisible
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -76,9 +77,10 @@ actual fun FilmPreview(
         }
     }
     LaunchedEffect(audio) { music.volume = if (audio == FilmAudio.MIX) MIX_MUSIC else 1f }
-    LaunchedEffect(paused) {
-        video.playWhenReady = !paused
-        music.playWhenReady = !paused
+    val visible = rememberAppVisible()
+    LaunchedEffect(paused, visible) {
+        video.playWhenReady = !paused && visible
+        music.playWhenReady = !paused && visible
     }
     LaunchedEffect(seek) {
         val s = seek ?: return@LaunchedEffect

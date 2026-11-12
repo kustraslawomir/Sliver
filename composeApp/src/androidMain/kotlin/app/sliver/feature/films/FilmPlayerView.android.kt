@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.rememberAppVisible
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -58,9 +59,10 @@ actual fun FilmPlayerView(
         player.prepare()
     }
     LaunchedEffect(muted) { player.volume = if (muted) 0f else 1f }
-    LaunchedEffect(playing) {
-        if (playing && player.playbackState == Player.STATE_ENDED) player.seekTo(0)
-        player.playWhenReady = playing
+    val visible = rememberAppVisible()
+    LaunchedEffect(playing, visible) {
+        if (playing && visible && player.playbackState == Player.STATE_ENDED) player.seekTo(0)
+        player.playWhenReady = playing && visible
     }
     LaunchedEffect(seek) { seek?.let { player.seekTo(it.ms) } }
     LaunchedEffect(Unit) {

@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.ui.rememberAppVisible
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +63,8 @@ actual fun TrimPlayer(
     }
     LaunchedEffect(speed) { player.playbackParameters = PlaybackParameters(speed) }
     LaunchedEffect(audio) { player.volume = if (audio) 1f else 0f }
-    LaunchedEffect(paused) { player.playWhenReady = !paused }
+    val visible = rememberAppVisible()
+    LaunchedEffect(paused, visible) { player.playWhenReady = !paused && visible }
 
     AndroidView(
         factory = { ctx ->

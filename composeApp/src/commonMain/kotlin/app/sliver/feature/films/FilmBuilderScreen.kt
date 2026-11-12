@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.OnAppHidden
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Canvas
@@ -106,6 +107,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val lookParams = options.look?.toParams()
 
     var paused by remember { mutableStateOf(false) }
+    OnAppHidden { paused = true }
     var seek by remember { mutableStateOf<FilmSeek?>(null) }
     var position by remember { mutableStateOf(0 to 0f) }
     val fileStore = remember { koin.get<FileStore>() }

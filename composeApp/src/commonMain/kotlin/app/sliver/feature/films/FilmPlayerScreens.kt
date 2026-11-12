@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.OnAppHidden
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.animation.core.Animatable
@@ -185,6 +186,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     var playing by remember { mutableStateOf(true) }
+    OnAppHidden { playing = false }
     var muted by remember { mutableStateOf(false) }
     var fullscreen by remember { mutableStateOf(false) }
     var seek by remember { mutableStateOf<PlayerSeek?>(null) }
