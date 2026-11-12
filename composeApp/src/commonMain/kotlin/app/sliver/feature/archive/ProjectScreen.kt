@@ -470,7 +470,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
             }
             else -> {
                 val thumb = if (day != null) rememberPhoto(day.thumb) else null
-                Box(Modifier.fillMaxSize().background(Color(day!!.color)))
+                Box(Modifier.fillMaxSize().background(day!!.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3))
                 if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
@@ -507,7 +507,7 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(56.dp).clip(CellShape).background(Color(day.color)), Alignment.Center) {
+        Box(Modifier.size(56.dp).clip(CellShape).background(day.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3), Alignment.Center) {
             if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
             SliverIcon(HubIcons.Play, SliverColors.TextPrimary, size = 18.dp)
         }
