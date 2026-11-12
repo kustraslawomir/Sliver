@@ -17,6 +17,6 @@ class Converters {
     @TypeConverter fun jsonToLook(v: String): LookParams = json.decodeFromString(LookParams.serializer(), v)
 
     private companion object {
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true; coerceInputValues = true }
     }
 }

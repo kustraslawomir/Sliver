@@ -1,0 +1,306 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "1d30d841ae711487d18a590d0f801e7b",
+    "entities": [
+      {
+        "tableName": "project",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `format` TEXT NOT NULL, `startDate` TEXT NOT NULL, `endDate` TEXT, `createdAt` INTEGER NOT NULL, `archived` INTEGER NOT NULL, `colorSeed` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "format",
+            "columnName": "format",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate",
+            "columnName": "endDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "archived",
+            "columnName": "archived",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colorSeed",
+            "columnName": "colorSeed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `file` TEXT NOT NULL, `thumb` TEXT NOT NULL, `source` TEXT NOT NULL, `look` TEXT NOT NULL, `motion` TEXT NOT NULL, `keepAudio` INTEGER NOT NULL, `speed` REAL NOT NULL, `color` INTEGER NOT NULL, `cropY` REAL, `takenAt` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `driveFileId` TEXT, `backup` TEXT NOT NULL, `place` TEXT, `projectId` TEXT NOT NULL, `luma` REAL NOT NULL DEFAULT -1, `tone` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`projectId`, `date`))",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "file",
+            "columnName": "file",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thumb",
+            "columnName": "thumb",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "look",
+            "columnName": "look",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "motion",
+            "columnName": "motion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keepAudio",
+            "columnName": "keepAudio",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speed",
+            "columnName": "speed",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cropY",
+            "columnName": "cropY",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "takenAt",
+            "columnName": "takenAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "driveFileId",
+            "columnName": "driveFileId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "backup",
+            "columnName": "backup",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "place",
+            "columnName": "place",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "projectId",
+            "columnName": "projectId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "luma",
+            "columnName": "luma",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "tone",
+            "columnName": "tone",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "projectId",
+            "date"
+          ]
+        }
+      },
+      {
+        "tableName": "film",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `format` TEXT NOT NULL, `rangeType` TEXT NOT NULL, `rangeFrom` TEXT, `rangeTo` TEXT, `live` INTEGER NOT NULL, `audio` TEXT NOT NULL, `track` TEXT, `cut` TEXT NOT NULL, `dateOn` INTEGER NOT NULL, `look` TEXT, `lookIntensity` INTEGER NOT NULL DEFAULT 100, `lookGrain` INTEGER, `mismatch` TEXT NOT NULL, `renderPath` TEXT, `renderedAt` INTEGER, `projectId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "format",
+            "columnName": "format",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangeType",
+            "columnName": "rangeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangeFrom",
+            "columnName": "rangeFrom",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rangeTo",
+            "columnName": "rangeTo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "live",
+            "columnName": "live",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "audio",
+            "columnName": "audio",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "track",
+            "columnName": "track",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cut",
+            "columnName": "cut",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateOn",
+            "columnName": "dateOn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "look",
+            "columnName": "look",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lookIntensity",
+            "columnName": "lookIntensity",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "100"
+          },
+          {
+            "fieldPath": "lookGrain",
+            "columnName": "lookGrain",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "mismatch",
+            "columnName": "mismatch",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "renderPath",
+            "columnName": "renderPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "renderedAt",
+            "columnName": "renderedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "projectId",
+            "columnName": "projectId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d30d841ae711487d18a590d0f801e7b')"
+    ]
+  }
+}

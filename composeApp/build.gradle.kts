@@ -220,6 +220,7 @@ androidComponents {
 
 tasks.withType<Test>().configureEach {
     providers.gradleProperty("genLuts").orNull?.let { systemProperty("genLuts", it) }
+    providers.gradleProperty("lookSheets").orNull?.let { systemProperty("lookSheets", it) }
 }
 
 val designLint by tasks.registering(Exec::class) {

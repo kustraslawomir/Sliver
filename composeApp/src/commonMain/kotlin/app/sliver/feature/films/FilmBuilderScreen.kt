@@ -50,7 +50,8 @@ import app.sliver.core.ui.isStorageLow
 import app.sliver.data.files.FileStore
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
-import app.sliver.data.LookPreset
+import app.sliver.data.StampStyle
+import app.sliver.feature.trim.rememberPhoto
 import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
 import app.sliver.data.info
@@ -85,7 +86,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
         options = FilmOptions(
-            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look,
+            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain,
         )
         dateTouched = true
     }
@@ -94,8 +95,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val format = editing?.format ?: app?.newFilmFormat ?: FilmFormat.CINEMA
 
     val plan = remember(all) { buildFilmPlan(all) }
-    val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.look, it.keepAudio) } }
-    val lookParams = options.look?.toParams()
+    val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.keepAudio) } }
+    val lookParams = options.look?.toParams(options.intensity, options.grain)
 
     var paused by remember { mutableStateOf(false) }
     OnAppHidden { paused = true }
@@ -144,7 +145,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 )
                 val index = position.first.coerceIn(0, clips.size - 1)
                 if (dateOn) {
-                    DateStamp(stampText(plan.days[index].date))
+                    val style = options.look?.info?.stamp ?: StampStyle.PLAIN
+                    DateStamp(stampText(plan.days[index].date, style), style = style)
                 }
                 if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
             }
@@ -162,6 +164,15 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             SliverSlider(fraction, { seek = FilmSeek(it) })
             SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.Meta, color = SliverColors.TextSecondary)
         }
+
+        val frame = plan.days.getOrNull(plan.days.size / 2)?.let { rememberPhoto(it.thumb) }
+        FilmFilterSection(
+            frame, options.look, options.intensity, options.grain,
+            onSelect = { options = options.copy(look = it, grain = null) },
+            onIntensity = { options = options.copy(intensity = it) },
+            onGrain = { options = options.copy(grain = it) },
+            modifier = Modifier.padding(horizontal = SliverSpace.Gutter),
+        )
 
         Section("Sound") {
             Segmented(

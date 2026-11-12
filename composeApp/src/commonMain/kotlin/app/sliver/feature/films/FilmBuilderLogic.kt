@@ -42,9 +42,13 @@ data class FilmOptions(
     val track: String? = null,
     val dateOn: Boolean = true,
     val look: LookPreset? = null,
+    val intensity: Int = 100,
+    /** Absolute grain 0..100; null keeps the filter's own grain. */
+    val grain: Int? = null,
 )
 
 fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film = Film(
     id = id, name = name, format = format, audio = audio,
     track = usableTrack(track).takeIf { audio != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
+    lookIntensity = intensity, lookGrain = grain.takeIf { look != null },
 )

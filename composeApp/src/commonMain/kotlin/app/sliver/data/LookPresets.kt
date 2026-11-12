@@ -1,27 +1,90 @@
 package app.sliver.data
 
-data class LookDefaults(val grain: Int = 0, val vignette: Int = 0, val fade: Int = 0, val sharp: Int = 0)
+import app.sliver.data.look.LookModel
 
-data class LookInfo(val label: String, val lutFile: String?, val defaults: LookDefaults)
+/** How the date is drawn on top of a film: [LED] orange segmented digits, [CAMCORDER] tape-deck style. */
+enum class StampStyle { PLAIN, LED, CAMCORDER }
 
+data class LookInfo(val label: String, val lutFile: String?, val model: LookModel, val stamp: StampStyle = StampStyle.PLAIN)
+
+/**
+ * The shipped filters. Each model is the candidate of the same number in `looks/candidates.json` (a unit test keeps them equal);
+ * the other candidates stay in the pool until the owner keeps them.
+ */
 val LookPreset.info: LookInfo
     get() = when (this) {
-        LookPreset.NATURAL -> LookInfo("Natural", null, LookDefaults())
-        LookPreset.NOIR -> LookInfo("Noir", "luts/noir.cube", LookDefaults(grain = 35, vignette = 50, sharp = 30))
-        LookPreset.BLACKOUT -> LookInfo("Blackout", "luts/blackout.cube", LookDefaults(vignette = 65, sharp = 40))
-        LookPreset.NIGHT_NEON -> LookInfo("Night Neon", "luts/night_neon.cube", LookDefaults(grain = 20, vignette = 40))
-        LookPreset.COLD_STEEL -> LookInfo("Cold Steel", "luts/cold_steel.cube", LookDefaults(vignette = 25, sharp = 60))
-        LookPreset.EMBER -> LookInfo("Ember", "luts/ember.cube", LookDefaults(grain = 22, vignette = 30))
-        LookPreset.VHS_94 -> LookInfo("VHS 94", "luts/vhs_94.cube", LookDefaults(grain = 55, fade = 35))
-        LookPreset.HARD_LIGHT -> LookInfo("Hard Light", "luts/hard_light.cube", LookDefaults(vignette = 20, sharp = 90))
-        LookPreset.GHOST -> LookInfo("Ghost", "luts/ghost.cube", LookDefaults(grain = 30, fade = 55))
+        LookPreset.NATURAL -> LookInfo("Natural", null, LookModel())
+        LookPreset.KIOSK -> LookInfo(
+            "Kiosk", "luts/kiosk.cube",
+            LookModel(
+                temp = 0.35, contrast = 0.25, blackLift = 0.07, saturation = 1.05,
+                bands = listOf(1.1, 1.1, 0.95, 1.0, 0.9, 1.0),
+                shadowTint = listOf(-0.03, 0.02, 0.025), highlightTint = listOf(0.03, 0.01, -0.04),
+                grain = 0.65, grainSize = 2.0, grainChroma = 0.7, halation = 0.15, vignette = 0.5, flash = 0.35,
+                softness = 0.5, weave = 0.4, leak = 0.2,
+            ),
+            StampStyle.LED,
+        )
+        LookPreset.AFTERHOURS -> LookInfo(
+            "Afterhours", "luts/afterhours.cube",
+            LookModel(
+                exposure = -0.3, gamma = listOf(1.15, 1.1, 1.05), contrast = 0.45, saturation = 0.7,
+                shadowTint = listOf(-0.04, 0.03, 0.04),
+                grain = 0.65, grainSize = 2.0, grainChroma = 0.35, halation = 0.6, vignette = 0.75,
+            ),
+        )
+        LookPreset.SILVER -> LookInfo(
+            "Silver", "luts/silver.cube",
+            LookModel(
+                mono = listOf(0.5, 0.4, 0.1), gamma = listOf(1.05, 1.05, 1.05), contrast = 0.55,
+                grain = 0.7, grainSize = 2.0, halation = 0.15, vignette = 0.35,
+            ),
+        )
+        LookPreset.SUNDAY -> LookInfo(
+            "Sunday", "luts/sunday.cube",
+            LookModel(
+                temp = 0.2, tint = 0.05, contrast = -0.2, blackLift = 0.05, shoulder = 0.5, saturation = 0.88,
+                bands = listOf(1.0, 0.95, 0.85, 0.9, 0.9, 1.0), highlightTint = listOf(0.03, 0.015, -0.02),
+                grain = 0.2, grainSize = 1.5, grainChroma = 0.4, bloom = 0.1, vignette = 0.2, fade = 0.2,
+            ),
+        )
+        LookPreset.TAPE -> LookInfo(
+            "Tape", "luts/tape.cube",
+            LookModel(
+                tint = 0.05, blackLift = 0.05, saturation = 1.15, shadowTint = listOf(0.01, 0.0, 0.03),
+                grain = 0.35, grainSize = 2.0, grainChroma = 0.6, vignette = 0.25, softness = 0.25, weave = 0.6,
+                scanlines = 0.5, chromaBleed = 0.8, fade = 0.2,
+            ),
+            StampStyle.CAMCORDER,
+        )
+        LookPreset.HALO -> LookInfo(
+            "Halo", "luts/halo.cube",
+            LookModel(
+                temp = -0.1, contrast = 0.05, shadowTint = listOf(-0.03, 0.0, 0.05),
+                grain = 0.4, grainSize = 1.75, grainChroma = 0.5, halation = 0.6, bloom = 0.8, vignette = 0.35,
+                softness = 0.5, fade = 0.1,
+            ),
+        )
     }
 
-fun LookPreset.toParams(intensity: Int = 100): LookParams = LookParams(
-    preset = this,
-    intensity = intensity,
-    sharp = info.defaults.sharp,
-    grain = info.defaults.grain,
-    vignette = info.defaults.vignette,
-    fade = info.defaults.fade,
-)
+/** Presets in picker order. */
+val FilterPresets: List<LookPreset> = LookPreset.entries.filter { it != LookPreset.NATURAL }
+
+/** Preset number in `looks/candidates.json`. */
+val LookPreset.candidateNumber: Int?
+    get() = when (this) {
+        LookPreset.NATURAL -> null
+        LookPreset.KIOSK -> 1
+        LookPreset.AFTERHOURS -> 33
+        LookPreset.SILVER -> 23
+        LookPreset.SUNDAY -> 6
+        LookPreset.TAPE -> 29
+        LookPreset.HALO -> 34
+    }
+
+/** [grain] 0..100 overrides the preset's own grain amount. */
+fun LookPreset.toParams(intensity: Int = 100, grain: Int? = null): LookParams =
+    LookParams(preset = this, intensity = intensity, grain = grain ?: (info.model.grain * 100).toInt())
+
+/** The film-level filter, or null when the film is clean. */
+fun app.sliver.data.db.Film.lookParams(): LookParams? = look?.takeIf { it != LookPreset.NATURAL }?.toParams(lookIntensity, lookGrain)

@@ -24,3 +24,9 @@ actual fun FilmPreview(
 
 @Composable
 actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = { logDebug("AudioPicker", "not on iOS yet") }
+
+// TODO iOS later: Core Image / Metal port of the look shader for filter thumbnails.
+actual suspend fun renderFilterThumbs(
+    frame: androidx.compose.ui.graphics.ImageBitmap,
+    presets: List<app.sliver.data.LookPreset>,
+): Map<app.sliver.data.LookPreset, androidx.compose.ui.graphics.ImageBitmap> = emptyMap()

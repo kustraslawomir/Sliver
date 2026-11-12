@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.sliver.core.log.logDebug
 import app.sliver.data.DaySource
-import app.sliver.data.toParams
+import app.sliver.data.LookParams
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.SaveClipRequest
@@ -111,7 +111,7 @@ class BackfillExecutor(
                     date = date, source = path, startMs = start, speed = 1f, cropY = null,
                     format = appSettings.newFilmFormat, daySource = DaySource.BACKFILL,
                     takenAt = LocalDateTime(date, LocalTime(12, 0)).toInstant(TimeZone.currentSystemDefault()),
-                    look = appSettings.defaultLook.toParams(), isPhoto = !item.video,
+                    look = LookParams(), isPhoto = !item.video,
                 ),
             )
             true

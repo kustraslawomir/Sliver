@@ -61,17 +61,14 @@ actual fun FilmPreview(
         video.setMediaItems(clips.map { MediaItem.fromUri(it.path) })
         video.prepare()
     }
-    LaunchedEffect(clips, look, paused) {
-        val params = look ?: clips.getOrNull(video.currentMediaItemIndex)?.look ?: LookParams()
-        video.setVideoEffects(LookEffects.build(context, params, forExport = false, animateGrain = !paused))
+    fun applyLook() {
+        val clip = clips.getOrNull(video.currentMediaItemIndex)
+        video.setVideoEffects(if (look == null || clip == null) emptyList() else LookEffects.build(context, look, clip.path, forExport = false, animate = !paused))
     }
-    DisposableEffect(video, clips, look) {
+    LaunchedEffect(clips, look, paused) { applyLook() }
+    DisposableEffect(video, clips, look, paused) {
         val listener = object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                if (look != null) return
-                val params = clips.getOrNull(video.currentMediaItemIndex)?.look ?: return
-                video.setVideoEffects(LookEffects.build(context, params, forExport = false))
-            }
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = applyLook()
         }
         video.addListener(listener)
         onDispose { video.removeListener(listener) }

@@ -76,10 +76,10 @@ Intro (needs full photo access, nothing leaves the phone, filled days never touc
 
 ### Films
 - Library: Year in Seconds teaser card, posters (title, format, runtime, project span "10 Jan – 12 Nov 2026 · 129 clips"; a collecting film is the project film that grows with new clips). Long-press a poster for "Delete film" (red text, undo toast, no confirm). "+ New film".
-- Builder (one screen): live preview (tap = pause), scrubber with day/month ticks (a film is always the whole project, no RANGE), SOUND Original / Music / Mix (Music and Mix need a file picked with "Pick a file"; copied into app storage, shown with Replace / Remove), DATE ON SCREEN On / Off, ONE LOOK (None or a preset). CTA "Save film" (runtime shown under the scrubber). Every filled day of the project is used; open days are skipped.
+- Builder (one screen): live preview (tap = pause), scrubber with day/month ticks (a film is always the whole project, no RANGE), SOUND Original / Music / Mix (Music and Mix need a file picked with "Pick a file"; copied into app storage, shown with Replace / Remove), DATE ON SCREEN On / Off, FILTERS (None, Kiosk, Afterhours, Silver, Sunday, Tape, Halo: thumbnails rendered from a frame of the film, Intensity and Grain sliders; saved on the film; Kiosk shows an orange LED date stamp, Tape a camcorder stamp). CTA "Save film" (runtime shown under the scrubber). Every filled day of the project is used; open days are skipped.
 - Export: progress ("made on your phone"), continues in background → Premiere: slit opens into the frame, title card "A film by you / <name> / project span · N clips · runtime" → Play film / Save to Photos / Share… / Done.
 - Player: play/pause, scrubber, mute, fullscreen (rotate), Share film… (system share sheet → YouTube, Instagram, …), Save to Photos, Edit film.
-- Year in Seconds: unlocks 26 Dec (local). Stats: seconds kept, films made, most filmed month(s), favourite look → "Watch the premiere".
+- Year in Seconds: unlocks 26 Dec (local). Stats: seconds kept, films made, most filmed month(s), "Watch the premiere".
 
 ### Backup & account (optional)
 - "Save your seconds" sheet: Continue with Google / Not now.
@@ -100,7 +100,7 @@ Copy:
 - On this day: "One month ago today" — "<Weekday>, <date>. Want to see it?"
 
 ### Settings
-Account · Backup · Default look · New film format · Date stamp (on) · Also save full recordings to Photos (off) · Notifications · Fill the past · What SLIVER stores · Send feedback (mailto) · version.
+Account · Backup · New film format · Date stamp (on) · Also save full recordings to Photos (off) · Notifications · Fill the past · What SLIVER stores · Send feedback (mailto) · version.
 
 ### Widgets
 Android: Glance 2×2 (today waiting / today ✓ thumbnail, tap → camera) and Quick Settings tile "SLIVER" → camera.
@@ -115,3 +115,9 @@ Day notes, voice notes, mood tags, streaks, paywall, multi-photo import, film-st
 - A clip can only be added to the day its media was recorded (EXIF DateTimeOriginal for photos and Motion Photos, video creation time for video, MediaStore DATE_TAKEN / modified as fallback; device local time zone). Mismatch or unreadable date: notice, nothing opens. In-app recordings are always today.
 - Edit clip / Photo clip show the fixed day as non-interactive text; saving uses that day.
 - Fill empty days assigns each item to its own date and shows "N not added: no date / outside this project".
+
+
+## Filters (T-looks-film, 2026-11-12)
+- Filters are FILM-LEVEL ONLY: chosen in the Film builder, applied to preview and render. Clips are never filtered: no filter control in camera (swipe removed), Edit clip, Photo clip or Day detail; stored clips stay clean; old per-day `look` values are ignored.
+- One GLSL pass (grain with per-frame seed and luminance weighting, halation, bloom, flash falloff, soft plastic lens, chroma bleed, scanlines, gate weave, flicker, light leak) after a 33^3 LUT; all randomness is a pure function of (clip id, frame time).
+- Parameter pool in `looks/candidates.json` (40 candidates); only kept ones ship as presets. Sheets: `./gradlew :composeApp:testDebugUnitTest --tests '*LookSheetsTest*' -PlookSheets=1` writes `docs/qa/looks-film/`.

@@ -36,6 +36,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -113,6 +114,8 @@ fun parseManifestFilms(json: String): List<Film> = runCatching {
             cut = f.enum<FilmCut>("cut") ?: FilmCut.CUT,
             dateOn = f["dateOn"]?.jsonPrimitive?.boolean ?: true,
             look = f.enum<LookPreset>("look"),
+            lookIntensity = f["lookIntensity"]?.jsonPrimitive?.intOrNull ?: 100,
+            lookGrain = f["lookGrain"]?.jsonPrimitive?.intOrNull,
             mismatch = f.enum<Mismatch>("mismatch") ?: Mismatch.CENTER,
         )
     }

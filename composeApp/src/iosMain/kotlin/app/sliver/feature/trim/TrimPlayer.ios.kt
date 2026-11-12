@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import app.sliver.data.LookParams
 
 // TODO iOS later: AVPlayerLayer looping the trim window.
 @Composable
@@ -17,7 +16,6 @@ actual fun TrimPlayer(
     audio: Boolean,
     paused: Boolean,
     modifier: Modifier,
-    look: LookParams,
     scrubMs: Long?,
     onAspect: (Float) -> Unit,
 ) = Box(modifier.background(Color.Black))

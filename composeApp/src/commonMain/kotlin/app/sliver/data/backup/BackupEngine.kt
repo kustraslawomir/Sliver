@@ -211,6 +211,8 @@ fun buildManifest(s: AppSettings, films: List<Film>, nowMillis: Long, project: P
                     put("cut", f.cut.name)
                     put("dateOn", f.dateOn)
                     put("look", f.look?.name?.let(::JsonPrimitive) ?: JsonNull)
+                    put("lookIntensity", f.lookIntensity)
+                    put("lookGrain", f.lookGrain?.let(::JsonPrimitive) ?: JsonNull)
                     put("mismatch", f.mismatch.name)
                 }
             },

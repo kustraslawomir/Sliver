@@ -124,3 +124,4 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Film = whole project | `FilmBuilder.dc.html` | **No RANGE section** (Week / Month / Year / Custom and the custom date sheet are removed). A film always uses every filled day of its project. Poster, library and premiere subtitle show the project span: "10 Jan – 12 Nov 2026 · 129 clips". |
 | Delete film | `FilmPlayer.dc.html` | "Delete film" as red text only, in the player and in a long-press sheet on a poster. Acts at once, toast "Film deleted · Undo" for 6 s, no confirm dialog. |
 | Camera start state | `CameraV2.dc.html` | The camera opens on Video / back lens / 1x / light off every time. Mode, lens and light are not remembered. |
+| Filters are film-level only | `FilmBuilder.dc.html` | Filters live only in the Film builder (None + Kiosk, Afterhours, Silver, Sunday, Tape, Halo, Intensity and Grain sliders). No filter control on clips, camera, Edit clip or Day detail. |

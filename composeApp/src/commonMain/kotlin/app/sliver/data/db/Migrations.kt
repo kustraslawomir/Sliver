@@ -47,3 +47,12 @@ val Migration3To4 = object : Migration(3, 4) {
         connection.execSQL("ALTER TABLE day ADD COLUMN tone INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+/** Film-level filters: intensity and grain live on the film; old presets that no longer exist are cleared. */
+val Migration4To5 = object : Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE film ADD COLUMN lookIntensity INTEGER NOT NULL DEFAULT 100")
+        connection.execSQL("ALTER TABLE film ADD COLUMN lookGrain INTEGER")
+        connection.execSQL("UPDATE film SET look = NULL WHERE look NOT IN ('KIOSK','AFTERHOURS','SILVER','SUNDAY','TAPE','HALO')")
+    }
+}

@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import app.sliver.data.LookParams
 
 /** Centers content of the given display [aspect] on black: 16:9 fills the width, 9:16 fills the height. */
 @Composable
@@ -34,13 +33,12 @@ fun ClipPlayer(
     speed: Float = 1f,
     audio: Boolean = false,
     paused: Boolean = false,
-    look: LookParams = LookParams(),
     scrubMs: Long? = null,
     overlay: @Composable BoxScope.() -> Unit = {},
 ) {
     var aspect by remember(path) { mutableStateOf<Float?>(null) }
     ClipFrame(aspect, modifier) {
-        TrimPlayer(path, startMs, windowMs, speed, audio, paused, Modifier.fillMaxSize(), look, scrubMs) { aspect = it }
+        TrimPlayer(path, startMs, windowMs, speed, audio, paused, Modifier.fillMaxSize(), scrubMs) { aspect = it }
         overlay()
     }
 }

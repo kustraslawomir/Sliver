@@ -1,5 +1,11 @@
 package app.sliver.shots
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.dp
+import app.sliver.data.info
 import app.sliver.core.navigation.Route
 import app.sliver.feature.archive.ArchiveSession
 import app.sliver.feature.archive.DayDetailScreen
@@ -39,6 +45,30 @@ class ScreenShots : ShotTest() {
     }
     @Test fun backfill() = shoot("Backfill", inspection = true) { BackfillScreen {} }
     @Test fun filmBuilder() = shoot("FilmBuilder", inspection = true) { FilmBuilderScreen({}, {}) }
+    @Test fun filterPicker() {
+        val frame = android.graphics.Bitmap.createBitmap(90, 120, android.graphics.Bitmap.Config.ARGB_8888).also { b ->
+            android.graphics.Canvas(b).drawRect(0f, 0f, 90f, 120f, android.graphics.Paint().apply {
+                shader = android.graphics.LinearGradient(0f, 0f, 0f, 120f, 0xFFB58A6A.toInt(), 0xFF2A3A4A.toInt(), android.graphics.Shader.TileMode.CLAMP)
+            })
+        }
+        val image = frame.asImageBitmap()
+        val thumbs = app.sliver.data.FilterPresets.associateWith { p ->
+            val m = p.info.model
+            val px = IntArray(90 * 120).also { frame.getPixels(it, 0, 90, 0, 0, 90, 120) }
+            val out = app.sliver.data.look.LookRaster.render(
+                px, 90, 120, if (m.hasLut) app.sliver.data.look.LutGenerator.table(m) else null, 1f,
+                app.sliver.data.look.lookFrame(m, 1f, m.grain.toFloat(), 7, 0, 120, animate = false),
+            )
+            android.graphics.Bitmap.createBitmap(out, 90, 120, android.graphics.Bitmap.Config.ARGB_8888).asImageBitmap()
+        }
+        shoot("FilterPicker") {
+            androidx.compose.foundation.layout.Box(Modifier.background(app.sliver.core.theme.SliverColors.BgBase).padding(16.dp)) {
+                app.sliver.feature.films.FilmFilterSection(
+                    image, app.sliver.data.LookPreset.KIOSK, 80, null, {}, {}, {}, thumbsOverride = thumbs,
+                )
+            }
+        }
+    }
     @Test fun export() {
         FilmNav.id = "shot-film"
         shoot("Export", darkOnly = true, inspection = true) { ExportScreen({}, {}) }

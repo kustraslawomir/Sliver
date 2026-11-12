@@ -26,7 +26,7 @@ import kotlinx.serialization.json.Json
 class RestoreTest {
     @Test
     fun parsesDayProperties() {
-        val look = LookParams(preset = LookPreset.NOIR, grain = 20)
+        val look = LookParams(preset = LookPreset.SILVER, grain = 20)
         val file = DriveFile(
             "f1", "2025-03-04.mp4",
             mapOf("sliverDate" to "2025-03-04", "look" to Json.encodeToString(LookParams.serializer(), look), "source" to "GALLERY"),

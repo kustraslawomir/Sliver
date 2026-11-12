@@ -49,3 +49,4 @@
 - T-film-whole-project: see HANDOFF.md section T-film-whole-project
 - T-auto-2: DONE (scripts/qa.sh + qa/flows, no Maestro; Xiaomi run green; see HANDOFF.md section T-auto-2)
 - T-auto-5: DONE (tools/design/render.sh + dcrender.mjs + pngdiff.mjs, Chrome headless; 71/79 boards >=95%; see HANDOFF.md section T-auto-5)
+- T-looks-film: DONE (film-level filters, shader pass, 6 presets, 40-candidate pool + sheets; on-device perf TODO, see HANDOFF.md)

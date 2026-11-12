@@ -14,7 +14,6 @@ import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class YearLogicTest {
@@ -35,21 +34,19 @@ class YearLogicTest {
         assertEquals("February · May", monthsText(s.topMonths))
     }
 
-    @Test fun favouriteLookAndFilms() {
+    @Test fun rendersAreCounted() {
         val rendered = yearFilm(2026, FilmFormat.CINEMA).copy(renderPath = "p")
         val s = yearStats(
             2026,
-            listOf(day(1, 1, LookPreset.NOIR), day(1, 2, LookPreset.NOIR), day(1, 3)),
+            listOf(day(1, 1), day(1, 2), day(1, 3)),
             listOf(rendered, yearFilm(2026, FilmFormat.STORY, false)),
         )
-        assertEquals(LookPreset.NOIR, s.favouriteLook)
         assertEquals(1, s.films)
     }
 
     @Test fun emptyYear() {
         val s = yearStats(2026, emptyList(), emptyList())
         assertEquals(0, s.clips)
-        assertNull(s.favouriteLook)
         assertEquals("None yet", monthsText(s.topMonths))
     }
 

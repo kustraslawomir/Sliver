@@ -109,7 +109,7 @@ class DataLayerTest {
 
     @Test
     fun insertReplaceDelete() = runTest {
-        val d = day("2026-11-10", look = LookParams(LookPreset.NOIR, grain = 40))
+        val d = day("2026-11-10", look = LookParams(LookPreset.SILVER, grain = 40))
         days.save(d)
         assertEquals(d.copy(projectId = projects.activeId()), days.getDay(d.date))
         assertEquals(1, days.observeCount().first())
@@ -147,7 +147,7 @@ class DataLayerTest {
     fun filmCrud() = runTest {
         val f = Film(
             id = "a", name = "Week", rangeType = FilmRangeType.CUSTOM,
-            rangeFrom = LocalDate.parse("2026-11-01"), rangeTo = LocalDate.parse("2026-11-07"), look = LookPreset.EMBER,
+            rangeFrom = LocalDate.parse("2026-11-01"), rangeTo = LocalDate.parse("2026-11-07"), look = LookPreset.KIOSK,
         )
         films.save(f)
         assertEquals(f.copy(projectId = projects.activeId()), films.getFilm("a"))

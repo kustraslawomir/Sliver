@@ -68,6 +68,9 @@ data class Film(
     val cut: FilmCut = FilmCut.CUT,
     val dateOn: Boolean = true,
     val look: LookPreset? = null,
+    @ColumnInfo(defaultValue = "100") val lookIntensity: Int = 100,
+    /** Absolute grain 0..100; null keeps the filter's own grain. */
+    val lookGrain: Int? = null,
     val mismatch: Mismatch = Mismatch.CENTER,
     val renderPath: String? = null,
     val renderedAt: Instant? = null,

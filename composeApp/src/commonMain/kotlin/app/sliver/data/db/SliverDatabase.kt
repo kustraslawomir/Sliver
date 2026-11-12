@@ -7,7 +7,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Project::class, Day::class, Film::class], version = 4, exportSchema = true, autoMigrations = [AutoMigration(from = 1, to = 2)])
+@Database(entities = [Project::class, Day::class, Film::class], version = 5, exportSchema = true, autoMigrations = [AutoMigration(from = 1, to = 2)])
 @TypeConverters(Converters::class)
 @ConstructedBy(SliverDatabaseConstructor::class)
 abstract class SliverDatabase : RoomDatabase() {

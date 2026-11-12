@@ -1,6 +1,6 @@
-# T-looks-film: un-park filters, add a "Film" family led by a Disposable-camera look (owner request, 2026-11-12)
+# T-looks-film: un-park filters, add an original film family led by Kiosk (owner request, 2026-11-12)
 
-Owner likes the grainy vibe of disposable cameras and dark/black film looks (apps like Prequel). Build OUR OWN
+Owner likes the grainy vibe of consumer disposable cameras and dark/black film looks (apps like Prequel). Build OUR OWN
 looks with the techniques below. Never copy LUTs, textures or assets from other apps.
 
 Product rules still apply: filters are never burned into stored clips, only into previews and exports
@@ -14,7 +14,7 @@ Product rules still apply: filters are never burned into stored clips, only into
 - **Film grain**: per-frame seed; grain size ~1.5–2 px at 1080p (scale with output height); luminance-weighted
   (strongest in shadows/mids, weak in highlights); colour grain with chroma amount param (0 for B&W).
 - **Halation**: threshold highlights → blur (separable, reduced-resolution pass OK) → add back with red-orange tint.
-- **Flash falloff** (disposable): radial exposure boost in the centre + falloff to edges, warm tint in the
+- **Flash falloff** (Kiosk): radial exposure boost in the centre + falloff to edges, warm tint in the
   boosted area; amount param.
 - **Soft plastic lens**: edge blur ramp + slight barrel distortion + chromatic aberration at the edges.
 - **Gate weave**: sub-pixel random offset per frame (±0.5 px), plus optional exposure flicker ±1.5 %.
@@ -65,7 +65,7 @@ Owner won't make reference pairs, and we must not sample other apps' filters. In
   (warm skin-tone gradient portrait stand-in, green foliage pattern, blue sky gradient, night lights with
   bright points) × each filter in 3 labelled variants (A/B/C differing in temperature, black level and grain).
 - Output `docs/qa/looks-film/sheet.png` (one image, readable on a phone). The owner answers e.g.
-  "Dark B, more grain, Disposable warmer"; the chosen variant's params become the preset.
+  "Afterhours B, more grain, Kiosk warmer"; the chosen variant's params become the preset.
 
 ## 6. Big candidate pool (owner: "plan a lot, I'll throw away ~99%")
 Build a parametric look model (LUT generated from: white balance shift, per-channel tone curves, black lift,

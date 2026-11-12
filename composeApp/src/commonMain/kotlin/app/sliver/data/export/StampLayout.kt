@@ -14,3 +14,7 @@ fun stampAnchor(frameW: Int, frameH: Int): Pair<Float, Float> {
     val margin = STAMP_MARGIN_DP * stampScale(frameW, frameH)
     return (1f - 2f * margin / frameW) to (-1f + 2f * margin / frameH)
 }
+
+/** LED stamp digit height at the 360 dp reference side, and its colour (film content, not UI chrome). */
+const val LED_DIGIT_DP = 16f
+const val LED_ORANGE = 0xFFFF9A3CL

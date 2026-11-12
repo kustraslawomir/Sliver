@@ -3,40 +3,34 @@ package app.sliver.data.look
 import android.content.Context
 import androidx.media3.common.Effect
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.effect.Contrast
-import androidx.media3.effect.HslAdjustment
 import androidx.media3.effect.SingleColorLut
 import app.sliver.data.LookParams
 import app.sliver.data.info
+import java.util.concurrent.ConcurrentHashMap
 
-/** Builds the Media3 effect chain for a [LookParams]; the same chain drives preview and export. */
+/**
+ * Builds the Media3 effect chain for a film's filter; the same chain drives preview and export. Filters belong to the
+ * film only: callers never pass a per-clip look, and with no film filter they do not call this at all.
+ */
 @UnstableApi
 object LookEffects {
-    private const val PARKED = true
+    private val tables = ConcurrentHashMap<String, FloatArray>()
 
     /**
-     * [animateGrain] should be true only while playing (preview); exports always animate the grain.
-     * Intensity blends the LUT with identity on the CPU, so no extra shader pass is needed.
+     * [clipId] seeds the grain, weave and light leak so a clip looks the same in preview and export.
+     * [animate] false (paused preview) freezes the per-frame randomness; exports always animate.
+     * Intensity blends the LUT with identity on the CPU and scales the shader amounts.
      */
-    fun build(context: Context, params: LookParams, forExport: Boolean, animateGrain: Boolean = true): List<Effect> {
-        // Filters are parked: clips always play and export unfiltered. Restore from git history to re-enable.
-        if (PARKED) return emptyList()
+    fun build(context: Context, params: LookParams, clipId: String, forExport: Boolean, animate: Boolean = true): List<Effect> {
+        val info = params.preset.info
+        if (params.intensity <= 0 && params.grain <= 0) return emptyList()
         val effects = ArrayList<Effect>()
-        val lut = params.preset.info.lutFile
+        val lut = info.lutFile
         if (lut != null && params.intensity > 0) {
-            val cube = context.assets.open(lut).use { LutCube.parse(it, params.intensity / 100f) }
-            effects += SingleColorLut.createFromCube(cube)
+            val table = tables.getOrPut(lut) { context.assets.open(lut).use { LutCube.parseTable(it) } }
+            effects += SingleColorLut.createFromCube(LutCube.toCube(table, params.intensity / 100f))
         }
-        if (params.contrast != 0) effects += Contrast(params.contrast / 100f)
-        if (params.saturation != 0) {
-            effects += HslAdjustment.Builder().adjustSaturation(params.saturation.toFloat()).build()
-        }
-        if (params.sharp > 0 || params.grain > 0 || params.vignette > 0 || params.fade > 0) {
-            effects += LookShaderEffect(
-                params.sharp / 100f, params.grain / 100f, params.vignette / 100f, params.fade / 100f,
-                animateGrain = forExport || animateGrain,
-            )
-        }
+        effects += LookShaderEffect(info.model, params.intensity / 100f, params.grain / 100f, LookRandom.seedOf(clipId), forExport || animate)
         return effects
     }
 }

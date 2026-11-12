@@ -40,7 +40,6 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.NoticeSheet
 import app.sliver.core.ui.SecondaryButton
-import app.sliver.data.LookParams
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
@@ -75,7 +74,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val first = app?.firstDay ?: filled.minOrNull() ?: current
 
     var muted by remember { mutableStateOf(true) }
-    var previewLook by remember(current) { mutableStateOf<LookParams?>(null) }
 
     LaunchedEffect(Unit) {
         CaptureSession.path = null
@@ -109,7 +107,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Box(Modifier.weight(1f).fillMaxWidth().background(SliverColors.Media)) {
                 if (day != null) {
                     ClipPlayer(
-                        day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, look = previewLook ?: LookParams(),
+                        day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted,
                     )
                 }
                 Box(Modifier.fillMaxWidth().height(140.dp).background(Brush.verticalGradient(listOf(SliverColors.Scrim, Color.Transparent))))

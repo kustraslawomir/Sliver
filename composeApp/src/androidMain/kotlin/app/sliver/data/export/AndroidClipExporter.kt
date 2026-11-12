@@ -35,7 +35,6 @@ import androidx.media3.transformer.VideoEncoderSettings
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
-import app.sliver.data.look.LookEffects
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -82,7 +81,6 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             if (info.fps > TARGET_FPS + 1f) add(FrameDropEffect.createDefaultFrameDropEffect(TARGET_FPS))
             add(Crop(crop.left, crop.right, crop.bottom, crop.top))
             add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT))
-            addAll(LookEffects.build(context, look, forExport = true))
         }
         fun item(mediaItem: MediaItem, itemSpeed: Float) = EditedMediaItem.Builder(mediaItem)
             .setEffects(
@@ -154,7 +152,6 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
                     },
                 )
             }
-            addAll(LookEffects.build(context, look, forExport = true))
         }
         val item = EditedMediaItem.Builder(MediaItem.Builder().setUri(uri).setImageDurationMs(SECOND_MS).build())
             .setFrameRate(PhotoMotion.FPS)

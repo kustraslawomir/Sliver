@@ -25,6 +25,7 @@ import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.OverlaySettings
+import androidx.media3.effect.BitmapOverlay
 import androidx.media3.effect.StaticOverlaySettings
 import androidx.media3.effect.TextureOverlay
 import androidx.media3.common.VideoCompositorSettings
@@ -67,7 +68,13 @@ import app.sliver.data.look.LookEffects
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.data.toParams
+import app.sliver.data.StampStyle
+import app.sliver.data.info
+import app.sliver.data.lookParams
+import app.sliver.data.export.LED_DIGIT_DP
+import app.sliver.data.export.LED_ORANGE
+import app.sliver.data.export.SevenSegment
+import app.sliver.data.export.stampScale
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.ProgressNotifier
 import app.sliver.feature.notifications.notifyFilmReady
@@ -219,23 +226,32 @@ class FilmComposer(
         val outAspect = outW.toFloat() / outH
         val audio = audioPlan(film.audio, usableTrack(film.track)?.takeIf { trackAvailable(it) })
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
-        val filmLook = film.look?.let { LookEffects.build(context, it.toParams(), forExport = true) }.orEmpty()
+        val filmParams = film.lookParams()
+
+        val stampStyle = film.look?.info?.stamp ?: StampStyle.PLAIN
 
         fun stamp(date: kotlinx.datetime.LocalDate): List<Effect> {
             if (!film.dateOn) return emptyList()
-            val size = stampTextPx(outW, outH)
-            val text = SpannableString(stampText(date)).apply {
-                setSpan(ForegroundColorSpan(Color.WHITE), 0, length, 0)
-                setSpan(AbsoluteSizeSpan(size, false), 0, length, 0)
-                stampTypeface?.let { setSpan(TypefaceSpan(it), 0, length, 0) }
-                setSpan(StampShadow(size / 3f), 0, length, 0)
-            }
+            val label = stampText(date, stampStyle)
             val (ax, ay) = stampAnchor(outW, outH)
+            val left = stampStyle == StampStyle.CAMCORDER
             val settings = StaticOverlaySettings.Builder()
-                .setBackgroundFrameAnchor(ax, ay)
-                .setOverlayFrameAnchor(1f, -1f)
+                .setBackgroundFrameAnchor(if (left) -ax else ax, ay)
+                .setOverlayFrameAnchor(if (left) -1f else 1f, -1f)
                 .build()
-            return listOf(OverlayEffect(ImmutableList.of<TextureOverlay>(TextOverlay.createStaticTextOverlay(text, settings))))
+            val overlay: TextureOverlay = if (stampStyle == StampStyle.LED) {
+                BitmapOverlay.createStaticBitmapOverlay(ledBitmap(label, outW, outH), settings)
+            } else {
+                val size = stampTextPx(outW, outH)
+                val text = SpannableString(label).apply {
+                    setSpan(ForegroundColorSpan(Color.WHITE), 0, length, 0)
+                    setSpan(AbsoluteSizeSpan(size, false), 0, length, 0)
+                    stampTypeface?.let { setSpan(TypefaceSpan(it), 0, length, 0) }
+                    setSpan(StampShadow(size / 3f), 0, length, 0)
+                }
+                TextOverlay.createStaticTextOverlay(text, settings)
+            }
+            return listOf(OverlayEffect(ImmutableList.of(overlay)))
         }
 
         fun clipItem(clip: Clip, effects: List<Effect>, withAudio: Boolean): EditedMediaItem =
@@ -268,7 +284,7 @@ class FilmComposer(
                     add(Crop(crop.left, crop.right, crop.bottom, crop.top))
                     add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT))
                 }
-                addAll(filmLook)
+                filmParams?.let { addAll(LookEffects.build(context, it, clip.day.file, forExport = true)) }
                 addAll(stamp(clip.day.date))
             }
             clipItem(clip, effects, withAudio = true)
@@ -299,6 +315,22 @@ class FilmComposer(
 
     private val stampTypeface: Typeface? by lazy {
         runCatching { Typeface.createFromAsset(context.assets, "composeResources/sliver.composeapp.generated.resources/font/geist_mono_medium.ttf") }.getOrNull()
+    }
+
+    /** The LED stamp drawn as lit segments with a soft glow, scaled like the text stamp. */
+    private fun ledBitmap(label: String, outW: Int, outH: Int): Bitmap {
+        val h = LED_DIGIT_DP * stampScale(outW, outH)
+        val pad = (h * 0.2f).toInt() + 2
+        val bmp = Bitmap.createBitmap(SevenSegment.width(label, h).toInt() + pad * 2, h.toInt() + pad * 2, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = LED_ORANGE.toInt(); alpha = 64 }
+        val lit = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = LED_ORANGE.toInt() }
+        val g = h * 0.06f
+        for (r in SevenSegment.rects(label, h)) {
+            canvas.drawRect(pad + r.x - g, pad + r.y - g, pad + r.x + r.w + g, pad + r.y + r.h + g, glow)
+            canvas.drawRect(pad + r.x, pad + r.y, pad + r.x + r.w, pad + r.y + r.h, lit)
+        }
+        return bmp
     }
 
     private class StampShadow(private val radius: Float) : CharacterStyle() {
