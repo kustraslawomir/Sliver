@@ -55,3 +55,11 @@ screenshots of each filter (dark UI) in docs/qa/looks-film/. Never use the owner
 
 ## Done when
 Build + tests + lint + designLint + verifyRoborazziDebug green; perf numbers in HANDOFF; SPEC updated.
+
+## 5. Tuning sheet for the owner (no references from other apps)
+Owner won't make reference pairs, and we must not sample other apps' filters. Instead:
+- `tools/looks/sheet.py` (or a Gradle/JVM test task) renders a contact sheet: 4 synthetic test frames
+  (warm skin-tone gradient portrait stand-in, green foliage pattern, blue sky gradient, night lights with
+  bright points) × each filter in 3 labelled variants (A/B/C differing in temperature, black level and grain).
+- Output `docs/qa/looks-film/sheet.png` (one image, readable on a phone). The owner answers e.g.
+  "Dark B, more grain, Disposable warmer"; the chosen variant's params become the preset.
