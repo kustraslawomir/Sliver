@@ -113,6 +113,11 @@ fi
 echo ">> install"
 adb install -r $G composeApp/build/outputs/apk/debug/composeApp-debug.apk >/dev/null || { echo "install failed" >&2; exit 1; }
 
+# the emulator is a disposable test device: start from a clean app so onboarding is deterministic
+if [ "$KIND" = emulator ]; then
+  adb shell pm clear $PKG >/dev/null 2>&1
+  for perm in CAMERA RECORD_AUDIO POST_NOTIFICATIONS; do adb shell pm grant $PKG android.permission.$perm >/dev/null 2>&1; done
+fi
 launch
 FRESH=0
 if [ $SAFE = 0 ]; then
