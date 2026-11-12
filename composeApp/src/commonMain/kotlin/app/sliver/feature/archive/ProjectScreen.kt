@@ -448,7 +448,11 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     }
     Box(
         surface.semantics(mergeDescendants = true) {
-            contentDescription = cellDescription(date, day != null) + if (state == CellState.TODAY) ", today" else ""
+            contentDescription = cellDescription(date, day != null) + when (state) {
+                CellState.TODAY -> ", today"
+                CellState.EMPTY -> ", add a clip"
+                else -> ""
+            }
             if (day != null) {
                 customActions = listOf(
                     CustomAccessibilityAction("Open") { onClick(); true },
@@ -465,7 +469,9 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                 val tint = if (state == CellState.TODAY) SliverColors.AccentText else null
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, tint ?: SliverColors.TextTertiary))
-                    Box(Modifier.size(4.dp).clip(CircleShape).background(tint ?: SliverColors.LineStrong))
+                    // Owner request: a past empty day shows "+" so it reads as "tap to fill"; today keeps its dot.
+                    if (state == CellState.EMPTY) SliverIcon(SliverIcons.Plus, SliverColors.TextTertiary, size = 12.dp)
+                    else Box(Modifier.size(4.dp).clip(CircleShape).background(tint ?: SliverColors.LineStrong))
                 }
             }
             else -> {
