@@ -40,3 +40,5 @@
 - [x] pixel-perfect pack (8): byte-identical to applied design/tools/brand/android-res; no new tasks (checked 2026-11-12)
 - [x] Camera zoom stops (0.6/1/2/3 + pinch) + 4K/bitrate/stabilization + 16 Mbps day encode (Samsung not device-tested, see HANDOFF)
 - [x] T-design-v1.3 (code done; reminder firing not verified on Xiaomi (MIUI alarm deferral), filled-day/project-cover bug not reproduced; QA shots not committed, see HANDOFF)
+
+- T-design-v1.4-mono: DONE except leftovers (seeder-dependent bugs, reminder emulator test); see HANDOFF.md.
