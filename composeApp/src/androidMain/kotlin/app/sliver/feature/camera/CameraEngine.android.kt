@@ -23,6 +23,7 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
+import android.view.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -106,7 +107,8 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     ) {
         previewView = view
         val selector = if (lens == Lens.FRONT) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
-        val preview = Preview.Builder().build().also { it.surfaceProvider = view.surfaceProvider }
+        val displayRotation = view.display?.rotation ?: Surface.ROTATION_0
+        val preview = Preview.Builder().setTargetRotation(displayRotation).build().also { it.surfaceProvider = view.surfaceProvider }
         provider.unbindAll()
         camera = if (mode == CameraMode.VIDEO) {
             val recorder = Recorder.Builder()
@@ -177,7 +179,12 @@ actual fun CameraPreview(
 ) {
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
-    val view = remember { PreviewView(context).apply { scaleType = PreviewView.ScaleType.FILL_CENTER } }
+    val view = remember {
+        PreviewView(context).apply {
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+            scaleType = PreviewView.ScaleType.FILL_CENTER
+        }
+    }
     var provider by remember { mutableStateOf<ProcessCameraProvider?>(null) }
 
     LaunchedEffect(Unit) {
