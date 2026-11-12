@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -324,12 +325,13 @@ private fun ViewRow(yearView: Boolean, onYear: (Boolean) -> Unit, canPrev: Boole
             listOf("Month" to false, "Year" to true).forEach { (label, isYear) ->
                 val on = yearView == isYear
                 Column(
-                    Modifier.semantics { selected = on; role = Role.Tab }.clickable(onClick = { onYear(isYear) }),
+                    Modifier.width(IntrinsicSize.Max).semantics { selected = on; role = Role.Tab }.clickable(onClick = { onYear(isYear) }),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     SliverText(
                         label, SliverType.Headline.copy(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
                         Modifier.padding(vertical = 8.dp), if (on) SliverColors.TextPrimary else SliverColors.TextTertiary,
+                        maxLines = 1, softWrap = false,
                     )
                     Box(Modifier.height(2.dp).fillMaxWidth().background(if (on) SliverColors.TextPrimary else Color.Transparent))
                 }
