@@ -5,6 +5,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import app.sliver.feature.archive.ArchiveSession
+import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.films.FilmNav
 import app.sliver.feature.notifications.DeepLinkTarget
 import kotlinx.datetime.LocalDate
@@ -40,10 +41,14 @@ class AppNavigator(private val nav: NavController) {
         }
     }
 
-    /** Swaps Edit clip for Photo clip (or back) in place; same route means the screen was already rebuilt by the session revision. */
+    /** Swaps Edit clip for Photo clip (or back) in place; the same editor is rebuilt through the session revision. */
     fun swapEditor(target: Route) {
         val from = current ?: return
-        if (from == target || from !in CaptureRoutes) return
+        if (from !in CaptureRoutes) return
+        if (from == target) {
+            CaptureSession.revision++
+            return
+        }
         nav.navigate(target.path) { popUpTo(from.path) { inclusive = true } }
     }
 

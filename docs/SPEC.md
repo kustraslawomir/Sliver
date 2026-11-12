@@ -64,15 +64,18 @@ Preview (hold to compare with original), tabs LOOKS / ADJUST.
 - Header: "N SECONDS · SINCE …", settings gear.
 - MONTH / YEAR switch.
 - Month grid (Mon-first): cells filled (thumb) / empty past (dim dot, tap → Add sheet) / today (ember ring → Camera) / future / before first day. Backfilled days show a small gallery glyph.
-- Year: 12 rows × 31 tiny cells colored by each clip; tap a month → month grid. "Fill the past from your gallery" link. "Make your <year> film so far".
+- Year: 12 rows × 31 tiny cells colored by each clip; tap a month → month grid. "Auto-import from..." in the project menu. "Make your <year> film so far".
 - Memory card: "ONE MONTH AGO · <date>" (rules: 1 month / 100 days / 1 year ago; year once available).
 - Add sheet for an empty day: Video from gallery / Photo → 1 second (gallery opens for that date), Leave it open.
 
 ### Day detail
 Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n, time. Chips: look (→ editor), place (from file location; name cached when online). Replace / Change look / Remove (confirm; original in gallery untouched; Drive copy trashed).
 
-### Fill the past (opt-in tool, Archive Year + Settings)
-Intro (needs full photo access, nothing leaves the phone, filled days never touched) + range: Since I started / This year / Everything → scan by taken date → mosaic of empty days that can be filled → toggle months, "Use photos too" → "Fill N days" (background, progress) → Undo all. Limited access banner with "Allow all".
+### Auto-import drafts (replaces "Fill the past"; Project `...` menu and Settings)
+- Entry: "Auto-import from..." opens a page: a "From" date (default = project start, any day up to today, own month-grid picker), "N empty days since <date>" live from the calendar, "Import drafts". Photo/video permission (READ_MEDIA_IMAGES + READ_MEDIA_VIDEO + VISUAL_USER_SELECTED) is asked only here; partial access imports what is visible and shows a "Limited access / Allow all" banner.
+- Scan: MediaStore by DATE_TAKEN (device zone), only days with no row. Per gap day the default is the longest video (a motion photo counts as a video), else a photo; 1 s window: motion photo around its presentation timestamp, video in the middle, photo Still. Created through the normal save path as `draft` days with up to 30 candidates (videos by length, then photos). WorkManager, sequential, resumable (re-scan skips days that already have a row), cancelable, progress notification. "Undo all" removes only unconfirmed drafts of the run.
+- Drafts are calendar-only: dashed outline, dimmed thumbnail, "Draft" label, a11y "<date>, draft, review"; header chip "N drafts to review". They are excluded from counts, films, year/light, memory card, reminders, project stats, backup and restore until kept.
+- Draft editor (Edit clip / Photo clip): "Draft - i of N" with previous/next draft, strip "Other items from this day" (swap in place, no picker), "Video | Photo" for motion photos (also after the Photo Picker), "Keep this clip" (confirms, no 6 s undo bar, jumps to the next draft) and "Skip day" (deletes the draft, undo toast).
 
 ### Films
 - Library: Year in Seconds teaser card, posters (title, format, runtime, project span "10 Jan – 12 Nov 2026 · 129 clips"; a collecting film is the project film that grows with new clips). Long-press a poster for "Delete film" (red text, undo toast, no confirm). "+ New film".
@@ -100,7 +103,7 @@ Copy:
 - On this day: "One month ago today" — "<Weekday>, <date>. Want to see it?"
 
 ### Settings
-Account · Backup · New film format · Date stamp (on) · Also save full recordings to Photos (off) · Notifications · Fill the past · What SLIVER stores · Send feedback (mailto) · version.
+Account · Backup · New film format · Date stamp (on) · Also save full recordings to Photos (off) · Notifications · Auto-import from... · What SLIVER stores · Send feedback (mailto) · version.
 
 ### Widgets
 Android: Glance 2×2 (today waiting / today ✓ thumbnail, tap → camera) and Quick Settings tile "SLIVER" → camera.
@@ -114,7 +117,7 @@ Day notes, voice notes, mood tags, streaks, paywall, multi-photo import, film-st
 ### Capture-day rule
 - A clip can only be added to the day its media was recorded (EXIF DateTimeOriginal for photos and Motion Photos, video creation time for video, MediaStore DATE_TAKEN / modified as fallback; device local time zone). Mismatch or unreadable date: notice, nothing opens. In-app recordings are always today.
 - Edit clip / Photo clip show the fixed day as non-interactive text; saving uses that day.
-- Fill empty days assigns each item to its own date and shows "N not added: no date / outside this project".
+- Auto-import assigns each gallery item to its own capture date (DATE_TAKEN only).
 
 
 ## Filters (T-looks-film, 2026-11-12)

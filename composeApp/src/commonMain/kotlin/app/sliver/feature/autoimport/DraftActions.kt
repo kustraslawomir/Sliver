@@ -39,7 +39,6 @@ class DraftActions(
         val target = uri ?: candidates.firstOrNull()?.uri ?: return null
         val route = loadIntoSession(gallery, files, target, day.date, asVideo) ?: return null
         CaptureSession.draft = DraftContext(day, candidates, target)
-        CaptureSession.revision++
         return route
     }
 

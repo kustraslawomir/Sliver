@@ -118,7 +118,6 @@ class DraftNav(
             if (route == null) {
                 Notices.show("Couldn't read that item. Pick another.")
             } else {
-                CaptureSession.revision++
                 navigator.swapEditor(route)
             }
         }

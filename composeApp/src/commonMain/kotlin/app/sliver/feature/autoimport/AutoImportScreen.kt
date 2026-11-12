@@ -192,7 +192,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         )
     }
 
-    DatePickerSheet(pickerOpen, from, start, today, { fromRaw = it.toString(); pickerOpen = false }, { pickerOpen = false })
+    DatePickerSheet(pickerOpen, from, LocalDate(today.year - 10, 1, 1), today, { fromRaw = it.toString(); pickerOpen = false }, { pickerOpen = false })
 }
 
 @Composable
