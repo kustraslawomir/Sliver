@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -101,49 +104,46 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
-        if (day != null) {
-            ClipPlayer(
-                day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, look = previewLook ?: LookParams(),
-            )
-        }
-
-        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton44(
-                        { show(prevDay(current, filled)) }, "Previous day",
-                    ) {
-                        SliverIcon(SliverIcons.ChevronLeft, if (prevDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
-                    }
-                    IconButton44(
-                        { nextDay(current, filled)?.let { show(it) } }, "Next day",
-                    ) {
-                        SliverIcon(SliverIcons.ChevronRight, if (nextDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
-                    }
-                    IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on") {
-                        SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.AccentText)
+    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
+        Column(Modifier.fillMaxSize()) {
+            Box(Modifier.weight(1f).fillMaxWidth().background(SliverColors.Media)) {
+                if (day != null) {
+                    ClipPlayer(
+                        day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, look = previewLook ?: LookParams(),
+                    )
+                }
+                Box(Modifier.fillMaxWidth().height(140.dp).background(Brush.verticalGradient(listOf(SliverColors.Scrim, Color.Transparent))))
+                Row(
+                    Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.S3),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    IconButton44(onBack, "Close", overCamera = true) { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton44({ show(prevDay(current, filled)) }, "Previous day", overCamera = true) {
+                            SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia.copy(alpha = if (prevDay(current, filled) != null) 1f else 0.4f))
+                        }
+                        IconButton44({ nextDay(current, filled)?.let { show(it) } }, "Next day", overCamera = true) {
+                            SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (nextDay(current, filled) != null) 1f else 0.4f))
+                        }
+                        IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on", overCamera = true) {
+                            SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.OnMedia.copy(alpha = 0.75f) else SliverColors.Accent)
+                        }
                     }
                 }
-            }
-            Box(Modifier.weight(1f).fillMaxWidth()) {
                 if (day != null && app?.dateStamp == true) DateStamp(stampText(current))
             }
             Column(
-                Modifier.fillMaxWidth().background(SliverColors.BgVoid.copy(alpha = 0.6f))
+                Modifier.fillMaxWidth().background(SliverColors.BgBase)
+                    .navigationBarsPadding()
                     .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
                 verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
             ) {
-                SliverText(weekdayName(current), SliverType.DisplayL)
+                SliverText(weekdayName(current), SliverType.DisplayL, color = SliverColors.TextPrimary)
                 val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
                 SliverText(
                     "Day ${dayNumber(current, first)}" + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                    SliverType.Meta,
+                    SliverType.Meta, color = SliverColors.TextSecondary,
                 )
                 if (day != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
