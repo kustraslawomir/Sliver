@@ -195,7 +195,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.sliver"
+        applicationId = "skustra.fragments"
         minSdk = 29
         targetSdk = 37
         versionCode = 1

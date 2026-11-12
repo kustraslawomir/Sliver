@@ -120,7 +120,7 @@ fun runSeed(context: Context, mode: String, days: Int, project: String, includeT
     }
 }
 
-/** `adb shell am broadcast -n app.sliver/app.sliver.debug.SeedReceiver -a app.sliver.debug.SEED --ei days 365 --es project "My 2026" [--es mode wipe] [--ez today true]` */
+/** `adb shell am broadcast -n skustra.fragments/app.sliver.debug.SeedReceiver -a app.sliver.debug.SEED --ei days 365 --es project "My 2026" [--es mode wipe] [--ez today true]` */
 class SeedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         runSeed(

@@ -288,7 +288,7 @@
 					"$(inherited)",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.sliver;
+				PRODUCT_BUNDLE_IDENTIFIER = skustra.fragments;
 				PRODUCT_NAME = SLIVER;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -314,7 +314,7 @@
 					"$(inherited)",
 					"-lsqlite3",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.sliver;
+				PRODUCT_BUNDLE_IDENTIFIER = skustra.fragments;
 				PRODUCT_NAME = SLIVER;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

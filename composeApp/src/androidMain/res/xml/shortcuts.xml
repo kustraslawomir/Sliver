@@ -8,7 +8,7 @@
         android:shortcutLongLabel="@string/shortcut_record">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="app.sliver"
+            android:targetPackage="skustra.fragments"
             android:targetClass="app.sliver.MainActivity">
             <extra android:name="deeplink" android:value="camera" />
         </intent>
@@ -21,7 +21,7 @@
         android:shortcutLongLabel="@string/shortcut_gallery">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="app.sliver"
+            android:targetPackage="skustra.fragments"
             android:targetClass="app.sliver.MainActivity">
             <extra android:name="deeplink" android:value="gallery" />
         </intent>
@@ -34,7 +34,7 @@
         android:shortcutLongLabel="@string/shortcut_film">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="app.sliver"
+            android:targetPackage="skustra.fragments"
             android:targetClass="app.sliver.MainActivity">
             <extra android:name="deeplink" android:value="film-new" />
         </intent>
