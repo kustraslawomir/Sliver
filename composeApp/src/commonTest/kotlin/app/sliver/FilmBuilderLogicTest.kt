@@ -2,14 +2,16 @@ package app.sliver
 
 import app.sliver.data.DaySource
 import app.sliver.data.FilmAudio
-import app.sliver.data.FilmCut
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
 import app.sliver.data.db.Day
 import app.sliver.feature.films.FilmOptions
 import app.sliver.feature.films.FilmPlan
 import app.sliver.feature.films.dayIndexAt
-import app.sliver.feature.films.fadeAlpha
+import app.sliver.feature.films.canSaveSound
+import app.sliver.feature.films.isLegacyTrack
+import app.sliver.feature.films.trackLabel
+import app.sliver.feature.films.usableTrack
 import app.sliver.feature.films.rangeFor
 import app.sliver.feature.films.scrubberTicks
 import app.sliver.feature.films.toFilm
@@ -19,7 +21,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class FilmBuilderLogicTest {
     private val today = LocalDate(2026, 11, 11)
@@ -56,20 +60,28 @@ class FilmBuilderLogicTest {
         assertEquals(0, dayIndexAt(0.5f, 0))
     }
 
-    @Test fun fadeOnlyForFadeCut() {
-        assertEquals(0f, fadeAlpha(FilmCut.CUT, 0f))
-        assertEquals(1f, fadeAlpha(FilmCut.FADE, 0f))
-        assertEquals(0f, fadeAlpha(FilmCut.FADE, 0.5f))
-        assertEquals(1f, fadeAlpha(FilmCut.FADE, 1f), 0.001f)
-    }
-
     @Test fun optionsBuildFilm() {
-        val o = FilmOptions(FilmRangeType.MONTH, custom, FilmAudio.ORIGINAL, "asset:x", FilmCut.FADE, false)
+        val o = FilmOptions(FilmRangeType.MONTH, custom, FilmAudio.ORIGINAL, "/music/1_x.mp3", false)
         val f = o.toFilm("id", "Nov", FilmFormat.STORY, today)
         assertEquals(LocalDate(2026, 11, 1), f.rangeFrom)
-        assertEquals(FilmCut.FADE, f.cut)
         assertEquals(false, f.dateOn)
         assertNull(f.track)
-        assertEquals("asset:x", o.copy(audio = FilmAudio.MIX).toFilm("id", "n", FilmFormat.CINEMA, today).track)
+        assertEquals("/music/1_x.mp3", o.copy(audio = FilmAudio.MIX).toFilm("id", "n", FilmFormat.CINEMA, today).track)
+    }
+
+    @Test fun legacyAssetTrackIsDropped() {
+        assertTrue(isLegacyTrack("asset:music/drift.aac"))
+        assertNull(usableTrack("asset:music/drift.aac"))
+        assertNull(trackLabel("asset:music/drift.aac"))
+        assertFalse(canSaveSound(FilmAudio.MUSIC, "asset:music/drift.aac"))
+        assertNull(FilmOptions(custom = custom, audio = FilmAudio.MUSIC, track = "asset:music/drift.aac").toFilm("id", "n", FilmFormat.CINEMA, today).track)
+    }
+
+    @Test fun musicNeedsPickedFile() {
+        assertTrue(canSaveSound(FilmAudio.ORIGINAL, null))
+        assertFalse(canSaveSound(FilmAudio.MUSIC, null))
+        assertFalse(canSaveSound(FilmAudio.MIX, null))
+        assertTrue(canSaveSound(FilmAudio.MIX, "/files/music/17_song.mp3"))
+        assertEquals("song.mp3", trackLabel("/files/music/17_song.mp3"))
     }
 }

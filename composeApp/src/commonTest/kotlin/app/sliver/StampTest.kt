@@ -7,5 +7,8 @@ import kotlin.test.assertEquals
 
 class StampTest {
     @Test
-    fun stampIsDayMonthYearPadded() = assertEquals("05.03.2026", stampText(LocalDate(2026, 3, 5)))
+    fun stampIsDayShortMonthYear() {
+        assertEquals("5 MAR 2026", stampText(LocalDate(2026, 3, 5)))
+        assertEquals("31 OCT 2026", stampText(LocalDate(2026, 10, 31)))
+    }
 }

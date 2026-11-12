@@ -1,13 +1,12 @@
 package app.sliver.feature.films
 
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,13 +20,13 @@ import androidx.media3.ui.PlayerView
 import app.sliver.data.FilmAudio
 import app.sliver.data.LookParams
 import app.sliver.data.look.LookEffects
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val MIX_ORIGINAL = 0.5f
 private const val MIX_MUSIC = 0.7f
-
-private fun trackUri(ref: String): Uri =
-    if (ref.startsWith(ASSET_PREFIX)) Uri.parse("asset:///" + ref.removePrefix(ASSET_PREFIX)) else Uri.parse(ref)
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -120,15 +119,11 @@ actual fun FilmPreview(
 }
 
 @Composable
-actual fun rememberAudioPicker(onPicked: (String) -> Unit): () -> Unit {
+actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            runCatching {
-                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            onPicked(uri.toString())
-        }
+        if (uri != null) scope.launch { onPicked(withContext(Dispatchers.IO) { importAudio(context, uri) }) }
     }
     return { launcher.launch(arrayOf("audio/*")) }
 }

@@ -38,7 +38,6 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
@@ -50,7 +49,6 @@ import app.sliver.core.ui.SwitchRow
 import app.sliver.core.ui.isStorageLow
 import app.sliver.data.files.FileStore
 import app.sliver.data.FilmAudio
-import app.sliver.data.FilmCut
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
@@ -93,7 +91,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
         options = FilmOptions(
-            f.rangeType, (f.rangeFrom ?: today) to (f.rangeTo ?: today), f.audio, f.track, f.cut, f.dateOn, f.look,
+            f.rangeType, (f.rangeFrom ?: today) to (f.rangeTo ?: today),
+            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look,
         )
         dateTouched = true
     }
@@ -109,7 +108,20 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var paused by remember { mutableStateOf(false) }
     var seek by remember { mutableStateOf<FilmSeek?>(null) }
     var position by remember { mutableStateOf(0 to 0f) }
-    val pickAudio = rememberAudioPicker { options = options.copy(audio = options.audio.takeIf { it != FilmAudio.ORIGINAL } ?: FilmAudio.MUSIC, track = it) }
+    val fileStore = remember { koin.get<FileStore>() }
+    var notice by remember { mutableStateOf<String?>(null) }
+    val fresh = remember { mutableSetOf<String>() }
+    fun setTrack(path: String?) {
+        options.track?.takeIf { it in fresh }?.let { fileStore.delete(it); fresh -= it }
+        if (path != null) fresh += path
+        options = options.copy(track = path)
+    }
+    val pickAudio = rememberAudioPicker {
+        when (it) {
+            is PickedAudio.Ok -> { notice = null; setTrack(it.path) }
+            is PickedAudio.Failed -> notice = it.message
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()
@@ -141,8 +153,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 if (dateOn) {
                     DateStamp(stampText(plan.days[index].date))
                 }
-                val dip = fadeAlpha(options.cut, position.second)
-                if (dip > 0f) Box(Modifier.fillMaxSize().background(SliverColors.Media.copy(alpha = dip)))
                 if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.TextPrimary)
             }
         }
@@ -180,25 +190,21 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 listOf("Original", "Music", "Mix"), Audios.indexOf(options.audio),
                 { options = options.copy(audio = Audios[it]) },
             )
-            if (options.audio != FilmAudio.ORIGINAL) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                    BuiltInTracks.forEach { t ->
-                        val ref = builtInTrackRef(t)
-                        Chip(t.label, options.track == ref, { options = options.copy(track = ref) })
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    GhostButton("Pick a file", pickAudio)
-                    val picked = options.track?.takeIf { !it.startsWith(ASSET_PREFIX) }
-                    if (picked != null) SliverText("Your file", SliverType.Caption, color = SliverColors.AccentText)
-                }
+            if (options.track == null && isLegacyTrack(editing?.track)) {
+                SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
             }
-        }
-
-        Section("Between days") {
-            Segmented(
-                listOf("Cut", "Fade"), options.cut.ordinal, { options = options.copy(cut = FilmCut.entries[it]) },
-            )
+            if (options.audio != FilmAudio.ORIGINAL) {
+                val picked = trackLabel(options.track)
+                if (picked != null) {
+                    SliverText(picked, SliverType.BodySmall, color = SliverColors.AccentText, maxLines = 1)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                    GhostButton(if (picked == null) "Pick a file" else "Replace", pickAudio)
+                    if (picked != null) GhostButton("Remove", { setTrack(null) })
+                }
+                notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
+                if (picked == null) SliverText(PICK_MUSIC_HINT, SliverType.Caption, color = SliverColors.TextSecondary)
+            }
         }
 
         Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
@@ -226,7 +232,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 }
             },
             Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),
-            enabled = clips.isNotEmpty(),
+            enabled = clips.isNotEmpty() && canSaveSound(options.audio, options.track),
         )
     }
 }

@@ -18,4 +18,4 @@ actual fun FilmPreview(
 ): Unit = TODO("iOS later")
 
 @Composable
-actual fun rememberAudioPicker(onPicked: (String) -> Unit): () -> Unit = TODO("iOS later")
+actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = TODO("iOS later")

@@ -12,7 +12,7 @@ class FilmSeek(val fraction: Float)
 
 /**
  * Plays [clips] back to back (one second each). [look] overrides every clip's own look when set.
- * [track] is an "asset:" reference or a content URI, played looped according to [audio].
+ * [track] is a path to a picked music file, played looped according to [audio].
  * [onPosition] reports the current clip index and progress through it.
  */
 @Composable
@@ -27,6 +27,12 @@ expect fun FilmPreview(
     modifier: Modifier,
 )
 
-/** Opens the system file picker for an audio file and returns a persistent reference to it. */
+/** Result of picking a music file: a copy in app-private storage, or a user-facing reason it could not be used. */
+sealed interface PickedAudio {
+    class Ok(val path: String) : PickedAudio
+    class Failed(val message: String) : PickedAudio
+}
+
+/** Opens the system document picker for an audio file; the file is copied into app storage and checked to decode. */
 @Composable
-expect fun rememberAudioPicker(onPicked: (String) -> Unit): () -> Unit
+expect fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit

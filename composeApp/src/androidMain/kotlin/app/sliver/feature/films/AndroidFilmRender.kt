@@ -18,6 +18,7 @@ import android.text.style.CharacterStyle
 import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import app.sliver.data.export.stampAnchor
+import app.sliver.data.export.stampText
 import app.sliver.data.export.stampTextPx
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
@@ -215,19 +216,14 @@ class FilmComposer(
 
     private fun compose(film: Film, clips: List<Clip>, card: File, outW: Int, outH: Int): Composition {
         val outAspect = outW.toFloat() / outH
-        val audio = audioPlan(film.audio, film.track?.takeIf { trackAvailable(it) })
+        val audio = audioPlan(film.audio, usableTrack(film.track)?.takeIf { trackAvailable(it) })
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
         val filmLook = film.look?.let { LookEffects.build(context, it.toParams(), forExport = true) }.orEmpty()
-
-        fun dip(): Effect = RgbMatrix { presentationTimeUs, _ ->
-            val f = dipFactor(film.cut, presentationTimeUs / 1000)
-            floatArrayOf(f, 0f, 0f, 0f, 0f, f, 0f, 0f, 0f, 0f, f, 0f, 0f, 0f, 0f, 1f)
-        }
 
         fun stamp(date: kotlinx.datetime.LocalDate): List<Effect> {
             if (!film.dateOn) return emptyList()
             val size = stampTextPx(outW, outH)
-            val text = SpannableString(dateStamp(date)).apply {
+            val text = SpannableString(stampText(date)).apply {
                 setSpan(ForegroundColorSpan(Color.WHITE), 0, length, 0)
                 setSpan(AbsoluteSizeSpan(size, false), 0, length, 0)
                 stampTypeface?.let { setSpan(TypefaceSpan(it), 0, length, 0) }
@@ -258,7 +254,7 @@ class FilmComposer(
             val background = clips.map { clip ->
                 clipItem(
                     clip,
-                    listOf(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP), GaussianBlur(24f), dip()),
+                    listOf(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP), GaussianBlur(24f)),
                     withAudio = false,
                 )
             } + cardItem
@@ -273,7 +269,6 @@ class FilmComposer(
                 }
                 addAll(filmLook)
                 addAll(stamp(clip.day.date))
-                add(dip())
             }
             clipItem(clip, effects, withAudio = true)
         } + cardItem
@@ -282,7 +277,7 @@ class FilmComposer(
 
         if (audio.music) {
             val ref = checkNotNull(film.track)
-            val uri = if (ref.startsWith(ASSET_PREFIX)) Uri.parse("asset:///" + ref.removePrefix(ASSET_PREFIX)) else Uri.parse(ref)
+            val uri = trackUri(ref)
             val volume = ChannelMixingAudioProcessor().apply {
                 if (audio.musicVolume != 1f) {
                     putChannelMixingMatrix(ChannelMixingMatrix.create(1, 1).scaleBy(audio.musicVolume))
@@ -309,12 +304,10 @@ class FilmComposer(
         override fun updateDrawState(tp: TextPaint) = tp.setShadowLayer(radius, 0f, 0f, 0x99000000.toInt())
     }
 
-    /** A built-in track whose asset is missing is skipped (the film keeps its original sound) instead of failing the render. */
+    /** A track whose file is gone is skipped (the film keeps its original sound) instead of failing the render. */
     private fun trackAvailable(ref: String): Boolean {
-        if (!ref.startsWith(ASSET_PREFIX)) return true
-        val path = ref.removePrefix(ASSET_PREFIX)
-        val present = runCatching { context.assets.open(path).close() }.isSuccess
-        if (!present) Log.w("FilmComposer", "Music asset $path missing, rendering without music")
+        val present = trackExists(ref)
+        if (!present) Log.w("FilmComposer", "Music file missing, rendering without music")
         return present
     }
 

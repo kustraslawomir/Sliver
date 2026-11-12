@@ -1,7 +1,6 @@
 package app.sliver.feature.films
 
 import app.sliver.data.FilmAudio
-import app.sliver.data.FilmCut
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
@@ -12,26 +11,22 @@ import kotlinx.datetime.plus
 
 const val MAX_DAY_TICKS = 40
 
-class BuiltInTrack(val id: String, val label: String) {
-    val asset: String get() = "music/$id.aac"
-}
+/** Tracks of films made before music files had to be picked ("asset:music/…") no longer exist. */
+const val LEGACY_ASSET_PREFIX = "asset:"
 
-val BuiltInTracks = listOf(
-    BuiltInTrack("drift", "Drift"),
-    BuiltInTrack("pulse", "Pulse"),
-    BuiltInTrack("dusk", "Dusk"),
-    BuiltInTrack("spark", "Spark"),
-)
+const val LEGACY_TRACK_NOTE = "The built-in music was removed. This film now uses its original sound."
+const val PICK_MUSIC_HINT = "Pick a music file to save"
 
-const val ASSET_PREFIX = "asset:"
+/** The track a film can really play, or null for removed built-in tracks. */
+fun usableTrack(ref: String?): String? = ref?.takeIf { !it.startsWith(LEGACY_ASSET_PREFIX) }
 
-fun builtInTrackRef(track: BuiltInTrack) = ASSET_PREFIX + track.asset
+fun isLegacyTrack(ref: String?): Boolean = ref != null && usableTrack(ref) == null
 
-fun trackLabel(ref: String?): String? = when {
-    ref == null -> null
-    ref.startsWith(ASSET_PREFIX) -> BuiltInTracks.firstOrNull { builtInTrackRef(it) == ref }?.label
-    else -> "Your file"
-}
+/** File name shown for a picked track; copies are stored as "<millis>_<name>". */
+fun trackLabel(ref: String?): String? = usableTrack(ref)?.substringAfterLast('/')?.replace(Regex("^\\d+_"), "")
+
+/** Music and Mix need a picked file; Original never does. */
+fun canSaveSound(audio: FilmAudio, track: String?): Boolean = audio == FilmAudio.ORIGINAL || usableTrack(track) != null
 
 fun rangeFor(type: FilmRangeType, today: LocalDate, custom: Pair<LocalDate, LocalDate>): Pair<LocalDate, LocalDate> =
     when (type) {
@@ -57,22 +52,11 @@ fun scrubberTicks(plan: FilmPlan): List<Float> {
 fun dayIndexAt(fraction: Float, count: Int): Int =
     if (count == 0) 0 else (fraction.coerceIn(0f, 1f) * count).toInt().coerceAtMost(count - 1)
 
-/** Opacity of the black dip near the clip edges for fade cuts; [clipFraction] is progress through one second. */
-fun fadeAlpha(cut: FilmCut, clipFraction: Float, edge: Float = 0.2f): Float {
-    if (cut != FilmCut.FADE) return 0f
-    return when {
-        clipFraction < edge -> 1f - clipFraction / edge
-        clipFraction > 1f - edge -> (clipFraction - (1f - edge)) / edge
-        else -> 0f
-    }.coerceIn(0f, 1f)
-}
-
 data class FilmOptions(
     val rangeType: FilmRangeType = FilmRangeType.YEAR,
     val custom: Pair<LocalDate, LocalDate>,
     val audio: FilmAudio = FilmAudio.ORIGINAL,
     val track: String? = null,
-    val cut: FilmCut = FilmCut.CUT,
     val dateOn: Boolean = true,
     val look: LookPreset? = null,
 )
@@ -81,6 +65,6 @@ fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat, today: Loca
     val (from, to) = rangeFor(rangeType, today, custom)
     return Film(
         id = id, name = name, format = format, rangeType = rangeType, rangeFrom = from, rangeTo = to,
-        audio = audio, track = track.takeIf { audio != FilmAudio.ORIGINAL }, cut = cut, dateOn = dateOn, look = look,
+        audio = audio, track = usableTrack(track).takeIf { audio != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
     )
 }

@@ -249,3 +249,9 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 - DECISION: strict. Unreadable capture date blocks the add ("We can't tell when this was recorded, so it can't be added."). Date compare is in the device's local time zone; fallback MediaStore DATE_MODIFIED can be used when no taken date exists.
 - Limitation: capture dates live in editable metadata, so a determined user can change them. This blocks casual cheating only.
 - Edit clip's 7-day day picker and lastSevenDays were removed. Not verified on device.
+
+## Film builder cleanup (music, cuts, stamp)
+- Built-in music tracks removed. Music/Mix need a picked file (copied to `filesDir/music/<millis>_<name>`, checked with MediaMetadataRetriever). Films with an old `asset:` track render with original sound and show a one-line note in the builder.
+- "Between days" removed; `FilmCut` stays stored, every film renders hard cuts.
+- One stamp format everywhere: `stampText` -> "2 NOV 2026" (design boards), used by on-screen DateStamp and film export.
+- Not verified on device (no on-device checks done).

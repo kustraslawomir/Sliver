@@ -16,7 +16,7 @@ Day
 
 Film
 - id: String (uuid) · name · format CINEMA | STORY · range: Week/Month/Year/Custom(from,to) · live: Boolean (keeps collecting)
-- audio ORIGINAL | MUSIC | MIX · track: String? (asset id or content uri) · cut CUT | FADE · dateOn: Boolean · look: preset or NONE · mismatch CENTER | BLUR
+- audio ORIGINAL | MUSIC | MIX · track: String? (path of a picked file copied to filesDir/music; old "asset:" values are ignored) · cut CUT | FADE (legacy, always rendered as hard cuts) · dateOn: Boolean · look: preset or NONE · mismatch CENTER | BLUR
 - renderPath: String? (`films/<id>.mp4`) · renderedAt: Instant?
 
 Settings (DataStore)

@@ -37,3 +37,4 @@
 - [x] T37 (sign out + delete account sheet; Drive folder trashed, not device-tested)
  - [x] F04 (projects sheet, repo rename/format/archive/delete)
 - [x] F05 (no tab bar, AppNavigator, flow origin + toast on destination, discard sheet, SavedStateHandle, deep-link stacks; not device-verified)
+- [x] pixel-perfect pack (8): byte-identical to applied design/tools/brand/android-res; no new tasks (checked 2026-11-12)
