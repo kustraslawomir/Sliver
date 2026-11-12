@@ -412,3 +412,16 @@ DONE with deviations (lead decision: no Playwright/pip/npm, nothing installed ou
 - Found on device and fixed: bumping the session revision before the route swap composed Edit clip on a photo path and crashed MediaMetadataRetriever; the revision is now bumped only for same-route swaps.
 - Device (emulator tracker13, API 35, synthetic media only in Movies/SliverDemo + Pictures/SliverDemo, EXIF with offset + videos with creation_time, three motion photos, seeded project): permission dialog -> 11 drafts for 11 gap days (filled days untouched), calendar drafts + chip, swap candidate then Keep, motion photo shows Video|Photo, Skip with undo toast, photo<->video editor swap, Undo all removed the remaining drafts and kept the confirmed clips. Cleaned afterwards: READ_MEDIA revoked, demo folders and app data wiped, emulator stopped. Shots (dark only): docs/qa/auto-import-drafts/. Device run was before the rebase onto T-looks; build/tests/goldens/lint were rerun after it.
 - Test pitfall: MediaStore only fills DATE_TAKEN for JPEGs that carry OffsetTimeOriginal + Make/Model in EXIF.
+
+## Lead notes, night 2026-11-12 (film filter perf check on the Xiaomi)
+- Seeded "QA Perf" (37 synthetic clips) on the Xiaomi, opened Film builder (preview surface 970×546).
+  Right after opening, the preview played (date stamp advanced 17 → 23 Oct). After re-installing the same
+  build plus a debug EventLogger, the preview stayed on "6 NOV 2026" for 10+ s with None and with Halo, and a
+  tap on the preview did not resume it. No error lines in logcat; EventLogger printed nothing (MIUI may drop
+  app debug logs). **Possible bug: Film builder preview can get stuck after filter switches / re-entry —
+  reproduce in the morning (switch filters a few times, leave and re-open the builder).**
+- FPS per filter is NOT measured: SurfaceFlinger `--latency` and `--timestats` return nothing for app
+  layers on MIUI 14, `gfxinfo` doesn't cover the SurfaceView. Next try: emulator or a debug-only frame counter
+  via `VideoFrameMetadataListener` on the preview player logging fps with `Log.i`.
+- Seeded data left on the Xiaomi in skustra.fragments ("QA Perf"/"My 2026"); wipe with
+  `am broadcast -n skustra.fragments/app.sliver.debug.SeedReceiver -a app.sliver.debug.SEED --es mode wipe`.
