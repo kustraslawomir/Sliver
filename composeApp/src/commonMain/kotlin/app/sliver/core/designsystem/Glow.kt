@@ -21,8 +21,8 @@ private fun ember(alpha: Int) = SliverColors.Accent.copy(alpha = alpha / 255f)
 /** Tokens from design/tokens.json "glow". */
 object Glow {
     val cta = arrayOf(GlowLayer(ember(0x44), 32.dp, dy = 8.dp))
-    val record = arrayOf(GlowLayer(ember(0x88), 14.dp), GlowLayer(ember(0x33), 32.dp))
-    val recordBreath = arrayOf(GlowLayer(ember(0xAA), 20.dp), GlowLayer(ember(0x44), 44.dp))
+    val record = arrayOf(GlowLayer(ember(0x4D), 12.dp))
+    val recordBreath = arrayOf(GlowLayer(ember(0x73), 18.dp))
     val photoRecord = arrayOf(GlowLayer(Color.White.copy(alpha = 0x33 / 255f), 16.dp))
     val frame = arrayOf(GlowLayer(ember(0x99), 14.dp), GlowLayer(ember(0x55), 36.dp))
     val slit = arrayOf(GlowLayer(ember(0xFF), 12.dp), GlowLayer(ember(0x88), 32.dp))

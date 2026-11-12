@@ -37,11 +37,11 @@ enum class RecordState { Photo, VideoIdle, Recording }
 
 private const val BREATH_MS = 1600
 
-/** CSS ease-in-out, as in design sv-breathe (1600 ms, 0%/100% = 14/32 px, 50% = 20/44 px). */
+/** CSS ease-in-out, as in design sv-breathe (1600 ms, 0%/100% = 12 px, 50% = 18 px). */
 private val EaseInOut = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 private val Disc = 72.dp
 
-/** Option D "Ember": 72 dp disc in an 80 dp hit area, glow drawn as a radial gradient (no blur). */
+/** Option D "Ember": 72 dp disc in an 80 dp hit area, glow (tokens glow.record, breathing to recordBreathPeak) drawn as a radial gradient (no blur). */
 @Composable
 fun RecordButton(
     state: RecordState,
@@ -61,9 +61,8 @@ fun RecordButton(
     } else 0f
     val white = state == RecordState.Photo
     val base = if (white) SliverColors.TextPrimary else SliverColors.Accent
-    val inner = if (white) 0x33 / 255f else lerpF(0x88 / 255f, 0xAA / 255f, breath)
-    val outer = if (white) 0f else lerpF(0x33 / 255f, 0x44 / 255f, breath)
-    val reach = if (white) 16f else lerpF(32f, 44f, breath)
+    val inner = if (white) 0x33 / 255f else lerpF(0x4D / 255f, 0x73 / 255f, breath)
+    val reach = if (white) 12f else lerpF(12f, 18f, breath)
     Box(
         modifier.size(80.dp).scale(if (holding) 1.2f else 1f)
             .semantics { contentDescription = if (state == RecordState.Recording) "Stop recording" else "Record"; role = Role.Button }
@@ -98,7 +97,7 @@ fun RecordButton(
                     drawCircle(
                         Brush.radialGradient(
                             edge to base.copy(alpha = inner),
-                            mid to base.copy(alpha = if (white) inner * 0.4f else outer + (inner - outer) * 0.35f),
+                            mid to base.copy(alpha = inner * 0.4f),
                             1f to Color.Transparent,
                             center = Offset(r, r), radius = r + reachPx,
                         ),
