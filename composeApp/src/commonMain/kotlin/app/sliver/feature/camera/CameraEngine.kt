@@ -23,6 +23,10 @@ interface CameraEngine {
     /** Exposure compensation range of the bound camera, or null when unsupported. */
     fun exposureRange(): ExposureRange?
     fun setExposureIndex(index: Int)
+    /** Zoom ratios reachable on the current lens, below 1× when there is an ultra-wide; null until bound. */
+    fun zoomRange(): ClosedFloatingPointRange<Float>?
+    /** Zoom ratio relative to the main lens (0.6 = ultra-wide); kept across rebinds of the same lens. */
+    fun setZoom(ratio: Float)
     fun takePhoto(path: String, onResult: (Result<String>) -> Unit)
 }
 

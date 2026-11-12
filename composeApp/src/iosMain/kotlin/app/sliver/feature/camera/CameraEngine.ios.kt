@@ -21,6 +21,8 @@ actual fun rememberCameraEngine(): CameraEngine = remember {
         override fun focus(x: Float, y: Float, lock: Boolean, onResult: (Boolean) -> Unit) = onResult(false)
         override fun exposureRange(): ExposureRange? = null
         override fun setExposureIndex(index: Int) = Unit
+        override fun zoomRange(): ClosedFloatingPointRange<Float>? = null
+        override fun setZoom(ratio: Float) = Unit
         override fun takePhoto(path: String, onResult: (Result<String>) -> Unit) = onResult(Result.failure(notYet))
     }
 }

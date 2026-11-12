@@ -106,3 +106,22 @@ fun formatEv(index: Int, step: Float): String {
 
 /** The slider sits on the side of the focus point with more room. */
 fun exposureOnRight(focusX: Float, width: Float): Boolean = focusX < width / 2f
+
+/** Zoom stops like the system camera: the ultra-wide (when the lens goes below 1×), 1×, 2× and 3× within [min]..[max]. */
+fun zoomPresets(min: Float, max: Float): List<Float> = buildList {
+    if (min < 0.95f) add(kotlin.math.round(min * 10f) / 10f)
+    add(1f)
+    if (max >= 2f) add(2f)
+    if (max >= 3f) add(3f)
+}
+
+/** Index of the stop the current [zoom] belongs to: the highest stop not above it. */
+fun activeZoomPreset(presets: List<Float>, zoom: Float): Int =
+    presets.indexOfLast { it <= zoom + 0.01f }.coerceAtLeast(0)
+
+/** "0.6", "2", or with [unit] "1.4×". */
+fun formatZoom(zoom: Float, unit: Boolean): String {
+    val tenths = kotlin.math.round(zoom * 10f).toInt()
+    val text = if (tenths % 10 == 0) "${tenths / 10}" else "${tenths / 10}.${tenths % 10}"
+    return if (unit) "$text×" else text
+}

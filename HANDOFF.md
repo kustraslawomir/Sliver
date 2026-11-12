@@ -272,3 +272,11 @@ Contrast (WCAG, light palette) before -> after; verified by `ContrastTest` (text
 - iOS SystemBars actual: no-op.
 - Splash/initial frame (item 7): accepted as brand splash. The system splash is dark #0A0A0B and App's first frame uses the SYSTEM default until the DataStore value loads, so a Light-choice user on a dark system may see one dark frame. Making it theme-aware needs a synchronous pre-read of the Appearance setting.
 - Device check (Xiaomi b798509a, light): Project home, Clip detail, Settings read correctly. Projects sheet and Film builder were not re-screenshotted. Screenshots were NOT saved to docs/qa/light/: the auto-mode classifier blocked copying device screenshots into the repo (provenance), so the images stay only in the scratchpad.
+
+## Camera: zoom stops + capture quality (2026-11-12)
+- Zoom stops 0.6×/1×/2×/3× from the bound camera's zoom range plus pinch to zoom (also while recording). Logical multi-cameras (Samsung S25: 0.6–10) reach the ultra-wide via setZoomRatio. Otherwise a separate back camera with a shorter 35 mm-equivalent focal length is used as the ultra-wide (rebinds when crossing 1×, never while recording). Zoom resets to 1× on lens flip and on launch (like the system camera), and survives recreation.
+- Xiaomi M2101K9G exposes no ultra-wide to third-party apps (CameraX sees range 1–10, no extra back camera), so it shows 1×/2×/3×. Verified on device: chips, active label "3×", reset on flip.
+- Back lens records 4K (48 Mbps) when offered, else 1080p (20 Mbps). Preview stabilization is on when supported (else video stabilization). Photo uses CAPTURE_MODE_MAXIMIZE_QUALITY.
+- Stored days and films were encoded at the Media3 default (~6 Mbps 1080p). They now use 16 Mbps (DECISION; ~2 MB per day).
+- NOT device-tested: Samsung (locked during the session), pinch (adb can't do multitouch), the separate-ultra-wide path, a real recording. True fish-eye is not offered: no native camera ships it as a lens; 0.6× ultra-wide is the widest optical option.
+- Zoom chips have no design yet (DECISION in CameraScreen.ZoomStops); no docs/qa screenshot because it would show the live preview.

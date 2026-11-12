@@ -97,6 +97,9 @@ import app.sliver.data.settings.CameraSettings
 import app.sliver.data.settings.Lens
 import app.sliver.data.settings.SettingsRepository
 import kotlinx.coroutines.Job
+import androidx.compose.animation.core.animate
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -157,6 +160,14 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     var recording by remember { mutableStateOf(false) }
     var holding by remember { mutableStateOf(false) }
     var elapsedMs by remember { mutableLongStateOf(0L) }
+    var zoom by rememberSaveable(cam.lens) { mutableFloatStateOf(1f) }
+    var zoomRange by remember { mutableStateOf<ClosedFloatingPointRange<Float>?>(null) }
+    var zoomJob by remember { mutableStateOf<Job?>(null) }
+    LaunchedEffect(zoom) { engine.setZoom(zoom) }
+    fun zoomTo(target: Float) {
+        zoomJob?.cancel()
+        zoomJob = scope.launch { animate(zoom, target, animationSpec = tween(220)) { v, _ -> zoom = v } }
+    }
     fun update(change: (CameraSettings) -> CameraSettings) {
         scope.launch { repo.update { it.copy(camera = change(it.camera)) } }
     }
@@ -226,10 +237,22 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 .padding(bottom = if (side) 0.dp else 248.dp, end = if (side) SideControlsWidth else 0.dp)
                 .clip(RoundedCornerShape(24.dp)),
         ) {
-            CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) { ready = true }
+            CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) {
+                ready = true
+                zoomRange = engine.zoomRange()
+            }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
-            FocusOverlay(!recording && ready, cam.lens to cam.mode, engine::exposureRange, engine::focus, engine::setExposureIndex)
+            FocusOverlay(!recording && ready, cam.lens to cam.mode, engine::exposureRange, engine::focus, engine::setExposureIndex, { factor ->
+                zoomJob?.cancel()
+                zoomRange?.let { zoom = (zoom * factor).coerceIn(it) }
+            })
+            zoomRange?.let { r ->
+                ZoomStops(zoomPresets(r.start, r.endInclusive), zoom, iconRot, Modifier.align(Alignment.BottomCenter).padding(bottom = SliverSpace.S4)) {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    zoomTo(it)
+                }
+            }
         }
 
         Box(
@@ -385,6 +408,39 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
             SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
         SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
+    }
+}
+
+// DECISION: no design for zoom yet; stops follow One UI (small dark circles, the active one larger with the live ratio and ×).
+@Composable
+private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifier: Modifier, onSelect: (Float) -> Unit) {
+    if (presets.size < 2) return
+    val active = activeZoomPreset(presets, zoom)
+    val turn by animateFloatAsState(rotation, tween(240), label = "zoom-upright")
+    Row(
+        modifier.clip(SliverShapes.Pill).background(SliverColors.Media.copy(alpha = 0.35f)).padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        presets.forEachIndexed { i, preset ->
+            val on = i == active
+            val label = formatZoom(if (on) zoom else preset, unit = on)
+            Box(
+                Modifier.size(44.dp)
+                    .semantics { contentDescription = "Zoom ${formatZoom(preset, true)}"; selected = on; role = Role.Button }
+                    .clickable { onSelect(preset) },
+                Alignment.Center,
+            ) {
+                Box(
+                    Modifier.size(if (on) 38.dp else 30.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = if (on) 0.7f else 0.5f)).rotate(turn),
+                    Alignment.Center,
+                ) {
+                    SliverText(
+                        label, SliverType.Meta.copy(fontSize = if (on) 12.sp else 11.sp, fontWeight = FontWeight.SemiBold).overMedia(),
+                        color = SliverColors.OnMedia.copy(alpha = if (on) 1f else 0.85f), maxLines = 1,
+                    )
+                }
+            }
+        }
     }
 }
 

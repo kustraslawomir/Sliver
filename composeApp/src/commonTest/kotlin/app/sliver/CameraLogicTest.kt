@@ -10,6 +10,9 @@ import app.sliver.feature.camera.exposureOnRight
 import app.sliver.feature.camera.formatEv
 import app.sliver.feature.camera.formatTimer
 import app.sliver.feature.camera.surfaceRotation
+import app.sliver.feature.camera.activeZoomPreset
+import app.sliver.feature.camera.formatZoom
+import app.sliver.feature.camera.zoomPresets
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -101,5 +104,31 @@ class MediaLegibilityTest {
             androidx.compose.ui.graphics.Color.White, androidx.compose.ui.graphics.Color.Black, 0f, androidx.compose.ui.graphics.Color.White,
         )
         kotlin.test.assertTrue(c < 1.1f)
+    }
+
+    @Test
+    fun zoomPresetsFollowLensRange() {
+        assertEquals(listOf(0.6f, 1f, 2f, 3f), zoomPresets(0.6f, 10f))
+        assertEquals(listOf(1f, 2f, 3f), zoomPresets(1f, 8f))
+        assertEquals(listOf(0.5f, 1f, 2f), zoomPresets(0.52f, 2.5f))
+        assertEquals(listOf(1f), zoomPresets(1f, 1f))
+    }
+
+    @Test
+    fun activeZoomPresetIsHighestStopNotAbove() {
+        val p = listOf(0.6f, 1f, 2f, 3f)
+        assertEquals(0, activeZoomPreset(p, 0.6f))
+        assertEquals(0, activeZoomPreset(p, 0.8f))
+        assertEquals(1, activeZoomPreset(p, 1.4f))
+        assertEquals(3, activeZoomPreset(p, 7f))
+        assertEquals(0, activeZoomPreset(p, 0.5f))
+    }
+
+    @Test
+    fun formatZoomTrimsWholeNumbers() {
+        assertEquals("0.6", formatZoom(0.6f, false))
+        assertEquals("2", formatZoom(2f, false))
+        assertEquals("1.4\u00D7", formatZoom(1.43f, true))
+        assertEquals("3\u00D7", formatZoom(3f, true))
     }
 }

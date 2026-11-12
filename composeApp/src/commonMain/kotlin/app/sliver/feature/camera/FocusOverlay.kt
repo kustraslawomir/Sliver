@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,6 +60,24 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 
+/** True when a second finger lands (pinch), false when the gesture ends or something else takes it. */
+private suspend fun AwaitPointerEventScope.awaitUpOrSecondFinger(): Boolean {
+    while (true) {
+        val event = awaitPointerEvent()
+        if (event.changes.count { it.pressed } > 1) return true
+        if (event.changes.none { it.pressed } || event.changes.any { it.isConsumed }) return false
+    }
+}
+
+private suspend fun AwaitPointerEventScope.pinch(onZoomBy: (Float) -> Unit) {
+    do {
+        val event = awaitPointerEvent()
+        val factor = event.calculateZoom()
+        if (factor != 1f) onZoomBy(factor)
+        event.changes.forEach { if (it.positionChange() != Offset.Zero) it.consume() }
+    } while (event.changes.any { it.pressed })
+}
+
 private data class FocusState(val x: Float, val y: Float, val tap: Int, val locked: Boolean = false, val ok: Boolean? = null)
 
 /**
@@ -72,8 +93,10 @@ fun FocusOverlay(
     exposureRange: () -> ExposureRange?,
     onFocus: (x: Float, y: Float, lock: Boolean, onResult: (Boolean) -> Unit) -> Unit,
     onExposure: (Int) -> Unit,
+    onZoomBy: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val zoomBy by rememberUpdatedState(onZoomBy)
     val reduced = LocalReducedMotion.current
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
@@ -99,9 +122,12 @@ fun FocusOverlay(
         modifier.fillMaxSize().onSizeChanged { size = it }
             .semantics { contentDescription = "Viewfinder. Tap to focus, hold to lock focus and exposure" }
             .pointerInput(enabled) {
-                if (!enabled) return@pointerInput
                 awaitEachGesture {
                     val down = awaitFirstDown()
+                    if (!enabled) {
+                        if (awaitUpOrSecondFinger()) pinch(zoomBy)
+                        return@awaitEachGesture
+                    }
                     val (cx, cy) = focusRingCenter(
                         down.position.x, down.position.y, size.width.toFloat(), size.height.toFloat(), with(density) { FOCUS_RING_START_DP.dp.toPx() },
                     )
@@ -112,8 +138,11 @@ fun FocusOverlay(
                     onFocus(down.position.x, down.position.y, false) { ok ->
                         if (focus?.tap == tapId) focus = focus?.copy(ok = ok)
                     }
-                    val up = withTimeoutOrNull(FOCUS_LOCK_HOLD_MS) { waitForUpOrCancellation() }
-                    if (up == null) {
+                    val secondFinger = withTimeoutOrNull(FOCUS_LOCK_HOLD_MS) { awaitUpOrSecondFinger() }
+                    if (secondFinger == true) {
+                        focus = null
+                        pinch(zoomBy)
+                    } else if (secondFinger == null) {
                         focus = FocusState(cx, cy, tapId, locked = true)
                         onFocus(down.position.x, down.position.y, true) { ok ->
                             if (focus?.tap == tapId) focus = focus?.copy(ok = ok)

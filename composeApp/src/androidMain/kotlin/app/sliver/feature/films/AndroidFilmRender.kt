@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.data.export.highQualityEncoder
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
@@ -344,6 +345,7 @@ class FilmComposer(
                 try {
                     suspendCancellableCoroutine { cont ->
                         val t = Transformer.Builder(context)
+                            .setEncoderFactory(highQualityEncoder(context))
                             .setVideoMimeType(MimeTypes.VIDEO_H264)
                             .setAudioMimeType(MimeTypes.AUDIO_AAC)
                             .addListener(object : Transformer.Listener {

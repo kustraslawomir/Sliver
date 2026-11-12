@@ -29,7 +29,9 @@ import androidx.media3.transformer.EditedMediaItemSequence
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.DefaultEncoderFactory
 import androidx.media3.transformer.Transformer
+import androidx.media3.transformer.VideoEncoderSettings
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
@@ -45,6 +47,15 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+/** Media3's default (~0.1 bit per pixel, about 6 Mbps at 1080p30) visibly softens camera footage; match the system camera's 1080p bitrate. */
+@UnstableApi
+internal fun highQualityEncoder(context: Context) = DefaultEncoderFactory.Builder(context)
+    .setRequestedVideoEncoderSettings(VideoEncoderSettings.Builder().setBitrate(ENCODE_BITRATE_1080P).build())
+    .build()
+
+// DECISION: 16 Mbps for stored 1080p days (~2 MB per day); the Samsung camera records 1080p30 at ~17 Mbps.
+private const val ENCODE_BITRATE_1080P = 16_000_000
 
 @UnstableApi
 class AndroidClipExporter(private val context: Context) : ClipExporter {
@@ -239,6 +250,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         File(outPath).delete()
         suspendCancellableCoroutine { cont ->
             val transformer = Transformer.Builder(context)
+                .setEncoderFactory(highQualityEncoder(context))
                 .setVideoMimeType(MimeTypes.VIDEO_H264)
                 .setAudioMimeType(MimeTypes.AUDIO_AAC)
                 .addListener(object : Transformer.Listener {
