@@ -365,8 +365,8 @@ private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         SliverText(
-            text, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp),
-            color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.6f), maxLines = 1,
+            text, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp).overMedia(),
+            color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.8f), maxLines = 1,
         )
         Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) SliverColors.OnMedia else Color.Transparent, CircleShape))
     }
@@ -384,7 +384,7 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
         Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.OnMedia.copy(alpha = 0.1f)), Alignment.Center) {
             SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
-        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp), color = SliverColors.OnMedia, maxLines = 1)
+        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
     }
 }
 

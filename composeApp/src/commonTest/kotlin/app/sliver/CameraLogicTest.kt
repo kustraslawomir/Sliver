@@ -84,3 +84,22 @@ class CameraLogicTest {
         assertEquals(false, exposureOnRight(300f, 400f))
     }
 }
+
+class MediaLegibilityTest {
+    @kotlin.test.Test
+    fun whiteOnBlackPlateIsReadableOverPureWhite() {
+        val c = app.sliver.feature.camera.plateContrast(
+            androidx.compose.ui.graphics.Color.White, androidx.compose.ui.graphics.Color.Black,
+            app.sliver.feature.camera.MEDIA_PLATE_ALPHA, androidx.compose.ui.graphics.Color.White,
+        )
+        kotlin.test.assertTrue(c >= 4.5f, "contrast $c")
+    }
+
+    @kotlin.test.Test
+    fun bareWhiteOnWhiteFails() {
+        val c = app.sliver.feature.camera.plateContrast(
+            androidx.compose.ui.graphics.Color.White, androidx.compose.ui.graphics.Color.Black, 0f, androidx.compose.ui.graphics.Color.White,
+        )
+        kotlin.test.assertTrue(c < 1.1f)
+    }
+}
