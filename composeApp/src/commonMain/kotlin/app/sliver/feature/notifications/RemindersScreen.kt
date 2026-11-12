@@ -313,7 +313,7 @@ private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         SliverIcon(SliverIcons.Bell, SliverColors.PermBannerIcon, size = 18.dp)
         SliverText(
-            "Notifications are off for SLIVER in Android settings.", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp),
+            "Notifications are off for Fragments in Android settings.", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp),
             Modifier.weight(1f), color = SliverColors.PermBannerText,
         )
         Box(
@@ -336,7 +336,7 @@ private fun NotifPreview(time: String, body: String) {
             Box(Modifier.size(2.dp, 13.dp).clip(SliverShapes.Pill).background(SliverColors.AccentText))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            SliverText("SLIVER · $time", SliverType.Caption.copy(fontSize = 12.sp, lineHeight = 16.sp))
+            SliverText("Fragments · $time", SliverType.Caption.copy(fontSize = 12.sp, lineHeight = 16.sp))
             SliverText("Today's clip", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp))
             SliverText(body, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp))
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {

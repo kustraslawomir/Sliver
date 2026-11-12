@@ -24,13 +24,13 @@ data class PermissionCopy(val title: String, val body: String, val allow: String
 
 fun PermissionKind.copy() = when (this) {
     PermissionKind.CameraMic -> PermissionCopy(
-        "Let SLIVER see and hear your day",
+        "Let Fragments see and hear your day",
         "One clip a day. Camera and microphone stay on your phone.",
         "Allow camera & mic",
     )
     PermissionKind.Notifications -> PermissionCopy(
         "A gentle nudge each day",
-        "SLIVER reminds you once a day to capture your clip.",
+        "Fragments reminds you once a day to capture your clip.",
         "Allow notifications",
     )
     PermissionKind.CoarseLocation -> PermissionCopy(

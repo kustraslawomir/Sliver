@@ -108,6 +108,8 @@ abstract class ShotTest {
                         }
                     }
                     single { settings }
+                    // Goldens never depend on a real OAuth client in local.properties.
+                    single<app.sliver.data.auth.GoogleAuth> { app.sliver.data.auth.FakeGoogleAuth() }
                     single<androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences>> {
                         PreferenceDataStoreFactory.create { File.createTempFile("prefs2", ".preferences_pb").apply { delete() } }
                     }

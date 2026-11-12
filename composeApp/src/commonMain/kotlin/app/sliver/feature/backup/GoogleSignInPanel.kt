@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
 val ConsentPoints = listOf(
-    "Google will ask to let SLIVER create one visible folder in your Drive named SLIVER.",
-    "SLIVER can only see files it creates itself, never the rest of your Drive.",
+    "Google will ask to let Fragments create one visible folder in your Drive named Fragments.",
+    "Fragments can only see files it creates itself, never the rest of your Drive.",
     "We never store your videos on our servers. They go straight to your Drive.",
     "Each clip is about 2 MB.",
 )

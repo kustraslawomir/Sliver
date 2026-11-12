@@ -40,7 +40,7 @@ interface DriveClient {
 
 data class DriveQuota(val used: Long, val limit: Long?)
 
-const val DRIVE_FOLDER_NAME = "SLIVER"
+const val DRIVE_FOLDER_NAME = "Fragments"
 const val MANIFEST_NAME = "manifest.json"
 
 class InMemoryDriveClient : DriveClient {

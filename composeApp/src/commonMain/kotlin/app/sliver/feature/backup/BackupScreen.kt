@@ -141,7 +141,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                             if (ui == BackupUi.REVOKED) scope.launch { manager.signIn() }
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
                         })
-                        InfoRow("Folder", "SLIVER in your Google Drive")
+                        InfoRow("Folder", "Fragments in your Google Drive")
                         InfoRow("Backed up", "$backedUp of ${statuses.size} clips")
                         InfoRow(
                             "Drive space",
@@ -194,11 +194,11 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverText("Delete account?", SliverType.Title)
                 SliverText(
-                    "We revoke SLIVER's access to your Google account and carry on as a guest.",
+                    "We revoke Fragments' access to your Google account and carry on as a guest.",
                     SliverType.BodySmall,
                 )
                 SwitchRow(
-                    "Delete the SLIVER folder in Drive", deleteDrive, { deleteDrive = it },
+                    "Delete the Fragments folder in Drive", deleteDrive, { deleteDrive = it },
                     caption = "Your backed-up clips are removed from Drive",
                 )
                 SwitchRow(

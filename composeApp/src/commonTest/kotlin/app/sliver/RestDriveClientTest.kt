@@ -38,7 +38,7 @@ class RestDriveClientTest {
         val c = client { respond("""{"files":[{"id":"F1","name":"SLIVER"}]}""", headers = json) }
         assertEquals("F1", c.ensureFolder())
         assertEquals("Bearer tok", log.single().headers[HttpHeaders.Authorization])
-        assertTrue(log.single().url.parameters["q"]!!.contains("name = 'SLIVER'"))
+        assertTrue(log.single().url.parameters["q"]!!.contains("name = 'Fragments'"))
     }
 
     @Test

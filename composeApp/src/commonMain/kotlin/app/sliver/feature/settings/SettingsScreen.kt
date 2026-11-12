@@ -112,17 +112,17 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         Group("More")
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
         NavRow("Fill empty days", null) { onGo(Route.FillThePast) }
-        NavRow("What SLIVER stores", null) { showStores = !showStores }
+        NavRow("What Fragments stores", null) { showStores = !showStores }
         if (showStores) {
             SliverText(
                 "Your clips, photos and films stay on this phone. If you turn on backup, copies go to a private folder in your own Google Drive. Nothing is shared with us.",
                 SliverType.BodySmall, Modifier.padding(bottom = SliverSpace.S3), color = SliverColors.TextSecondary,
             )
         }
-        NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "SLIVER feedback") }
+        NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "Fragments feedback") }
 
         SliverText(
-            "Sliver ${platform.versionName}", SliverType.Meta,
+            "Fragments ${platform.versionName}", SliverType.Meta,
             Modifier.padding(top = SliverSpace.S6).combinedClickable(onClick = {}, onLongClick = { platform.seedDebugData() }),
             color = SliverColors.TextTertiary,
         )

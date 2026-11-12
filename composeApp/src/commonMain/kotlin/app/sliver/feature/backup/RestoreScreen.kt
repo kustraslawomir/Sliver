@@ -113,7 +113,7 @@ fun RestoreScreen(onDone: () -> Unit) {
             }
             RestoreStage.NONE -> {
                 SliverText("Nothing to restore", SliverType.DisplayM)
-                SliverText("We didn't find any clips in your SLIVER folder.", SliverType.Body, color = SliverColors.TextSecondary)
+                SliverText("We didn't find any clips in your Fragments folder.", SliverType.Body, color = SliverColors.TextSecondary)
                 GhostButton("Continue", onClick = onDone)
             }
             RestoreStage.FAILED -> {
