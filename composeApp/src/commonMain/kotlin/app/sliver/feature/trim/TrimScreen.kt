@@ -96,6 +96,10 @@ import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.media.MotionPhoto
+import app.sliver.feature.autoimport.CandidateStrip
+import app.sliver.feature.autoimport.DraftBar
+import app.sliver.feature.autoimport.MotionChoice
+import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -125,6 +129,9 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val settings = remember { koin.get<SettingsRepository>() }
     val projects = remember { koin.get<ProjectRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
+    val draft = remember { CaptureSession.draft }
+    val motionPhoto = remember { CaptureSession.motionPhoto }
+    val draftNav = rememberDraftNav()
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
 
@@ -238,10 +245,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
                 look = LookParams(),
             )
-            val result = runCatching { undo.save(request) }
+            val result = if (draft != null) draftNav.keep(draft, request) else runCatching { undo.save(request) }
             if (result.isSuccess) {
                 done = true
-                navigator.finishFlow(day)
+                if (draft != null) draftNav.afterResolved(day) { navigator.finishFlow(day) } else navigator.finishFlow(day)
             } else {
                 result.exceptionOrNull()?.let { logDebug("TrimScreen", "save failed: $it") }
                 saveFailed = true
@@ -272,6 +279,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     )
                 }
             }
+
+            if (draft != null) DraftBar(draft, draftNav, Modifier.padding(horizontal = SliverSpace.S3))
 
             val sideBySide = LocalWindowSize.current.sideBySide
             @Composable
@@ -353,16 +362,24 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                             .forEach { (mode, label) -> Chip(label, shortMode == mode, { shortMode = mode }) }
                     }
                 }
+                if (draft != null) CandidateStrip(draft, draftNav)
+                if (motionPhoto) MotionChoice(video = true, draftNav)
                 PrimaryButton(
-                    if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again" else "Save clip", ::useSecond,
-                    enabled = ready && !saving,
+                    if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again"
+                    else if (draft != null) "Keep this clip" else "Save clip",
+                    ::useSecond,
+                    enabled = ready && !saving && !draftNav.busy,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                    GhostButton(
-                        if (inApp) "Retake" else "Pick another",
-                        { if (inApp) onNavigate(Route.Camera) else navigator.back() },
-                        Modifier.weight(1f),
-                    )
+                    if (draft != null) {
+                        GhostButton("Skip day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), enabled = !saving && !draftNav.busy)
+                    } else {
+                        GhostButton(
+                            if (inApp) "Retake" else "Pick another",
+                            { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                            Modifier.weight(1f),
+                        )
+                    }
                 }
             }
             }

@@ -24,6 +24,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -108,11 +109,11 @@ fun SliverNavHost() {
                             Route.Camera -> CameraScreen(go, onClose = back)
                             Route.Trim -> {
                                 restoreCapture(entry.savedStateHandle)
-                                TrimScreen(go, entry.savedStateHandle)
+                                key(CaptureSession.revision) { TrimScreen(go, entry.savedStateHandle) }
                             }
                             Route.PhotoTrim -> {
                                 restoreCapture(entry.savedStateHandle)
-                                PhotoTrimScreen(go)
+                                key(CaptureSession.revision) { PhotoTrimScreen(go) }
                             }
                             Route.Project -> ProjectScreen(go)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)

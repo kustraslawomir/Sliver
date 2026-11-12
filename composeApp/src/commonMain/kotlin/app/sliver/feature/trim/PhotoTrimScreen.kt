@@ -60,6 +60,10 @@ import app.sliver.data.FilmFormat
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
+import app.sliver.feature.autoimport.CandidateStrip
+import app.sliver.feature.autoimport.DraftBar
+import app.sliver.feature.autoimport.MotionChoice
+import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -80,6 +84,9 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     }
     val koin = remember { KoinPlatform.getKoin() }
     val undo = remember { koin.get<SaveUndo>() }
+    val draft = remember { CaptureSession.draft }
+    val motionPhoto = remember { CaptureSession.motionPhoto }
+    val draftNav = rememberDraftNav()
     val files = remember { koin.get<FileStore>() }
     val projects = remember { koin.get<ProjectRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
@@ -123,11 +130,11 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
                 look = LookParams(),
             )
-            val ok = runCatching { undo.save(request) }.isSuccess
+            val ok = (if (draft != null) draftNav.keep(draft, request) else runCatching { undo.save(request) }).isSuccess
             saving = false
             if (ok) {
                 done = true
-                navigator.finishFlow(day)
+                if (draft != null) draftNav.afterResolved(day) { navigator.finishFlow(day) } else navigator.finishFlow(day)
             }
         }
     }
@@ -146,6 +153,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             SliverText("For ${dayLabel(day, today).lowercase()}", SliverType.Meta, color = SliverColors.TextSecondary)
             Box(Modifier.padding(SliverSpace.S6))
         }
+        if (draft != null) DraftBar(draft, draftNav, Modifier.padding(horizontal = SliverSpace.S3))
         ClipFrame(
             if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
             Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
@@ -163,17 +171,26 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
+            if (draft != null) CandidateStrip(draft, draftNav)
+            if (motionPhoto) MotionChoice(video = false, draftNav)
             Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 Chip("Still", motion == Motion.STILL, { motion = Motion.STILL })
                 Chip("Slow zoom", motion == Motion.ZOOM, { motion = Motion.ZOOM })
             }
-            PrimaryButton(if (saving) "Saving..." else "Save clip", ::useSecond, enabled = photo != null && !saving)
+            PrimaryButton(
+                if (saving) "Saving..." else if (draft != null) "Keep this clip" else "Save clip", ::useSecond,
+                enabled = photo != null && !saving && !draftNav.busy,
+            )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                GhostButton(
-                    if (inApp) "Retake" else "Pick another",
-                    { if (inApp) onNavigate(Route.Camera) else navigator.back() },
-                    Modifier.weight(1f),
-                )
+                if (draft != null) {
+                    GhostButton("Skip day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), enabled = !saving && !draftNav.busy)
+                } else {
+                    GhostButton(
+                        if (inApp) "Retake" else "Pick another",
+                        { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                        Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
