@@ -385,9 +385,11 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
 
 @Composable
 private fun MonthHeading(left: String, right: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), Modifier.alignByBaseline())
-        SliverText(right, mono(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.alignByBaseline())
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), Modifier.alignByBaseline(), maxLines = 1, softWrap = false)
+        Box(Modifier.weight(1f).alignByBaseline(), contentAlignment = Alignment.CenterEnd) {
+            SliverText(right, mono(11.sp, 0.06.em, SliverColors.TextTertiary), maxLines = 1, softWrap = false)
+        }
     }
 }
 
