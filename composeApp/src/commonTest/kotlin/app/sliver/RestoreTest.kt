@@ -18,6 +18,7 @@ import app.sliver.feature.backup.monthCells
 import app.sliver.feature.backup.restoreStage
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
@@ -44,11 +45,20 @@ class RestoreTest {
 
     @Test
     fun manifestRoundTripsFilmsAndSettings() {
-        val film = Film(id = "a", name = "March", rangeType = FilmRangeType.MONTH, rangeFrom = LocalDate(2025, 3, 1), rangeTo = LocalDate(2025, 3, 31))
+        val film = Film(id = "a", name = "March")
         val settings = AppSettings(dateStamp = false)
         val json = buildManifest(settings, listOf(film), 1L)
         assertEquals(listOf(film), parseManifestFilms(json))
         assertEquals(false, applyManifestSettings(AppSettings(), json).dateStamp)
+    }
+
+    @Test
+    fun oldManifestWithRangeStillReads() {
+        val old = """{"films":[{"id":"a","name":"March","rangeType":"MONTH","rangeFrom":"2025-03-01","rangeTo":"2025-03-31"}]}"""
+        val film = parseManifestFilms(old).single()
+        assertEquals(FilmRangeType.MONTH, film.rangeType)
+        assertEquals(LocalDate(2025, 3, 31), film.rangeTo)
+        assertFalse(buildManifest(AppSettings(), listOf(film), 1L).contains("rangeFrom"))
     }
 
     @Test

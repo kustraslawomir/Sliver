@@ -3,7 +3,9 @@ package app.sliver.feature.films
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
+import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.Notices
+import app.sliver.core.ui.SliverBottomSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,21 +70,12 @@ import org.koin.mp.KoinPlatform
 
 /** Films of the active project, shown under the calendar on the Project screen. */
 @Composable
-fun FilmsSection(onNavigate: (Route) -> Unit) {
+fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
-    val settings = remember { koin.get<SettingsRepository>() }
-    val today = remember { todayLocal() }
     val list by remember { films.observeAll() }.collectAsState(emptyList())
     val all by remember { days.observeAll() }.collectAsState(emptyList())
-    val app by remember { settings.settings }.collectAsState(null)
-
-    LaunchedEffect(all.isNotEmpty(), app) {
-        val first = all.minOfOrNull { it.date }
-        val format = app?.newFilmFormat
-        if (first != null && format != null) films.ensureDefaultFilm(first, format)
-    }
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
@@ -94,7 +94,10 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 itemsIndexed(list, key = { _, f -> f.id }) { i, film ->
-                    Poster(film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size]) {
+                    Poster(
+                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size],
+                        onLongClick = { onLongPress(film) },
+                    ) {
                         FilmNav.id = film.id
                         onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
                     }
@@ -106,11 +109,12 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
 
 
 @Composable
-private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> Unit, onClick: () -> Unit) {
     val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
     val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
     Column(
-        Modifier.width(132.dp).clickable(role = Role.Button, onClick = rememberTapGate(onClick))
+        Modifier.width(132.dp).combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = rememberTapGate(onClick))
             .semantics { contentDescription = "${film.name}, ${formatRuntime(plan.clips)}" },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -136,9 +140,27 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit)
                 }
             }
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            SliverText(formatRuntime(plan.clips), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextPrimary)
-            SliverText(if (film.live) "Live" else film.rangeText(), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            SliverText(plan.spanText(), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary, maxLines = 1)
+            SliverText("${clipsText(plan.clips)} · ${formatRuntime(plan.clips)}", SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextPrimary)
+        }
+    }
+}
+
+/** Sheet for a long-pressed poster; lives at the screen root so it covers the whole window. */
+@Composable
+fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    SliverBottomSheet(film != null, onDismiss) {
+        Column {
+            SliverText(film?.name.orEmpty(), SliverType.Headline, Modifier.padding(bottom = SliverSpace.S2))
+            GhostButton("Delete film", {
+                onDismiss()
+                if (film != null) scope.launch {
+                    runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(film) }
+                        .onFailure { Notices.show("Couldn't delete this film. Try again.") }
+                }
+            }, Modifier.fillMaxWidth(), destructive = true)
         }
     }
 }

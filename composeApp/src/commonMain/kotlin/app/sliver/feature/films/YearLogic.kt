@@ -1,6 +1,5 @@
 package app.sliver.feature.films
 
-import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
@@ -42,9 +41,8 @@ fun lookName(look: LookPreset): String = when (look) {
     else -> look.name.lowercase().replaceFirstChar { it.uppercase() }
 }
 
-/** The live film or an existing year film for that year; null means the caller creates one. */
-fun findYearFilm(year: Int, films: Collection<Film>): Film? =
-    films.firstOrNull { it.rangeType == FilmRangeType.YEAR && it.rangeFrom?.year == year }
+/** The project's film (the live one first); null means the caller creates one. */
+fun findYearFilm(films: Collection<Film>): Film? = films.firstOrNull { it.live } ?: films.firstOrNull()
 
 /** A render is stale when missing or older than any day it contains. */
 fun Film.isStale(days: Collection<Day>): Boolean {

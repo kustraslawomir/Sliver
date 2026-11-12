@@ -2,7 +2,6 @@ package app.sliver.debug
 
 import app.sliver.data.DaySource
 import app.sliver.data.FilmFormat
-import app.sliver.data.FilmRangeType
 import app.sliver.data.db.Film
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
@@ -79,11 +78,9 @@ class Seeder(
         remember()
         fill(main, FilmFormat.CINEMA, zone)
 
-        val week = main.takeLast(7)
-        if (week.isNotEmpty()) {
+        if (main.isNotEmpty()) {
             val film = Film(
-                id = "seed-film-${project.id.take(8)}", name = "A week in clips", format = FilmFormat.CINEMA,
-                rangeType = FilmRangeType.CUSTOM, rangeFrom = week.first().date, rangeTo = week.last().date, projectId = project.id,
+                id = "seed-film-${project.id.take(8)}", name = projectName, format = FilmFormat.CINEMA, projectId = project.id,
             )
             films.save(film)
             startRender(film.id)

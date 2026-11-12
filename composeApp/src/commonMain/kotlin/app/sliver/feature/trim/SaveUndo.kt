@@ -10,6 +10,7 @@ import app.sliver.data.repo.SaveClipRequest
 import app.sliver.feature.films.ensureDefaultFilm
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 const val UNDO_WINDOW_MS = 6000L
@@ -48,7 +49,9 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             throw e
         }
         FirstClipTimer.clipSaved()
-        runCatching { films.ensureDefaultFilm(request.date, request.format) }
+        if (previous == null && days.observeAll().first().size == 1) {
+            runCatching { films.ensureDefaultFilm(request.date, request.format) }
+        }
         val p = Pending(request, previous, backup)
         pending = p
         p.timer = scope.launch {

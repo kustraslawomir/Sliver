@@ -38,7 +38,6 @@ import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
-import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
@@ -51,7 +50,6 @@ import app.sliver.core.ui.isStorageLow
 import app.sliver.data.files.FileStore
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
-import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
 import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
@@ -63,12 +61,9 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.toParams
 import kotlin.time.Clock
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
+import app.sliver.data.repo.ProjectRepository
 import org.koin.mp.KoinPlatform
 
-private val RangeTypes = listOf(FilmRangeType.WEEK, FilmRangeType.MONTH, FilmRangeType.YEAR, FilmRangeType.CUSTOM)
 private val Audios = listOf(FilmAudio.ORIGINAL, FilmAudio.MUSIC, FilmAudio.MIX)
 
 @Composable
@@ -78,13 +73,11 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
-    val today = remember { todayLocal() }
     val all by remember { days.observeAll() }.collectAsState(emptyList())
     val app by remember { settings.settings }.collectAsState(null)
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
 
-    var options by remember {
-        mutableStateOf(FilmOptions(custom = today.plus(-13, DateTimeUnit.DAY) to today))
-    }
+    var options by remember { mutableStateOf(FilmOptions()) }
     var dateTouched by remember { mutableStateOf(false) }
     val editId = remember { FilmNav.takeEditId() }
     var editing by remember { mutableStateOf<Film?>(null) }
@@ -92,7 +85,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
         options = FilmOptions(
-            f.rangeType, (f.rangeFrom ?: today) to (f.rangeTo ?: today),
             if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look,
         )
         dateTouched = true
@@ -101,8 +93,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val dateOn = if (dateTouched) options.dateOn else app?.dateStamp ?: options.dateOn
     val format = editing?.format ?: app?.newFilmFormat ?: FilmFormat.CINEMA
 
-    val range = rangeFor(options.rangeType, today, options.custom)
-    val plan = remember(all, range) { buildFilmPlan(all, range.first, range.second) }
+    val plan = remember(all) { buildFilmPlan(all) }
     val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.look, it.keepAudio) } }
     val lookParams = options.look?.toParams()
 
@@ -145,7 +136,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 .background(SliverColors.BgVoid).clickable { paused = !paused },
         ) {
             if (clips.isEmpty()) {
-                SliverText("No clips in this range", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.OnMedia.copy(alpha = 0.7f))
+                SliverText("No clips yet", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.OnMedia.copy(alpha = 0.7f))
             } else {
                 FilmPreview(
                     clips, lookParams, options.audio, options.track, paused, seek,
@@ -170,21 +161,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             }
             SliverSlider(fraction, { seek = FilmSeek(it) })
             SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.Meta, color = SliverColors.TextSecondary)
-        }
-
-        Section("Range") {
-            Segmented(
-                listOf("Week", "Month", "Year", "Custom"), RangeTypes.indexOf(options.rangeType),
-                { options = options.copy(rangeType = RangeTypes[it]) },
-            )
-            if (options.rangeType == FilmRangeType.CUSTOM) {
-                DateStepper("From", options.custom.first) {
-                    options = options.copy(custom = it.coerceAtMost(options.custom.second) to options.custom.second)
-                }
-                DateStepper("To", options.custom.second) {
-                    options = options.copy(custom = options.custom.first to it.coerceAtLeast(options.custom.first))
-                }
-            }
         }
 
         Section("Sound") {
@@ -226,7 +202,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 if (!lowStorage) scope.launch {
                     val old = editing
                     val id = old?.id ?: "film-${Clock.System.now().toEpochMilliseconds()}"
-                    val film = options.copy(dateOn = dateOn).toFilm(id, old?.name ?: filmName(options, range), old?.format ?: format, today)
+                    val film = options.copy(dateOn = dateOn).toFilm(id, old?.name ?: project?.name ?: "My film", old?.format ?: format)
                         .let { if (old != null) it.copy(projectId = old.projectId) else it }
                     films.save(film)
                     koin.get<FilmRenderer>().start(id)
@@ -239,35 +215,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     }
 }
 
-private fun filmName(options: FilmOptions, range: Pair<LocalDate, LocalDate>): String = when (options.rangeType) {
-    FilmRangeType.WEEK -> "Last 7 days"
-    FilmRangeType.MONTH -> MonthLong[range.first.monthNumber - 1]
-    FilmRangeType.YEAR -> "${range.first.year}"
-    FilmRangeType.CUSTOM -> "${range.first.dayOfMonth} ${MonthLong[range.first.monthNumber - 1].take(3)} – " +
-        "${range.second.dayOfMonth} ${MonthLong[range.second.monthNumber - 1].take(3)}"
-}
-
-private val MonthLong = listOf(
-    "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November",
-    "December",
-)
-
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText(title, SliverType.Meta, color = SliverColors.TextSecondary)
         content()
-    }
-}
-
-@Composable
-private fun DateStepper(label: String, date: LocalDate, onChange: (LocalDate) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        SliverText(label, SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextSecondary)
-        GhostButton("-7", { onChange(date.plus(-7, DateTimeUnit.DAY)) })
-        GhostButton("-1", { onChange(date.plus(-1, DateTimeUnit.DAY)) })
-        SliverText(stampText(date), SliverType.Stamp, Modifier.padding(horizontal = SliverSpace.S2))
-        GhostButton("+1", { onChange(date.plus(1, DateTimeUnit.DAY)) })
-        GhostButton("+7", { onChange(date.plus(7, DateTimeUnit.DAY)) })
     }
 }

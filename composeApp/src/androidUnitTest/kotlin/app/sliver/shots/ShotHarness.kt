@@ -142,8 +142,7 @@ abstract class ShotTest {
         dates.forEachIndexed { i, d -> db.dayDao().upsert(day(ShotProjectId, d, i, FilmFormat.CINEMA)) }
         db.filmDao().upsert(
             Film(
-                id = "shot-film", name = "A week in clips", format = FilmFormat.CINEMA,
-                rangeType = app.sliver.data.FilmRangeType.CUSTOM, rangeFrom = ShotToday.minus(DatePeriod(days = 6)), rangeTo = ShotToday,
+                id = "shot-film", name = "My 2026", format = FilmFormat.CINEMA,
                 projectId = ShotProjectId,
             ),
         )

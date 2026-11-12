@@ -3,7 +3,6 @@ package app.sliver
 import app.sliver.data.DaySource
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
-import app.sliver.data.FilmRangeType
 import app.sliver.data.db.Day
 import app.sliver.feature.films.FilmOptions
 import app.sliver.feature.films.FilmPlan
@@ -12,7 +11,6 @@ import app.sliver.feature.films.canSaveSound
 import app.sliver.feature.films.isLegacyTrack
 import app.sliver.feature.films.trackLabel
 import app.sliver.feature.films.usableTrack
-import app.sliver.feature.films.rangeFor
 import app.sliver.feature.films.scrubberTicks
 import app.sliver.feature.films.toFilm
 import kotlin.time.Instant
@@ -26,9 +24,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class FilmBuilderLogicTest {
-    private val today = LocalDate(2026, 11, 11)
-    private val custom = LocalDate(2026, 2, 1) to LocalDate(2026, 2, 10)
-
     private fun plan(n: Int) = FilmPlan(
         List(n) {
             Day(
@@ -37,13 +32,6 @@ class FilmBuilderLogicTest {
             )
         },
     )
-
-    @Test fun ranges() {
-        assertEquals(LocalDate(2026, 11, 5) to today, rangeFor(FilmRangeType.WEEK, today, custom))
-        assertEquals(LocalDate(2026, 11, 1) to LocalDate(2026, 11, 30), rangeFor(FilmRangeType.MONTH, today, custom))
-        assertEquals(LocalDate(2026, 1, 1) to LocalDate(2026, 12, 31), rangeFor(FilmRangeType.YEAR, today, custom))
-        assertEquals(custom, rangeFor(FilmRangeType.CUSTOM, today, custom))
-    }
 
     @Test fun ticksPerDayUpToLimitThenPerMonth() {
         assertEquals(40, scrubberTicks(plan(40)).size)
@@ -61,12 +49,13 @@ class FilmBuilderLogicTest {
     }
 
     @Test fun optionsBuildFilm() {
-        val o = FilmOptions(FilmRangeType.MONTH, custom, FilmAudio.ORIGINAL, "/music/1_x.mp3", false)
-        val f = o.toFilm("id", "Nov", FilmFormat.STORY, today)
-        assertEquals(LocalDate(2026, 11, 1), f.rangeFrom)
+        val o = FilmOptions(FilmAudio.ORIGINAL, "/music/1_x.mp3", false)
+        val f = o.toFilm("id", "Nov", FilmFormat.STORY)
+        assertNull(f.rangeFrom)
+        assertNull(f.rangeTo)
         assertEquals(false, f.dateOn)
         assertNull(f.track)
-        assertEquals("/music/1_x.mp3", o.copy(audio = FilmAudio.MIX).toFilm("id", "n", FilmFormat.CINEMA, today).track)
+        assertEquals("/music/1_x.mp3", o.copy(audio = FilmAudio.MIX).toFilm("id", "n", FilmFormat.CINEMA).track)
     }
 
     @Test fun legacyAssetTrackIsDropped() {
@@ -74,7 +63,7 @@ class FilmBuilderLogicTest {
         assertNull(usableTrack("asset:music/drift.aac"))
         assertNull(trackLabel("asset:music/drift.aac"))
         assertFalse(canSaveSound(FilmAudio.MUSIC, "asset:music/drift.aac"))
-        assertNull(FilmOptions(custom = custom, audio = FilmAudio.MUSIC, track = "asset:music/drift.aac").toFilm("id", "n", FilmFormat.CINEMA, today).track)
+        assertNull(FilmOptions(audio = FilmAudio.MUSIC, track = "asset:music/drift.aac").toFilm("id", "n", FilmFormat.CINEMA).track)
     }
 
     @Test fun musicNeedsPickedFile() {

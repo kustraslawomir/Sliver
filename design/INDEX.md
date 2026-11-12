@@ -116,3 +116,11 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Switches | `Settings`, `Reminders` | On = filled track in the primary colour, knob with a 2dp ring in the background colour so it stays visible. |
 | Brand | `brand/`, `android-res/` | Unchanged for now: the icon/logo slit stays warm. That's the one place colour stays. |
 | Player in light theme | `FilmPlayer.dc.html` | Reminder from v1.3: the player, camera, recording and edit preview are dark in BOTH themes. Use a forced dark surface for these screens, not `BgBase`. |
+
+## v1.4.1 owner decisions (2026-11-12)
+
+| Item | Design | Notes |
+|---|---|---|
+| Film = whole project | `FilmBuilder.dc.html` | **No RANGE section** (Week / Month / Year / Custom and the custom date sheet are removed). A film always uses every filled day of its project. Poster, library and premiere subtitle show the project span: "10 Jan – 12 Nov 2026 · 129 clips". |
+| Delete film | `FilmPlayer.dc.html` | "Delete film" as red text only, in the player and in a long-press sheet on a poster. Acts at once, toast "Film deleted · Undo" for 6 s, no confirm dialog. |
+| Camera start state | `CameraV2.dc.html` | The camera opens on Video / back lens / 1x / light off every time. Mode, lens and light are not remembered. |

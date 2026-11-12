@@ -58,7 +58,8 @@ data class Film(
     @PrimaryKey val id: String,
     val name: String,
     val format: FilmFormat = FilmFormat.CINEMA,
-    val rangeType: FilmRangeType,
+    /** Legacy: only read from old rows and backups; new films are always the whole project. */
+    val rangeType: FilmRangeType = FilmRangeType.YEAR,
     val rangeFrom: LocalDate? = null,
     val rangeTo: LocalDate? = null,
     val live: Boolean = false,

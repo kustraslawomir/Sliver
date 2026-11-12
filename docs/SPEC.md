@@ -75,9 +75,9 @@ Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n
 Intro (needs full photo access, nothing leaves the phone, filled days never touched) + range: Since I started / This year / Everything → scan by taken date → mosaic of empty days that can be filled → toggle months, "Use photos too" → "Fill N days" (background, progress) → Undo all. Limited access banner with "Allow all".
 
 ### Films
-- Library: Year in Seconds teaser card, posters (title, format, runtime, range, LIVE badge for collecting films). "+ New film".
-- Builder (one screen): live preview (tap = pause), scrubber with day/month ticks, RANGE Week / Month / Year / Custom, SOUND Original / Music / Mix (Music and Mix need a file picked with "Pick a file"; copied into app storage, shown with Replace / Remove), DATE ON SCREEN On / Off, ONE LOOK (None or a preset). CTA "Make film · mm:ss". Open days are skipped.
-- Export: progress ("made on your phone"), continues in background → Premiere: slit opens into the frame, title card "A FILM BY YOU / <name> / range · N SECONDS · runtime" → Play film / Save to Photos / Share… / Done.
+- Library: Year in Seconds teaser card, posters (title, format, runtime, project span "10 Jan – 12 Nov 2026 · 129 clips"; a collecting film is the project film that grows with new clips). Long-press a poster for "Delete film" (red text, undo toast, no confirm). "+ New film".
+- Builder (one screen): live preview (tap = pause), scrubber with day/month ticks (a film is always the whole project, no RANGE), SOUND Original / Music / Mix (Music and Mix need a file picked with "Pick a file"; copied into app storage, shown with Replace / Remove), DATE ON SCREEN On / Off, ONE LOOK (None or a preset). CTA "Save film" (runtime shown under the scrubber). Every filled day of the project is used; open days are skipped.
+- Export: progress ("made on your phone"), continues in background → Premiere: slit opens into the frame, title card "A film by you / <name> / project span · N clips · runtime" → Play film / Save to Photos / Share… / Done.
 - Player: play/pause, scrubber, mute, fullscreen (rotate), Share film… (system share sheet → YouTube, Instagram, …), Save to Photos, Edit film.
 - Year in Seconds: unlocks 26 Dec (local). Stats: seconds kept, films made, most filmed month(s), favourite look → "Watch the premiere".
 

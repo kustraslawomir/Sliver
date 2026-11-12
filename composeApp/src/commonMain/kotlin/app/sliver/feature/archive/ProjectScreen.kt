@@ -93,6 +93,7 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
+import app.sliver.feature.films.FilmActionsSheet
 import app.sliver.feature.films.FilmsSection
 import app.sliver.feature.gallery.rememberAddMedia
 import app.sliver.feature.projects.ProjectAction
@@ -133,6 +134,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val scope = rememberCoroutineScope()
     val undo = remember { koin.get<SaveUndo>() }
     var notice by remember { mutableStateOf<String?>(null) }
+    var filmMenu by remember { mutableStateOf<app.sliver.data.db.Film?>(null) }
     var yearView by rememberSaveable { mutableStateOf(false) }
     var shownIndex by rememberSaveable { mutableStateOf(today.toYearMonth().let { it.year * 12 + it.month - 1 }) }
     val shown = YearMonth(shownIndex / 12, shownIndex % 12 + 1)
@@ -231,7 +233,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
 
                         memory?.let { (day, kind) -> MemoryCard(day, kind) { openDay(day.date) } }
                     }
-                    if (!wide) FilmsSection(onNavigate)
+                    if (!wide) FilmsSection(onNavigate, { filmMenu = it })
                 }
             }
             if (wide) {
@@ -242,7 +244,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         Column(
                             Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
                                 .padding(vertical = SliverSpace.S4),
-                        ) { FilmsSection(onNavigate) }
+                        ) { FilmsSection(onNavigate, { filmMenu = it }) }
                     }
                 }
             }
@@ -257,6 +259,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
         ProjectsSheet(projectsOpen, { projectsOpen = false })
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
         NoticeSheet(notice) { notice = null }
+        FilmActionsSheet(filmMenu) { filmMenu = null }
         if (menuOpen) {
             val canLeave = project?.let { canLeaveActive(it, projects) } ?: false
             ProjectMenu(

@@ -54,7 +54,7 @@ fun YearInClipsScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val unlocked = teaserState(today) == TeaserState.UNLOCKED
     val scope = rememberCoroutineScope()
 
-    suspend fun yearFilmOrCreate() = findYearFilm(year, films.observeAll().first()) ?: yearFilm(
+    suspend fun yearFilmOrCreate() = findYearFilm(films.observeAll().first()) ?: yearFilm(
         year, settings.settings.first().newFilmFormat, live = false,
     ).also { films.save(it) }
 

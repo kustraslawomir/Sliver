@@ -1,6 +1,7 @@
 package app.sliver
 
 import app.sliver.core.ui.NoticeHost
+import app.sliver.core.ui.UndoToastHost
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ fun App() {
             Box {
                 SliverNavHost()
                 NoticeHost()
+                UndoToastHost()
                 if (splash) SplashOverlay { splash = false }
             }
         }

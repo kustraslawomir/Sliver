@@ -174,7 +174,7 @@ fun PremiereScreen(onDone: () -> Unit) {
             Column(Modifier.alpha(titleAlpha(ms)), horizontalAlignment = Alignment.CenterHorizontally) {
                 SliverText("A film by you", SliverType.Meta, color = SliverColors.TextTertiary)
                 SliverText(f?.name ?: "", SliverType.DisplayM, Modifier.padding(vertical = SliverSpace.S2))
-                f?.let { SliverText(it.rangeText(), SliverType.Meta, color = SliverColors.TextSecondary) }
+                f?.let { SliverText(it.plan(days).subtitle(), SliverType.Meta, color = SliverColors.TextSecondary) }
             }
         }
     }
@@ -288,6 +288,13 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
             }
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
+            // DECISION: no overflow menu exists on this screen, so Delete film is a red text button under the actions.
+            GhostButton("Delete film", {
+                scope.launch {
+                    if (runCatching { koin.get<FilmDeleter>().delete(f) }.isSuccess) onBack()
+                    else status = "Couldn't delete this film. Try again."
+                }
+            }, Modifier.fillMaxWidth(), destructive = true)
             SliverText(info, SliverType.Meta.copy(fontSize = 10.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.fillMaxWidth(), color = SliverColors.TextDisabled)
         }
     }

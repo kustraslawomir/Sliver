@@ -27,6 +27,7 @@ import app.sliver.feature.backfill.BackfillExecutor
 import app.sliver.feature.backfill.BackfillStore
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.trim.SaveUndo
+import app.sliver.feature.films.FilmDeleter
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -41,6 +42,7 @@ val commonModule: Module = module {
     single { BackupCoordinator(get(), get(), get()) }
     single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
+    single { FilmDeleter(get(), get(), get()) }
     single { BackfillStore(get()) }
     single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get()) }
