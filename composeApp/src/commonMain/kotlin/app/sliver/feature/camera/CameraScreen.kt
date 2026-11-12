@@ -16,6 +16,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
@@ -292,12 +294,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3, if (side) Alignment.CenterVertically else Alignment.Top),
         ) {
             Box(Modifier.alpha(if (recording) 0f else 1f)) {
-            Segmented(
-                listOf("PHOTO", "VIDEO"),
-                if (cam.mode == CameraMode.PHOTO) 0 else 1,
-                { if (!recording) update { s -> s.copy(mode = if (it == 0) CameraMode.PHOTO else CameraMode.VIDEO) } },
-                Modifier.width(168.dp),
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                ModeWord("Photo", cam.mode == CameraMode.PHOTO) { if (!recording) update { s -> s.copy(mode = CameraMode.PHOTO) } }
+                ModeWord("Video", cam.mode == CameraMode.VIDEO) { if (!recording) update { s -> s.copy(mode = CameraMode.VIDEO) } }
+            }
             if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
             }
             Row(
@@ -305,7 +305,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (recording) Box(Modifier.size(64.dp)) else AddMediaButton(iconRot) { addMedia(null) }
+                if (recording) Box(Modifier.size(64.dp)) else CameraAction(SliverIcons.ImagePlus, "Add", "Add media", iconRot) { addMedia(null) }
                 RecordButton(
                     state = when {
                         recording -> RecordState.Recording
@@ -327,19 +327,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     Box(Modifier.size(64.dp))
                 } else {
                     val turn by animateFloatAsState(flipTurns * 180f, tween(240), label = "flip")
-                    Column(
-                        Modifier.width(64.dp).semantics { contentDescription = "Switch camera"; role = Role.Button }
-                            .clickable(onClick = rememberTapGate {
-                                flipTurns++
-                                update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
-                            }),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.TextPrimary.copy(alpha = 0.1f)), Alignment.Center) {
-                            SliverIcon(SliverIcons.SwitchCamera, SliverColors.TextPrimary, Modifier.rotate(turn), size = 22.dp)
-                        }
-                        SliverText("FLIP", SliverType.MonoS.copy(fontSize = 9.sp, letterSpacing = 0.08.em, lineHeight = 12.sp), color = SliverColors.TextPrimary, maxLines = 1)
+                    CameraAction(SliverIcons.SwitchCamera, "Flip", "Switch camera", turn) {
+                        flipTurns++
+                        update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
                     }
                 }
             }
@@ -366,24 +356,35 @@ private fun CinemaBandDim() {
 }
 
 @Composable
-private fun AddMediaButton(rotation: Float, onClick: () -> Unit) {
-    val turn by animateFloatAsState(rotation, tween(240), label = "add-upright")
+private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
     Column(
-        Modifier.width(64.dp).semantics { contentDescription = "Add media"; role = Role.Button }
+        Modifier.defaultMinSize(minHeight = 44.dp)
+            .semantics { selected = active; role = Role.Tab }
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        SliverText(
+            text, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp),
+            color = Color.White.copy(alpha = if (active) 1f else 0.6f), maxLines = 1,
+        )
+        Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) Color.White else Color.Transparent, CircleShape))
+    }
+}
+
+@Composable
+private fun CameraAction(icon: ImageVector, label: String, description: String, rotation: Float, onClick: () -> Unit) {
+    val turn by animateFloatAsState(rotation, tween(240), label = "action-turn")
+    Column(
+        Modifier.width(64.dp).semantics { contentDescription = description; role = Role.Button }
             .clickable(onClick = rememberTapGate(onClick)),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(Modifier.size(52.dp)) {
-            Box(
-                Modifier.fillMaxSize().clip(SliverShapes.M).background(SliverColors.Surface1)
-                    .border(1.dp, SliverColors.LineHairline, SliverShapes.M),
-            )
-            Box(
-                Modifier.align(Alignment.TopEnd).offset(x = 7.dp, y = (-7).dp).size(22.dp).clip(CircleShape).background(SliverColors.Accent),
-                Alignment.Center,
-            ) { SliverIcon(SliverIcons.Plus, SliverColors.OnAccent, Modifier.rotate(turn), size = 14.dp) }
+        Box(Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f)), Alignment.Center) {
+            SliverIcon(icon, Color.White, Modifier.rotate(turn), size = 22.dp)
         }
-        SliverText("ADD", SliverType.Caption, color = SliverColors.TextSecondary, maxLines = 1)
+        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp), color = Color.White, maxLines = 1)
     }
 }
 
