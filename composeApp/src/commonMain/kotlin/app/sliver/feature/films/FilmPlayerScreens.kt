@@ -57,6 +57,7 @@ import app.sliver.core.ui.isStorageLow
 import app.sliver.data.files.FileStore
 import app.sliver.core.ui.SliverSlider
 import app.sliver.data.FilmFormat
+import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
@@ -239,8 +240,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     if (fullscreen) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
             Video(Modifier.fillMaxSize().clickable { playing = !playing })
-            SliverText(dateLabel, SliverType.Stamp, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S4), SliverColors.AccentCore)
-            Controls(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = SliverSpace.Gutter))
+            Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+                Box(Modifier.fillMaxWidth()) { DateStamp(dateLabel) }
+                Controls(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter))
+            }
         }
         return
     }
@@ -260,7 +263,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 .clickable { playing = !playing },
         ) {
             Video(Modifier.fillMaxSize())
-            SliverText(dateLabel, SliverType.Stamp, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S3), SliverColors.AccentCore)
+            DateStamp(dateLabel)
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {

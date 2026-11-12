@@ -243,3 +243,4 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 - Focus ring 84 -> 70 dp, 1.5 dp, no centre dot; EV slider (1.5 dp track, 32 dp sun thumb) beside ring with EV pill beside the thumb, TextHandleMove haptic per step; ring and slider fade together after 3 s (ring dims at 1.2 s). Ember only when locked.
 - Not verified on device (phone not unlocked / no on-device check possible).
 - Clip detail (also Project two-pane) starts muted; toggle is per visit. Film builder/player audio left as chosen by the user (film audio mode / explicit Mute button).
+- Date stamp is bottom-right (16 dp, white Geist Mono, soft shadow; export scales by short side/360, see StampLayout.kt) on Clip detail, Edit/Photo clip, film builder preview, film player and film render. Owner overrides design/src ember top/bottom placement. Settings has no stamp preview (switch only). Stamp text formats still differ (screens dd.MM.yyyy, film render 'd Mon yyyy').

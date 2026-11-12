@@ -13,7 +13,12 @@ import android.os.Build
 import android.util.Log
 import android.text.SpannableString
 import android.text.style.AbsoluteSizeSpan
+import android.text.TextPaint
+import android.text.style.CharacterStyle
 import android.text.style.ForegroundColorSpan
+import android.text.style.TypefaceSpan
+import app.sliver.data.export.stampAnchor
+import app.sliver.data.export.stampTextPx
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -221,13 +226,17 @@ class FilmComposer(
 
         fun stamp(date: kotlinx.datetime.LocalDate): List<Effect> {
             if (!film.dateOn) return emptyList()
+            val size = stampTextPx(outW, outH)
             val text = SpannableString(dateStamp(date)).apply {
                 setSpan(ForegroundColorSpan(Color.WHITE), 0, length, 0)
-                setSpan(AbsoluteSizeSpan(36, false), 0, length, 0)
+                setSpan(AbsoluteSizeSpan(size, false), 0, length, 0)
+                stampTypeface?.let { setSpan(TypefaceSpan(it), 0, length, 0) }
+                setSpan(StampShadow(size / 3f), 0, length, 0)
             }
+            val (ax, ay) = stampAnchor(outW, outH)
             val settings = StaticOverlaySettings.Builder()
-                .setBackgroundFrameAnchor(-0.92f, -0.9f)
-                .setOverlayFrameAnchor(-1f, -1f)
+                .setBackgroundFrameAnchor(ax, ay)
+                .setOverlayFrameAnchor(1f, -1f)
                 .build()
             return listOf(OverlayEffect(ImmutableList.of<TextureOverlay>(TextOverlay.createStaticTextOverlay(text, settings))))
         }
@@ -290,6 +299,14 @@ class FilmComposer(
         val builder = Composition.Builder(sequences)
         if (blur) builder.setVideoCompositorSettings(fitCompositor(clips, outW, outH))
         return builder.build()
+    }
+
+    private val stampTypeface: Typeface? by lazy {
+        runCatching { Typeface.createFromAsset(context.assets, "composeResources/sliver.composeapp.generated.resources/font/geist_mono_medium.ttf") }.getOrNull()
+    }
+
+    private class StampShadow(private val radius: Float) : CharacterStyle() {
+        override fun updateDrawState(tp: TextPaint) = tp.setShadowLayer(radius, 0f, 0f, 0x99000000.toInt())
     }
 
     /** A built-in track whose asset is missing is skipped (the film keeps its original sound) instead of failing the render. */

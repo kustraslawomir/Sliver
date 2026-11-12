@@ -96,6 +96,8 @@ import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
+import app.sliver.core.ui.DateStamp
+import app.sliver.data.export.stampText
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.camera.CaptureSession
@@ -305,6 +307,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                             SliverColors.TextPrimary,
                         )
                     }
+                    if (saved?.dateStamp == true) DateStamp(stampText(day))
                     Badge(
                         if (custom) "Custom" else "Auto-picked",
                         Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),

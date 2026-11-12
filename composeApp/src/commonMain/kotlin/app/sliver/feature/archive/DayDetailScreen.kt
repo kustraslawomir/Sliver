@@ -1,9 +1,8 @@
 package app.sliver.feature.archive
 
 import app.sliver.feature.gallery.rememberAddMedia
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.LocalDensity
-import app.sliver.core.designsystem.Glow
+import app.sliver.core.ui.DateStamp
+import app.sliver.data.export.stampText
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
@@ -107,14 +106,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             ClipPlayer(
                 day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, look = previewLook ?: LookParams(),
             )
-            if (app?.dateStamp == true) {
-                SliverText(
-                    "${current.day.toString().padStart(2, '0')}.${current.month.ordinal.plus(1).toString().padStart(2, '0')}.${current.year}",
-                    SliverType.Stamp.copy(shadow = Shadow(SliverColors.Accent.copy(alpha = Glow.stampShadowAlpha), blurRadius = 6f * LocalDensity.current.density)),
-                    Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = SliverSpace.Gutter),
-                    SliverColors.AccentCore,
-                )
-            }
         }
 
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
@@ -140,7 +131,9 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     }
                 }
             }
-            Box(Modifier.weight(1f))
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                if (day != null && app?.dateStamp == true) DateStamp(stampText(current))
+            }
             Column(
                 Modifier.fillMaxWidth().background(SliverColors.BgVoid.copy(alpha = 0.6f))
                     .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),

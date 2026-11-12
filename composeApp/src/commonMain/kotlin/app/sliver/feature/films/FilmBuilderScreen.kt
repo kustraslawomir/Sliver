@@ -54,6 +54,7 @@ import app.sliver.data.FilmCut
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
 import app.sliver.data.LookPreset
+import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
 import app.sliver.data.info
 import app.sliver.data.db.Film
@@ -138,10 +139,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 )
                 val index = position.first.coerceIn(0, clips.size - 1)
                 if (dateOn) {
-                    SliverText(
-                        stampText(plan.days[index].date), SliverType.Stamp,
-                        Modifier.align(Alignment.TopEnd).padding(SliverSpace.S3), SliverColors.AccentCore,
-                    )
+                    DateStamp(stampText(plan.days[index].date))
                 }
                 val dip = fadeAlpha(options.cut, position.second)
                 if (dip > 0f) Box(Modifier.fillMaxSize().background(SliverColors.Media.copy(alpha = dip)))
