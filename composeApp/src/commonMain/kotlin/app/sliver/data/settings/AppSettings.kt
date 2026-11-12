@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalTime
 
 enum class ReminderMode { FIXED, RANDOM, OFF }
 enum class CameraMode { VIDEO, PHOTO }
+enum class Appearance { SYSTEM, LIGHT, DARK }
 enum class Lens { BACK, FRONT }
 
 data class ReminderSettings(
@@ -49,6 +50,7 @@ data class AccountSettings(
 data class AppSettings(
     val defaultLook: LookPreset = LookPreset.NATURAL,
     val newFilmFormat: FilmFormat = FilmFormat.CINEMA,
+    val appearance: Appearance = Appearance.SYSTEM,
     val dateStamp: Boolean = true,
     val saveFullRecordings: Boolean = false,
     val volumeKeyRecords: Boolean = false,

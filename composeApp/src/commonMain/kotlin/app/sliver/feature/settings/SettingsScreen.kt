@@ -32,17 +32,19 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.Chip
-import app.sliver.core.ui.Segmented
+import app.sliver.feature.camera.label
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.FilmFormat
 import app.sliver.data.settings.AppSettings
+import app.sliver.data.settings.Appearance
 import app.sliver.data.settings.SettingsRepository
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
 internal const val FEEDBACK_ADDRESS = "feedback@sliver.app"
 private val Formats = listOf(FilmFormat.CINEMA, FilmFormat.STORY)
+private val Appearances = listOf(Appearance.SYSTEM to "System", Appearance.LIGHT to "Light", Appearance.DARK to "Dark")
 
 @Composable
 fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
@@ -73,12 +75,14 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         NavRow("Backup", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
 
         Group("Films")
-        SliverText("New film format", SliverType.Body, Modifier.padding(top = SliverSpace.S3, bottom = SliverSpace.S2))
-        Segmented(
-            listOf("Cinema 16:9", "Story 9:16"),
-            Formats.indexOf(s.newFilmFormat),
-            { i -> update { it.copy(newFilmFormat = Formats[i]) } },
-        )
+        ChoiceRow(
+            "Default film format", Formats.map { it.label() }, Formats.indexOf(s.newFilmFormat),
+        ) { i -> update { it.copy(newFilmFormat = Formats[i]) } }
+
+        Group("Appearance")
+        ChoiceRow(
+            "Theme", Appearances.map { it.second }, Appearances.indexOfFirst { it.first == s.appearance },
+        ) { i -> update { it.copy(appearance = Appearances[i].first) } }
 
         Group("Capture")
         SwitchRow("Date stamp", s.dateStamp, { on -> update { it.copy(dateStamp = on) } })
@@ -112,6 +116,29 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 @Composable
 private fun Group(title: String) {
     SliverText(title, SliverType.Caption, Modifier.padding(top = SliverSpace.S6, bottom = SliverSpace.S1), color = SliverColors.TextTertiary)
+}
+
+@Composable
+private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { open = !open }.padding(vertical = SliverSpace.S2),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+    ) {
+        SliverText(title, SliverType.Body, Modifier.weight(1f))
+        SliverText(options.getOrElse(selected) { "" }, SliverType.BodySmall, color = SliverColors.TextSecondary)
+        SliverIcon(if (open) SliverIcons.ChevronDown else SliverIcons.ChevronRight, SliverColors.TextTertiary)
+    }
+    if (open) options.forEachIndexed { i, label ->
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(i); open = false }.padding(start = SliverSpace.S4),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SliverText(label, SliverType.Body, Modifier.weight(1f), if (i == selected) SliverColors.AccentText else SliverColors.TextSecondary)
+            if (i == selected) SliverIcon(SliverIcons.Check, SliverColors.AccentText)
+        }
+    }
 }
 
 @Composable

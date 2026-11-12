@@ -29,6 +29,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     private object K {
         val defaultLook = stringPreferencesKey("defaultLook")
         val newFilmFormat = stringPreferencesKey("newFilmFormat")
+        val appearance = stringPreferencesKey("appearance")
         val dateStamp = booleanPreferencesKey("dateStamp")
         val saveFullRecordings = booleanPreferencesKey("saveFullRecordings")
         val volumeKeyRecords = booleanPreferencesKey("volumeKeyRecords")
@@ -72,6 +73,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         return AppSettings(
             defaultLook = enum(K.defaultLook, d.defaultLook),
             newFilmFormat = enum(K.newFilmFormat, d.newFilmFormat),
+            appearance = enum(K.appearance, d.appearance),
             dateStamp = this[K.dateStamp] ?: d.dateStamp,
             saveFullRecordings = this[K.saveFullRecordings] ?: d.saveFullRecordings,
             volumeKeyRecords = this[K.volumeKeyRecords] ?: d.volumeKeyRecords,
@@ -123,6 +125,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
     private fun MutablePreferences.write(s: AppSettings) {
         put(K.defaultLook, s.defaultLook.name)
         put(K.newFilmFormat, s.newFilmFormat.name)
+        put(K.appearance, s.appearance.name)
         put(K.dateStamp, s.dateStamp)
         put(K.saveFullRecordings, s.saveFullRecordings)
         put(K.volumeKeyRecords, s.volumeKeyRecords)
