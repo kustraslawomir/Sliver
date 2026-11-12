@@ -73,6 +73,12 @@ class RestDriveClient(
         return created.getValue("id").jsonPrimitive.content
     }
 
+    override suspend fun renameFolder(folderId: String, name: String) {
+        call(HttpMethod.Patch, "/drive/v3/files/$folderId") {
+            jsonBody(buildJsonObject { put("name", name) })
+        }.checked()
+    }
+
     override suspend fun listFolders(parentId: String): List<DriveFile> =
         query("'$parentId' in parents and mimeType = '$FOLDER_MIME' and trashed = false")
 

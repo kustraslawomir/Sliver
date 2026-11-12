@@ -255,3 +255,6 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 - "Between days" removed; `FilmCut` stays stored, every film renders hard cuts.
 - One stamp format everywhere: `stampText` -> "2 NOV 2026" (design boards), used by on-screen DateStamp and film export.
 - Not verified on device (no on-device checks done).
+
+## Backup per project
+- BackupEngine backs up every non-archived project into `SLIVER/<name>` (`<name> (<first 4 of id>)` on name collisions). Folders are matched by the projectId in their manifest, so a rename renames the folder; manifest-less legacy folders are adopted by name.

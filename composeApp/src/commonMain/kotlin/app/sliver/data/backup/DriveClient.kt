@@ -14,6 +14,8 @@ interface DriveClient {
     /** Finds or creates the folder [name] directly under [parentId]. */
     suspend fun ensureSubfolder(parentId: String, name: String): String
 
+    suspend fun renameFolder(folderId: String, name: String)
+
     /** Direct subfolders of [parentId]. */
     suspend fun listFolders(parentId: String): List<DriveFile>
 
@@ -63,6 +65,10 @@ class InMemoryDriveClient : DriveClient {
     override suspend fun ensureSubfolder(parentId: String, name: String): String =
         entries.values.firstOrNull { it.folder && it.parent == parentId && it.file.name == name && !it.trashed }?.file?.id
             ?: add(name, parentId, emptyMap(), ByteArray(0), folder = true).id
+
+    override suspend fun renameFolder(folderId: String, name: String) {
+        entries[folderId]?.let { it.file = it.file.copy(name = name) }
+    }
 
     override suspend fun listFolders(parentId: String) =
         entries.values.filter { it.folder && it.parent == parentId && !it.trashed }.map { it.file }

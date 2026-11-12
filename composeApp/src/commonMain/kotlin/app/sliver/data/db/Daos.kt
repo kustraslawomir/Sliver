@@ -81,6 +81,9 @@ interface FilmDao {
     @Query("SELECT * FROM film WHERE projectId = :projectId ORDER BY name")
     fun observeAll(projectId: String): Flow<List<Film>>
 
+    @Query("SELECT * FROM film")
+    fun observeEverything(): Flow<List<Film>>
+
     @Query("SELECT * FROM film WHERE id = :id")
     fun observeById(id: String): Flow<Film?>
 

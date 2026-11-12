@@ -35,7 +35,7 @@ class BackupCoordinator(
         scope.launch {
             combine(
                 settings.settings.map { (it.account.signedIn && it.account.autoBackup) to it.account.wifiOnly },
-                days.observeAll().map { list -> list.any { it.backup == BackupState.PENDING } },
+                days.observeAllProjects().map { list -> list.any { it.backup == BackupState.PENDING } },
             ) { (active, wifiOnly), pending -> Triple(active, wifiOnly, pending) }
                 .distinctUntilChanged()
                 .collect { (active, wifiOnly, pending) ->

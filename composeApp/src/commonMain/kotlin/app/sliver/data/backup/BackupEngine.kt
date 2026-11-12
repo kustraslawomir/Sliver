@@ -82,8 +82,8 @@ class BackupEngine(
         if (root != account.driveFolderId) {
             settings.update { s -> s.copy(account = s.account.copy(driveFolderId = root)) }
         }
-        val project = projects.active.first()
-        val folder = project?.let { drive.ensureSubfolder(root, it.name) } ?: root
+        val active = projects.projects.first().filter { !it.archived }
+        val folders = projectFolders(root, active)
         for (id in account.pendingTrash) {
             try {
                 drive.trash(id)
@@ -96,19 +96,53 @@ class BackupEngine(
         var done = 0
         var retryFailed = true
         while (true) {
-            val todo = days.observeAll().first().filter {
-                it.backup == BackupState.PENDING || (retryFailed && it.backup == BackupState.FAILED)
+            val todo = days.observeAllProjects().first().filter {
+                it.projectId in folders && (it.backup == BackupState.PENDING || (retryFailed && it.backup == BackupState.FAILED))
             }
             retryFailed = false
             if (todo.isEmpty()) break
             val total = done + todo.size
             _progress.value = BackupProgress(done, total)
             for (day in todo) {
-                upload(folder, day)
+                upload(folders.getValue(day.projectId), day)
                 _progress.value = BackupProgress(++done, total)
             }
         }
-        drive.writeManifest(folder, buildManifest(settings.settings.first(), films.observeAll().first(), nowMillis(), project))
+        val settingsNow = settings.settings.first()
+        val allFilms = films.observeAllProjects().first()
+        for (project in active) {
+            drive.writeManifest(
+                folders.getValue(project.id),
+                buildManifest(settingsNow, allFilms.filter { it.projectId == project.id }, nowMillis(), project),
+            )
+        }
+    }
+
+    /**
+     * One Drive folder per project, keyed by the projectId in its manifest so renames rename the folder.
+     * A folder without a project id in its manifest (older backups) is adopted by the project whose name it carries.
+     */
+    private suspend fun projectFolders(root: String, active: List<Project>): Map<String, String> {
+        val existing = drive.listFolders(root)
+        val byId = HashMap<String, DriveFile>()
+        val unclaimed = ArrayList<DriveFile>()
+        for (folder in existing) {
+            val id = drive.readManifest(folder.id)?.let(::parseManifestProject)?.id
+            if (id != null) byId.putIfAbsent(id, folder) else unclaimed += folder
+        }
+        val names = folderNames(active)
+        val out = LinkedHashMap<String, String>()
+        for (project in active) {
+            val wanted = names.getValue(project.id)
+            val folder = byId[project.id] ?: unclaimed.firstOrNull { it.name == wanted || it.name == project.name }
+                ?.also { unclaimed.remove(it) }
+            out[project.id] = when {
+                folder == null -> drive.ensureSubfolder(root, wanted)
+                folder.name != wanted -> { drive.renameFolder(folder.id, wanted); folder.id }
+                else -> folder.id
+            }
+        }
+        return out
     }
 
     private suspend fun upload(folder: String, day: Day) {
@@ -124,7 +158,7 @@ class BackupEngine(
             "motion" to day.motion.name,
         )
         val file = drive.upload(folder, "${day.date}.mp4", props, bytes, day.driveFileId)
-        val current = days.getDay(day.date)
+        val current = days.getDay(day.projectId, day.date)
         when {
             current == null -> drive.trash(file.id)
             current.createdAt != day.createdAt -> days.save(current.copy(driveFileId = file.id))
@@ -186,3 +220,11 @@ fun buildManifest(s: AppSettings, films: List<Film>, nowMillis: Long, project: P
         ),
     )
 }.toString()
+
+/** Drive folder name per project id: the project name, plus " (<first 4 of id>)" when names collide. */
+fun folderNames(projects: List<Project>): Map<String, String> {
+    val counts = projects.groupingBy { it.name.lowercase() }.eachCount()
+    return projects.associate { p ->
+        p.id to if (counts.getValue(p.name.lowercase()) > 1) "${p.name} (${p.id.take(4)})" else p.name
+    }
+}

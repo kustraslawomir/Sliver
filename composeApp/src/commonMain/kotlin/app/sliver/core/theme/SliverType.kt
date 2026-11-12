@@ -3,7 +3,6 @@ package app.sliver.core.theme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -18,7 +17,7 @@ object SliverFonts {
 
 object SliverType {
     private val Base = TextStyle(
-        platformStyle = PlatformTextStyle(includeFontPadding = false),
+        platformStyle = noFontPadding,
         lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both),
     )
 
@@ -37,3 +36,6 @@ object SliverType {
     /** Burned-in date stamp: the only uppercase mono text. */
     val Stamp get() = Base.copy(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Mono, lineHeight = 16.sp, letterSpacing = 1.44.sp)
 }
+
+/** Android pads text with font ascent/descent unless told not to; other platforms have no such padding. */
+internal expect val noFontPadding: androidx.compose.ui.text.PlatformTextStyle?

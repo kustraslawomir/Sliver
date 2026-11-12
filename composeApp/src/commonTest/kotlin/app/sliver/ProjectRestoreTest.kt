@@ -52,6 +52,7 @@ private class MultiDays : DayRepository {
 private class SavedFilms : FilmRepository {
     val saved = mutableListOf<Film>()
     override fun observeAll(): Flow<List<Film>> = MutableStateFlow(saved)
+    override fun observeAllProjects(): Flow<List<Film>> = MutableStateFlow(saved)
     override fun observeFilm(id: String) = MutableStateFlow<Film?>(null)
     override fun observeCount() = MutableStateFlow(0)
     override suspend fun getFilm(id: String): Film? = saved.firstOrNull { it.id == id }

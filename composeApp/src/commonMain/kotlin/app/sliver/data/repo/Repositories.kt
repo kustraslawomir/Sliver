@@ -63,6 +63,9 @@ fun interface PlaceResolver {
 
 interface FilmRepository {
     fun observeAll(): Flow<List<Film>>
+
+    /** Films of every project; used by backup. */
+    fun observeAllProjects(): Flow<List<Film>>
     fun observeFilm(id: String): Flow<Film?>
     fun observeCount(): Flow<Int>
     suspend fun getFilm(id: String): Film?
@@ -127,6 +130,7 @@ class FilmRepositoryImpl(private val dao: FilmDao, private val projects: Project
     private val activeIds = projects.active.filterNotNull().map { it.id }.distinctUntilChanged()
 
     override fun observeAll() = activeIds.flatMapLatest { dao.observeAll(it) }
+    override fun observeAllProjects() = dao.observeEverything()
     override fun observeFilm(id: String) = dao.observeById(id)
     override fun observeCount() = activeIds.flatMapLatest { dao.observeCount(it) }
     override suspend fun getFilm(id: String) = dao.getById(id)
