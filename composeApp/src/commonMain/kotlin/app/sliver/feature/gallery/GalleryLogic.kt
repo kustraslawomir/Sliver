@@ -33,3 +33,21 @@ fun parseVideoDate(raw: String?, zone: TimeZone): LocalDate? {
 
 private fun LocalDateTime.toInstantUtcSeconds(): Long =
     date.toEpochDays() * 86_400L + hour * 3_600L + minute * 60L + second
+
+sealed interface AddCheck {
+    data object Allowed : AddCheck
+    data class Blocked(val message: String) : AddCheck
+}
+
+private val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+fun formatDay(d: LocalDate) = "${d.day} ${monthNames[d.month.ordinal]} ${d.year}"
+
+const val NO_CAPTURE_DATE = "We can't tell when this was recorded, so it can't be added."
+
+// DECISION: strict. A missing or unreadable capture date blocks the add.
+fun checkCaptureDate(captured: LocalDate?, target: LocalDate): AddCheck = when {
+    captured == null -> AddCheck.Blocked(NO_CAPTURE_DATE)
+    captured != target -> AddCheck.Blocked("This clip was recorded on ${formatDay(captured)}. It can only be added to that day.")
+    else -> AddCheck.Allowed
+}

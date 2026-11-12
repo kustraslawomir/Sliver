@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.Route
+import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Notices
 import app.sliver.data.DaySource
 import app.sliver.feature.camera.CaptureSession
@@ -15,7 +16,7 @@ import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
 
 /**
- * Opens the system Photo Picker straight away for [forDate] (null = today). A video or Motion Photo goes to Edit clip,
+ * Opens the system Photo Picker straight away for [forDate] (null = today). Media recorded on another day is refused with a notice. A video or Motion Photo goes to Edit clip,
  * a photo to Photo clip. Cancelling leaves the user where they were.
  */
 @Composable
@@ -30,6 +31,13 @@ fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
         busy = true
         val forDate = target
         scope.launch {
+            val captured = runCatching { provider.describe(listOf(uri)).firstOrNull()?.date }.getOrNull()
+            val check = checkCaptureDate(captured, forDate ?: todayLocal())
+            if (check is AddCheck.Blocked) {
+                busy = false
+                Notices.show(check.message)
+                return@launch
+            }
             val motion = runCatching { provider.extractMotionVideo(uri) }.getOrNull()
             val video = motion != null || provider.isVideo(uri)
             val path = motion?.path ?: runCatching { provider.copyToTmp(uri) }.getOrNull()
