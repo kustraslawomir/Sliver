@@ -1,3 +1,7 @@
 package app.sliver.core.log
 
-actual fun logDebug(tag: String, message: String) = TODO("iOS later")
+import platform.Foundation.NSLog
+
+actual fun logDebug(tag: String, message: String) {
+    NSLog("%@: %@", tag, message)
+}

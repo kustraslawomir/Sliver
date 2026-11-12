@@ -103,7 +103,7 @@ Without `GOOGLE_WEB_CLIENT_ID` the app uses `FakeGoogleAuth` and an in-memory Dr
 - Film render has no chunked resume; "Try again" restarts. The film's look is applied on top of each day's baked look.
 - On restore conflict a local day wins.
 - Delete account moves the Drive folder to trash (recoverable).
-- Not-built iOS: `iosMain` holds `TODO("iOS later")` stubs, never compiled.
+- iOS shell (prepared, not feature-complete): `iosApp/` (XcodeGen `project.yml` + generated `iosApp.xcodeproj`; app icon is the 512 px Play icon upscaled, replace with a 1024 px master) embeds the `ComposeApp` framework and launches the shared UI. Room (bundled SQLite), DataStore, file store, Ktor Darwin and permissions are real; camera, gallery picker, players, clip export, film render, backup/restore scheduling, reminders, share and zip export are placeholders (black boxes / no-ops / fake auth). Build: `cd iosApp && xcodebuild -scheme iosApp -sdk iphonesimulator build`, or open the project in Xcode. Regenerate the project after editing `project.yml`: `cd iosApp && xcodegen generate`.
 
 ## How to run
 ```

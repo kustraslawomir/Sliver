@@ -1,8 +1,12 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
+// TODO iOS later: AVPlayerLayer.
 @Composable
 actual fun FilmPlayerView(
     path: String,
@@ -12,7 +16,7 @@ actual fun FilmPlayerView(
     onPosition: (positionMs: Long, durationMs: Long) -> Unit,
     onEnded: () -> Unit,
     modifier: Modifier,
-) = TODO("iOS later")
+) = Box(modifier.background(Color.Black))
 
 @Composable
-actual fun FullscreenLandscape(on: Boolean) = TODO("iOS later")
+actual fun FullscreenLandscape(on: Boolean) = Unit

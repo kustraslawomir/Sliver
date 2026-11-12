@@ -11,7 +11,8 @@ composeApp/
     platform/    interfaces implemented per platform (see below)
     feature/     onboarding, camera, trim, gallery, photo, looks, archive, day, backfill, films, builder, export, player, backup, account, notifications, settings
   src/androidMain/kotlin/app/sliver/platform/   Android implementations
-  src/iosMain/kotlin/app/sliver/platform/       actual stubs: TODO("iOS later")
+  src/iosMain/kotlin/app/sliver/               iOS actuals; media features are placeholders (see HANDOFF)
+iosApp/                                        SwiftUI host for MainViewController (XcodeGen project.yml)
   src/commonTest/
 ```
 minSdk 29, targetSdk latest stable. Use the newest stable versions of every library; put them in `gradle/libs.versions.toml`.

@@ -128,7 +128,7 @@ class BackupEngine(
         val unclaimed = ArrayList<DriveFile>()
         for (folder in existing) {
             val id = drive.readManifest(folder.id)?.let(::parseManifestProject)?.id
-            if (id != null) byId.putIfAbsent(id, folder) else unclaimed += folder
+            if (id != null) byId.getOrPut(id) { folder } else unclaimed += folder
         }
         val names = folderNames(active)
         val out = LinkedHashMap<String, String>()

@@ -1,10 +1,15 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import app.sliver.core.log.logDebug
 import app.sliver.data.FilmAudio
 import app.sliver.data.LookParams
 
+// TODO iOS later: AVQueuePlayer preview and UIDocumentPicker for audio.
 @Composable
 actual fun FilmPreview(
     clips: List<FilmClip>,
@@ -15,7 +20,7 @@ actual fun FilmPreview(
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
-): Unit = TODO("iOS later")
+) = Box(modifier.background(Color.Black))
 
 @Composable
-actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = TODO("iOS later")
+actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = { logDebug("AudioPicker", "not on iOS yet") }

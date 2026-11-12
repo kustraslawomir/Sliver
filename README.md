@@ -73,7 +73,7 @@ It is not a social network. There is no feed, no followers and no streak to lose
 
 ## Tech
 
-- **Kotlin Multiplatform** with **Compose Multiplatform**. Android is the only target built and tested; iOS is stubbed.
+- **Kotlin Multiplatform** with **Compose Multiplatform**. Android is the only target fully built and tested; iOS builds and launches in the simulator with media features still placeholders.
 - Shared in `commonMain`: UI, navigation, domain logic (auto-pick scoring, film plans, reminder rules, backup state machine), Room KMP, DataStore, Ktor, Koin, Coil 3.
 - Android in `androidMain`: CameraX, Media3 (Transformer, effects), WorkManager, Glance widgets, Credential Manager.
 - Min SDK 29.
