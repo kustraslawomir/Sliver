@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
+import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
@@ -48,7 +49,7 @@ fun GoldenHourLine(enabled: Boolean, modifier: Modifier = Modifier) {
         state = null
     }
     val s = state ?: return
-    val color = if (s is GoldenState.Now) Color(0xFFFFC58A) else Color(0xD9FFFFFF)
+    val color = if (s is GoldenState.Now) SliverColors.GoldenNow else SliverColors.GoldenIdle
     Row(
         modifier.semantics { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,

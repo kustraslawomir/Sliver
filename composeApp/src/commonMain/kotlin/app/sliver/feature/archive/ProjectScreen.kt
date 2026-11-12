@@ -532,7 +532,7 @@ private fun ProjectMenu(
     Box(Modifier.fillMaxSize().padding(top = top, end = 12.dp), Alignment.TopEnd) {
         Column(
             Modifier.width(230.dp)
-                .shadow(24.dp, SliverShapes.R18, ambientColor = Color.Black, spotColor = Color.Black)
+                .shadow(24.dp, SliverShapes.R18, ambientColor = Color.Black, spotColor = Color.Black) // lint-ok: elevation
                 .clip(SliverShapes.R18).background(SliverColors.Surface2)
                 .border(1.dp, SliverColors.LineStrong, SliverShapes.R18)
                 .clickable(remember { MutableInteractionSource() }, null) {}

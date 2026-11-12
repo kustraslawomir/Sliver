@@ -306,21 +306,21 @@ private fun PresetTile(t: LocalTime, name: String, selected: Boolean, modifier: 
 @Composable
 private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth().clip(SliverShapes.M).background(Color(0xFF1A1710))
-            .border(1.dp, Color(0x55E8C27A), SliverShapes.M).padding(horizontal = 14.dp, vertical = 12.dp),
+        modifier.fillMaxWidth().clip(SliverShapes.M).background(SliverColors.PermBannerBg)
+            .border(1.dp, SliverColors.PermBannerBorder, SliverShapes.M).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        SliverIcon(SliverIcons.Bell, Color(0xFFE8C27A), size = 18.dp)
+        SliverIcon(SliverIcons.Bell, SliverColors.PermBannerIcon, size = 18.dp)
         SliverText(
             "Notifications are off for SLIVER in Android settings.", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp),
-            Modifier.weight(1f), color = Color(0xFFEDEDE8),
+            Modifier.weight(1f), color = SliverColors.PermBannerText,
         )
         Box(
-            Modifier.height(36.dp).clip(SliverShapes.Pill).background(Color(0xFFEDEDE8))
+            Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.PermBannerText)
                 .clickable(role = Role.Button, onClick = onTurnOn).padding(horizontal = 14.dp),
             Alignment.Center,
-        ) { SliverText("Turn on", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = Color(0xFF0A0A0B)) }
+        ) { SliverText("Turn on", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.PermBannerButtonText) }
     }
 }
 
@@ -328,12 +328,12 @@ private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
 private fun NotifPreview(time: String, body: String) {
     Row(
         Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(22.dp))
-            .background(if (SliverColors.light) SliverColors.Surface1 else Color(0xFF1C1C1F))
+            .background(if (SliverColors.light) SliverColors.Surface1 else SliverColors.NotifPreviewDark)
             .padding(start = 16.dp, top = 14.dp, end = 14.dp, bottom = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(24.dp).clip(SliverShapes.Pill).background(Color(0xFF050505)), Alignment.Center) {
-            Box(Modifier.size(2.dp, 13.dp).clip(SliverShapes.Pill).background(Color(0xFFFFD2AE)))
+        Box(Modifier.size(24.dp).clip(SliverShapes.Pill).background(SliverColors.BgVoid), Alignment.Center) {
+            Box(Modifier.size(2.dp, 13.dp).clip(SliverShapes.Pill).background(SliverColors.AccentText))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             SliverText("SLIVER · $time", SliverType.Caption.copy(fontSize = 12.sp, lineHeight = 16.sp))
@@ -344,7 +344,7 @@ private fun NotifPreview(time: String, body: String) {
                 SliverText("Tomorrow", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.TextSecondary)
             }
         }
-        Box(Modifier.size(52.dp).clip(SliverShapes.S).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF8A6A48), Color(0xFF1A120B)))))
+        Box(Modifier.size(52.dp).clip(SliverShapes.S).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(SliverColors.NotifThumbFrom, SliverColors.NotifThumbTo))))
     }
 }
 

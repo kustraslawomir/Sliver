@@ -336,3 +336,9 @@ Commits: P-v132-1 (switch + settings row), -2 (reminder), -3 (golden hour), -4 (
 - Incident: `./gradlew installDebug` ran once without ANDROID_SERIAL and installed the debug app on the Samsung too (nothing else touched, no data, no launch). Every later command set the serial.
 - Screenshots (synthetic seeded data, Xiaomi, dark + light): docs/qa/auto-1/{month,year,projects,day,films}-{dark,light}.png.
 - Cleanup: seeded data wiped on the Xiaomi and the emulator (owner's pre-existing project/clips untouched); emulator stopped; night mode restored to auto.
+
+## T-auto-3 (design lint)
+- `scripts/design-lint.sh` (ripgrep if installed, else grep -rnE; bash 3.2 safe), Gradle task `:composeApp:designLint`, wired into `check`. No `.github` CI exists in the repo, so CI = `./gradlew check`.
+- Rules: FF8A3D/FFD2AE; Geist Mono; `.glow(`; `.shadow(`; FontFamily.Default/SansSerif; `Color(0x` outside core/designsystem|core/theme; `Text("SLIVER")`; "second(s)" and ALL CAPS in values/strings.xml.
+- Allowlist: brand files ic_launcher_foreground, ic_shortcut_slit, widget_slit, brand/ (v1.4 brand stays as is); lines containing `Stamp` for Geist Mono (SliverType.Stamp); `core/theme/` for Color(0x (token file; the repo has no core/designsystem); two `shadow` uses carry `// lint-ok: elevation` (black popup/sheet elevation: Overlays.kt, ProjectScreen.kt).
+- Fixed: 13 Color(0x literals in RemindersScreen.kt and GoldenHour.kt moved to SliverColors tokens (the notification-preview glyph bar now uses AccentText instead of FFD2AE).

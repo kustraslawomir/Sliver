@@ -117,3 +117,11 @@ androidComponents {
 tasks.withType<Test>().configureEach {
     providers.gradleProperty("genLuts").orNull?.let { systemProperty("genLuts", it) }
 }
+
+val designLint by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Fails on forbidden design patterns (scripts/design-lint.sh)"
+    workingDir = rootDir
+    commandLine("bash", "scripts/design-lint.sh")
+}
+tasks.matching { it.name == "check" }.configureEach { dependsOn(designLint) }

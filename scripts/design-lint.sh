@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Design lint: fails with file:line on forbidden design patterns. Uses ripgrep if present, else grep.
+cd "$(dirname "$0")/.." || exit 2
+SRC=composeApp/src
+RES=composeApp/src/main/res
+FAIL=0
+
+# search <pattern> <ext-regex> : prints "file:line:text" for matches in $SRC.
+search() {
+  if command -v rg >/dev/null 2>&1; then
+    rg -n --no-heading -e "$1" -g "*.$2" $SRC 2>/dev/null
+  else
+    grep -rnE --include="*.$2" -e "$1" $SRC 2>/dev/null
+  fi
+}
+
+# report <message> : reads matches on stdin, drops allowlisted lines, prints rest.
+report() {
+  local out
+  out=$(grep -vE "$ALLOW_FILES" | grep -v "lint-ok" || true)
+  [ -n "$ALLOW_EXTRA" ] && out=$(printf '%s\n' "$out" | grep -vE "$ALLOW_EXTRA" || true)
+  out=$(printf '%s\n' "$out" | sed '/^$/d')
+  if [ -n "$out" ]; then
+    echo "DESIGN LINT: $1"; printf '%s\n' "$out" | sed 's/^/  /'; FAIL=1
+  fi
+}
+
+# Brand assets (icon, splash, logo, shortcut, widget) intentionally keep #FF8A3D (v1.4: "Brand stays as is").
+ALLOW_FILES='ic_launcher_foreground|ic_shortcut_slit|widget_slit|/brand/'
+ALLOW_EXTRA=''
+
+ALLOW_EXTRA='' ; report "legacy ember colours FF8A3D/FFD2AE are forbidden; use tokens" < <(search 'FF8A3D|FFD2AE' '(kt|xml)')
+# Geist Mono is allowed only for the burned-in date stamp (SliverType.Stamp) and its font definition.
+ALLOW_EXTRA='Stamp' ; report "Geist Mono is forbidden (only SliverType.Stamp may use it)" < <(search 'Geist ?Mono|GeistMono' 'kt')
+ALLOW_EXTRA='' ; report ".glow( is forbidden" < <(search '\.glow\(' 'kt')
+ALLOW_EXTRA='' ; report "shadow( as colour light is forbidden; add '// lint-ok: elevation' for real elevation" < <(search 'Modifier\.shadow\(|\.shadow\(' 'kt')
+ALLOW_EXTRA='' ; report "FontFamily.Default / SansSerif are forbidden; use SliverTheme.typography" < <(search 'FontFamily\.Default|SansSerif' 'kt')
+ALLOW_EXTRA='core/(designsystem|theme)/' ; report "Color(0x literals only allowed in core/designsystem or core/theme (token files); use tokens" < <(search 'Color\(0x' 'kt')
+ALLOW_EXTRA='' ; report "wordmark must be a drawable, not Text(\"SLIVER\")" < <(search 'Text\([^)]*"SLIVER"' 'kt')
+
+# strings.xml copy rules
+STR=$(find $SRC -name strings.xml -path '*values/*' 2>/dev/null)
+if [ -n "$STR" ]; then
+  # shellcheck disable=SC2086
+    W=$(grep -nEi '>[^<]*\bseconds?\b[^<]*<' $STR | sed 's/^/  /' || true)
+  [ -n "$W" ] && { echo 'DESIGN LINT: "second(s)" in strings.xml; say "clip" or use "1 s"'; echo "$W"; FAIL=1; }
+  # ALL CAPS strings (3+ letters, no lowercase), excluding the date-stamp format.
+  C=$(grep -nE '<string [^>]*>[^a-z<]*[A-Z]{3,}[^a-z<]*</string>' $STR | grep -vi 'stamp' | sed 's/^/  /' || true)
+  [ -n "$C" ] && { echo "DESIGN LINT: ALL CAPS string in strings.xml"; echo "$C"; FAIL=1; }
+fi
+
+[ $FAIL -eq 0 ] && echo "design-lint: OK"
+exit $FAIL

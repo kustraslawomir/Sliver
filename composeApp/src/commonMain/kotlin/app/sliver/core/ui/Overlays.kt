@@ -83,7 +83,7 @@ fun SliverBottomSheet(
                         translationY = back * 24.dp.toPx()
                         transformOrigin = TransformOrigin(0.5f, 1f)
                     }
-                    .then(Modifier.shadow(24.dp, SliverShapes.SheetTop, ambientColor = Color.Black, spotColor = Color.Black))
+                    .then(Modifier.shadow(24.dp, SliverShapes.SheetTop, ambientColor = Color.Black, spotColor = Color.Black)) // lint-ok: elevation
                     .clip(SliverShapes.SheetTop)
                     .background(SliverColors.Surface2)
                     .border(1.dp, SliverColors.LineHairline, SliverShapes.SheetTop)
