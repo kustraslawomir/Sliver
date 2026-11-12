@@ -32,7 +32,7 @@
           <sc-if value="{{r.isSwitch}}" hint-placeholder-val="{{ false }}">
             <button onClick="{{r.toggle}}" role="switch" aria-checked="{{r.on}}" style="min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-top: 1px solid #E8E4DC; background: transparent; color: #141413; padding: 0; font-family: Geist, sans-serif; text-align: left">
               <span style="display: flex; flex-direction: column; gap: 3px; padding: 8px 0"><span style="font-size: 15px">{{r.n}}</span><span style="font-size: 12px; line-height: 1.35; color: #6E6B64">{{r.d}}</span></span>
-              <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{r.track}}"><span style="position: absolute; top: 2px; left: {{r.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #141413"></span></span>
+              <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{r.track}}"><span style="position: absolute; top: 2px; left: {{r.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #FFFFFF"></span></span>
             </button>
           </sc-if>
           <sc-if value="{{r.isSeg}}" hint-placeholder-val="{{ false }}">
@@ -77,7 +77,7 @@ class Component extends DCLogic {
           sw('Also save full recordings to Photos', 'Off: only the chosen clip is kept, the rest is deleted.', st.fullRec, () => this.setState({ fullRec: !st.fullRec }))
         ]},
         { n: 'Reminders & past', rows: [
-          link('Notifications', 'Notifications.dc.html', 'Daily at 19:30'),
+          link('Daily reminder', 'Reminders.dc.html', '20:00, every day'),
           link('Fill the past from gallery', 'Backfill.dc.html', '', 'Match photos & videos to empty days')
         ]},
         { n: 'About', rows: [

@@ -77,7 +77,7 @@ class Component extends DCLogic {
           sw('Also save full recordings to Photos', 'Off: only the chosen clip is kept, the rest is deleted.', st.fullRec, () => this.setState({ fullRec: !st.fullRec }))
         ]},
         { n: 'Reminders & past', rows: [
-          link('Notifications', 'Notifications.dc.html', 'Daily at 19:30'),
+          link('Daily reminder', 'Reminders.dc.html', '20:00, every day'),
           link('Fill the past from gallery', 'Backfill.dc.html', '', 'Match photos & videos to empty days')
         ]},
         { n: 'About', rows: [
