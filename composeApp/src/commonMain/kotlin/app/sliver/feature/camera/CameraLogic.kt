@@ -66,9 +66,9 @@ fun displaySize(width: Int, height: Int, rotationDegrees: Int): Pair<Int, Int> =
 const val FOCUS_LOCK_HOLD_MS = 600L
 const val FOCUS_DIM_AFTER_MS = 1200L
 const val FOCUS_AUTO_CANCEL_S = 3L
-const val FOCUS_RING_START_DP = 88
-const val FOCUS_RING_END_DP = 64
-const val FOCUS_LOCK_PILL_OFFSET_DP = 54
+const val FOCUS_RING_START_DP = 84
+const val FOCUS_RING_END_DP = 70
+const val FOCUS_LOCK_PILL_OFFSET_DP = 58
 
 /** Tap position inside the viewfinder, clamped to its bounds, as 0..1 fractions. */
 fun focusFraction(x: Float, y: Float, width: Float, height: Float): Pair<Float, Float> =

@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -58,7 +62,7 @@ private data class FocusState(val x: Float, val y: Float, val tap: Int, val lock
 /**
  * Tap-to-focus layer. It sits over the preview and under the camera controls, so its coordinates are PreviewView
  * coordinates and taps on controls never reach it.
- * Tap: AF+AE ring (88 -> 64 dp, 220 ms, dims to 35% after 1.2 s or at once if focus failed).
+ * Tap: thin AF+AE ring like One UI (84 -> 70 dp, 220 ms, dims to 35% after 1.2 s or at once if focus failed).
  * Hold 600 ms: AE/AF lock. A vertical exposure slider appears beside the ring.
  */
 @Composable
@@ -72,6 +76,7 @@ fun FocusOverlay(
 ) {
     val reduced = LocalReducedMotion.current
     val density = LocalDensity.current
+    val haptics = LocalHapticFeedback.current
     var focus by remember { mutableStateOf<FocusState?>(null) }
     var size by remember { mutableStateOf(IntSize.Zero) }
     var range by remember { mutableStateOf<ExposureRange?>(null) }
@@ -119,13 +124,13 @@ fun FocusOverlay(
             },
     ) {
         val f = focus ?: return@Box
-        FocusRing(f, reduced, Offset(f.x, f.y))
+        FocusRing(f, reduced, Offset(f.x, f.y), if (enabled && (sliderVisible || f.locked)) 1f else 0f)
         val r = range
         if (r != null && enabled) {
             ExposureSlider(
                 visible = sliderVisible || f.locked, locked = f.locked, range = r, index = evIndex,
                 centerX = f.x, centerY = f.y, width = size.width.toFloat(), height = size.height.toFloat(),
-                onIndex = { if (it != evIndex) { evIndex = it; onExposure(it) } },
+                onIndex = { if (it != evIndex) { evIndex = it; onExposure(it); haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove) } },
                 onTouch = { interaction++ },
             )
         }
@@ -133,7 +138,7 @@ fun FocusOverlay(
 }
 
 @Composable
-private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset) {
+private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibility: Float) {
     val ringSize = remember(f.tap) { Animatable(if (reduced) FOCUS_RING_END_DP.toFloat() else FOCUS_RING_START_DP.toFloat()) }
     val opacity = remember(f.tap) { Animatable(1f) }
     LaunchedEffect(f.tap) {
@@ -151,16 +156,14 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset) {
     }
     val color = if (f.locked) SliverColors.Accent else SliverColors.OnMedia
     val d = ringSize.value
-    Box(Modifier.fillMaxSize().alpha(opacity.value)) {
+    val fade by animateFloatAsState(visibility, tween(300), label = "ring-fade")
+    Box(Modifier.fillMaxSize().alpha(opacity.value * fade)) {
         Box(
             Modifier.offset { IntOffset((center.x - d.dp.toPx() / 2).roundToInt(), (center.y - d.dp.toPx() / 2).roundToInt()) }
                 .size(d.dp)
                 .then(if (f.locked) Modifier.glow(CircleShape, *Glow.lock, stroke = 1.5.dp) else Modifier)
-                .border(1.5.dp, color, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Box(Modifier.size(4.dp).background(color, CircleShape))
-        }
+                .border(1.5.dp, color, CircleShape)
+        )
         if (f.locked) {
             Box(
                 Modifier.layout { m, c ->
@@ -181,7 +184,7 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset) {
 }
 
 private val SliderWidth = 32.dp
-private val SliderGap = 52.dp
+private val SliderGap = 48.dp
 
 /** Neutral white vertical slider beside the focus ring; ember only while AE/AF is locked. */
 @Composable
@@ -198,9 +201,8 @@ private fun ExposureSlider(
     onTouch: () -> Unit,
 ) {
     val density = LocalDensity.current
-    val alpha by androidx.compose.animation.core.animateFloatAsState(if (visible) 1f else 0f, tween(300), label = "ev-fade")
+    val alpha by animateFloatAsState(if (visible) 1f else 0f, tween(300), label = "ev-fade")
     if (alpha == 0f) return
-    var dragging by remember { mutableStateOf(false) }
     val trackPx = with(density) { EXPOSURE_TRACK_DP.dp.toPx() }
     val onRight = exposureOnRight(centerX, width)
     val gapPx = with(density) { SliderGap.toPx() }
@@ -217,7 +219,6 @@ private fun ExposureSlider(
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     down.consume()
-                    dragging = true
                     onTouch()
                     onIndex(exposureIndexAt(down.position.y / size.height, range.min, range.max))
                     verticalDrag(down.id) { change ->
@@ -225,25 +226,27 @@ private fun ExposureSlider(
                         onTouch()
                         onIndex(exposureIndexAt(change.position.y / size.height, range.min, range.max))
                     }
-                    dragging = false
                 }
             },
         contentAlignment = Alignment.TopCenter,
     ) {
-        Box(Modifier.align(Alignment.Center).width(2.dp).fillMaxSize().background(SliverColors.OnMedia.copy(alpha = 0.6f), CircleShape))
-        val thumb = 28.dp
+        Box(Modifier.align(Alignment.Center).width(1.5.dp).fillMaxSize().background(SliverColors.OnMedia.copy(alpha = 0.85f), CircleShape))
+        val thumb = 32.dp
         Box(
             Modifier.offset { IntOffset(0, ((trackPx - with(density) { thumb.toPx() }) * fraction).roundToInt()) }
                 .size(thumb).background(SliverColors.Media.copy(alpha = 0.55f), CircleShape).border(1.dp, tint, CircleShape),
             contentAlignment = Alignment.Center,
-        ) { SliverIcon(SliverIcons.Sun, tint, size = 16.dp) }
-        if (dragging) {
-            SliverText(
-                formatEv(index, range.step), SliverType.Meta.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
-                Modifier.align(if (onRight) Alignment.TopEnd else Alignment.TopStart)
-                    .offset { IntOffset(0, ((trackPx - with(density) { 28.dp.toPx() }) * fraction).roundToInt() - with(density) { 18.dp.toPx() }.roundToInt()) },
-                SliverColors.OnMedia, maxLines = 1,
-            )
-        }
+        ) { SliverIcon(SliverIcons.Sun, tint, size = 18.dp) }
+        SliverText(
+            formatEv(index, range.step), SliverType.Meta.overMedia(),
+            Modifier.layout { m, c ->
+                val p = m.measure(c.copy(minWidth = 0, minHeight = 0, maxWidth = Constraints.Infinity, maxHeight = Constraints.Infinity))
+                val gap = 22.dp.roundToPx()
+                val x = if (onRight) c.maxWidth / 2 + gap else c.maxWidth / 2 - gap - p.width
+                val y = ((trackPx - thumb.toPx()) * fraction + (thumb.toPx() - p.height) / 2f).roundToInt()
+                layout(0, 0) { p.place(x, y) }
+            }.mediaPlate(),
+            SliverColors.OnMedia, maxLines = 1,
+        )
     }
 }
