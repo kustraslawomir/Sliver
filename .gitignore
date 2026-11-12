@@ -31,3 +31,4 @@ xcuserdata/
 *.xcuserstate
 iosApp/DerivedData/
 docs/qa/*/compare/
+.claude/worktrees/
