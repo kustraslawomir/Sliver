@@ -35,11 +35,12 @@ fun ClipPlayer(
     audio: Boolean = false,
     paused: Boolean = false,
     look: LookParams = LookParams(),
+    scrubMs: Long? = null,
     overlay: @Composable BoxScope.() -> Unit = {},
 ) {
     var aspect by remember(path) { mutableStateOf<Float?>(null) }
     ClipFrame(aspect, modifier) {
-        TrimPlayer(path, startMs, windowMs, speed, audio, paused, Modifier.fillMaxSize(), look) { aspect = it }
+        TrimPlayer(path, startMs, windowMs, speed, audio, paused, Modifier.fillMaxSize(), look, scrubMs) { aspect = it }
         overlay()
     }
 }

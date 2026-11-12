@@ -18,5 +18,6 @@ actual fun TrimPlayer(
     paused: Boolean,
     modifier: Modifier,
     look: LookParams,
+    scrubMs: Long?,
     onAspect: (Float) -> Unit,
 ) = Box(modifier.background(Color.Black))

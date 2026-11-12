@@ -32,6 +32,7 @@ actual fun TrimPlayer(
     paused: Boolean,
     modifier: Modifier,
     look: LookParams,
+    scrubMs: Long?,
     onAspect: (Float) -> Unit,
 ) {
     val context = LocalContext.current
@@ -50,7 +51,17 @@ actual fun TrimPlayer(
         onDispose { player.removeListener(listener); player.release() }
     }
 
-    LaunchedEffect(path, startMs, windowMs) {
+    val scrubbing = scrubMs != null
+    LaunchedEffect(path, scrubbing) {
+        if (!scrubbing) return@LaunchedEffect
+        player.playWhenReady = false
+        player.setMediaItem(MediaItem.fromUri(path))
+        player.prepare()
+    }
+    LaunchedEffect(scrubMs) { scrubMs?.let { player.seekTo(it) } }
+
+    LaunchedEffect(path, startMs, windowMs, scrubbing) {
+        if (scrubbing) return@LaunchedEffect
         val clip = MediaItem.ClippingConfiguration.Builder()
             .setStartPositionMs(startMs)
             .setEndPositionMs(startMs + windowMs)

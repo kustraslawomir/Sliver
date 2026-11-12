@@ -29,5 +29,7 @@ expect fun TrimPlayer(
     paused: Boolean,
     modifier: Modifier,
     look: LookParams = LookParams(),
+    /** While the user drags the clip window: show this frame of the whole video instead of looping the window. */
+    scrubMs: Long? = null,
     onAspect: (Float) -> Unit = {},
 )

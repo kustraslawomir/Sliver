@@ -287,6 +287,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 } else if (duration != null) {
                     ClipPlayer(
                         path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging, LookParams(),
+                        scrubMs = if (dragging) startMs else null,
                     ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
                     if (!soundTouched) {
                         SliverText(
