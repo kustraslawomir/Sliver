@@ -382,3 +382,14 @@ Commits: P-v132-1 (switch + settings row), -2 (reminder), -3 (golden hour), -4 (
 - Fixes found by the run: settings flow must scroll back up after Reminders; day flow no longer asserts Replace/Remove (below the fold at font 1.3).
 - Projects sheet screenshot (ProjectsV2) is skipped on a fresh install because the onboarding project "My 2026" is listed too (cover rule is conservative); the flow still asserts the sheet.
 - BLOCKED (emulator run, 2 fix attempts used): `scripts/qa.sh --device emulator` boots tracker13 and installs, but the onboarding flow (`00_onboarding.sh`, written against the Xiaomi's first-run screens) fails on the emulator ("Create project" not visible after Start; the first emulator attempt found leftover app state on the Restore/Google sign-in screen). The script now `pm clear`s + grants camera/mic/notifications on the emulator before launch. Likely cause: the first-run screens changed with the newer Fragments/Google sign-in build (commit d87c1e3). Next step: dump the screens after "Start" on the emulator (`qa/lib/ui.py list`) and adapt 00_onboarding.sh. The Xiaomi run (26/26 flows PASS, 579 s) predates that change; re-run it when the device is free. Emulator camera flows were never reached, so the CameraX skip path is untested.
+
+## T-auto-5 (render design boards locally)
+DONE with deviations (lead decision: no Playwright/pip/npm, nothing installed outside the repo):
+- `tools/design/dcrender.mjs` (Node built-ins only): parses `.dc.html`, runs `renderVals()` with `data-props` defaults, expands sc-for/sc-if/dc-import, interpolates holes, drops `on*`, inlines Geist/Geist Mono from composeApp resources, writes one HTML file.
+- `tools/design/render.sh <Board|all> [outDir]` replaces `render.py`: headless Google Chrome, network blocked, throwaway profile. Phone boards (<1000 px wide) @3x, big boards @1x. Default outDir is `design/png`; pass a temp dir to compare without overwriting.
+- `tools/design/pngdiff.mjs a.png b.png [tol]` (zlib PNG decoder): prints % of pixels within tol 16 and mean abs diff.
+- `scripts/design-png.sh [base-ref]` re-renders only boards whose `.dc.html` changed.
+- Result (all 79 boards vs committed PNG): 71 boards >= 95% similar (most 98-99.9%, residual is anti-aliasing). Below 95%: DayDetail 85.7, DayDetailL 86.1, BackupStates 88.8, OnboardingFlow 89.5, LooksAdjust 90.6, EdgeStates 90.7, Looks 91.5, DayShare 92.5.
+  - DayDetail/DayDetailL/Looks/LooksAdjust/DayShare: animated scene art (Frame / slBar keyframes) captured mid-animation in the reference; not deterministic. Disabling animations did not help.
+  - BackupStates/OnboardingFlow/EdgeStates: multi-phone boards; surround/corner background differs from the reference (page background outside the phone frames), content matches visually.
+- Changelog.dc.html has no committed PNG (not compared). Brand SVGs/support.js referenced by Logo/Main are absent from design/src, so those images render empty.
