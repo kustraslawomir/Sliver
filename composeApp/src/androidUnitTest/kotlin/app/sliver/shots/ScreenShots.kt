@@ -53,7 +53,11 @@ class ScreenShots : ShotTest() {
     }
     @Test fun year() = shoot("YearInSeconds", darkOnly = true) { YearInClipsScreen({}, {}) }
     @Test fun backup() = shoot("Backup") { BackupScreen({}, {}) }
-    @Test fun restore() = shoot("Restore", settled = "Nothing to restore") { RestoreScreen {} }
+    @Test fun restore() {
+        // Restore asks for sign-in first; the golden shows the signed-in Drive scan result.
+        kotlinx.coroutines.runBlocking { settings.update { it.copy(account = it.account.copy(signedIn = true, email = "Demo account")) } }
+        shoot("Restore", settled = "Nothing to restore") { RestoreScreen {} }
+    }
     @Test fun reminders() = shoot("Notifications") { RemindersScreen {} }
     @Test fun onboarding() = shoot("OnbV2") { OnboardingScreen({}, {}) }
     @Test fun camera() = shoot("CameraV2", darkOnly = true, inspection = true) { CameraScreen({}, {}) }

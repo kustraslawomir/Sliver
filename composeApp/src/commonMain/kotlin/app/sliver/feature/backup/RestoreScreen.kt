@@ -36,6 +36,10 @@ import app.sliver.data.backup.RestoreScan
 import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
+import app.sliver.data.settings.SettingsRepository
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.number
@@ -82,7 +86,22 @@ fun RestoreScreen(onDone: () -> Unit) {
     val progress by engine.progress.collectAsState()
     val local by remember { repo.observeAllProjects() }.collectAsState(emptyList())
 
-    LaunchedEffect(Unit) {
+    val settingsRepo = remember { koin.get<SettingsRepository>() }
+    val signedIn = remember { settingsRepo.settings }.collectAsState(null).value?.account?.signedIn
+    val scope = rememberCoroutineScope()
+    if (signedIn == false) {
+        // Restore needs the Google account first; after sign-in this screen continues with the Drive scan.
+        Box(Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding().padding(horizontal = SliverSpace.Gutter)) {
+            GoogleSignInPanel(
+                skipLabel = "Not now",
+                onFinished = { scope.launch { if (!settingsRepo.settings.first().account.signedIn) onDone() } },
+                onRestore = {},
+            )
+        }
+        return
+    }
+    LaunchedEffect(signedIn) {
+        if (signedIn != true) return@LaunchedEffect
         runCatching { engine.scan() }.onSuccess { scan = it }.onFailure { failed = true }
     }
     val have = local.map { it.projectId to it.date }.toSet()
