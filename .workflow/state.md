@@ -42,3 +42,4 @@
 - [x] T-design-v1.3 (code done; reminder firing not verified on Xiaomi (MIUI alarm deferral), filled-day/project-cover bug not reproduced; QA shots not committed, see HANDOFF)
 
 - T-design-v1.4-mono: DONE except leftovers (seeder-dependent bugs, reminder emulator test); see HANDOFF.md.
+- T-auto-1: DONE (seeder, thumbnail self-heal, memory card checked, reminder emulator test; see HANDOFF.md section T-auto-1)
