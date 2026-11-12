@@ -110,3 +110,8 @@ Empty archive (first day), camera access off (→ Settings / add from gallery), 
 
 ## Cut from v1 (don't build)
 Day notes, voice notes, mood tags, streaks, paywall, multi-photo import, film-strip archive view, Pan/Parallax, Shadows/Highlights/Temperature sliders, "Try another" suggestions, auto subject reframe, 4K, dual crops, Apple/email sign-in, Firebase, push server, quiet hours, quality setting, glitch/flash transitions, subtitles, recap image card, direct YouTube API, iOS.
+
+### Capture-day rule
+- A clip can only be added to the day its media was recorded (EXIF DateTimeOriginal for photos and Motion Photos, video creation time for video, MediaStore DATE_TAKEN / modified as fallback; device local time zone). Mismatch or unreadable date: notice, nothing opens. In-app recordings are always today.
+- Edit clip / Photo clip show the fixed day as non-interactive text; saving uses that day.
+- Fill empty days assigns each item to its own date and shows "N not added: no date / outside this project".

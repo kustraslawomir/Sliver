@@ -29,8 +29,8 @@ Project (root)
 | Camera | stop recording | Edit clip (tmp file) | Discard sheet ("Discard this recording?") → Camera |
 | Edit clip | Save clip | **Project screen** (edit screen popped from the stack); the saved day's cell pops in once (scale 0.6 to 1, 420 ms, 2 dp ember ring), count +1. No toast. Replace flow from Clip detail returns to Clip detail | Back → origin |
 | Edit clip | Retake | pop to Camera, tmp deleted | — |
-| system Photo Picker | pick video | Edit clip | Back → screen that opened the picker |
-| system Photo Picker | pick photo | Photo clip | Back → screen that opened the picker |
+| system Photo Picker | pick video | Edit clip (only if recorded on the target day; otherwise NoticeSheet with OK and no navigation) | Back → screen that opened the picker |
+| system Photo Picker | pick photo | Photo clip (same capture-day check; unreadable date also blocks) | Back → screen that opened the picker |
 | Photo clip | Save clip | same as Edit clip | Back → origin |
 | Project | day cell | Clip detail | Back → Project, same month |
 | Clip detail | Replace clip | system Photo Picker / Camera for that date → Save pops back to Clip detail | — |
@@ -51,3 +51,6 @@ Project (root)
 - Transitions: push = slide 240 ms emphasized; sheets 400 ms; Project ↔ Camera = vertical slide (Camera slides up over home).
 
 > **Add media**: ADD, "Choose from Photos" (empty day) and Replace clip open the system Photo Picker directly (no gallery screen). The target date (default today) travels in `CaptureSession.forDate`. Cancel returns to the previous screen.
+
+## Capture-day rule (anti-cheat)
+Media from the Photo Picker (Add, Choose from Photos, Replace) is added only to the day it was recorded (target = today for Add, the tapped day otherwise). Another day shows a NoticeSheet: "This clip was recorded on 28 Feb 2026. It can only be added to that day." An unreadable date shows "We can't tell when this was recorded, so it can't be added." Edit clip and Photo clip show the day as plain text (no picker). Fill empty days uses each item's own date and reports "N not added: no date / outside this project".

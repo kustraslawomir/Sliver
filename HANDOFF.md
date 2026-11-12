@@ -244,3 +244,8 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 - Not verified on device (phone not unlocked / no on-device check possible).
 - Clip detail (also Project two-pane) starts muted; toggle is per visit. Film builder/player audio left as chosen by the user (film audio mode / explicit Mute button).
 - Date stamp is bottom-right (16 dp, white Geist Mono, soft shadow; export scales by short side/360, see StampLayout.kt) on Clip detail, Edit/Photo clip, film builder preview, film player and film render. Owner overrides design/src ember top/bottom placement. Settings has no stamp preview (switch only). Stamp text formats still differ (screens dd.MM.yyyy, film render 'd Mon yyyy').
+
+## Capture-day rule
+- DECISION: strict. Unreadable capture date blocks the add ("We can't tell when this was recorded, so it can't be added."). Date compare is in the device's local time zone; fallback MediaStore DATE_MODIFIED can be used when no taken date exists.
+- Limitation: capture dates live in editable metadata, so a determined user can change them. This blocks casual cheating only.
+- Edit clip's 7-day day picker and lastSevenDays were removed. Not verified on device.
