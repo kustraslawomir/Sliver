@@ -35,9 +35,18 @@ Product rules still apply: filters are never burned into stored clips, only into
 Keep the existing presets that still make sense; drop or rename any that duplicate these (note in HANDOFF).
 Generate LUTs with the Kotlin LUT generator (commit 0c90b44) from documented curves/matrices, 33³ `.cube`.
 
-## 3. Picker UX
-Filter row in Edit clip / Film builder: thumbnails rendered from the current clip frame per filter (cached),
-intensity slider, Grain amount slider. Disposable shown first.
+## 3. Where filters live: the FILM, not single clips (owner decision, 2026-11-12)
+- Filters are chosen only in the **Film builder** and apply to the whole film (preview + render/export).
+  The builder's existing single-look option becomes the "Filter" section: horizontal row of thumbnails
+  rendered from a frame of the project's film with each filter (cached), intensity slider, Grain slider.
+  Disposable first. Saved in the film definition (synced later with T-sync-two-devices).
+- **Remove filters from single clips**: no filter control in Edit clip / Photo clip / Day detail, and no
+  "Change look"/filter entry on a day. Clips play and save clean. Existing per-day `look` values are ignored
+  for playback and render (keep the DB column readable; migration not needed); the film's filter is the only
+  one applied. Remove the camera filter swipe if it still exists.
+- Single-clip export/share (if any) stays unfiltered.
+- docs/SPEC.md and docs/TERMS.md: update the Filters/Films sections accordingly; design/INDEX.md: add to
+  "v1.4.1 owner decisions": filters are film-level only.
 
 ## 4. Tests + checks
 Unit tests: LUT generator output for known colours, deterministic shader params per clip id. Roborazzi goldens
