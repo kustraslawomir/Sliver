@@ -69,6 +69,7 @@ fun BackfillScreen(onBack: () -> Unit) {
     var usePhotos by remember { mutableStateOf(false) }
     var scanned by remember { mutableStateOf<List<GalleryItem>?>(null) }
     var scanning by remember { mutableStateOf(false) }
+    var pickedCount by remember { mutableStateOf(0) }
     var off by remember { mutableStateOf(emptySet<YearMonth>()) }
 
     val candidates = remember(scanned, all, range, usePhotos) {
@@ -76,17 +77,21 @@ fun BackfillScreen(onBack: () -> Unit) {
         val first = all.minOfOrNull { it.date } ?: today
         findCandidates(items, all.map { it.date }.toSet(), today, rangeStart(range, first, today), usePhotos)
     }
+    val notAdded = remember(candidates) {
+        val items = scanned ?: return@remember 0
+        val first = all.minOfOrNull { it.date } ?: today
+        notAddedCount(pickedCount, items, all.map { it.date }.toSet(), today, rangeStart(range, first, today))
+    }
     val picked = remember(candidates, off) { candidates?.let { selectedCandidates(it, off) }.orEmpty() }
 
     val pick = rememberMultiMediaPicker { uris ->
         scanning = true
+        pickedCount = uris.size
         scope.launch {
             val described = runCatching { gallery.describe(uris) }
             scanned = described.getOrDefault(emptyList())
             scanning = false
-            val unreadable = uris.size - (scanned?.size ?: 0)
             if (described.isFailure) Notices.show("Couldn't read the selected items.")
-            else if (unreadable > 0) Notices.show("Could not read $unreadable ${if (unreadable == 1) "item" else "items"}.")
         }
     }
 
@@ -107,7 +112,7 @@ fun BackfillScreen(onBack: () -> Unit) {
         val running = batch
         if (running != null) {
             val filled = all.count { d -> d.source == DaySource.BACKFILL && running.items.any { it.date == d.date.toString() } }
-            BatchProgress(running, filled, onUndo = {
+            BatchProgress(running, filled, notAdded, onUndo = {
                 runner.cancel()
                 scope.launch { executor.undoAll() }
             }, onDone = {
@@ -140,9 +145,11 @@ fun BackfillScreen(onBack: () -> Unit) {
             )
         } else if (candidates.isEmpty()) {
             SliverText("Nothing to fill in this range.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            if (notAdded > 0) SliverText(notAddedLabel(notAdded), SliverType.BodySmall, color = SliverColors.TextSecondary)
             GhostButton("Select other items", { scanned = null }, Modifier.fillMaxWidth())
         } else {
             Mosaic(yearRows(candidates), off) { m -> off = if (m in off) off - m else off + m }
+            if (notAdded > 0) SliverText(notAddedLabel(notAdded), SliverType.BodySmall, color = SliverColors.TextSecondary)
             PrimaryButton(fillLabel(picked.size), {
                 if (picked.isEmpty()) return@PrimaryButton
                 scope.launch {
@@ -190,11 +197,12 @@ private fun Mosaic(rows: List<YearRow>, off: Set<YearMonth>, onToggle: (YearMont
 }
 
 @Composable
-private fun BatchProgress(batch: BackfillBatch, filled: Int, onUndo: () -> Unit, onDone: () -> Unit) {
+private fun BatchProgress(batch: BackfillBatch, filled: Int, notAdded: Int, onUndo: () -> Unit, onDone: () -> Unit) {
     SliverText(
         if (batch.finished) "Filled $filled of ${batch.total} days" else "Filling ${batch.done} / ${batch.total}",
         SliverType.Title,
     )
+    if (batch.finished && notAdded > 0) SliverText(notAddedLabel(notAdded), SliverType.BodySmall, color = SliverColors.TextSecondary)
     Box(Modifier.fillMaxWidth().height(2.dp).background(SliverColors.LineStrong)) {
         Box(Modifier.fillMaxWidth(batch.progress).height(2.dp).background(SliverColors.Accent))
     }

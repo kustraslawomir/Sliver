@@ -42,6 +42,14 @@ fun findCandidates(
     }
     .sortedBy { it.date }
 
+/** Picked items that can never be added: no readable date, or a date that is today, in the future, filled or before [from]. */
+fun notAddedCount(totalPicked: Int, items: List<GalleryItem>, filled: Set<LocalDate>, today: LocalDate, from: LocalDate?): Int {
+    val eligible = items.count { it.date < today && it.date !in filled && (from == null || it.date >= from) }
+    return totalPicked - eligible
+}
+
+fun notAddedLabel(count: Int) = "$count not added: no date / outside this project"
+
 fun BackfillItem.month(): YearMonth = LocalDate.parse(date).toYearMonth()
 
 /** Candidates of months the user has not switched off. */
