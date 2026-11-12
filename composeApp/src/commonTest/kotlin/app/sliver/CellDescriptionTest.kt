@@ -13,4 +13,7 @@ class CellDescriptionTest {
 
     @Test
     fun withoutSecond() = assertEquals("Tuesday 10 November", cellDescription(date, false))
+
+    @Test
+    fun draft() = assertEquals("Tuesday 10 November, draft, review", cellDescription(date, false, draft = true))
 }

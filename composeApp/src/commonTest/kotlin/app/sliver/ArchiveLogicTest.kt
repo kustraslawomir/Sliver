@@ -33,6 +33,7 @@ class ArchiveLogicTest {
         assertEquals(CellState.EMPTY, cellState(LocalDate(2026, 11, 1), today, null))
         assertEquals(CellState.FILLED, cellState(today, today, day(today)))
         assertEquals(CellState.BACKFILLED, cellState(today, today, day(today, DaySource.BACKFILL)))
+        assertEquals(CellState.DRAFT, cellState(LocalDate(2026, 11, 1), today, day(LocalDate(2026, 11, 1)).copy(draft = true)))
     }
 
     @Test

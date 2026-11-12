@@ -9,7 +9,7 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
-enum class CellState { FILLED, BACKFILLED, TODAY, EMPTY, FUTURE }
+enum class CellState { FILLED, BACKFILLED, DRAFT, TODAY, EMPTY, FUTURE }
 
 /** Months shown in the grid: [first] and [last] bound navigation. */
 data class YearMonth(val year: Int, val month: Int) : Comparable<YearMonth> {
@@ -30,6 +30,7 @@ fun canGoNext(shown: YearMonth, today: LocalDate) = shown < today.toYearMonth()
 fun cellState(date: LocalDate, today: LocalDate, day: Day?, start: LocalDate? = null): CellState = when {
     date > today -> CellState.FUTURE
     day == null && start != null && date < start -> CellState.FUTURE
+    day?.draft == true -> CellState.DRAFT
     day != null -> if (day.source == app.sliver.data.DaySource.BACKFILL) CellState.BACKFILLED else CellState.FILLED
     date == today -> CellState.TODAY
     else -> CellState.EMPTY

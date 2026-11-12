@@ -92,7 +92,13 @@ import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
+import app.sliver.feature.autoimport.draftsChipLabel
+import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import app.sliver.feature.films.FilmActionsSheet
 import app.sliver.feature.films.FilmsSection
 import app.sliver.feature.gallery.rememberAddMedia
@@ -125,6 +131,9 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val all by remember { days.observeAll() }.collectAsState(emptyList())
     val app by remember { settings.settings }.collectAsState(null)
     val byDate = remember(all) { all.associateBy { it.date } }
+    val drafts by remember { days.observeDrafts() }.collectAsState(emptyList())
+    val calendar = remember(byDate, drafts) { drafts.associateBy { it.date } + byDate }
+    val draftNav = rememberDraftNav()
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
     val first = project?.startDate ?: app?.firstDay ?: all.minOfOrNull { it.date } ?: today
@@ -154,7 +163,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     }
 
     fun onCell(date: LocalDate) {
-        when (cellState(date, today, byDate[date], first)) {
+        when (cellState(date, today, calendar[date], first)) {
             CellState.FUTURE -> Unit
             CellState.TODAY -> {
                 CaptureSession.forDate = null
@@ -162,6 +171,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             }
             CellState.EMPTY -> addFor = date
             CellState.FILLED, CellState.BACKFILLED -> openDay(date)
+            CellState.DRAFT -> draftNav.openFirst(onNavigate, calendar[date])
         }
     }
 
@@ -199,6 +209,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
+                        if (drafts.isNotEmpty()) DraftsChip(drafts.size) { draftNav.openFirst(onNavigate) }
                         ViewRow(yearView, { yearView = it }, canGoPrev(shown, first), canGoNext(shown, today),
                             { show(shown.plusMonths(-1)) }, { show(shown.plusMonths(1)) })
 
@@ -228,7 +239,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         } else {
                             val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month } }
                             MonthHeading(MonthLong[shown.month - 1], "$count ${if (count == 1) "clip" else "clips"}")
-                            MonthGrid(shown, byDate, today, first, ::onCell, ::replaceDay, ::removeDay)
+                            MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay)
                         }
 
                         memory?.let { (day, kind) -> MemoryCard(day, kind) { openDay(day.date) } }
@@ -451,12 +462,14 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     }
     Box(
         surface.semantics(mergeDescendants = true) {
-            contentDescription = cellDescription(date, day != null) + when (state) {
+            contentDescription = cellDescription(date, day != null && !day.draft, day?.draft == true) + when (state) {
                 CellState.TODAY -> ", today"
                 CellState.EMPTY -> ", add a clip"
                 else -> ""
             }
-            if (day != null) {
+            if (day?.draft == true) {
+                customActions = listOf(CustomAccessibilityAction("Review draft") { onClick(); true })
+            } else if (day != null) {
                 customActions = listOf(
                     CustomAccessibilityAction("Open") { onClick(); true },
                     CustomAccessibilityAction("Replace clip") { onReplace(); true },
@@ -478,9 +491,28 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                 }
             }
             else -> {
+                val draft = state == CellState.DRAFT
                 val thumb = if (day != null) rememberPhoto(day.thumb) else null
-                Box(Modifier.fillMaxSize().background(day!!.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3))
-                if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Box(Modifier.fillMaxSize().then(if (draft) Modifier.alpha(DraftAlpha) else Modifier)) {
+                    Box(Modifier.fillMaxSize().background(day!!.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3))
+                    if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                }
+                if (draft) {
+                    val line = SliverColors.TextSecondary
+                    Box(
+                        Modifier.fillMaxSize().drawBehind {
+                            val w = 1.5.dp.toPx()
+                            drawRoundRect(
+                                line, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(8.dp.toPx()),
+                                style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
+                            )
+                        },
+                    )
+                    SliverText(
+                        "Draft", SliverType.Caption.copy(fontSize = 9.sp, lineHeight = 11.sp, color = SliverColors.OnMedia).overMedia(),
+                        Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 5.dp),
+                    )
+                }
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
                     date.day.toString(), SliverType.tnum(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
@@ -488,6 +520,21 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                 )
             }
         }
+    }
+}
+
+private const val DraftAlpha = 0.55f
+
+@Composable
+private fun DraftsChip(count: Int, onClick: () -> Unit) {
+    Row(
+        Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface1).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
+            .clickable(role = Role.Button, onClick = onClick).padding(start = 14.dp, end = 10.dp).height(36.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        SliverText(draftsChipLabel(count), SliverType.BodySmall, color = SliverColors.TextPrimary)
+        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 16.dp)
     }
 }
 
