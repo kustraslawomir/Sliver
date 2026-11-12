@@ -212,3 +212,8 @@ Device: Samsung (1080x2340 @420dpi). Shots in docs/qa/project/ (clip cells maske
 - "Year in clips" added as a plain item in the Project ⋯ menu (no board shows an entry; DECISION).
 - Archive/Delete stay disabled with one project (rule kept); one-line reason "Keep at least one open project." shown under them (the board shows them enabled; DECISION: rule wins, reason added).
 - Verified on Samsung (no screenshots taken): chip text "My 2026", menu lists Year in clips, Back closes menu only.
+
+## Fix round: overlay z-order + preview rotation
+- Camera: ProjectsSheet/menu sheet were declared before the controls Column, so controls drew on top. Moved overlays to the end of the root Box. Other screens (Project, Day, Trim, Backup, Export) already declare sheets last; sheets already pad for nav bar via safeDrawing.
+- Verified on Samsung with uiautomator: with the Projects sheet open only sheet nodes exist, PHOTO/VIDEO/FLIP/ADD are not exposed (blocked). No screenshots stored.
+- Preview: explicit Preview targetRotation = display rotation, PreviewView COMPATIBLE (TextureView) mode. Root cause of the sideways viewfinder was not reproduced (phone was face-down, dark scene); DECISION: made rotation explicit. Capture rotation unchanged (set at record/photo time from device orientation). Owner to confirm upright preview.
