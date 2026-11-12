@@ -375,7 +375,7 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
                 Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary)
                     .clickable(role = Role.Button, onClick = set).padding(horizontal = 14.dp),
                 Alignment.Center,
-            ) { SliverText("Set reminder", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.OnAccent) }
+            ) { SliverText("Set reminder", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.OnInverse) }
             Box(
                 Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
                     .clickable(role = Role.Button, onClick = onDismiss).padding(horizontal = 14.dp),

@@ -123,7 +123,7 @@ fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit
                     .clickable(role = Role.Tab) { onSelect(i) },
                 contentAlignment = Alignment.Center,
             ) {
-                SliverText(label, SliverType.BodySmall, color = if (on) SliverColors.OnAccent else SliverColors.TextSecondary)
+                SliverText(label, SliverType.BodySmall, color = if (on) SliverColors.OnInverse else SliverColors.TextSecondary)
             }
         }
     }

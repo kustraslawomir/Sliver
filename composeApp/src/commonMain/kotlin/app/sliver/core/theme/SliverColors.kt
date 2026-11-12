@@ -34,6 +34,8 @@ object SliverColors {
     val AccentLine get() = pick(0x55FF8A3D, 0x55E8671C)
     val AccentTint get() = pick(0x1FFF8A3D, 0x1FE8671C)
     val OnAccent = Color(0xFF0A0A0B)
+    /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
+    val OnInverse get() = pick(0xFF0A0A0B, 0xFFEDEDE8)
     val Success get() = pick(0xFF8FC7A4, 0xFF2F7D55)
     val Warning get() = pick(0xFFE8C27A, 0xFF9A6A0B)
     val Error get() = pick(0xFFE5675F, 0xFFC0392B)
