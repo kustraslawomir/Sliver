@@ -106,7 +106,7 @@ fun RemindersScreen(onBack: () -> Unit) {
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}
     val r = s.reminder
     val status = controller.status(PermissionKind.Notifications)
-    val permOff = status == PermissionStatus.Denied || (status == PermissionStatus.Granted && !platform.notificationsEnabled())
+    val permOff = r.enabled && !platform.notificationsEnabled()
 
     fun update(transform: (ReminderSettings) -> ReminderSettings) {
         scope.launch { repo.update { it.copy(reminder = transform(it.reminder)) } }

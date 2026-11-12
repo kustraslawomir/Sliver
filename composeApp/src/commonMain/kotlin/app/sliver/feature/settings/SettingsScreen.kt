@@ -27,6 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.sliver.core.navigation.Route
+import app.sliver.core.permissions.PermissionKind
+import app.sliver.core.permissions.PermissionStatus
+import app.sliver.core.permissions.rememberPermissionController
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
@@ -52,6 +55,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
     val repo = remember { KoinPlatform.getKoin().get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val platform = rememberSettingsPlatform()
+    val location = rememberPermissionController()
     val settings by remember { repo.settings }.collectAsState(null)
     var showStores by remember { mutableStateOf(false) }
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}
@@ -94,6 +98,15 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 
         // DECISION: the volume-key option lives in Settings (not on the Camera toolbar) and only acts while Camera is open.
         SwitchRow("Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } })
+
+        SwitchRow(
+            "Show golden hour", s.showGoldenHour,
+            { on ->
+                update { it.copy(showGoldenHour = on) }
+                if (on && location.status(PermissionKind.CoarseLocation) == PermissionStatus.NotAsked) location.request(PermissionKind.CoarseLocation)
+            },
+            caption = "A line on the camera when the light is about to turn. Uses approximate location.",
+        )
 
         Group("More")
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
