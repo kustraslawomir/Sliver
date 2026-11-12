@@ -10,7 +10,7 @@
 <helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
 <style>body{margin:0}
-@keyframes sv-breathe{0%,100%{box-shadow:0 0 14px #FF8A3D88,0 0 32px #FF8A3D33}50%{box-shadow:0 0 20px #FF8A3DAA,0 0 44px #FF8A3D44}}
+@keyframes sv-breathe{0%,100%{box-shadow:0 0 12px #FF8A3D4D}50%{box-shadow:0 0 18px #FF8A3D73}}
 .sv-breathe{animation:sv-breathe 1600ms ease-in-out infinite}
 @media (prefers-reduced-motion: reduce){.sv-breathe{animation:none}}</style>
 </helmet>
@@ -64,51 +64,39 @@
   <!-- top scrim: keeps chips readable on any video -->
   <div style="position: absolute; left: 0; right: 0; top: 0; height: 150px; background: linear-gradient(180deg, #000000B3 0%, #00000059 55%, #00000000 100%); pointer-events: none"></div>
 
-  <!-- top: project + calendar (rarely used → top) -->
-  <div style="position: absolute; left: 16px; right: 16px; top: 52px; height: 44px; display: flex; align-items: center; justify-content: space-between">
-    <a href="ProjectsV2.dc.html" aria-label="Project My 2026. Switch project" style="height: 36px; padding: 0 10px 0 14px; border-radius: 18px; background: #0000008C; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 6px; color: #FFFFFF; text-decoration: none; font-family: Geist, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap">
-      My 2026
-      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFFB3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
-    </a>
-    <a href="ProjectHub.dc.html" aria-label="{{calAria}}" style="height: 36px; padding: 0 14px 0 10px; border-radius: 18px; background: #0000008C; backdrop-filter: blur(12px); display: flex; align-items: center; gap: 6px; color: #FFFFFF; text-decoration: none; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500; white-space: nowrap">
-      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
-      Today
-    </a>
-  </div>
+  <!-- top: close back to the project (home). No project / Today chips: the camera only films. -->
+  <a href="ProjectHub.dc.html" aria-label="Close camera" style="position: absolute; left: 12px; top: 52px; width: 44px; height: 44px; border-radius: 22px; background: #0000008C; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
 
   <!-- tools row, in thumb reach -->
-  <div style="position: absolute; left: 0; right: 0; top: 576px; display: flex; justify-content: center; gap: 22px; visibility: {{idleVis}}">
+  <div style="position: absolute; right: 12px; top: 52px; display: flex; gap: 8px; visibility: {{idleVis}}">
     <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
-      <button onClick="{{t.tap}}" aria-pressed="{{t.on}}" aria-label="{{t.n}}" style="width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: {{t.color}}">
-        <span style="width: 44px; height: 44px; border-radius: 22px; background: #05050599; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span>
+      <button onClick="{{t.tap}}" aria-pressed="{{t.on}}" aria-label="{{t.n}}" style="width: 44px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: {{t.color}}">
+        <span style="width: 44px; height: 44px; border-radius: 22px; background: #0000008C; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.icon}}"></path></svg></span>
       </button>
     </sc-for>
   </div>
   <sc-if value="{{more}}" hint-placeholder-val="{{ false }}">
     <div onClick="{{toggleMore}}" style="position: absolute; inset: 0"></div>
-    <div role="menu" style="position: absolute; left: 50%; top: 512px; transform: translateX(-50%); width: 180px; border-radius: 16px; background: #18181BF2; border: 1px solid #3A3A40; padding: 4px; box-shadow: 0 12px 40px #000000">
+    <div role="menu" style="position: absolute; right: 12px; top: 104px; width: 180px; border-radius: 16px; background: #18181BF2; border: 1px solid #3A3A40; padding: 4px; box-shadow: 0 12px 40px #000000">
       <button onClick="{{toggleGrid}}" role="menuitemcheckbox" aria-checked="{{gridStr}}" style="width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">Grid<span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: {{gridColor}}">{{gridState}}</span></button>
     </div>
   </sc-if>
 
-  <div style="position: absolute; left: 0; right: 0; top: 660px; display: flex; justify-content: center; visibility: {{idleVis}}">
-    <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #05050599; border: 1px solid #26262A; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em">
-      <button onClick="{{setPhoto}}" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: {{photoBg}}; color: {{photoColor}}; font: inherit; letter-spacing: inherit">PHOTO</button>
-      <button onClick="{{setVideo}}" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: {{videoBg}}; color: {{videoColor}}; font: inherit; letter-spacing: inherit">VIDEO</button>
-    </div>
+  <!-- mode: plain words, no pill. Active = white + dot under it -->
+  <div role="radiogroup" aria-label="Capture mode" style="position: absolute; left: 0; right: 0; top: 664px; display: flex; justify-content: center; gap: 28px; visibility: {{idleVis}}; font-family: Geist, sans-serif; font-size: 15px; font-weight: 500">
+    <button onClick="{{setPhoto}}" role="radio" aria-checked="{{photoOn}}" style="height: 36px; border: 0; background: transparent; padding: 0; color: {{photoColor}}; font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px">Photo<span style="width: 4px; height: 4px; border-radius: 2px; background: {{photoDot}}"></span></button>
+    <button onClick="{{setVideo}}" role="radio" aria-checked="{{videoOn}}" style="height: 36px; border: 0; background: transparent; padding: 0; color: {{videoColor}}; font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px">Video<span style="width: 4px; height: 4px; border-radius: 2px; background: {{videoDot}}"></span></button>
   </div>
 
   <!-- capture row -->
   <div style="position: absolute; left: 0; right: 0; top: 712px; height: 88px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; box-sizing: border-box">
     <a href="PickerV2.dc.html" aria-label="Add from gallery" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #EDEDE8; text-decoration: none">
-      <span style="position: relative; width: 52px; height: 52px; box-sizing: border-box; border-radius: 14px; border: 1.5px solid #EDEDE8; background: linear-gradient(160deg, #6A7A86, #1A2026)">
-        <span style="position: absolute; right: -7px; top: -7px; width: 22px; height: 22px; border-radius: 11px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 600; line-height: 1">+</span>
-      </span>
-      <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">ADD</span>
+      <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="14" rx="2"></rect><path d="M3 15l4-4 4 4 2-2 4 4"></path><path d="M19 3v6M16 6h6"></path></svg></span>
+      <span style="font-family: Geist, sans-serif; font-size: 12px; font-weight: 500; line-height: 16px">Add</span>
     </a>
     <!-- record button: option D "Ember" -->
     <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: 0 0 14px #FF8A3D88, 0 0 32px #FF8A3D33"></span></button>
+      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: 0 0 12px #FF8A3D4D"></span></button>
     </sc-if>
     <sc-if value="{{photoIdle}}" hint-placeholder-val="{{ false }}">
       <a href="EditClipV2.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #EDEDE8; box-shadow: 0 0 16px #FFFFFF33"></span></a>
@@ -118,7 +106,7 @@
     </sc-if>
     <button onClick="{{flip}}" aria-label="Switch camera" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: #EDEDE8">
       <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center; transform: rotate({{flipDeg}}deg); transition: transform 240ms ease"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></span>
-      <span style="font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.08em">{{lensLabel}}</span>
+      <span style="font-family: Geist, sans-serif; font-size: 12px; font-weight: 500; line-height: 16px">{{lensLabel}}</span>
     </button>
   </div>
 
@@ -168,10 +156,10 @@ class Component extends DCLogic {
       more: !!st.more && !rec, toggleMore: () => this.setState({ more: false }),
       toggleGrid: () => this.setState({ grid: !st.grid, more: false }), gridStr: String(st.grid), gridState: st.grid ? 'ON' : 'OFF', gridColor: st.grid ? '#FF8A3D' : '#8E8E88',
       setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
-      photoBg: video ? 'transparent' : '#EDEDE8', photoColor: video ? '#8E8E88' : '#0A0A0B',
-      videoBg: video ? '#EDEDE8' : 'transparent', videoColor: video ? '#0A0A0B' : '#8E8E88',
+      photoOn: String(!video), photoColor: video ? '#FFFFFF99' : '#FFFFFF', photoDot: video ? 'transparent' : '#FFFFFF',
+      videoOn: String(video), videoColor: video ? '#FFFFFF' : '#FFFFFF99', videoDot: video ? '#FFFFFF' : 'transparent',
       flip: () => this.setState({ front: !st.front, flipDeg: st.flipDeg + 180 }),
-      flipDeg: st.flipDeg, lensLabel: 'FLIP'
+      flipDeg: st.flipDeg, lensLabel: 'Flip'
     };
   }
 }

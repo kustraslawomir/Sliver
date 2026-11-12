@@ -26,7 +26,7 @@ body{margin:0}
       <dc-import name="Frame" look="{{look}}" intensity="{{intensity}}" adj="{{noAdj}}" frame-w="{{ 390 }}" frame-h="{{ 580 }}" radius="{{ 0 }}" hint-size="390px,580px"></dc-import>
     </div>
     <div style="position: absolute; left: 0; right: 0; top: 0; height: 140px; background: linear-gradient(180deg, #050505B3, transparent)"></div>
-    <span style="position: absolute; right: 18px; bottom: 44px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">{{stamp}}</span>
+    <span style="position: absolute; right: 18px; bottom: 44px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 15px; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">{{stamp}}</span>
     <div style="position: absolute; left: 16px; right: 16px; bottom: 32px; height: 2px; background: #FFFFFF26"><div class="sl-bar" style="height: 2px; background: #EDEDE8"></div></div>
     <button onClick="{{older}}" aria-label="Previous day" disabled="{{noOlder}}" style="position: absolute; left: 8px; top: 260px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{olderColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
     <button onClick="{{newer}}" aria-label="Next day" disabled="{{noNewer}}" style="position: absolute; right: 8px; top: 260px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{newerColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></button>
@@ -35,7 +35,7 @@ body{margin:0}
   <!-- top bar -->
   <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
     <a href="ProjectHub.dc.html" aria-label="Back to archive" style="width: 44px; height: 44px; border-radius: 22px; background: #05050566; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
-    <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #05050566; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em">{{dateLabel}}</span>
+    <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #05050566; display: flex; align-items: center; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; ">{{dateLabel}}</span>
     <button onClick="{{toggleSound}}" aria-label="{{soundLabel}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{soundColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="{{soundPath}}"></path></svg></button>
   </div>
 
@@ -43,10 +43,10 @@ body{margin:0}
   <div style="position: absolute; left: 0; right: 0; top: 556px; bottom: 0; border-radius: 32px 32px 0 0; background: #0A0A0B; border-top: 1px solid #26262A"></div>
   <div style="position: absolute; left: 20px; right: 20px; top: 576px; display: flex; justify-content: space-between; align-items: baseline">
     <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 29px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{weekday}}</span>
-    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #8E8E88">DAY {{dayN}} · {{time}}</span>
+    <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; color: #8E8E88">Day {{dayN}} · {{time}}</span>
   </div>
   <div style="position: absolute; left: 20px; right: 20px; top: 640px; display: flex; gap: 8px; flex-wrap: nowrap">
-    <a href="Looks.dc.html" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #3A3A40; display: flex; align-items: center; gap: 6px; color: #EDEDE8; text-decoration: none; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>{{lookName}}</a>
+    <a href="Looks.dc.html" style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #3A3A40; display: flex; align-items: center; gap: 6px; color: #EDEDE8; text-decoration: none; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; "><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>{{lookName}}</a>
     <span style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #26262A; display: flex; align-items: center; gap: 6px; color: #B9B9B3; font-size: 13px; white-space: nowrap; overflow: hidden"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>{{place}}</span>
   </div>
 
@@ -80,7 +80,7 @@ body{margin:0}
         </div>
         <div style="display: flex; flex-direction: column; gap: 4px">
           <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">Share this clip</span>
-          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8E8E88">1.0S · 9:16 · 1080P · MADE ON YOUR PHONE</span>
+          <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">1.0S · 9:16 · 1080P · MADE ON YOUR PHONE</span>
         </div>
       </div>
       <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
@@ -111,9 +111,9 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const D = [
-      { label: 'MON · 2 NOV 2026', wd: 'Monday', n: 134, time: '19:42', look: 1, int: 80, lookName: 'NOIR · 80%', place: 'Kraków · Kazimierz', stamp: '2 NOV 2026' },
-      { label: 'SUN · 1 NOV 2026', wd: 'Sunday', n: 133, time: '13:05', look: 5, int: 70, lookName: 'EMBER · 70%', place: 'Tatra Mountains', stamp: '1 NOV 2026' },
-      { label: 'SAT · 31 OCT 2026', wd: 'Saturday', n: 132, time: '21:18', look: 0, int: 100, lookName: 'NATURAL', place: 'Home', stamp: '31 OCT 2026' }
+      { label: 'Mon 2 Nov 2026', wd: 'Monday', n: 134, time: '19:42', look: 1, int: 80, lookName: 'Noir · 80%', place: 'Kraków · Kazimierz', stamp: '2 NOV 2026' },
+      { label: 'Sun 1 Nov 2026', wd: 'Sunday', n: 133, time: '13:05', look: 5, int: 70, lookName: 'EMBER · 70%', place: 'Tatra Mountains', stamp: '1 NOV 2026' },
+      { label: 'Sat 31 Oct 2026', wd: 'Saturday', n: 132, time: '21:18', look: 0, int: 100, lookName: 'Natural', place: 'Home', stamp: '31 OCT 2026' }
     ];
     const d = D[st.idx];
     const inc = st.inc;

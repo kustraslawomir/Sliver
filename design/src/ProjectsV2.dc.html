@@ -25,7 +25,7 @@
           <span style="flex: 0 0 auto; width: {{p.cw}}px; height: 52px; border-radius: 8px; background: {{p.bg}}"></span>
           <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px">
             <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{p.n}}</span>
-            <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: #8E8E88">{{p.meta}}</span>
+            <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">{{p.meta}}</span>
           </span>
           <span style="flex: 0 0 24px; height: 24px; border-radius: 12px; background: {{p.dot}}; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="visibility: {{p.checkVis}}"><path d="M5 12l5 5L20 7"></path></svg></span>
         </button>
@@ -59,9 +59,9 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const P = [
-      ['My 2026', 'CINEMA 16:9 · 129 CLIPS · SINCE 21 JUN', 'cinema', '#8A6A48'],
-      ['Lisbon trip', 'STORY 9:16 · 8 CLIPS · 12–20 SEP', 'story', '#3E5A6A'],
-      ['Garden', 'CINEMA 16:9 · 34 CLIPS · SINCE 2 APR', 'cinema', '#5A6A50']
+      ['My 2026', 'Cinema 16:9 · 129 clips · since 21 Jun', 'cinema', '#8A6A48'],
+      ['Lisbon trip', 'Story 9:16 · 8 clips · 12–20 Sep', 'story', '#3E5A6A'],
+      ['Garden', 'Cinema 16:9 · 34 clips · since 2 Apr', 'cinema', '#5A6A50']
     ];
     return {
       isList: st.view === 'list', isNew: st.view === 'new',

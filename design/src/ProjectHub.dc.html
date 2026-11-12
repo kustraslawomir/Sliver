@@ -18,8 +18,8 @@
 
   <!-- header (fixed) -->
   <div style="position: absolute; left: 0; right: 0; top: 0; height: 132px; background: #0A0A0B; z-index: 2"></div>
-  <div style="position: absolute; left: 8px; right: 8px; top: 50px; height: 48px; display: flex; align-items: center; gap: 2px; z-index: 3">
-    <a href="CameraV2.dc.html" aria-label="Back to camera" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></a>
+  <div style="position: absolute; left: 20px; right: 8px; top: 50px; height: 48px; display: flex; align-items: center; gap: 2px; z-index: 3">
+
     <a href="ProjectsV2.dc.html" aria-label="Switch project" style="flex: 1 1 auto; min-width: 0; height: 44px; display: flex; align-items: center; gap: 8px; color: #EDEDE8; text-decoration: none">
       <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; letter-spacing: -0.02em">My 2026</span>
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E8E88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
@@ -27,16 +27,16 @@
     <a href="Settings.dc.html" aria-label="Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #B9B9B3"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
     <button onClick="{{toggleMenu}}" aria-label="More" aria-expanded="{{menuStr}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: {{menuBg}}; color: #B9B9B3; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></button>
   </div>
-  <span style="position: absolute; left: 20px; top: 100px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88; z-index: 3">{{total}} CLIPS · SINCE 21 JUN · CINEMA 16:9</span>
+  <span style="position: absolute; left: 20px; top: 98px; font-family: Geist, sans-serif; font-size: 14px; color: #8E8E88; z-index: 3">{{total}} clips · since 21 June</span>
 
   <!-- scroll content -->
   <div style="position: absolute; left: 0; right: 0; top: 132px; bottom: 0; overflow-y: auto; scrollbar-width: none">
-    <div style="padding: 8px 20px 48px; display: flex; flex-direction: column; gap: 20px">
+    <div style="padding: 8px 20px 150px; display: flex; flex-direction: column; gap: 20px">
 
       <div style="display: flex; align-items: center; justify-content: space-between">
-        <div style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: #111113; border: 1px solid #26262A">
+        <div role="tablist" style="display: flex; gap: 22px">
           <sc-for list="{{views}}" as="v" hint-placeholder-count="2">
-            <button onClick="{{v.pick}}" aria-pressed="{{v.on}}" style="height: 32px; padding: 0 16px; border-radius: 16px; border: 0; background: {{v.bg}}; color: {{v.color}}; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500">{{v.n}}</button>
+            <button onClick="{{v.pick}}" role="tab" aria-selected="{{v.on}}" style="height: 40px; padding: 0; border: 0; border-bottom: 2px solid {{v.line}}; background: transparent; color: {{v.color}}; font-family: Geist, sans-serif; font-size: 16px; font-weight: 600">{{v.n}}</button>
           </sc-for>
         </div>
         <sc-if value="{{isMonth}}" hint-placeholder-val="{{ true }}">
@@ -64,26 +64,26 @@
       <sc-if value="{{isMonth}}" hint-placeholder-val="{{ true }}">
         <div style="display: flex; align-items: baseline; justify-content: space-between">
           <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{monthName}}</span>
-          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88">{{monthCount}} CLIPS</span>
+          <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">{{monthCount}} clips</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 6px">
-          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #8E8E88; text-align: center">
+          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: #8E8E88; text-align: center">
             <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
           </div>
           <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px 4px">
             <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
               <sc-if value="{{c.isBlank}}" hint-placeholder-val="{{ false }}"><div style="height: 58px"></div></sc-if>
               <sc-if value="{{c.isFilled}}" hint-placeholder-val="{{ true }}">
-                <a href="DayDetail.dc.html" aria-label="{{c.label}}, has a clip" class="{{c.cls}}" style="position: relative; height: 58px; box-sizing: border-box; border-radius: 10px; border: {{c.ring}}; background: {{c.bg}}; text-decoration: none"><span style="position: absolute; left: 6px; bottom: 5px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #EDEDE8">{{c.d}}</span></a>
+                <a href="DayDetail.dc.html" aria-label="{{c.label}}, has a clip" class="{{c.cls}}" style="position: relative; height: 58px; box-sizing: border-box; border-radius: 10px; border: {{c.ring}}; background: {{c.bg}}; text-decoration: none"><span style="position: absolute; left: 6px; bottom: 5px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: #EDEDE8">{{c.d}}</span></a>
               </sc-if>
               <sc-if value="{{c.isEmpty}}" hint-placeholder-val="{{ false }}">
-                <button onClick="{{c.open}}" aria-label="{{c.label}}, empty. Add a clip" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 1px solid #1F1F22; background: #111113; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #8E8E88">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #3A3A40"></span></button>
+                <button onClick="{{c.open}}" aria-label="{{c.label}}, empty. Add a clip" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 1px solid #1F1F22; background: #111113; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #3A3A40"></span></button>
               </sc-if>
               <sc-if value="{{c.isToday}}" hint-placeholder-val="{{ false }}">
-                <a href="CameraV2.dc.html" aria-label="{{c.label}}, today, no clip yet. Open camera" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 2px solid #FF8A3D; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-decoration: none"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #FF8A3D">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #FF8A3D"></span></a>
+                <a href="CameraV2.dc.html" aria-label="{{c.label}}, today, no clip yet. Open camera" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 2px solid #FF8A3D; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-decoration: none"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #FF8A3D">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #FF8A3D"></span></a>
               </sc-if>
               <sc-if value="{{c.isFuture}}" hint-placeholder-val="{{ false }}">
-                <div style="height: 58px; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', monospace; font-size: 11px; color: #55555A">{{c.d}}</div>
+                <div style="height: 58px; display: flex; align-items: center; justify-content: center; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #55555A">{{c.d}}</div>
               </sc-if>
             </sc-for>
           </div>
@@ -94,12 +94,12 @@
       <sc-if value="{{isYear}}" hint-placeholder-val="{{ false }}">
         <div style="display: flex; align-items: baseline; justify-content: space-between">
           <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">2026</span>
-          <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88">129 CLIPS · 02:09 OF FILM</span>
+          <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">129 clips · 2:09 of film</span>
         </div>
         <div style="display: flex; flex-direction: column; gap: 6px">
           <sc-for list="{{year}}" as="r" hint-placeholder-count="12">
             <button onClick="{{r.go}}" aria-label="{{r.label}}" style="height: 16px; display: flex; align-items: center; border: 0; background: transparent; padding: 0">
-              <span style="flex: 0 0 32px; text-align: left; font-family: 'Geist Mono', monospace; font-size: 10px; color: {{r.color}}">{{r.n}}</span>
+              <span style="flex: 0 0 32px; text-align: left; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: {{r.color}}">{{r.n}}</span>
               <span style="display: flex; gap: 2.3px">
                 <sc-for list="{{r.cells}}" as="y" hint-placeholder-count="31"><span style="width: 7.8px; height: 16px; box-sizing: border-box; border-radius: 2px; background: {{y.bg}}; border: {{y.border}}; visibility: {{y.vis}}"></span></sc-for>
               </span>
@@ -111,7 +111,7 @@
       <!-- memory -->
       <a href="DayDetail.dc.html" style="height: 76px; box-sizing: border-box; border-radius: 18px; border: 1px solid #26262A; background: #111113; padding: 10px 14px 10px 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #EDEDE8">
         <span style="flex: 0 0 56px; height: 56px; border-radius: 10px; background: linear-gradient(160deg, #7A6A50, #0C0B0A); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#EDEDE8"><path d="M8 5v14l11-7z"></path></svg></span>
-        <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #FF8A3D">ONE MONTH AGO · SAT 10 OCT</span><span style="font-size: 15px">A clip you might have forgotten</span></span>
+        <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #FF8A3D">One month ago · Sat 10 Oct</span><span style="font-size: 15px">A clip you might have forgotten</span></span>
       </a>
 
       <!-- films -->
@@ -124,16 +124,27 @@
           <sc-for list="{{films}}" as="f" hint-placeholder-count="3">
             <a href="FilmPlayer.dc.html" aria-label="{{f.aria}}" style="flex: 0 0 auto; width: 132px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: #EDEDE8">
               <span style="position: relative; height: 198px; box-sizing: border-box; border-radius: 14px; border: 1px solid #26262A; background: {{f.bg}}; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px">
-                <span style="font-family: 'Geist Mono', monospace; font-size: 8px; letter-spacing: 0.3em; color: #8E8E88">A FILM BY YOU</span>
+                <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 8px; color: #8E8E88">A film by you</span>
                 <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 21px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">{{f.n}}</span>
               </span>
-              <span style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 10px"><span>{{f.rt}}</span><span style="color: #8E8E88">{{f.range}}</span></span>
+              <span style="display: flex; justify-content: space-between; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px"><span>{{f.rt}}</span><span style="color: #8E8E88">{{f.range}}</span></span>
             </a>
           </sc-for>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- home: record today -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 150px; background: linear-gradient(180deg, #0A0A0B00 0%, #0A0A0BE6 40%, #0A0A0B 100%); z-index: 3; pointer-events: none"></div>
+  <sc-if value="{{todayOpen}}" hint-placeholder-val="{{ true }}">
+    <a href="CameraV2.dc.html" aria-label="Record today's clip" style="position: absolute; left: 50%; bottom: 40px; margin-left: -36px; width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: 0 0 12px #FF8A3D4D; z-index: 4"></a>
+    <span style="position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-family: Geist, sans-serif; font-size: 13px; font-weight: 500; color: #EDEDE8; z-index: 4">Record today</span>
+  </sc-if>
+  <sc-if value="{{todayDone}}" hint-placeholder-val="{{ false }}">
+    <a href="DayDetail.dc.html" aria-label="Today's clip is saved. Open it" style="position: absolute; left: 50%; bottom: 40px; margin-left: -36px; width: 72px; height: 72px; box-sizing: border-box; border-radius: 36px; border: 2px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; z-index: 4"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></a>
+    <span style="position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-family: Geist, sans-serif; font-size: 13px; font-weight: 500; color: #8E8E88; z-index: 4">Done for today</span>
+  </sc-if>
 
   <!-- more menu -->
   <sc-if value="{{menu}}" hint-placeholder-val="{{ false }}">
@@ -150,7 +161,7 @@
     <div onClick="{{closeSheet}}" style="position: absolute; inset: 0; background: #000000B3; z-index: 4"></div>
     <div role="dialog" aria-label="Add a clip" style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 32px 32px 0 0; background: #18181B; border-top: 1px solid #3A3A40; padding: 10px 20px 34px; display: flex; flex-direction: column; gap: 8px; z-index: 5">
       <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40; margin-bottom: 10px"></div>
-      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8E8E88">{{sheetLabel}}</span>
+      <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88">{{sheetLabel}}</span>
       <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1.05; padding-bottom: 8px; font-weight: 600; letter-spacing: -0.02em">Add a clip for this day</span>
       <a href="PickerV2.dc.html" style="height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 8px 32px #FF8A3D44"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="2"></circle><path d="M21 15l-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>Choose from Photos</a>
       <button onClick="{{closeSheet}}" style="height: 48px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Leave it empty</button>
@@ -168,7 +179,8 @@ class Component extends DCLogic {
     const st = this.state;
     const ML = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     const MN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const MS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const MS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const WD = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
     const doy = (m, d) => { let n = d; for (let i = 0; i < m; i++) n += ML[i]; return n; };
     const START = doy(5, 21), TODAY = doy(10, 10);
@@ -203,13 +215,13 @@ class Component extends DCLogic {
       }
       return { n: name, cells: cs, color: active ? '#B9B9B3' : '#55555A', label: MN[mi], go: () => { if (active) this.setState({ view: 'month', month: mi }); } };
     });
-    const seg = (on) => ({ bg: on ? '#EDEDE8' : 'transparent', color: on ? '#0A0A0B' : '#8E8E88', on: String(on) });
+    const seg = (on) => ({ line: on ? '#EDEDE8' : 'transparent', color: on ? '#EDEDE8' : '#8E8E88', on: String(on) });
     return {
       views: [['month', 'Month'], ['year', 'Year']].map((v) => Object.assign({ n: v[1], pick: () => this.setState({ view: v[0] }) }, seg(st.view === v[0]))),
       isMonth: st.view === 'month', isYear: st.view === 'year',
       prev: () => { if (m > 5) this.setState({ month: m - 1 }); }, next: () => { if (m < 10) this.setState({ month: m + 1 }); },
       prevColor: m > 5 ? '#EDEDE8' : '#3A3A40', nextColor: m < 10 ? '#EDEDE8' : '#3A3A40',
-      total: st.saved ? 130 : 129,
+      total: st.saved ? 130 : 129, todayOpen: !st.saved, todayDone: st.saved,
       monthName: MN[m], monthCount: count, cells, year,
       nudge: st.nudge, dismissNudge: () => this.setState({ nudge: false }),
       menu: st.menu, menuStr: String(st.menu), menuBg: st.menu ? '#202024' : 'transparent',
@@ -221,9 +233,9 @@ class Component extends DCLogic {
         { n: 'Archive project', href: 'ProjectsV2.dc.html', color: '#EDEDE8', icon: 'M3 4h18v4H3z M5 8v12h14V8 M10 12h4' },
         { n: 'Delete project', href: 'ProjectsV2.dc.html', color: '#E5675F', icon: 'M3 6h18 M8 6V4h8v2 M6 6l1 14h10l1-14' }
       ],
-      films: [['2026', '02:09', 'LIVE', '#2A2018'], ['October', '00:29', '1—31 OCT', '#34201A'], ['Summer', '01:27', 'JUN—SEP', '#3A2E16']].map((f) => ({ n: f[0], rt: f[1], range: f[2], bg: 'linear-gradient(180deg, ' + f[3] + ' 0%, #050505 75%)', aria: f[0] + ', ' + f[1] })),
+      films: [['2026', '2:09', 'Live', '#2A2018'], ['October', '0:29', '1–31 Oct', '#34201A'], ['Summer', '1:27', 'Jun–Sep', '#3A2E16']].map((f) => ({ n: f[0], rt: f[1], range: f[2], bg: 'linear-gradient(180deg, ' + f[3] + ' 0%, #050505 75%)', aria: f[0] + ', ' + f[1] })),
       sheetOpen: st.sheet > 0, closeSheet: () => this.setState({ sheet: 0 }),
-      sheetLabel: st.sheet ? WD[wdOf(m, st.sheet)] + ' · ' + st.sheet + ' ' + MS[m] + ' 2026' : ''
+      sheetLabel: st.sheet ? WDL[wdOf(m, st.sheet)] + ' ' + st.sheet + ' ' + MN[m] : ''
     };
   }
 }

@@ -62,3 +62,18 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Share image | `DayShare.dc.html` | The wordmark on the share image = `R.drawable.sliver_wordmark` drawn onto the bitmap (`drawable.setBounds(); drawable.draw(canvas)`). Never `drawText("SLIVER")`. |
 | Landscape | `CameraV2Land.dc.html` | Not a screenshot task. The owner holds the phone sideways and records 2 s; then you pull the file (`adb pull`) and prove with `ffprobe` (or MediaMetadataRetriever) that width > height after rotation and the preview in Edit clip is 16:9. Post the ffprobe output in docs/qa/landscape.md. Do the same for upside-down landscape. |
 | Filters | — | Parked in the app. Edit clip/Day detail boards still show "Filters": hide those entries while parked, don't leave dead buttons. |
+
+## v1.3: home first, camera as a modal, light theme
+
+| Item | Design | Notes |
+|---|---|---|
+| **Start screen** | `ProjectHub.dc.html` | The app opens on the Project screen, not on the camera. It's home: no back arrow. Project name + chevron = switch project. A 72dp ember **Record today** button sits fixed at the bottom center (label under it). When today has a clip, it's an outlined ✓ "Done for today" button that opens the day. No tab bar: two places don't need one. Notification / widget "record" deep links still open the camera directly. |
+| Camera | `CameraV2.dc.html`, `CameraV2Rec.dc.html` | Full-screen modal over home. Top-left ✕ closes it (back gesture too). Top-right: Light + ⋯ (Grid). **No "My 2026" chip and no "Today" chip**: the camera only films, and project switching lives on home. Save → back to home with today's cell popping in (ProjectHubSaved). |
+| Photo / Video | `CameraV2.dc.html` | Two plain words, no pill, no segmented control. Active = white + 4dp dot under it, inactive = white 60%. Geist 15/500. |
+| Add & Flip | `CameraV2.dc.html` | Identical controls: 52dp circle, white 10% fill, 22dp icon, label under it in Geist 12/500, sentence case ("Add", "Flip"). Add is an icon (we have no library access to show a thumbnail). |
+| Record glow | `tokens.json → glow.record` | Toned down: one layer, `0 0 12px #FF8A3D4D`. Breathing peaks at `0 0 18px #FF8A3D73`. |
+| Month / Year | `ProjectHub.dc.html` | Text tabs with a 2dp underline. No pill. |
+| Labels | all | No Geist Mono, no uppercase labels anywhere in the UI. Numbers use Geist with tabular figures (`fontFeatureSettings = "tnum"`). The only uppercase text left is the date stamp burned into the video. |
+| Settings format | `Settings.dc.html` | "Default film format: Cinema 16:9 >" is a normal row that opens a choice. No segmented control. |
+| **Text vertical offset on chips/buttons** | all | It's Android font padding, not a design margin. Set in the base TextStyle: `platformStyle = PlatformTextStyle(includeFontPadding = false)` and `lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)`. Apply it once in the Typography, not per component. |
+| **Light theme** | `*L.dc.html` (ProjectHubL, DayDetailL, ProjectsV2L, SettingsL, EditClipV2L) + `tokens.json → themeLight` | Settings → Appearance: System (default) / Light / Dark. Implement as two `ColorScheme`s from the token maps, so no screen has a hard-coded color. Camera, recording, the Edit clip preview area and the player **stay dark in both themes**. No glow in light theme. Ember text on light uses `emberOnLight` #C2540F (contrast); ember fills keep #FF8A3D with dark text. |
