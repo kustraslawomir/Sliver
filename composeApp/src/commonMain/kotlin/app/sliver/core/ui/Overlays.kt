@@ -125,6 +125,6 @@ fun SliverFrame(state: SliverFrameState, modifier: Modifier = Modifier) {
 
 /** Dims everything outside the frame region of a strip to 66%. */
 @Composable
-fun StripDim(modifier: Modifier = Modifier, color: Color = Color.Black) {
+fun StripDim(modifier: Modifier = Modifier, color: Color = SliverColors.Media) {
     Box(modifier.background(color.copy(alpha = 0.66f)))
 }

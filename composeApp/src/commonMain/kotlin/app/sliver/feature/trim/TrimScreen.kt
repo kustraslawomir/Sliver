@@ -482,8 +482,8 @@ private fun ReframeBand(cropY: Float, onCropY: (Float) -> Unit) {
         val h = maxHeight
         val bandH = h * band
         val topDp = h * top
-        StripDim(Modifier.fillMaxWidth().height(topDp), Color.Black.copy(alpha = 0.55f))
-        StripDim(Modifier.fillMaxWidth().height(h - topDp - bandH).align(Alignment.BottomStart), Color.Black.copy(alpha = 0.55f))
+        StripDim(Modifier.fillMaxWidth().height(topDp), SliverColors.Media.copy(alpha = 0.55f))
+        StripDim(Modifier.fillMaxWidth().height(h - topDp - bandH).align(Alignment.BottomStart), SliverColors.Media.copy(alpha = 0.55f))
         Box(
             Modifier.fillMaxWidth().height(bandH).offset(y = topDp)
                 .border(1.5.dp, SliverColors.Accent)

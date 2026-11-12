@@ -149,7 +149,7 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset) {
             }
         }
     }
-    val color = if (f.locked) SliverColors.Accent else Color.White
+    val color = if (f.locked) SliverColors.Accent else SliverColors.OnMedia
     val d = ringSize.value
     Box(Modifier.fillMaxSize().alpha(opacity.value)) {
         Box(
@@ -208,7 +208,7 @@ private fun ExposureSlider(
     val left = if (onRight) centerX + gapPx - widthPx / 2 else centerX - gapPx - widthPx / 2
     val top = (centerY - trackPx / 2).coerceIn(0f, (height - trackPx).coerceAtLeast(0f))
     val fraction = exposureFraction(index, range.min, range.max)
-    val tint = if (locked) SliverColors.Accent else Color.White
+    val tint = if (locked) SliverColors.Accent else SliverColors.OnMedia
     Box(
         Modifier.offset { IntOffset(left.roundToInt(), top.roundToInt()) }
             .width(SliderWidth).height(EXPOSURE_TRACK_DP.dp).alpha(alpha)
@@ -230,11 +230,11 @@ private fun ExposureSlider(
             },
         contentAlignment = Alignment.TopCenter,
     ) {
-        Box(Modifier.align(Alignment.Center).width(2.dp).fillMaxSize().background(Color.White.copy(alpha = 0.6f), CircleShape))
+        Box(Modifier.align(Alignment.Center).width(2.dp).fillMaxSize().background(SliverColors.OnMedia.copy(alpha = 0.6f), CircleShape))
         val thumb = 28.dp
         Box(
             Modifier.offset { IntOffset(0, ((trackPx - with(density) { thumb.toPx() }) * fraction).roundToInt()) }
-                .size(thumb).background(Color.Black.copy(alpha = 0.55f), CircleShape).border(1.dp, tint, CircleShape),
+                .size(thumb).background(SliverColors.Media.copy(alpha = 0.55f), CircleShape).border(1.dp, tint, CircleShape),
             contentAlignment = Alignment.Center,
         ) { SliverIcon(SliverIcons.Sun, tint, size = 16.dp) }
         if (dragging) {
@@ -242,7 +242,7 @@ private fun ExposureSlider(
                 formatEv(index, range.step), SliverType.Meta.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
                 Modifier.align(if (onRight) Alignment.TopEnd else Alignment.TopStart)
                     .offset { IntOffset(0, ((trackPx - with(density) { 28.dp.toPx() }) * fraction).roundToInt() - with(density) { 18.dp.toPx() }.roundToInt()) },
-                Color.White, maxLines = 1,
+                SliverColors.OnMedia, maxLines = 1,
             )
         }
     }

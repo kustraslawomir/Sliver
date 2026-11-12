@@ -115,8 +115,6 @@ object ArchiveSession {
 private val WeekDays = listOf("M", "T", "W", "T", "F", "S", "S")
 private val Weekdays3 = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 private val CellShape get() = SliverShapes.S
-private val YearEmpty = Color(0xFF1C1C20)
-private val CellEmptyLine = Color(0xFF1F1F22)
 
 @Composable
 fun ProjectScreen(onNavigate: (Route) -> Unit) {
@@ -363,7 +361,7 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            SliverIcon(HubIcons.Bell, SliverColors.Accent)
+            SliverIcon(HubIcons.Bell, SliverColors.AccentText)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 SliverText("Want a daily nudge?", SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp))
                 SliverText("One quiet reminder at a time you choose.", SliverType.Caption.copy(lineHeight = 17.sp), color = SliverColors.TextTertiary)
@@ -438,7 +436,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     val base = Modifier.fillMaxSize().graphicsLayer { scaleX = scale.value; scaleY = scale.value }.clip(CellShape)
     val surface = when (state) {
         CellState.FUTURE -> base
-        CellState.EMPTY -> base.background(SliverColors.Surface1).border(1.dp, CellEmptyLine, CellShape)
+        CellState.EMPTY -> base.background(SliverColors.Surface1).border(1.dp, SliverColors.CellEmptyLine, CellShape)
         CellState.TODAY -> base.border(2.dp, SliverColors.Accent, CellShape)
         else -> base.then(if (ringed) Modifier.border(2.dp, SliverColors.Accent, CellShape) else Modifier)
     }
@@ -458,7 +456,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
         when (state) {
             CellState.FUTURE -> SliverText(date.day.toString(), mono(11.sp, 0.sp, SliverColors.TextDisabled))
             CellState.EMPTY, CellState.TODAY -> {
-                val tint = if (state == CellState.TODAY) SliverColors.Accent else null
+                val tint = if (state == CellState.TODAY) SliverColors.AccentText else null
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     SliverText(date.day.toString(), mono(11.sp, 0.sp, tint ?: SliverColors.TextTertiary))
                     Box(Modifier.size(4.dp).clip(CircleShape).background(tint ?: SliverColors.LineStrong))
@@ -511,7 +509,7 @@ private fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, f
                                 }
                                 date == today -> drawRoundRect(SliverColors.Accent, Offset(x, 0f), box, r)
                                 date < first -> drawRoundRect(SliverColors.Surface1, Offset(x, 0f), box, r)
-                                else -> drawRoundRect(YearEmpty, Offset(x, 0f), box, r)
+                                else -> drawRoundRect(SliverColors.CellEmpty, Offset(x, 0f), box, r)
                             }
                         }
                     }
@@ -539,7 +537,7 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             SliverText(
                 "One month ago · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
-                mono(11.sp, 0.06.em, SliverColors.Accent), maxLines = 1,
+                mono(11.sp, 0.06.em, SliverColors.AccentText), maxLines = 1,
             )
             SliverText("A clip you might have forgotten", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp))
         }

@@ -180,7 +180,7 @@ private fun Mosaic(rows: List<YearRow>, off: Set<YearMonth>, onToggle: (YearMont
                         SliverText(MonthNames[i].take(1), SliverType.Meta, color = SliverColors.TextTertiary)
                         SliverText(
                             if (count > 0) count.toString() else "-", SliverType.Meta,
-                            color = if (on) SliverColors.Accent else SliverColors.TextDisabled,
+                            color = if (on) SliverColors.AccentText else SliverColors.TextDisabled,
                         )
                     }
                 }

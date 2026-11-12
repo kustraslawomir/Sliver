@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.theme.SliverColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Box
@@ -18,7 +19,7 @@ import app.sliver.data.LookParams
 /** Centers content of the given display [aspect] on black: 16:9 fills the width, 9:16 fills the height. */
 @Composable
 fun ClipFrame(aspect: Float?, modifier: Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.background(Color.Black), Alignment.Center) {
+    Box(modifier.background(SliverColors.Media), Alignment.Center) {
         Box(if (aspect != null && aspect > 0f) Modifier.aspectRatio(aspect) else Modifier.fillMaxSize(), content = content)
     }
 }

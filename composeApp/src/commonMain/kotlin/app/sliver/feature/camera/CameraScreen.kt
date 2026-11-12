@@ -235,7 +235,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
         Box(
             Modifier.align(Alignment.TopCenter).fillMaxWidth().height(150.dp).background(
                 Brush.verticalGradient(
-                    0f to Color.Black.copy(alpha = 0.7f), 0.55f to Color.Black.copy(alpha = 0.35f), 1f to Color.Transparent,
+                    0f to SliverColors.Media.copy(alpha = 0.7f), 0.55f to SliverColors.Media.copy(alpha = 0.35f), 1f to Color.Transparent,
                 ),
             ),
         )
@@ -253,11 +253,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
                     TimerPill(formatTimer(elapsedMs), long, Modifier.align(Alignment.CenterVertically))
                 } else {
-                    CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, Color.White) }
+                    CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
                     Spacer(Modifier.weight(1f))
                     LightToggle(cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
                     Spacer(Modifier.width(SliverSpace.S2))
-                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, Color.White) }
+                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, SliverColors.OnMedia) }
                 }
             }
             if (saved?.coachRecordSeen == false && !recording) {
@@ -349,7 +349,7 @@ private fun CinemaBandDim() {
     Canvas(Modifier.fillMaxSize()) {
         val band = cinemaBandFraction(size.width, size.height) * size.height
         val edge = (size.height - band) / 2f
-        val dim = Color.Black.copy(alpha = 0.55f)
+        val dim = SliverColors.Media.copy(alpha = 0.55f)
         drawRect(dim, Offset.Zero, androidx.compose.ui.geometry.Size(size.width, edge))
         drawRect(dim, Offset(0f, size.height - edge), androidx.compose.ui.geometry.Size(size.width, edge))
     }
@@ -366,9 +366,9 @@ private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
     ) {
         SliverText(
             text, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp),
-            color = Color.White.copy(alpha = if (active) 1f else 0.6f), maxLines = 1,
+            color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.6f), maxLines = 1,
         )
-        Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) Color.White else Color.Transparent, CircleShape))
+        Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) SliverColors.OnMedia else Color.Transparent, CircleShape))
     }
 }
 
@@ -381,17 +381,17 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(Modifier.size(52.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f)), Alignment.Center) {
-            SliverIcon(icon, Color.White, Modifier.rotate(turn), size = 22.dp)
+        Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.OnMedia.copy(alpha = 0.1f)), Alignment.Center) {
+            SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
-        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp), color = Color.White, maxLines = 1)
+        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp), color = SliverColors.OnMedia, maxLines = 1)
     }
 }
 
 @Composable
 private fun GridOverlay() {
     Canvas(Modifier.fillMaxSize()) {
-        val c = Color.White.copy(alpha = 0.35f)
+        val c = SliverColors.OnMedia.copy(alpha = 0.35f)
         for (i in 1..2) {
             val x = size.width * i / 3
             val y = size.height * i / 3
@@ -404,7 +404,7 @@ private fun GridOverlay() {
 @Composable
 private fun CameraRoundButton(onClick: () -> Unit, label: String, icon: @Composable () -> Unit) {
     Box(
-        Modifier.size(44.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f))
+        Modifier.size(44.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = 0.5f))
             .semantics { contentDescription = label }
             .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
         Alignment.Center,
@@ -431,11 +431,11 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
 private fun LightToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "light-upright")
     Box(
-        Modifier.size(44.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f))
+        Modifier.size(44.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = 0.5f))
             .semantics { contentDescription = if (on) "Light on" else "Light off"; role = Role.Switch; selected = on }
             .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
         Alignment.Center,
     ) {
-        SliverIcon(if (on) SliverIcons.Zap else SliverIcons.ZapOff, if (on) Color.White else Color.White.copy(alpha = 0.7f), Modifier.rotate(turn))
+        SliverIcon(if (on) SliverIcons.Zap else SliverIcons.ZapOff, if (on) SliverColors.OnMedia else SliverColors.OnMedia.copy(alpha = 0.7f), Modifier.rotate(turn))
     }
 }

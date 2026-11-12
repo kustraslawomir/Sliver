@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverMotion
@@ -66,6 +68,9 @@ fun SliverNavHost() {
     val nav = rememberNavController()
     val navigator = remember(nav) { AppNavigator(nav) }
     val go = navigator::go
+    val entry by nav.currentBackStackEntryAsState()
+    val dark = Route.fromPath(entry?.destination?.route) in DarkRoutes
+    SideEffect { SliverColors.forceDark = dark }
 
     val link by DeepLink.target.collectAsState()
 
@@ -144,6 +149,9 @@ fun SliverNavHost() {
     }
     }
 }
+
+/** Media screens stay dark in both themes. */
+private val DarkRoutes = setOf(Route.Camera, Route.Trim, Route.PhotoTrim, Route.Export, Route.Premiere, Route.FilmPlayer, Route.YearInClips)
 
 private val CappedRoutes = setOf(
     Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,

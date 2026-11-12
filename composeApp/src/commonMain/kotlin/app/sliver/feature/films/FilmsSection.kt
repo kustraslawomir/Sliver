@@ -94,7 +94,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 itemsIndexed(list, key = { _, f -> f.id }) { i, film ->
-                    Poster(film, film.plan(all), PosterColors[i % PosterColors.size]) {
+                    Poster(film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size]) {
                         FilmNav.id = film.id
                         onNavigate(if (film.renderPath != null) Route.FilmPlayer else Route.Export)
                     }
@@ -104,7 +104,6 @@ fun FilmsSection(onNavigate: (Route) -> Unit) {
     }
 }
 
-private val PosterColors = listOf(Color(0xFF2A2018), Color(0xFF34201A), Color(0xFF3A2E16))
 
 @Composable
 private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit) {

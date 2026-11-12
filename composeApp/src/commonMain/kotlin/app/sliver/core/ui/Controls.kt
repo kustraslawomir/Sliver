@@ -65,7 +65,7 @@ fun Chip(
             .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
         contentAlignment = Alignment.Center,
     ) {
-        val color = if (selected) SliverColors.Accent else SliverColors.TextSecondary
+        val color = if (selected) SliverColors.AccentText else SliverColors.TextSecondary
         Row(
             Modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
                 .background(if (selected) SliverColors.AccentTint else Color.Transparent)

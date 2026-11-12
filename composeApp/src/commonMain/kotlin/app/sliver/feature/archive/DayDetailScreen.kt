@@ -147,7 +147,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                         SliverIcon(SliverIcons.ChevronRight, if (nextDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
                     }
                     IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute") {
-                        SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.Accent)
+                        SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.AccentText)
                     }
                 }
             }

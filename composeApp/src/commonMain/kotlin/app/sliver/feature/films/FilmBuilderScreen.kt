@@ -144,7 +144,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     )
                 }
                 val dip = fadeAlpha(options.cut, position.second)
-                if (dip > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = dip)))
+                if (dip > 0f) Box(Modifier.fillMaxSize().background(SliverColors.Media.copy(alpha = dip)))
                 if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.TextPrimary)
             }
         }
@@ -192,7 +192,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     GhostButton("Pick a file", pickAudio)
                     val picked = options.track?.takeIf { !it.startsWith(ASSET_PREFIX) }
-                    if (picked != null) SliverText("Your file", SliverType.Caption, color = SliverColors.Accent)
+                    if (picked != null) SliverText("Your file", SliverType.Caption, color = SliverColors.AccentText)
                 }
             }
         }

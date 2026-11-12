@@ -231,7 +231,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
 private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
     val dot: Color = when (ui) {
         BackupUi.UP_TO_DATE -> SliverColors.Success
-        BackupUi.BACKING_UP -> SliverColors.Accent
+        BackupUi.BACKING_UP -> SliverColors.AccentText
         BackupUi.PAUSED_WIFI, BackupUi.OFFLINE -> SliverColors.Warning
         BackupUi.FAILED, BackupUi.DRIVE_FULL, BackupUi.REVOKED -> SliverColors.Error
     }

@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
 @Composable
-fun SliverTheme(reducedMotion: Boolean = false, content: @Composable () -> Unit) {
+fun SliverTheme(reducedMotion: Boolean = false, light: Boolean = false, content: @Composable () -> Unit) {
+    SliverColors.userLight = light
+    SystemBarsEffect(SliverColors.light)
     val sans = FontFamily(
         Font(Res.font.geist_regular, FontWeight.Normal),
         Font(Res.font.geist_medium, FontWeight.Medium),
