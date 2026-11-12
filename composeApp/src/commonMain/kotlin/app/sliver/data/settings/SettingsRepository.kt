@@ -47,7 +47,6 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val cameraMode = stringPreferencesKey("camera.mode")
         val cameraLook = stringPreferencesKey("camera.look")
         val cameraLens = stringPreferencesKey("camera.lens")
-        val cameraFlash = booleanPreferencesKey("camera.flash")
         val cameraGrid = booleanPreferencesKey("camera.grid")
         val cameraActiveFilmId = stringPreferencesKey("camera.activeFilmId")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
@@ -98,7 +97,6 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
                 mode = enum(K.cameraMode, d.camera.mode),
                 look = enum(K.cameraLook, d.camera.look),
                 lens = enum(K.cameraLens, d.camera.lens),
-                flash = this[K.cameraFlash] ?: d.camera.flash,
                 grid = this[K.cameraGrid] ?: d.camera.grid,
                 activeFilmId = this[K.cameraActiveFilmId],
             ),
@@ -147,7 +145,6 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.cameraMode, s.camera.mode.name)
         put(K.cameraLook, s.camera.look.name)
         put(K.cameraLens, s.camera.lens.name)
-        put(K.cameraFlash, s.camera.flash)
         put(K.cameraGrid, s.camera.grid)
         put(K.cameraActiveFilmId, s.camera.activeFilmId)
         put(K.onboardingDone, s.onboardingDone)

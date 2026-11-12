@@ -166,6 +166,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     var holding by remember { mutableStateOf(false) }
     var elapsedMs by remember { mutableLongStateOf(0L) }
     var zoom by rememberSaveable(cam.lens) { mutableFloatStateOf(1f) }
+    // Owner decision: the light always starts off when the camera opens, like the system camera.
+    var light by rememberSaveable { mutableStateOf(false) }
     var zoomRange by remember { mutableStateOf<ClosedFloatingPointRange<Float>?>(null) }
     var zoomJob by remember { mutableStateOf<Job?>(null) }
     LaunchedEffect(zoom) { engine.setZoom(zoom) }
@@ -242,7 +244,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 .padding(bottom = if (side) 0.dp else 248.dp, end = if (side) SideControlsWidth else 0.dp)
                 .clip(RoundedCornerShape(24.dp)),
         ) {
-            CameraPreview(engine, cam.mode, cam.lens, cam.flash, Modifier.fillMaxSize()) {
+            CameraPreview(engine, cam.mode, cam.lens, light, Modifier.fillMaxSize()) {
                 ready = true
                 zoomRange = engine.zoomRange()
             }
@@ -283,7 +285,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 } else {
                     CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { GoldenHourLine(saved?.showGoldenHour == true) }
-                    LightToggle(cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
+                    LightToggle(light, iconRot) { light = !light }
                     Spacer(Modifier.width(SliverSpace.S2))
                     CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, SliverColors.OnMedia) }
                 }
