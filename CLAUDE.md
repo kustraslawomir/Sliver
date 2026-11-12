@@ -48,7 +48,7 @@ Product: one-clip-a-day video diary, organised in projects. Read before coding:
 # Add to CLAUDE.md (v1.2)
 
 - targetSdk 36. Never set `windowOptOutEdgeToEdgeEnforcement`, never rely on `onBackPressed`.
-- Never request READ_MEDIA_IMAGES / READ_MEDIA_VIDEO. Get media through the system Photo Picker (`PickVisualMedia` / `PickMultipleVisualMedia`).
+- Gallery access (owner decision 2026-11-12, for auto-import of drafts): READ_MEDIA_IMAGES + READ_MEDIA_VIDEO (+ READ_MEDIA_VISUAL_USER_SELECTED for partial access on 14+) are allowed, requested ONLY when the user starts auto-import, never at app start. Everything else (adding a single clip, replace) still uses the system Photo Picker. Never write, move or delete gallery files; never upload them anywhere except the user's own Drive backup of saved clips.
 - Every screen must work at any window size ≥ 600 dp and survive recreation (state in ViewModel / SavedStateHandle). Use window size classes, not device checks.
 - Long work (render, backup, restore, fill empty days) shows a progress notification using `Notification.ProgressStyle` on API 36+, normal progress notification below.
 - State is never shown by color alone: add an icon, label or shape.
