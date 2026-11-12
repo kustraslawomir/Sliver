@@ -121,12 +121,12 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit)
                 .padding(12.dp),
         ) {
             Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                SliverText("A film by you", mono(9.sp, 0.sp), color = SliverColors.TextTertiary)
-                SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em))
+                SliverText("A film by you", mono(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
+                SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
             }
             when (val s = state) {
-                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart))
-                RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) })
+                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
+                RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) }, SliverColors.Accent)
                 RenderState.Idle -> Unit
             }
         }

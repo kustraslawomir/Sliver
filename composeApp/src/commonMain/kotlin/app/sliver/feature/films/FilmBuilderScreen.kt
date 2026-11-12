@@ -143,7 +143,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 .background(SliverColors.BgVoid).clickable { paused = !paused },
         ) {
             if (clips.isEmpty()) {
-                SliverText("No clips in this range", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.TextSecondary)
+                SliverText("No clips in this range", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.OnMedia.copy(alpha = 0.7f))
             } else {
                 FilmPreview(
                     clips, lookParams, options.audio, options.track, paused, seek,
@@ -153,7 +153,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 if (dateOn) {
                     DateStamp(stampText(plan.days[index].date))
                 }
-                if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.TextPrimary)
+                if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
             }
         }
 
