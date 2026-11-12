@@ -7,7 +7,6 @@ import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.graphics.Color
@@ -82,7 +81,6 @@ import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
-import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
 import app.sliver.core.ui.StripDim
@@ -93,7 +91,6 @@ import app.sliver.feature.looks.LookSession
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
-import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.core.ui.DateStamp
@@ -125,7 +122,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
     val koin = remember { KoinPlatform.getKoin() }
     val media = remember { koin.get<TrimMedia>() }
-    val days = remember { koin.get<DayRepository>() }
     val files = remember { koin.get<FileStore>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val projects = remember { koin.get<ProjectRepository>() }
@@ -134,8 +130,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val haptics = LocalHapticFeedback.current
 
     val today = remember { todayLocal() }
-    val week = remember { lastSevenDays(today) }
-    val filled by remember { days.observeRange(week.last(), today) }.collectAsState(emptyList())
     val saved by remember { settings.settings }.collectAsState(null)
 
     val resume = remember { LookSession.takeResume() }
@@ -158,12 +152,11 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     var ready by remember { mutableStateOf(false) }
     var thumbsTotal by remember { mutableStateOf(1) }
     var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
-    var day by remember { mutableStateOf(resume?.day ?: CaptureSession.forDate ?: today) }
+    val day = remember { resume?.day ?: CaptureSession.forDate ?: today }
     val daySource = remember { CaptureSession.source }
     var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var clipAspect by remember { mutableStateOf(1f) }
     var cropY by remember { mutableStateOf(0.5f) }
-    var sheet by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
@@ -271,7 +264,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                Chip(dayLabel(day, today), selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
+                SliverText(dayLabel(day, today), SliverType.Meta, color = SliverColors.TextSecondary)
                 IconButton44(
                     { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
                     if (previewSound) "Sound on" else "Sound off",
@@ -387,24 +380,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
             }
         }
         DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
-        SliverBottomSheet(sheet, { sheet = false }) {
-            Column {
-                SliverText("Save to which day", SliverType.Headline, color = SliverColors.TextPrimary)
-                week.forEach { d ->
-                    Row(
-                        Modifier.fillMaxWidth().height(56.dp).clickable { day = d; sheet = false },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        SliverText(
-                            dayLabel(d, today), SliverType.Body,
-                            color = if (d == day) SliverColors.Accent else SliverColors.TextPrimary,
-                        )
-                        if (filled.any { it.date == d }) SliverText("Has a clip", SliverType.Meta, color = SliverColors.TextTertiary)
-                    }
-                }
-            }
-        }
     }
 }
 

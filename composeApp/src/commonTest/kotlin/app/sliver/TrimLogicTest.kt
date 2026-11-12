@@ -1,7 +1,6 @@
 package app.sliver
 
 import app.sliver.feature.trim.clampStart
-import app.sliver.feature.trim.lastSevenDays
 import app.sliver.feature.trim.minimapJump
 import app.sliver.feature.trim.thumbCount
 import app.sliver.feature.trim.tickIndex
@@ -25,13 +24,6 @@ class TrimLogicTest {
         assertEquals(59_500, minimapJump(0.5f, 120_000, 1f))
         assertEquals(0, minimapJump(0f, 120_000, 1f))
         assertEquals(119_000, minimapJump(1f, 120_000, 1f))
-    }
-
-    @Test fun sevenDaysNewestFirst() {
-        val days = lastSevenDays(LocalDate(2026, 3, 2))
-        assertEquals(7, days.size)
-        assertEquals(LocalDate(2026, 3, 2), days.first())
-        assertEquals(LocalDate(2026, 2, 24), days.last())
     }
 
     @Test fun onlyRecordingsAreTmp() {

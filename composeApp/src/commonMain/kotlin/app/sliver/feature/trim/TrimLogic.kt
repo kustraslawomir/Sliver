@@ -1,9 +1,6 @@
 package app.sliver.feature.trim
 
 import app.sliver.data.export.SECOND_MS
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
 
 const val MINIMAP_THRESHOLD_MS = 60_000L
 const val TICK_MS = 250L
@@ -28,9 +25,6 @@ fun tickIndex(startMs: Long) = startMs / TICK_MS
 /** Start that centers the 1 s window on [fraction] (0..1) of the clip. */
 fun minimapJump(fraction: Float, durationMs: Long, speed: Float): Long =
     clampStart((fraction.coerceIn(0f, 1f) * durationMs - SECOND_MS * speed / 2).toLong(), durationMs, speed)
-
-/** Today and the six days before it, newest first. */
-fun lastSevenDays(today: LocalDate): List<LocalDate> = (0..6).map { today.minus(DatePeriod(days = it)) }
 
 fun thumbCount(durationMs: Long) = ((durationMs + SECOND_MS - 1) / SECOND_MS).toInt().coerceIn(1, MAX_THUMBS)
 
