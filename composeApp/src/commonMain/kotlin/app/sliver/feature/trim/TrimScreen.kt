@@ -272,7 +272,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 Chip(dayLabel(day, today), selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
                 IconButton44(
                     { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
-                    if (previewSound) "Mute" else "Unmute",
+                    if (previewSound) "Sound on" else "Sound off",
                 ) {
                     SliverIcon(
                         if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX,

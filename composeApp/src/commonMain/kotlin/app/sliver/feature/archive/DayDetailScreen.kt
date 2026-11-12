@@ -72,7 +72,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val filled = remember(all) { all.map { it.date } }
     val first = app?.firstDay ?: filled.minOrNull() ?: current
 
-    var muted by remember { mutableStateOf(false) }
+    var muted by remember { mutableStateOf(true) }
     var previewLook by remember(current) { mutableStateOf<LookParams?>(null) }
 
     LaunchedEffect(Unit) {
@@ -135,7 +135,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     ) {
                         SliverIcon(SliverIcons.ChevronRight, if (nextDay(current, filled) != null) SliverColors.TextPrimary else SliverColors.TextDisabled)
                     }
-                    IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute") {
+                    IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on") {
                         SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.AccentText)
                     }
                 }

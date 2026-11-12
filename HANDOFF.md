@@ -242,3 +242,4 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 - Text over the live preview gets a dark shadow (overMedia) and the EV value sits in a 60% black pill (mediaPlate); plateContrast + test checks >= 4.5:1 on pure white. Hints and AE/AF lock pill already had solid plates.
 - Focus ring 84 -> 70 dp, 1.5 dp, no centre dot; EV slider (1.5 dp track, 32 dp sun thumb) beside ring with EV pill beside the thumb, TextHandleMove haptic per step; ring and slider fade together after 3 s (ring dims at 1.2 s). Ember only when locked.
 - Not verified on device (phone not unlocked / no on-device check possible).
+- Clip detail (also Project two-pane) starts muted; toggle is per visit. Film builder/player audio left as chosen by the user (film audio mode / explicit Mute button).
