@@ -4,6 +4,7 @@ import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -121,7 +122,8 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "SLIVER feedback") }
 
         SliverText(
-            "Sliver ${platform.versionName}", SliverType.Meta, Modifier.padding(top = SliverSpace.S6),
+            "Sliver ${platform.versionName}", SliverType.Meta,
+            Modifier.padding(top = SliverSpace.S6).combinedClickable(onClick = {}, onLongClick = { platform.seedDebugData() }),
             color = SliverColors.TextTertiary,
         )
     }

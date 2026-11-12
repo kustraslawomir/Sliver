@@ -10,6 +10,9 @@ interface SettingsPlatform {
     fun notificationsEnabled(): Boolean
     fun openNotificationSettings()
     val is24Hour: Boolean
+
+    /** Debug builds only: fills the app with synthetic clips (long-press on the version row). No-op in release. */
+    fun seedDebugData() {}
 }
 
 @Composable

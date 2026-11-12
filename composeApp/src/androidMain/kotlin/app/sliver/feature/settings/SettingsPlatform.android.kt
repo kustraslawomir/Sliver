@@ -23,6 +23,13 @@ private class AndroidSettingsPlatform(private val context: Context) : SettingsPl
         }
     }
 
+    override fun seedDebugData() {
+        if (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE == 0) return
+        context.sendBroadcast(
+            Intent("app.sliver.debug.SEED").setClassName(context.packageName, "app.sliver.debug.SeedReceiver"),
+        )
+    }
+
     override val is24Hour: Boolean get() = android.text.format.DateFormat.is24HourFormat(context)
 
     override fun sendFeedback(address: String, subject: String) {
