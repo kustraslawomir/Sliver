@@ -67,6 +67,13 @@
   <!-- top: close back to the project (home). No project / Today chips: the camera only films. -->
   <a href="ProjectHub.dc.html" aria-label="Close camera" style="position: absolute; left: 12px; top: 52px; width: 44px; height: 44px; border-radius: 22px; background: #0000008C; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
 
+  <!-- golden hour: only when coarse location was allowed; hidden otherwise, never asks twice -->
+  <sc-if value="{{ghShow}}" hint-placeholder-val="{{ true }}">
+    <span role="status" style="position: absolute; left: 64px; right: 112px; top: 52px; height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: Geist, sans-serif; font-size: 13px; font-weight: 500; color: {{ghColor}}; white-space: nowrap; visibility: {{idleVis}}">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 18h18M7 18a5 5 0 0 1 10 0M12 5v3M4.9 9.9l2.1 2.1M19.1 9.9L17 12"></path></svg>{{ghText}}
+    </span>
+  </sc-if>
+
   <!-- tools row, in thumb reach -->
   <div style="position: absolute; right: 12px; top: 52px; display: flex; gap: 8px; visibility: {{idleVis}}">
     <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
@@ -112,7 +119,7 @@
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"saved":{"editor":"boolean","default":false},"recording":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"golden":{"editor":"enum","options":["soon","now","off"],"default":"soon"},"saved":{"editor":"boolean","default":false},"recording":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { grid: false, timer: 0, flash: false, mode: 'video', front: false, flipDeg: 0, rec: !!(props && props.recording), sec: (props && props.recording) ? 3 : 0, f: null, fBig: false, fDim: false, lock: false }; }
   focusAt(e) {
@@ -142,6 +149,8 @@ class Component extends DCLogic {
       saved, hint: !saved && !rec, grid: st.grid,
       rec, videoIdle: video && !rec, photoIdle: !video && !rec, idleVis: rec ? 'hidden' : 'visible',
       startRec: () => this.startRec(),
+      ghShow: (this.props.golden || 'soon') !== 'off', ghColor: this.props.golden === 'now' ? '#FFC58A' : '#FFFFFFD9',
+      ghText: this.props.golden === 'now' ? 'Golden hour now · 24 min left' : 'Golden hour in 38 min',
       fDown: (e) => this.focusAt(e), fUp: () => this.focusUp(),
       focusOn: !!st.f && !rec, fx: st.f ? st.f.x.toFixed(0) : 0, fy: st.f ? st.f.y.toFixed(0) : 0, ly: st.f ? (st.f.y - 54).toFixed(0) : 0,
       fs: st.fBig ? 88 : 64, fm: st.fBig ? -44 : -32, locked: st.lock,

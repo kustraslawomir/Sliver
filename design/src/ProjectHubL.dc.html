@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ProjectHub light</title>
+<title>Project, light</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -96,16 +96,28 @@
           <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 27px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">2026</span>
           <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #6E6B64">129 clips · 2:09 of film</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 6px">
-          <sc-for list="{{year}}" as="r" hint-placeholder-count="12">
-            <button onClick="{{r.go}}" aria-label="{{r.label}}" style="height: 16px; display: flex; align-items: center; border: 0; background: transparent; padding: 0">
-              <span style="flex: 0 0 32px; text-align: left; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: {{r.color}}">{{r.n}}</span>
-              <span style="display: flex; gap: 2.3px">
-                <sc-for list="{{r.cells}}" as="y" hint-placeholder-count="31"><span style="width: 7.8px; height: 16px; box-sizing: border-box; border-radius: 2px; background: {{y.bg}}; border: {{y.border}}; visibility: {{y.vis}}"></span></sc-for>
-              </span>
-            </button>
-          </sc-for>
+        <!-- light of the year: one bar per day, height = how bright the clip is, colour = the clip -->
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-family: Geist, sans-serif; font-size: 14px; font-weight: 500; color: #141413">The light of your year</span>
+          <div style="position: relative; height: 180px">
+            <sc-for list="{{light}}" as="b" hint-placeholder-count="143">
+              <span onClick="{{b.pick}}" style="position: absolute; bottom: 0; left: {{b.x}}px; width: 1.9px; height: {{b.h}}px; border-radius: 1px; background: {{b.c}}; opacity: {{b.op}}"></span>
+            </sc-for>
+            <span style="position: absolute; left: {{selX}}px; top: -4px; bottom: -6px; width: 1.5px; background: #141413"></span>
+            <span style="position: absolute; left: {{todayX}}px; bottom: -3px; width: 6px; height: 6px; margin-left: -2px; border-radius: 3px; background: #FF8A3D"></span>
+          </div>
+          <div style="position: relative; height: 16px">
+            <sc-for list="{{lightMonths}}" as="m" hint-placeholder-count="6"><button onClick="{{m.go}}" style="position: absolute; left: {{m.x}}px; border: 0; background: transparent; padding: 0; font-family: Geist, sans-serif; font-size: 12px; color: #6E6B64">{{m.n}}</button></sc-for>
+          </div>
+          <span style="font-family: Geist, sans-serif; font-size: 12px; line-height: 1.4; color: #6E6B64">Taller = brighter clip. Colour = the clip itself. Tap a bar.</span>
         </div>
+        <a href="DayDetail.dc.html" style="display: flex; gap: 14px; align-items: center; text-decoration: none; color: #141413">
+          <span style="flex: 0 0 140px; height: 79px; border-radius: 8px; background: {{selBg}}"></span>
+          <span style="display: flex; flex-direction: column; gap: 4px; font-family: Geist, sans-serif">
+            <span style="font-size: 18px; font-weight: 600">{{selName}}</span>
+            <span style="font-size: 13px; line-height: 1.35; color: #6E6B64">{{selNote}}</span>
+          </span>
+        </a>
       </sc-if>
 
       <!-- memory -->
@@ -215,6 +227,28 @@ class Component extends DCLogic {
       }
       return { n: name, cells: cs, color: active ? '#4A4843' : '#A8A49B', label: MN[mi], go: () => { if (active) this.setState({ view: 'month', month: mi }); } };
     });
+    // light of the year
+    const LW = 350, N = TODAY - START + 1;
+    const lum = (n) => { const season = 1 - (n - START) / N * 0.5; const w = Math.sin(n * 1.7) * 0.17 + Math.sin(n * 0.37) * 0.12; return Math.min(1, Math.max(0.1, season * 0.82 + w)); };
+    const tone = ['#C9A27A', '#7F9FB4', '#93A878', '#C98E6E', '#B7B0A0', '#6A86A8', '#D6BE8A', '#8E80A0', '#B08A62', '#74906E'];
+    const sel = st.sel || doy(9, 10);
+    const light = [];
+    for (let n = START; n < TODAY; n++) {
+      const s = status(...(() => { let mm = 0, dd = n; while (dd > ML[mm]) { dd -= ML[mm]; mm++; } return [mm, dd]; })());
+      const x = ((n - START) * LW / N).toFixed(1);
+      if (s !== 'filled') { light.push({ x, h: 2, c: '#CFCAC0', op: 1, pick: () => {} }); continue; }
+      light.push({ x, h: Math.round(172 * lum(n)), c: tone[(n * 3 + (n >> 3)) % tone.length], op: n === sel ? 1 : 0.9, pick: () => this.setState({ sel: n }) });
+    }
+    const dOf = (n) => { let mm = 0, dd = n; while (dd > ML[mm]) { dd -= ML[mm]; mm++; } return [mm, dd]; };
+    const [sm, sd] = dOf(sel);
+    let best = START, bl = 0; for (let n = START; n < TODAY; n++) { const [a2, b2] = dOf(n); if (a2 === sm && status(a2, b2) === 'filled' && lum(n) > bl) { bl = lum(n); best = n; } }
+    const lightVals = {
+      light, selX: ((sel - START) * LW / N).toFixed(1), todayX: ((TODAY - START) * LW / N).toFixed(1),
+      lightMonths: [[6, 'Jul'], [7, 'Aug'], [8, 'Sep'], [9, 'Oct'], [10, 'Nov']].map((q) => ({ n: q[1], x: Math.max(0, (doy(q[0], 1) - START) * LW / N).toFixed(1), go: () => this.setState({ view: 'month', month: q[0] }) })),
+      selBg: 'linear-gradient(160deg, ' + tone[(sel * 3 + (sel >> 3)) % tone.length] + ', #0C0B0A)',
+      selName: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][wdOf(sm, sd)] + ' ' + sd + ' ' + MN[sm],
+      selNote: sel === best ? 'The brightest day of ' + MN[sm] : 'Day ' + (sel - START + 1) + ' of this project'
+    };
     const seg = (on) => ({ line: on ? '#141413' : 'transparent', color: on ? '#141413' : '#6E6B64', on: String(on) });
     return {
       views: [['month', 'Month'], ['year', 'Year']].map((v) => Object.assign({ n: v[1], pick: () => this.setState({ view: v[0] }) }, seg(st.view === v[0]))),
@@ -222,7 +256,7 @@ class Component extends DCLogic {
       prev: () => { if (m > 5) this.setState({ month: m - 1 }); }, next: () => { if (m < 10) this.setState({ month: m + 1 }); },
       prevColor: m > 5 ? '#141413' : '#CFCAC0', nextColor: m < 10 ? '#141413' : '#CFCAC0',
       total: st.saved ? 130 : 129, todayOpen: !st.saved, todayDone: st.saved,
-      monthName: MN[m], monthCount: count, cells, year,
+      monthName: MN[m], monthCount: count, cells, year, ...lightVals,
       nudge: st.nudge, dismissNudge: () => this.setState({ nudge: false }),
       menu: st.menu, menuStr: String(st.menu), menuBg: st.menu ? '#ECE8E0' : 'transparent',
       toggleMenu: () => this.setState({ menu: !st.menu }),
