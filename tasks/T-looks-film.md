@@ -66,3 +66,67 @@ Owner won't make reference pairs, and we must not sample other apps' filters. In
   bright points) × each filter in 3 labelled variants (A/B/C differing in temperature, black level and grain).
 - Output `docs/qa/looks-film/sheet.png` (one image, readable on a phone). The owner answers e.g.
   "Dark B, more grain, Disposable warmer"; the chosen variant's params become the preset.
+
+## 6. Big candidate pool (owner: "plan a lot, I'll throw away ~99%")
+Build a parametric look model (LUT generated from: white balance shift, per-channel tone curves, black lift,
+shoulder roll-off, saturation per hue band, shadow/highlight tint, B&W channel mix) + shader params (grain
+size/amount/chroma, halation, bloom, vignette, flash falloff, softness, weave, leak probability). Each
+candidate is just a parameter set in `looks/candidates.json`, so adding/removing one costs nothing.
+Names in the app are OUR OWN; film-stock names below are only internal notes describing the general,
+publicly known character of that kind of film (never shown in UI, never used as filter names).
+
+Colour negative, consumer (cheap, warm, punchy):
+1. Kiosk 400 — consumer 400 colour neg: warm yellow-orange, punchy reds, cyan shadows, visible grain.
+2. Kiosk 200 — consumer 200 "gold" style: warmer, golden skin, softer grain.
+3. Plus 200 — budget 200: lower saturation, slightly muddy greens, warm cast, coarse grain.
+4. Superstore — Japanese consumer 400 feel: cooler greens, magenta-ish skin, green-cyan shadows.
+5. Corner 100 — budget 100/200 with green-teal shadows and pastel highlights.
+Colour negative, pro (clean, skin-friendly):
+6. Sunday 160 — soft portrait neg: low contrast, gentle peach skin, pastel.
+7. Sunday 400 — portrait 400: a bit more contrast and warmth, fine grain.
+8. Vivid 100 — fine-grain landscape neg: saturated, crisp, deep blues.
+9. Studio 400 — cool-neutral pro neg: minty greens, soft magenta.
+Cinema / tungsten:
+10. Afterhours — tungsten night stock: blue shadows, red halation around lights, medium grain.
+11. Afterhours Warm — same, white balance corrected warmer for streetlights.
+12. Reel 250 — daylight cinema neg: low contrast, wide latitude, filmic roll-off.
+13. Bleach — bleach-bypass: desaturated, high contrast, silvery highlights.
+Slide film (reversal):
+14. Slide 100 — vivid transparency: high saturation, deep blacks, punchy blues.
+15. Cross — cross-processed slide: yellow-green highlights, cyan shadows, high contrast.
+16. Slide Fade — expired slide: magenta shift, faded blacks.
+Expired / lo-fi:
+17. Expired 03 — expired colour neg: colour shifts toward magenta/brown, raised blacks, heavy grain.
+18. Attic — very old print: yellowed, low contrast, soft.
+19. Leak — strong light leaks + warm shift.
+20. Kiosk Flash — disposable with strong on-camera flash falloff and red-eye-warm skin.
+21. Kiosk Night — disposable at night without flash: underexposed, green cast, huge grain.
+22. Toy — plastic toy camera: heavy vignette, soft edges, saturated, colour fringing.
+Black & white:
+23. Silver 400 — classic grainy B&W 400: punchy contrast, coarse grain.
+24. Silver 100 — fine-grain B&W: smooth mid-tones, gentle contrast.
+25. Silver 3200 — pushed high-ISO B&W: crushed blacks, huge grain.
+26. Silver Soft — matte B&W with lifted blacks.
+27. Sepia — warm toned B&W.
+28. Cyan — cyanotype-like blue toned B&W.
+Video eras:
+29. Tape — VHS camcorder (evolves VHS 94).
+30. Hi8 — sharper camcorder, cool, interlace-ish weave.
+31. DV 2004 — early digital camcorder: over-sharpened, cool, clipped highlights.
+32. Webcam — low-light early webcam: noisy, green-yellow.
+Moods:
+33. Afterhours Dark — low-key city night, teal-green shadows, crushed blacks.
+34. Halo — dreamy bloom on lights.
+35. Fog — milky haze, low contrast, cool.
+36. Golden — warm late-sun push, orange highlights.
+37. Winter — cold blue, desaturated, bright.
+38. Noir Tint — B&W with deep teal shadows.
+39. Neon — boosted magentas/cyans for night city lights.
+40. Plain — Natural: no colour change, grain only.
+
+## 7. Overnight deliverable for the owner
+- All 40 candidates as parameter sets, rendered by `tools/looks/sheet` (JVM test or Gradle task, no Python
+  deps — numpy/PIL are not installed) on synthetic test frames AND on seeded demo clips: one contact sheet
+  per family + one overview sheet, in `docs/qa/looks-film/` (scratchpad if the classifier blocks images).
+- Each tile labelled with its number + our name, so the owner can answer "keep 1, 10, 23, 33".
+- Only the kept ones become presets in the Film builder; the rest stay in candidates.json (not shown).
