@@ -322,24 +322,18 @@ private fun HubButton(icon: ImageVector, label: String, onClick: () -> Unit, tin
 @Composable
 private fun ViewRow(yearView: Boolean, onYear: (Boolean) -> Unit, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(
-            Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface1)
-                .border(1.dp, SliverColors.LineHairline, SliverShapes.Pill).padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             listOf("Month" to false, "Year" to true).forEach { (label, isYear) ->
                 val on = yearView == isYear
-                Box(
-                    Modifier.height(32.dp).clip(RoundedCornerShape16)
-                        .background(if (on) SliverColors.TextPrimary else Color.Transparent)
-                        .semantics { selected = on; role = Role.Tab }
-                        .clickable(onClick = { onYear(isYear) }).padding(horizontal = 16.dp),
-                    Alignment.Center,
+                Column(
+                    Modifier.semantics { selected = on; role = Role.Tab }.clickable(onClick = { onYear(isYear) }),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     SliverText(
-                        label, SliverType.BodySmall.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium, lineHeight = 18.sp),
-                        color = if (on) SliverColors.OnAccent else SliverColors.TextTertiary,
+                        label, SliverType.Headline.copy(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
+                        Modifier.padding(vertical = 8.dp), if (on) SliverColors.TextPrimary else SliverColors.TextTertiary,
                     )
+                    Box(Modifier.height(2.dp).fillMaxWidth().background(if (on) SliverColors.TextPrimary else Color.Transparent))
                 }
             }
         }
@@ -351,8 +345,6 @@ private fun ViewRow(yearView: Boolean, onYear: (Boolean) -> Unit, canPrev: Boole
         }
     }
 }
-
-private val RoundedCornerShape16 = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
 
 @Composable
 private fun NavArrow(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit) {
