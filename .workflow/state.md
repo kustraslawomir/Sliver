@@ -39,3 +39,4 @@
 - [x] F05 (no tab bar, AppNavigator, flow origin + toast on destination, discard sheet, SavedStateHandle, deep-link stacks; not device-verified)
 - [x] pixel-perfect pack (8): byte-identical to applied design/tools/brand/android-res; no new tasks (checked 2026-11-12)
 - [x] Camera zoom stops (0.6/1/2/3 + pinch) + 4K/bitrate/stabilization + 16 Mbps day encode (Samsung not device-tested, see HANDOFF)
+- [~] T-design-v1.3 (b947cf6: player icons, no date overlay, poster thumb, demo label; open items in HANDOFF T-design-v1.3)
