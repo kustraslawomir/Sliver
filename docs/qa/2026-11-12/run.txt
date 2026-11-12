@@ -1,0 +1,3 @@
+device: xiaomi (b798509a)
+date: 2026-11-12
+duration: 584s

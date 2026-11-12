@@ -47,3 +47,4 @@
 - [x] T-auto-6 (tokens.json codegen, see HANDOFF)
 - T-auto-4: DONE (Roborazzi goldens for 16 screens + tools/design-report.py; see HANDOFF.md section T-auto-4)
 - T-film-whole-project: see HANDOFF.md section T-film-whole-project
+- T-auto-2: DONE (scripts/qa.sh + qa/flows, no Maestro; Xiaomi run green; see HANDOFF.md section T-auto-2)
