@@ -1,5 +1,9 @@
 package app.sliver.feature.camera
 
+import androidx.compose.ui.platform.LocalInspectionMode
+import app.sliver.core.theme.SliverColors
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import app.sliver.core.log.logDebug
 import android.annotation.SuppressLint
 import android.content.ContentUris
@@ -274,6 +278,12 @@ actual fun CameraPreview(
     modifier: Modifier,
     onReady: () -> Unit,
 ) {
+    if (LocalInspectionMode.current) {
+        // Screenshot tests have no camera: a flat placeholder stands in for the live preview.
+        Box(modifier.background(SliverColors.Surface3))
+        LaunchedEffect(Unit) { onReady() }
+        return
+    }
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     val view = remember {

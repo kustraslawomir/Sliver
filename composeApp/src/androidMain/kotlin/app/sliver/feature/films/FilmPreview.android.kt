@@ -1,5 +1,9 @@
 package app.sliver.feature.films
 
+import app.sliver.core.theme.SliverColors
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import app.sliver.core.ui.rememberAppVisible
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +45,10 @@ actual fun FilmPreview(
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
 ) {
+    if (LocalInspectionMode.current) {
+        Box(modifier.background(SliverColors.Surface3))
+        return
+    }
     val context = LocalContext.current
     val video = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ALL } }
     val music = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ALL } }

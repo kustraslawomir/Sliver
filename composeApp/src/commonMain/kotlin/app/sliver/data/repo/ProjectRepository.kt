@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
 
 interface ProjectRepository {
     val projects: Flow<List<Project>>
@@ -67,7 +66,7 @@ class ProjectRepositoryImpl(
 
     private suspend fun ensureDefault() {
         if (dao.count() > 0) return
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val today = app.sliver.core.time.todayLocal()
         create("My ${today.year}", settings.settings.first().newFilmFormat, today)
     }
 

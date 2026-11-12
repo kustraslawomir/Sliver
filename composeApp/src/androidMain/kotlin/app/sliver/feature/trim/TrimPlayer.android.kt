@@ -1,5 +1,11 @@
 package app.sliver.feature.trim
 
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.Image
+import app.sliver.core.theme.SliverColors
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import app.sliver.core.ui.rememberAppVisible
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -35,6 +41,13 @@ actual fun TrimPlayer(
     scrubMs: Long?,
     onAspect: (Float) -> Unit,
 ) {
+    if (LocalInspectionMode.current) {
+        // Screenshot tests have no decoder: show the still instead of a playing video.
+        val still = rememberPhoto(path)
+        LaunchedEffect(path) { onAspect(9f / 16f) }
+        if (still != null) Image(still, null, modifier, contentScale = ContentScale.Crop) else Box(modifier.background(SliverColors.Surface3))
+        return
+    }
     val context = LocalContext.current
     val player = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ONE } }
     val reportAspect = rememberUpdatedState(onAspect)

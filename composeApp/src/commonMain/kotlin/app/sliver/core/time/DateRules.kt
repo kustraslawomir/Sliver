@@ -15,7 +15,7 @@ import kotlinx.datetime.toLocalDateTime
 fun Instant.toLocalDate(zone: TimeZone = TimeZone.currentSystemDefault()): LocalDate =
     toLocalDateTime(zone).date
 
-fun todayLocal(clock: Clock = Clock.System, zone: TimeZone = TimeZone.currentSystemDefault()): LocalDate =
+fun todayLocal(clock: Clock = AppClock, zone: TimeZone = TimeZone.currentSystemDefault()): LocalDate =
     clock.now().toLocalDate(zone)
 
 fun LocalDate.startOfDay(zone: TimeZone = TimeZone.currentSystemDefault()): Instant = atStartOfDayIn(zone)

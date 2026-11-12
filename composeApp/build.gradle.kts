@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.roborazzi)
 }
 
 val googleWebClientId: String = rootProject.file("local.properties").takeIf { it.exists() }
@@ -175,11 +176,15 @@ kotlin {
         getByName("androidUnitTest").dependencies {
             implementation(libs.robolectric)
             implementation(libs.androidx.test.core)
+            implementation(libs.roborazzi)
+            implementation(libs.roborazzi.compose)
+            implementation(libs.compose.ui.test.junit4)
         }
     }
 }
 
 dependencies {
+    debugImplementation(libs.compose.ui.test.manifest)
     add("kspAndroid", libs.room.compiler)
     add("kspIosArm64", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)
@@ -224,3 +229,10 @@ val designLint by tasks.registering(Exec::class) {
     commandLine("bash", "scripts/design-lint.sh")
 }
 tasks.matching { it.name == "check" }.configureEach { dependsOn(designLint) }
+
+val designReport by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Scores Roborazzi goldens against design/png (warnings only)"
+    workingDir = rootDir
+    commandLine("python3", "tools/design-report.py")
+}
