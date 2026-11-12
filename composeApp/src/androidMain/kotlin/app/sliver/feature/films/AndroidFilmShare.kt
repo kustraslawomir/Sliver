@@ -22,6 +22,8 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
         context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
+    override fun sizeBytes(path: String): Long = File(path).length()
+
     override suspend fun saveToPhotos(path: String, name: String): Boolean = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val values = ContentValues().apply {

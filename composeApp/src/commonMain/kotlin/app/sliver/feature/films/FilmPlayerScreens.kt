@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
@@ -205,6 +206,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         return
     }
     val plan = remember(f, days) { f.plan(days) }
+    val info = remember(path) { filmInfoLine(share.sizeBytes(path)) }
     val (pos, dur) = position
     val total = dur.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
     val ticks = remember(plan, dur) { playerTicks(plan, dur) }
@@ -286,6 +288,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
             }
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
+            SliverText(info, SliverType.Meta.copy(fontSize = 10.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.fillMaxWidth(), color = SliverColors.TextDisabled)
         }
     }
 }

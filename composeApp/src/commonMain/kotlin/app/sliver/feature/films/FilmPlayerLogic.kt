@@ -40,4 +40,12 @@ interface FilmShare {
 
     /** Copies the film into the shared Movies collection; true when it was saved. */
     suspend fun saveToPhotos(path: String, name: String): Boolean
+
+    fun sizeBytes(path: String): Long
+}
+
+/** One-line file info under the player actions (design/src/FilmPlayer.dc.html). Both formats render at 1080p. */
+fun filmInfoLine(sizeBytes: Long): String {
+    val mb = ((sizeBytes + 500_000) / 1_000_000).coerceAtLeast(1)
+    return "MP4 · 1080p · 30 fps · $mb MB · kept in SLIVER"
 }

@@ -1,6 +1,7 @@
 package app.sliver
 
 import app.sliver.feature.films.dayIndexAtMs
+import app.sliver.feature.films.filmInfoLine
 import app.sliver.feature.films.slitFraction
 import app.sliver.feature.films.titleAlpha
 import kotlin.test.Test
@@ -30,5 +31,11 @@ class FilmPlayerLogicTest {
         assertEquals(1, dayIndexAtMs(1000, 3))
         assertEquals(2, dayIndexAtMs(9000, 3))
         assertEquals(0, dayIndexAtMs(500, 0))
+    }
+
+    @Test
+    fun infoLineRoundsMegabytes() {
+        assertEquals("MP4 · 1080p · 30 fps · 9 MB · kept in SLIVER", filmInfoLine(9_400_000))
+        assertEquals("MP4 · 1080p · 30 fps · 1 MB · kept in SLIVER", filmInfoLine(0))
     }
 }
