@@ -166,6 +166,7 @@ class DataLayerTest {
         assertEquals(LookPreset.NATURAL, s.defaultLook)
         assertEquals(FilmFormat.CINEMA, s.newFilmFormat)
         assertEquals(true, s.dateStamp)
+        assertEquals(app.sliver.data.settings.Appearance.SYSTEM, s.appearance)
         assertEquals(false, s.saveFullRecordings)
         assertEquals(LocalTime(19, 30), s.reminder.time)
         assertEquals(List(7) { true }, s.reminder.days)
@@ -177,11 +178,13 @@ class DataLayerTest {
         repo.update {
             it.copy(
                 firstDay = LocalDate.parse("2026-01-01"),
+                appearance = app.sliver.data.settings.Appearance.LIGHT,
                 reminder = it.reminder.copy(mode = ReminderMode.RANDOM, days = List(7) { i -> i < 5 }),
             )
         }
         val u = repo.settings.first()
         assertEquals(ReminderMode.RANDOM, u.reminder.mode)
+        assertEquals(app.sliver.data.settings.Appearance.LIGHT, u.appearance)
         assertEquals(List(7) { i -> i < 5 }, u.reminder.days)
         assertEquals(LocalDate.parse("2026-01-01"), u.firstDay)
     }

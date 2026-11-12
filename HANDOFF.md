@@ -217,3 +217,24 @@ Device: Samsung (1080x2340 @420dpi). Shots in docs/qa/project/ (clip cells maske
 - Camera: ProjectsSheet/menu sheet were declared before the controls Column, so controls drew on top. Moved overlays to the end of the root Box. Other screens (Project, Day, Trim, Backup, Export) already declare sheets last; sheets already pad for nav bar via safeDrawing.
 - Verified on Samsung with uiautomator: with the Projects sheet open only sheet nodes exist, PHOTO/VIDEO/FLIP/ADD are not exposed (blocked). No screenshots stored.
 - Preview: explicit Preview targetRotation = display rotation, PreviewView COMPATIBLE (TextureView) mode. Root cause of the sideways viewfinder was not reproduced (phone was face-down, dark scene); DECISION: made rotation explicit. Capture rotation unchanged (set at record/photo time from device orientation). Owner to confirm upright preview.
+
+## v1.3
+Part A (done earlier)
+- [x] 1 Home first: Project screen is root, no back arrow, fixed 72dp Record today / outlined check Done for today; deep links still open camera; docs/NAVIGATION.md updated.
+- [x] 2 Camera is a full-screen modal: X closes, Light + Grid menu only, no project/Today chips; save returns to home with the cell pop.
+- [x] 3 Photo/Video plain words with 4dp dot. [x] 4 Add and Flip identical 52dp controls, Add is an icon.
+- [x] 5 Single-layer record glow per tokens. [x] 6 Month/Year text tabs with 2dp underline.
+
+Part B
+- [x] 7 No Geist Mono or uppercase labels: SliverType.MonoS/MonoL replaced by Meta/Num (Geist, tnum); labels sentence-cased (Clip OK, Archived, month/weekday names, meta lines). Mono + uppercase kept only as SliverType.Stamp for the burned-in date stamp and the in-app stamp previews. The exported end card text "A FILM BY YOU" (AndroidFilmRender, burned into video) was left unchanged.
+- [x] 8 includeFontPadding=false + LineHeightStyle(Center, Trim.Both) set once in SliverType.Base; no per-component compensation existed to remove.
+- [x] 9 "Default film format" is a normal row that expands to a choice (Cinema 16:9 / Story 9:16); Settings > Appearance > Theme (System/Light/Dark) persisted in DataStore (key appearance).
+- [x] 10 SliverColors has dark (themeDarkMap) and light (themeLight) palettes; AccentText = emberOnLight in light; Glow returns no layers in light; status/nav bar icons follow the theme (SystemBarsEffect). Hard-coded Colors moved to tokens (CellEmpty, CellEmptyLine, PosterTints, Media/OnMedia). Intentionally left: Color(day.color) data colors, SliverIcons mask Black, Android export/notification colors.
+- [x] 11 Build, unit tests and lint green; settings round-trip test covers appearance.
+
+DECISIONS
+- Dark-in-both-themes is per route (Camera, Trim, PhotoTrim, Export, Premiere, FilmPlayer, YearInClips), set from the nav back stack. So the whole Edit clip screen stays dark, not only its preview area (board EditClipV2L has a light chrome around the dark preview). During a route transition the outgoing screen briefly takes the new palette.
+- Surface2/Surface3 map to themeLight surface2 / line; Success/Warning in light are my darker picks (tokens give none).
+- Choice rows expand inline instead of a sheet.
+
+Not verified on device: the phone was not unlocked, so no on-device or screenshot check of the light theme, centering of chips/buttons, Settings Appearance row or status bar icon colors. Light boards (ProjectHubL, DayDetailL, ProjectsV2L, SettingsL, EditClipV2L) were not compared pixel by pixel.
