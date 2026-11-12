@@ -14,7 +14,7 @@
 | Archive | (merged into **Project** screen) | |
 | Films tab | (inside Project screen, "Films" section) | |
 | FOR: 2026 · CINEMA 16:9 v | project chip "My 2026 · 16:9 ▾" with a real chevron icon | |
-| Replace day | Replace clip | |
+| Replace day | Replace (button on Clip detail; TalkBack says "Replace clip") | Short label: three buttons share one row |
 | SND | sound icon (muted / unmuted) | |
 
 Rename in strings, code identifiers you touch, analytics-free logs. Don't rename DB columns in this task — map in code.

@@ -170,7 +170,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     SecondaryButton("Share", { shareOpen = true }, Modifier.weight(1f), enabled = day != null)
-                    SecondaryButton("Replace clip", { replace(current) }, Modifier.weight(1f))
+                    SecondaryButton("Replace", { replace(current) }, Modifier.weight(1f))
                     GhostButton("Remove", { day?.let(::remove) }, Modifier.weight(1f), destructive = true, enabled = day != null)
                 }
             }
