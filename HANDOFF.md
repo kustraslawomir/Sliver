@@ -258,3 +258,6 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 
 ## Backup per project
 - BackupEngine backs up every non-archived project into `SLIVER/<name>` (`<name> (<first 4 of id>)` on name collisions). Folders are matched by the projectId in their manifest, so a rename renames the folder; manifest-less legacy folders are adopted by name.
+
+## Filters cleanup
+- Removed unreachable `LookSession`, `LooksLogic` (AdjustTool), `LookRenderer` and the Trim/PhotoTrim resume/applied-look plumbing. DB `look` columns and stored data untouched. To restore Filters, use git history before commit a78807d (plus this cleanup commit's parent).

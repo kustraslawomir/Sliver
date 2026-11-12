@@ -87,7 +87,6 @@ import app.sliver.core.ui.StripDim
 import app.sliver.data.DaySource
 import app.sliver.data.LookParams
 import app.sliver.data.toParams
-import app.sliver.feature.looks.LookSession
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
@@ -132,27 +131,25 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val today = remember { todayLocal() }
     val saved by remember { settings.settings }.collectAsState(null)
 
-    val resume = remember { LookSession.takeResume() }
     val restoredMs = remember { savedState.get<Long>(KEY_START_MS) }
     val navigator = LocalNavigator.current
-    var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
 
     var durationMs by remember { mutableStateOf<Long?>(null) }
     var thumbs by remember { mutableStateOf<List<ImageBitmap>>(emptyList()) }
-    var startMs by remember { mutableStateOf(resume?.startMs ?: restoredMs ?: 0L) }
-    var committedMs by remember { mutableStateOf(resume?.startMs ?: restoredMs ?: 0L) }
-    var custom by remember { mutableStateOf(resume?.custom ?: false) }
+    var startMs by remember { mutableStateOf(restoredMs ?: 0L) }
+    var committedMs by remember { mutableStateOf(restoredMs ?: 0L) }
+    var custom by remember { mutableStateOf(false) }
     var dragging by remember { mutableStateOf(false) }
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
     val speed = 1f
-    var keepAudio by remember { mutableStateOf(resume?.audio ?: true) }
+    var keepAudio by remember { mutableStateOf(true) }
     var previewSound by remember { mutableStateOf(false) }
     var soundTouched by remember { mutableStateOf(false) }
     var info by remember { mutableStateOf("") }
     var ready by remember { mutableStateOf(false) }
     var thumbsTotal by remember { mutableStateOf(1) }
-    var shortMode by remember { mutableStateOf(resume?.shortMode ?: ShortMode.SLOW_TO_FIT) }
-    val day = remember { resume?.day ?: CaptureSession.forDate ?: today }
+    var shortMode by remember { mutableStateOf(ShortMode.SLOW_TO_FIT) }
+    val day = remember { CaptureSession.forDate ?: today }
     val daySource = remember { CaptureSession.source }
     var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var clipAspect by remember { mutableStateOf(1f) }
@@ -174,7 +171,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         val motion = CaptureSession.motion
         CaptureSession.motion = false
         ready = true
-        if (resume == null && restoredMs == null) {
+        if (restoredMs == null) {
             if (motion) {
                 MotionPhoto.windowStartMs(CaptureSession.motionPresentationUs, d).let { startMs = it; committedMs = it }
             } else {
@@ -289,7 +286,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     )
                 } else if (duration != null) {
                     ClipPlayer(
-                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging, look ?: LookParams(),
+                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging, LookParams(),
                     ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
                     if (!soundTouched) {
                         SliverText(

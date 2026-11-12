@@ -53,8 +53,6 @@ import app.sliver.data.DaySource
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
 import app.sliver.data.toParams
-import app.sliver.feature.looks.LookSession
-import app.sliver.feature.looks.rememberLookRenderer
 import app.sliver.data.export.PhotoMotion
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.files.FileStore
@@ -68,7 +66,6 @@ import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
 
-private const val PHOTO_EDGE = 1080
 
 /** Decodes a downsampled bitmap of the still at [path] (file path or content URI). */
 @Composable
@@ -88,19 +85,12 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val settings = remember { koin.get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
     val today = remember { todayLocal() }
-    val resume = remember { LookSession.takeResume() }
-    val day = remember { resume?.day ?: CaptureSession.forDate ?: today }
-    var motion by remember { mutableStateOf(resume?.motion ?: Motion.STILL) }
-    var look by remember { mutableStateOf(LookSession.takeApplied() ?: LookSession.params.takeIf { resume != null }) }
+    val day = remember { CaptureSession.forDate ?: today }
+    var motion by remember { mutableStateOf(Motion.STILL) }
     var saving by remember { mutableStateOf(false) }
     val project by remember { projects.active }.collectAsState(null)
     var done by remember { mutableStateOf(false) }
-    val rawPhoto = rememberPhoto(path)
-    val renderer = rememberLookRenderer()
-    val photo by produceState(rawPhoto, rawPhoto, look) {
-        val p = rawPhoto
-        value = if (p == null || look == null || look == LookParams()) p else renderer.render(p, look!!, PHOTO_EDGE)
-    }
+    val photo = rememberPhoto(path)
 
 
     DisposableEffect(Unit) {
