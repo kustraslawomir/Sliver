@@ -10,7 +10,7 @@
 <helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=Geist+Mono:wght@400;500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
 <style>body{margin:0}
-@keyframes sv-breathe{0%,100%{box-shadow:0 0 12px #FF8A3D4D}50%{box-shadow:0 0 18px #FF8A3D73}}
+@keyframes sv-breathe{0%,100%{opacity:1}50%{opacity:.78}}
 .sv-breathe{animation:sv-breathe 1600ms ease-in-out infinite}
 @media (prefers-reduced-motion: reduce){.sv-breathe{animation:none}}</style>
 </helmet>
@@ -39,7 +39,7 @@
         <span style="position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 2px; background: {{fColor}}"></span>
       </div>
       <sc-if value="{{locked}}" hint-placeholder-val="{{ false }}">
-        <span style="position: absolute; left: {{fx}}px; top: {{ly}}px; transform: translateX(-50%); height: 24px; padding: 0 10px; border-radius: 12px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 500; white-space: nowrap; pointer-events: none">AE/AF LOCK</span>
+        <span style="position: absolute; left: {{fx}}px; top: {{ly}}px; transform: translateX(-50%); height: 24px; padding: 0 10px; border-radius: 12px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 500; white-space: nowrap; pointer-events: none">AE/AF LOCK</span>
       </sc-if>
     </sc-if>
   </div>
@@ -56,7 +56,7 @@
   <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 0; right: 0; top: 182px; display: flex; justify-content: center">
       <span role="timer" aria-label="{{recAria}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: #050505B3; border: 1px solid {{recBorder}}; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.06em; color: {{recColor}}; transition: color 200ms, border-color 200ms">
-        <span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D"></span>{{recTime}}<span style="font-size: 10px; letter-spacing: 0.12em; visibility: {{okVis}}">· CLIP OK</span>
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #FF3B30"></span>{{recTime}}<span style="font-size: 10px; letter-spacing: 0.12em; visibility: {{okVis}}">· CLIP OK</span>
       </span>
     </div>
   </sc-if>
@@ -103,13 +103,13 @@
     </a>
     <!-- record button: option D "Ember" -->
     <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: 0 0 12px #FF8A3D4D"></span></button>
+      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; box-shadow: none"></span></button>
     </sc-if>
     <sc-if value="{{photoIdle}}" hint-placeholder-val="{{ false }}">
       <a href="EditClipV2.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #EDEDE8; box-shadow: 0 0 16px #FFFFFF33"></span></a>
     </sc-if>
     <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
-      <a href="EditClipV2.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="sv-breathe" style="width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B"></span></span></a>
+      <a href="EditClipV2.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="sv-breathe" style="width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B"></span></span></a>
     </sc-if>
     <button onClick="{{flip}}" aria-label="Switch camera" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: #EDEDE8">
       <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center; transform: rotate({{flipDeg}}deg); transition: transform 240ms ease"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></span>
@@ -149,21 +149,21 @@ class Component extends DCLogic {
       saved, hint: !saved && !rec, grid: st.grid,
       rec, videoIdle: video && !rec, photoIdle: !video && !rec, idleVis: rec ? 'hidden' : 'visible',
       startRec: () => this.startRec(),
-      ghShow: (this.props.golden || 'soon') !== 'off', ghColor: this.props.golden === 'now' ? '#FFC58A' : '#FFFFFFD9',
+      ghShow: (this.props.golden || 'soon') !== 'off', ghColor: this.props.golden === 'now' ? '#EDEDE8' : '#FFFFFFD9',
       ghText: this.props.golden === 'now' ? 'Golden hour now · 24 min left' : 'Golden hour in 38 min',
       fDown: (e) => this.focusAt(e), fUp: () => this.focusUp(),
       focusOn: !!st.f && !rec, fx: st.f ? st.f.x.toFixed(0) : 0, fy: st.f ? st.f.y.toFixed(0) : 0, ly: st.f ? (st.f.y - 54).toFixed(0) : 0,
       fs: st.fBig ? 88 : 64, fm: st.fBig ? -44 : -32, locked: st.lock,
-      fColor: st.lock ? '#FF8A3D' : '#FFFFFF', fGlow: st.lock ? '0 0 10px #FF8A3D99' : '0 0 6px #00000066', fOp: st.fDim && !st.lock ? 0.35 : 1,
+      fColor: st.lock ? '#EDEDE8' : '#FFFFFF', fGlow: st.lock ? 'none' : '0 0 6px #00000066', fOp: st.fDim && !st.lock ? 0.35 : 1,
       calAria: (saved ? 'Today has a clip. ' : '') + 'Open the calendar of this project',
-      recTime: '0:' + String(st.sec).padStart(2, '0'), recColor: ok ? '#FF8A3D' : '#B9B9B3', recBorder: ok ? '#FF8A3D66' : '#3A3A40', okVis: ok ? 'visible' : 'hidden',
+      recTime: '0:' + String(st.sec).padStart(2, '0'), recColor: ok ? '#FF3B30' : '#B9B9B3', recBorder: ok ? '#FF3B3066' : '#3A3A40', okVis: ok ? 'visible' : 'hidden',
       recAria: 'Recording, ' + st.sec + ' seconds' + (ok ? ', clip is long enough' : ''),
       tools: [
-        { n: st.flash ? 'Light on' : 'Light', on: String(st.flash), color: st.flash ? '#FF8A3D' : '#EDEDE8', tap: () => this.setState({ flash: !st.flash }), icon: 'M13 3L5 14h6l-1 7 8-11h-6l1-7z' },
+        { n: st.flash ? 'Light on' : 'Light', on: String(st.flash), color: st.flash ? '#EDEDE8' : '#EDEDE8', tap: () => this.setState({ flash: !st.flash }), icon: 'M13 3L5 14h6l-1 7 8-11h-6l1-7z' },
         { n: 'More', on: String(st.more), color: '#EDEDE8', tap: () => this.setState({ more: !st.more }), icon: 'M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' }
       ],
       more: !!st.more && !rec, toggleMore: () => this.setState({ more: false }),
-      toggleGrid: () => this.setState({ grid: !st.grid, more: false }), gridStr: String(st.grid), gridState: st.grid ? 'ON' : 'OFF', gridColor: st.grid ? '#FF8A3D' : '#8E8E88',
+      toggleGrid: () => this.setState({ grid: !st.grid, more: false }), gridStr: String(st.grid), gridState: st.grid ? 'ON' : 'OFF', gridColor: st.grid ? '#EDEDE8' : '#8E8E88',
       setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
       photoOn: String(!video), photoColor: video ? '#FFFFFF99' : '#FFFFFF', photoDot: video ? 'transparent' : '#FFFFFF',
       videoOn: String(video), videoColor: video ? '#FFFFFF' : '#FFFFFF99', videoDot: video ? '#FFFFFF' : 'transparent',

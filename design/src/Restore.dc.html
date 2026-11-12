@@ -14,7 +14,7 @@
 <div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
 
   <sc-if value="{{isSignin}}" hint-placeholder-val="{{ true }}">
-    <div style="position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center"><span aria-hidden="true" style="width: 3px; height: 120px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 12px #FF8A3D, 0 0 40px #FF8A3D"></span></div>
+    <div style="position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center"><span aria-hidden="true" style="width: 3px; height: 120px; border-radius: 2px; background: #FFFFFF; box-shadow: none"></span></div>
     <h1 style="position: absolute; left: 24px; right: 24px; top: 330px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">Welcome back.</h1>
     <p style="position: absolute; left: 24px; right: 24px; top: 392px; margin: 0; font-size: 16px; line-height: 1.5; color: #B9B9B3">New phone? Sign in and we'll look for your clips in your Google Drive.</p>
     <div style="position: absolute; left: 20px; right: 20px; top: 560px; display: flex; flex-direction: column; gap: 10px">
@@ -33,7 +33,7 @@
       <div style="height: 50px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #1F1F22; border-bottom: 1px solid #1F1F22"><span style="color: #B9B9B3">Films</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px">4 · RE-RENDERED ON THIS PHONE</span></div>
     </div>
     <p style="position: absolute; left: 24px; right: 24px; top: 540px; margin: 0; font-size: 14px; line-height: 1.5; color: #8E8E88">Restoring uses Wi-Fi when it can. You can start using the camera straight away — today's clip won't wait for the restore.</p>
-    <button onClick="{{start}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Restore all</button>
+    <button onClick="{{start}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Restore all</button>
     <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 780px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">Not now</a>
   </sc-if>
 
@@ -52,9 +52,9 @@
         </div>
       </sc-for>
     </div>
-    <div style="position: absolute; left: 20px; right: 20px; top: 560px; height: 3px; border-radius: 2px; background: #26262A"><div style="height: 3px; border-radius: 2px; width: {{pct}}%; background: #FF8A3D"></div></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 560px; height: 3px; border-radius: 2px; background: #26262A"><div style="height: 3px; border-radius: 2px; width: {{pct}}%; background: #EDEDE8"></div></div>
     <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
-      <a href="ProjectHub.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Open your archive</a>
+      <a href="ProjectHub.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Open your archive</a>
     </sc-if>
     <sc-if value="{{notDone}}" hint-placeholder-val="{{ true }}">
       <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; border: 1px solid #3A3A40; color: #EDEDE8; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 500; font-size: 17px">Use the camera meanwhile</a>

@@ -38,7 +38,7 @@
       </sc-for>
     </div>
     
-    <button onClick="{{scan}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Scan my library</button>
+    <button onClick="{{scan}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Scan my library</button>
     <span style="position: absolute; left: 20px; right: 20px; top: 786px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8E8E88">NOTHING IS FILLED UNTIL YOU CONFIRM</span>
   </sc-if>
 
@@ -61,25 +61,25 @@
     </div>
     <div style="position: absolute; left: 20px; right: 20px; top: 532px; display: flex; gap: 14px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #8E8E88">
       <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 12px; border-radius: 2px; background: #3A3A40"></span>ALREADY YOURS</span>
-      <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 12px; box-sizing: border-box; border-radius: 2px; border: 1.5px solid #FF8A3D"></span>CAN BE FILLED</span>
-      <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 12px; border-radius: 2px; background: #FF8A3D"></span>FILLED</span>
+      <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 12px; box-sizing: border-box; border-radius: 2px; border: 1.5px solid #EDEDE8"></span>CAN BE FILLED</span>
+      <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 12px; border-radius: 2px; background: #EDEDE8"></span>FILLED</span>
     </div>
 
     <sc-if value="{{isResults}}" hint-placeholder-val="{{ false }}">
       <button onClick="{{togglePhotos}}" role="switch" aria-checked="{{photosStr}}" style="position: absolute; left: 20px; right: 20px; top: 566px; height: 60px; display: flex; align-items: center; justify-content: space-between; border: 0; border-top: 1px solid #1F1F22; background: transparent; color: #EDEDE8; padding: 0; font-family: Geist, sans-serif; text-align: left">
         <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px">Use photos too</span><span style="font-size: 12px; color: #8E8E88">Days without video get a photo as a slow zoom</span></span>
-        <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{photoTrack}}"><span style="position: absolute; top: 2px; left: {{photoKnob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+        <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{photoTrack}}"><span style="position: absolute; top: 2px; left: {{photoKnob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; box-sizing: border-box; border: 2px solid #0A0A0B"></span></span>
       </button>
       <span style="position: absolute; left: 20px; right: 20px; top: 636px; font-size: 12px; line-height: 1.4; color: #8E8E88">Tap a month to leave it out. Videos are trimmed to their best moment automatically — change any day later.</span>
-      <button onClick="{{fill}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Fill {{selCount}} days</button>
+      <button onClick="{{fill}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Fill {{selCount}} days</button>
       <a href="ProjectHubYear.dc.html" style="position: absolute; left: 20px; right: 20px; top: 780px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8E8E88; text-decoration: none; font-size: 15px">Not now</a>
     </sc-if>
     <sc-if value="{{isWorking}}" hint-placeholder-val="{{ false }}">
-      <div style="position: absolute; left: 20px; right: 20px; top: 580px; height: 3px; border-radius: 2px; background: #26262A"><div style="height: 3px; border-radius: 2px; width: {{pct}}%; background: #FF8A3D"></div></div>
+      <div style="position: absolute; left: 20px; right: 20px; top: 580px; height: 3px; border-radius: 2px; background: #26262A"><div style="height: 3px; border-radius: 2px; width: {{pct}}%; background: #EDEDE8"></div></div>
       <span style="position: absolute; left: 20px; right: 20px; top: 600px; font-size: 13px; line-height: 1.45; color: #8E8E88">{{workNote}}</span>
     </sc-if>
     <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
-      <a href="ProjectHubYear.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">See your year</a>
+      <a href="ProjectHubYear.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">See your year</a>
       <button onClick="{{undo}}" style="position: absolute; left: 20px; right: 20px; top: 780px; height: 44px; border: 0; background: transparent; color: #8E8E88; font-family: Geist, sans-serif; font-size: 15px">Undo — remove these {{selCount}} days</button>
     </sc-if>
   </sc-if>
@@ -135,8 +135,8 @@ class Component extends DCLogic {
         if (mine(n)) bg = '#3A3A40';
         else if (n <= scanned && candIdx[n] !== undefined) {
           any = true;
-          if (candIdx[n] < filledUpto) bg = '#FF8A3D';
-          else { bg = 'transparent'; border = '1.5px solid #FF8A3D'; }
+          if (candIdx[n] < filledUpto) bg = '#EDEDE8';
+          else { bg = 'transparent'; border = '1.5px solid #EDEDE8'; }
         } else if (n <= scanned && media(n) && !mine(n) && (st.off[mi] || (media(n) === 'photo' && !st.photos))) { bg = 'transparent'; border = '1px solid #3A3A40'; any = true; }
         cells.push({ vis: 'visible', bg, border });
       }
@@ -144,7 +144,7 @@ class Component extends DCLogic {
       const on = !st.off[mi];
       return { n: name, cells, color: any ? '#B9B9B3' : '#55555A', label: name + (on ? ', included' : ', left out'), on: String(on), cursor: res && any ? 'pointer' : 'default',
         toggle: () => { if (!res || !any) return; const o = Object.assign({}, st.off); o[mi] = !o[mi]; this.setState({ off: o }); },
-        boxShow: res && any ? 'flex' : 'none', boxBorder: on ? '0' : '1.5px solid #55555A', boxBg: on ? '#FF8A3D' : 'transparent', mark: on ? '✓' : '' };
+        boxShow: res && any ? 'flex' : 'none', boxBorder: on ? '0' : '1.5px solid #55555A', boxBg: on ? '#EDEDE8' : 'transparent', mark: on ? '✓' : '' };
     });
     const ph = st.phase;
     return {
@@ -152,7 +152,7 @@ class Component extends DCLogic {
       isIntro: ph === 'intro', hasMosaic: ph !== 'intro',
       isResults: ph === 'results', isWorking: ph === 'scan' || filling, isDone: done,
       points: ['Needs full access to your photos — nothing leaves your phone', 'One clip per day: videos first, then photos', 'Days you already filled are never touched'],
-      ranges: [['started', 'Since I started', 'FROM 21 JUN'], ['year', 'All of 2026', 'FROM 1 JAN'], ['all', 'Everything', 'ALL YEARS']].map((r) => ({ n: r[1], d: r[2], on: String(st.range === r[0]), pick: () => this.setState({ range: r[0] }), border: st.range === r[0] ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: st.range === r[0] ? '#FF8A3D14' : 'transparent' })),
+      ranges: [['started', 'Since I started', 'FROM 21 JUN'], ['year', 'All of 2026', 'FROM 1 JAN'], ['all', 'Everything', 'ALL YEARS']].map((r) => ({ n: r[1], d: r[2], on: String(st.range === r[0]), pick: () => this.setState({ range: r[0] }), border: st.range === r[0] ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: st.range === r[0] ? '#EDEDE814' : 'transparent' })),
       scan: () => this.setState({ phase: 'scan', pct: 0 }),
       fill: () => this.setState({ phase: 'filling', pct: 0 }),
       undo: () => this.setState({ phase: 'results' }),
@@ -163,7 +163,7 @@ class Component extends DCLogic {
       workNote: ph === 'scan' ? 'Reading dates only — this takes a few seconds.' : 'You can leave — it carries on in the background.',
       selCount: total,
       togglePhotos: () => this.setState({ photos: !st.photos }), photosStr: String(st.photos),
-      photoTrack: st.photos ? '#FF8A3D' : '#3A3A40', photoKnob: st.photos ? 20 : 2
+      photoTrack: st.photos ? '#EDEDE8' : '#3A3A40', photoKnob: st.photos ? 20 : 2
     };
   }
 }

@@ -33,7 +33,7 @@ body{margin:0}
       <div style="position: absolute; left: 70px; top: 22px; width: 96px; height: 70px; border-radius: 3px; background: linear-gradient(180deg, #F2D6B0 0%, #B98A5E 100%); opacity: 0.8"></div>
       <div style="position: absolute; left: {{faceX}}px; top: 48px; width: 58px; height: 64px; border-radius: 29px / 32px; background: radial-gradient(70% 70% at 30% 40%, #F0C4A0 0%, #C68A62 35%, #4A2C1E 75%, #1E140E 100%)"></div>
       <div style="position: absolute; left: {{bodyX}}px; top: 104px; width: 118px; height: 110px; border-radius: 59px 59px 0 0; background: #140E0A"></div>
-      <span style="position: absolute; right: 12px; bottom: 12px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">10 NOV 2026</span>
+      <span style="position: absolute; right: 12px; bottom: 12px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #141413; text-shadow: none">10 NOV 2026</span>
       <div style="position: absolute; left: 10px; right: 10px; bottom: 6px; height: 2px; background: #FFFFFF26"><div class="sl-bar" style="height: 2px; background: #141413"></div></div>
     </div>
     <sc-if value="{{soundHint}}" hint-placeholder-val="{{ false }}">
@@ -57,13 +57,13 @@ body{margin:0}
     </div>
     <span style="position: absolute; left: 0; right: 0; top: 600px; text-align: center; font-size: 12px; color: #6E6B64">Drag to choose the part you keep</span>
 
-    <a href="ProjectHubSaved.dc.html" style="position: absolute; left: 20px; right: 20px; top: 704px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</a>
+    <a href="ProjectHubSaved.dc.html" style="position: absolute; left: 20px; right: 20px; top: 704px; height: 56px; border-radius: 28px; background: #141413; color: #F6F4EF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Save clip</a>
   </sc-if>
 
   <!-- LOADING -->
   <sc-if value="{{loading}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 20px; top: 196px; width: 350px; height: 197px; border-radius: 12px; overflow: hidden; background: #FFFFFF; border: 1px solid #E8E4DC">
-      <span class="sl-sweep" style="position: absolute; top: 0; width: 3px; height: 197px; background: #FFD2AE; box-shadow: none"></span>
+      <span class="sl-sweep" style="position: absolute; top: 0; width: 3px; height: 197px; background: #141413; box-shadow: none"></span>
     </div>
     <div style="position: absolute; left: 20px; right: 20px; top: 412px; display: flex; flex-direction: column; gap: 4px">
       <span style="font-size: 17px; font-weight: 500">Preparing video… {{pct}}%</span>
@@ -120,7 +120,7 @@ class Component extends DCLogic {
     const stepState = (a, b) => pct >= b ? 'done' : (pct >= a ? 'now' : 'todo');
     const steps = [['Opening the file', 0, 15], ['Building the preview strip', 15, 75], ['Finding the best part', 75, 100]].map((x) => {
       const s = stepState(x[1], x[2]);
-      return { n: x[0] + (s === 'now' && x[0].indexOf('strip') >= 0 ? ' · ' + Math.round((pct - 15) / 60 * 100) + '%' : ''), color: s === 'todo' ? '#A8A49B' : '#141413', ring: s === 'done' ? '0' : (s === 'now' ? '1.5px solid #FF8A3D' : '1.5px solid #CFCAC0'), fill: s === 'done' ? '#8FC7A4' : 'transparent', mark: s === 'done' ? '✓' : '' };
+      return { n: x[0] + (s === 'now' && x[0].indexOf('strip') >= 0 ? ' · ' + Math.round((pct - 15) / 60 * 100) + '%' : ''), color: s === 'todo' ? '#A8A49B' : '#141413', ring: s === 'done' ? '0' : (s === 'now' ? '1.5px solid #141413' : '1.5px solid #CFCAC0'), fill: s === 'done' ? '#8FC7A4' : 'transparent', mark: s === 'done' ? '✓' : '' };
     });
     const loaded = Math.floor(Math.max(0, pct - 15) / 60 * 5);
     const faceShift = 30 * Math.sin(pos * 0.6);
@@ -135,11 +135,11 @@ class Component extends DCLogic {
       soundPath: st.sound ? 'M15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12' : 'M16 9l5 6M21 9l-5 6',
       soundHint: st.hint,
       faceX: (146 + faceShift).toFixed(0), bodyX: (116 + faceShift).toFixed(0),
-      badge: auto ? 'Auto-picked' : 'Your pick', badgeColor: auto ? '#FF8A3D' : '#141413', badgeLine: auto ? '#FF8A3D55' : '#CFCAC0',
+      badge: auto ? 'Auto-picked' : 'Your pick', badgeColor: auto ? '#141413' : '#141413', badgeLine: auto ? '#14141355' : '#CFCAC0',
       badgeIcon: auto ? 'M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z' : 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z',
       tc: f2(pos) + ' – ' + f2(pos + 1),
       frames, stripX: (145 - pos * pps).toFixed(1), stripT: st.drag ? 'none' : 'transform 320ms cubic-bezier(0.3,0,0,1)',
-      frameColor: st.drag ? '#FFD2AE' : '#FF8A3D', frameScale: st.drag ? 1.04 : 1,
+      frameColor: st.drag ? '#141413' : '#141413', frameScale: st.drag ? 1.04 : 1,
       down: (e) => { const r = e.currentTarget.getBoundingClientRect(); this._sc = r.width / 390; this._sx = e.clientX; this._sp = pos; this._d = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} this.setState({ drag: true }); },
       move: (e) => { if (!this._d) return; this.setState({ pos: this._sp - (e.clientX - this._sx) / this._sc / pps, mode: 'custom' }); },
       up: () => { this._d = false; this.setState({ drag: false }); }

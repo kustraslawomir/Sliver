@@ -29,7 +29,7 @@
         <button onClick="{{f.pick}}" style="height: 32px; padding: 0 12px; border-radius: 16px; border: {{f.border}}; background: {{f.bg}}; color: {{f.color}}; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em">{{f.n}}</button>
       </sc-for>
     </div>
-    <span style="display: flex; align-items: center; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #FF8A3D"><span style="width: 6px; height: 6px; border-radius: 3px; background: #FF8A3D"></span>FOR {{forDay}}</span>
+    <span style="display: flex; align-items: center; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #EDEDE8"><span style="width: 6px; height: 6px; border-radius: 3px; background: #EDEDE8"></span>FOR {{forDay}}</span>
   </div>
 
   <div style="position: absolute; left: 20px; right: 20px; top: 152px; bottom: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 120px">
@@ -55,7 +55,7 @@
 
   <sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: linear-gradient(0deg, #0A0A0B 60%, transparent)"></div>
-    <a href="{{selHref}}" style="position: absolute; left: 20px; right: 20px; bottom: 34px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{selLabel}}</a>
+    <a href="{{selHref}}" style="position: absolute; left: 20px; right: 20px; bottom: 34px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">{{selLabel}}</a>
   </sc-if>
 </div>
 </x-dc>
@@ -95,7 +95,7 @@ class Component extends DCLogic {
       return { isVideo: it.k === 'v', isPhoto: it.k === 'p', href: it.href, dur: it.dur, bg: it.bg, fav: !!it.fav,
         label: it.k === 'v' ? 'Video, ' + it.dur : 'Photo',
         toggle: () => toggle(it.id), selStr: String(idx >= 0), num: idx >= 0 ? String(idx + 1) : '',
-        badgeBg: idx >= 0 ? '#FF8A3D' : '#00000033', border: idx >= 0 ? '2px solid #FF8A3D' : '0' };
+        badgeBg: idx >= 0 ? '#EDEDE8' : '#00000033', border: idx >= 0 ? '2px solid #EDEDE8' : '0' };
     }) })).filter((s) => s.items.length);
     const n = st.sel.length;
     return {

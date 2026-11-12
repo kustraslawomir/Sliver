@@ -45,8 +45,8 @@
       <sc-for list="{{ticks}}" as="tk" hint-placeholder-count="12">
         <span style="position: absolute; left: {{tk.x}}%; top: {{tk.top}}px; width: 1px; height: {{tk.h}}px; background: #55555A"></span>
       </sc-for>
-      <div style="position: absolute; left: 0; top: 11px; height: 2px; width: {{headPct}}%; background: #FF8A3D"></div>
-      <span style="position: absolute; left: {{headPct}}%; top: 2px; width: 3px; height: 20px; margin-left: -1px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+      <div style="position: absolute; left: 0; top: 11px; height: 2px; width: {{headPct}}%; background: #EDEDE8"></div>
+      <span style="position: absolute; left: {{headPct}}%; top: 2px; width: 3px; height: 20px; margin-left: -1px; border-radius: 2px; background: #FFFFFF; box-shadow: none"></span>
     </div>
     <div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #8E8E88">
       <span>{{timeLabel}}</span><span>{{count}} CLIPS · {{rangeText}}</span>
@@ -117,7 +117,7 @@
   </div>
 
   <div style="position: absolute; left: 0; right: 0; top: 680px; height: 24px; background: linear-gradient(180deg, transparent, #050505); pointer-events: none"></div>
-  <a href="Export.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Make film · {{totalLabel}}</a>
+  <a href="Export.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Make film · {{totalLabel}}</a>
   <span style="position: absolute; left: 20px; right: 20px; top: 786px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8E8E88">RENDERED ON YOUR PHONE · WORKS OFFLINE</span>
 </div>
 </x-dc>
@@ -182,10 +182,10 @@ class Component extends DCLogic {
       ranges: [['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['custom', 'Custom']].map((r) => Object.assign({ n: r[1], pick: () => this.setState({ range: r[0], t: 0 }), border: st.range === r[0] ? '1px solid #EDEDE8' : '1px solid #26262A' }, seg(st.range === r[0]), { bg: st.range === r[0] ? '#EDEDE8' : 'transparent' })),
       audios: [['original', 'Original'], ['music', 'Music'], ['mix', 'Mix']].map((a) => Object.assign({ n: a[1], pick: () => this.setState({ audio: a[0] }) }, seg(st.audio === a[0]))),
       audioHint: AH[st.audio], hasMusic: st.audio !== 'original',
-      tracks: TR.map((tr, i) => ({ n: tr[0], meta: tr[1], on: String(i === st.track), pick: () => this.setState({ track: i }), ring: i === st.track ? '5px solid #FF8A3D' : '1.5px solid #55555A', dot: 'transparent' })),
+      tracks: TR.map((tr, i) => ({ n: tr[0], meta: tr[1], on: String(i === st.track), pick: () => this.setState({ track: i }), ring: i === st.track ? '5px solid #EDEDE8' : '1.5px solid #55555A', dot: 'transparent' })),
       cuts: [['cut', 'Cut'], ['fade', 'Fade']].map((c) => Object.assign({ n: c[1], pick: () => this.setState({ cut: c[0] }) }, seg(st.cut === c[0]))),
       dates: [[true, 'On'], [false, 'Off']].map((d) => Object.assign({ n: d[1], pick: () => this.setState({ date: d[0] }) }, seg(st.date === d[0]))),
-      looks: LN.map((l, i) => ({ n: l, on: String(i === st.look), pick: () => this.setState({ look: i }), border: i === st.look ? '1px solid #FF8A3D' : '1px solid #26262A', bg: i === st.look ? '#FF8A3D1F' : 'transparent', color: i === st.look ? '#FF8A3D' : '#B9B9B3' }))
+      looks: LN.map((l, i) => ({ n: l, on: String(i === st.look), pick: () => this.setState({ look: i }), border: i === st.look ? '1px solid #EDEDE8' : '1px solid #26262A', bg: i === st.look ? '#EDEDE81F' : 'transparent', color: i === st.look ? '#EDEDE8' : '#B9B9B3' }))
     };
   }
 }

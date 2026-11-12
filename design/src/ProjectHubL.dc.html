@@ -50,7 +50,7 @@
       <sc-if value="{{nudge}}" hint-placeholder-val="{{ false }}">
         <div style="box-sizing: border-box; border-radius: 20px; border: 1px solid #E2DED6; background: #FFFFFF; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
           <div style="display: flex; gap: 12px; align-items: center">
-            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF8A3D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg>
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141413" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"></path></svg>
             <span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">Want a daily nudge?</span><span style="font-size: 13px; color: #6E6B64">One quiet reminder at a time you choose.</span></span>
           </div>
           <div style="display: flex; gap: 8px; padding-left: 34px">
@@ -80,7 +80,7 @@
                 <button onClick="{{c.open}}" aria-label="{{c.label}}, empty. Add a clip" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 1px solid #E8E4DC; background: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #6E6B64">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #CFCAC0"></span></button>
               </sc-if>
               <sc-if value="{{c.isToday}}" hint-placeholder-val="{{ false }}">
-                <a href="CameraV2.dc.html" aria-label="{{c.label}}, today, no clip yet. Open camera" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 2px solid #E8671C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-decoration: none"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #C2540F">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #FF8A3D"></span></a>
+                <a href="CameraV2.dc.html" aria-label="{{c.label}}, today, no clip yet. Open camera" style="height: 58px; box-sizing: border-box; border-radius: 10px; border: 2px solid #141413; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-decoration: none"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #141413">{{c.d}}</span><span style="width: 4px; height: 4px; border-radius: 2px; background: #141413"></span></a>
               </sc-if>
               <sc-if value="{{c.isFuture}}" hint-placeholder-val="{{ false }}">
                 <div style="height: 58px; display: flex; align-items: center; justify-content: center; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #A8A49B">{{c.d}}</div>
@@ -104,7 +104,7 @@
               <span onClick="{{b.pick}}" style="position: absolute; bottom: 0; left: {{b.x}}px; width: 1.9px; height: {{b.h}}px; border-radius: 1px; background: {{b.c}}; opacity: {{b.op}}"></span>
             </sc-for>
             <span style="position: absolute; left: {{selX}}px; top: -4px; bottom: -6px; width: 1.5px; background: #141413"></span>
-            <span style="position: absolute; left: {{todayX}}px; bottom: -3px; width: 6px; height: 6px; margin-left: -2px; border-radius: 3px; background: #FF8A3D"></span>
+            <span style="position: absolute; left: {{todayX}}px; bottom: -3px; width: 6px; height: 6px; margin-left: -2px; border-radius: 3px; background: #141413"></span>
           </div>
           <div style="position: relative; height: 16px">
             <sc-for list="{{lightMonths}}" as="m" hint-placeholder-count="6"><button onClick="{{m.go}}" style="position: absolute; left: {{m.x}}px; border: 0; background: transparent; padding: 0; font-family: Geist, sans-serif; font-size: 12px; color: #6E6B64">{{m.n}}</button></sc-for>
@@ -123,7 +123,7 @@
       <!-- memory -->
       <a href="DayDetail.dc.html" style="height: 76px; box-sizing: border-box; border-radius: 18px; border: 1px solid #E2DED6; background: #FFFFFF; padding: 10px 14px 10px 10px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #141413">
         <span style="flex: 0 0 56px; height: 56px; border-radius: 10px; background: linear-gradient(160deg, #7A6A50, #0C0B0A); display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#141413"><path d="M8 5v14l11-7z"></path></svg></span>
-        <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #C2540F">One month ago · Sat 10 Oct</span><span style="font-size: 15px">A clip you might have forgotten</span></span>
+        <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px"><span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #141413">One month ago · Sat 10 Oct</span><span style="font-size: 15px">A clip you might have forgotten</span></span>
       </a>
 
       <!-- films -->
@@ -150,7 +150,7 @@
   <!-- home: record today -->
   <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 150px; background: linear-gradient(180deg, #F6F4EF00 0%, #F6F4EFE6 40%, #F6F4EF 100%); z-index: 3; pointer-events: none"></div>
   <sc-if value="{{todayOpen}}" hint-placeholder-val="{{ true }}">
-    <a href="CameraV2.dc.html" aria-label="Record today's clip" style="position: absolute; left: 50%; bottom: 40px; margin-left: -36px; width: 72px; height: 72px; border-radius: 36px; background: #FF8A3D; box-shadow: none; z-index: 4"></a>
+    <a href="CameraV2.dc.html" aria-label="Record today's clip" style="position: absolute; left: 50%; bottom: 40px; margin-left: -36px; width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; box-shadow: none; z-index: 4"></a>
     <span style="position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-family: Geist, sans-serif; font-size: 13px; font-weight: 500; color: #141413; z-index: 4">Record today</span>
   </sc-if>
   <sc-if value="{{todayDone}}" hint-placeholder-val="{{ false }}">
@@ -175,7 +175,7 @@
       <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #CFCAC0; margin-bottom: 10px"></div>
       <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #6E6B64">{{sheetLabel}}</span>
       <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1.05; padding-bottom: 8px; font-weight: 600; letter-spacing: -0.02em">Add a clip for this day</span>
-      <a href="PickerV2.dc.html" style="height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 8px 32px #FF8A3D44"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="2"></circle><path d="M21 15l-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>Choose from Photos</a>
+      <a href="PickerV2.dc.html" style="height: 56px; border-radius: 28px; background: #141413; color: #F6F4EF; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: none"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="2"></circle><path d="M21 15l-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>Choose from Photos</a>
       <button onClick="{{closeSheet}}" style="height: 48px; border: 0; background: transparent; color: #4A4843; font-family: Geist, sans-serif; font-size: 15px">Leave it empty</button>
     </div>
   </sc-if>
@@ -214,7 +214,7 @@ class Component extends DCLogic {
       const s = status(m, d);
       if (s === 'filled') count++;
       cells.push({ d: String(d), label: WD[wdOf(m, d)] + ' ' + d + ' ' + MS[m], bg: 'linear-gradient(160deg, ' + pal[doy(m, d) % pal.length] + ', #0C0B0A)',
-        isFilled: s === 'filled', ring: (st.saved && doy(m, d) === TODAY) ? '2px solid #FF8A3D' : '0', cls: (st.saved && doy(m, d) === TODAY) ? 'sv-in' : '', isEmpty: s === 'empty', isToday: s === 'today', isFuture: s === 'future' || s === 'before', isBlank: false,
+        isFilled: s === 'filled', ring: (st.saved && doy(m, d) === TODAY) ? '2px solid #141413' : '0', cls: (st.saved && doy(m, d) === TODAY) ? 'sv-in' : '', isEmpty: s === 'empty', isToday: s === 'today', isFuture: s === 'future' || s === 'before', isBlank: false,
         open: () => this.setState({ sheet: d }) });
     }
     const year = MS.map((name, mi) => {
@@ -223,7 +223,7 @@ class Component extends DCLogic {
       for (let d = 1; d <= 31; d++) {
         if (d > ML[mi]) { cs.push({ vis: 'hidden', bg: 'transparent', border: '0' }); continue; }
         const s = status(mi, d);
-        cs.push({ vis: 'visible', bg: (st.saved && doy(mi, d) === TODAY) ? '#FF8A3D' : s === 'filled' ? pal[doy(mi, d) % pal.length] : (s === 'empty' ? '#1C1C20' : (s === 'today' ? '#FF8A3D' : (s === 'before' ? '#FFFFFF' : 'transparent'))), border: s === 'future' ? '1px solid #E2DED6' : '0' });
+        cs.push({ vis: 'visible', bg: (st.saved && doy(mi, d) === TODAY) ? '#141413' : s === 'filled' ? pal[doy(mi, d) % pal.length] : (s === 'empty' ? '#1C1C20' : (s === 'today' ? '#141413' : (s === 'before' ? '#FFFFFF' : 'transparent'))), border: s === 'future' ? '1px solid #E2DED6' : '0' });
       }
       return { n: name, cells: cs, color: active ? '#4A4843' : '#A8A49B', label: MN[mi], go: () => { if (active) this.setState({ view: 'month', month: mi }); } };
     });

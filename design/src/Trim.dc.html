@@ -40,7 +40,7 @@
       </div>
     </sc-if>
     <sc-if value="{{dateOn}}" hint-placeholder-val="{{ true }}">
-      <span style="position: absolute; right: 16px; top: {{stampTop}}px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">{{stamp}}</span>
+      <span style="position: absolute; right: 16px; top: {{stampTop}}px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #EDEDE8; text-shadow: none">{{stamp}}</span>
     </sc-if>
     <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 2px; border-radius: 1px; background: #FFFFFF26"><div style="height: 2px; width: {{loopPct}}%; background: #EDEDE8"></div></div>
   </div>
@@ -99,7 +99,7 @@
   </div>
 
   <!-- CTA -->
-  <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</button>
+  <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Save clip</button>
   <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
     <a href="CameraV2.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Retake</a>
     <a href="Looks.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Filters</a>
@@ -198,8 +198,8 @@ class Component extends DCLogic {
       hasSugs: !short, isShort: short, notShort: !short, hasMinimap: !short,
       sugLabel: (st.sug + 1) + '/3',
       badge: short ? '0.64S CLIP' : (auto ? '✦ AUTO-PICKED' : 'CUSTOM'),
-      badgeColor: auto && !short ? '#FF8A3D' : '#EDEDE8',
-      badgeLine: auto && !short ? '#FF8A3D55' : '#3A3A40',
+      badgeColor: auto && !short ? '#EDEDE8' : '#EDEDE8',
+      badgeLine: auto && !short ? '#EDEDE855' : '#3A3A40',
       audioTag: st.audio ? 'SOUND ON' : 'MUTED',
       audioLabel: st.audio ? 'Mute original sound' : 'Keep original sound',
       audioColor: st.audio ? '#EDEDE8' : '#8E8E88',
@@ -210,7 +210,7 @@ class Component extends DCLogic {
       loopScale: (1 + 0.03 * st.t / 1000).toFixed(4),
       loopPct: (st.t / 10).toFixed(1),
       fromTc: short ? '00:00.00 → 00:01.00' : 'FROM ' + this.fmt(pos),
-      tcColor: st.drag ? '#FF8A3D' : '#B9B9B3',
+      tcColor: st.drag ? '#EDEDE8' : '#B9B9B3',
       tryAnother: () => { const s = (st.sug + 1) % 3; lock(c.sugs[s], { sug: s, mode: 'auto', coach: false }); },
       mini, miniMarks: c.sugs.map((s) => ({ x: (s / c.len * 350).toFixed(1) })),
       miniX: (pos / c.len * 350).toFixed(1), miniW: Math.max(3, win / c.len * 350).toFixed(1),
@@ -218,21 +218,21 @@ class Component extends DCLogic {
       stripW: (c.len * pps).toFixed(0), stripX: (143 - pos * pps).toFixed(1),
       stripTransition: st.drag ? 'none' : 'transform 320ms cubic-bezier(0.3, 0, 0, 1)',
       frames, marks,
-      frameBorder: st.drag ? '2.5px solid #FFD2AE' : (st.lock ? '3px solid #FF8A3D' : '2.5px solid #FF8A3D'),
-      frameGlow: st.lock ? '0 0 0 4px #FF8A3D33, 0 0 24px #FF8A3D, 0 0 60px #FF8A3D88' : (st.drag ? '0 0 18px #FF8A3D, 0 0 48px #FF8A3D88' : '0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55'),
+      frameBorder: st.drag ? '2.5px solid #FFFFFF' : (st.lock ? '3px solid #EDEDE8' : '2.5px solid #EDEDE8'),
+      frameGlow: st.lock ? '0 0 0 4px #EDEDE833, 0 0 24px #EDEDE8, 0 0 60px #EDEDE888' : (st.drag ? 'none' : 'none'),
       frameScale: st.drag ? 1.04 : 1,
       stripHint: c.v === 'long' ? 'DRAG STRIP · TAP OVERVIEW TO JUMP · PINCH TO ZOOM' : 'DRAG THE STRIP TO CHOOSE YOUR SECOND',
       down: (e) => { const r = e.currentTarget.getBoundingClientRect(); this._sc = r.width / 350; this._sx = e.clientX; this._sp = pos; this._d = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} this.setState({ drag: true, coach: false, mode: 'custom' }); },
       move: (e) => { if (!this._d) return; const dx = (e.clientX - this._sx) / this._sc; const np = Math.max(0, Math.min(maxPos, this._sp - dx / pps)); this.setState({ pos: np }); },
       up: () => { if (!this._d) return; this._d = false; const p = this.state.pos == null ? pos : this.state.pos; let hit = -1; c.sugs.forEach((s, i) => { if (Math.abs(s - p) < 0.15) hit = i; }); this.setState({ drag: false }); if (hit >= 0) lock(c.sugs[hit], { sug: hit, mode: 'auto' }); else lock(p, { mode: 'custom' }); },
-      fills: ['Slow to fit', 'Loop', 'Hold last frame'].map((nm, i) => ({ n: nm, pick: () => this.setState({ fill: i }), border: i === st.fill ? '1px solid #FF8A3D' : '1px solid #26262A', bg: i === st.fill ? '#FF8A3D1F' : 'transparent' })),
+      fills: ['Slow to fit', 'Loop', 'Hold last frame'].map((nm, i) => ({ n: nm, pick: () => this.setState({ fill: i }), border: i === st.fill ? '1px solid #EDEDE8' : '1px solid #26262A', bg: i === st.fill ? '#EDEDE81F' : 'transparent' })),
       speedLabel: st.speed === 1 ? '1× SPEED' : '0.5× SLOW-MO',
-      speedLine: st.speed === 1 ? '#26262A' : '#FF8A3D', speedBg: st.speed === 1 ? 'transparent' : '#FF8A3D1F',
+      speedLine: st.speed === 1 ? '#26262A' : '#EDEDE8', speedBg: st.speed === 1 ? 'transparent' : '#EDEDE81F',
       toggleSpeed: () => this.setState({ speed: st.speed === 1 ? 0.5 : 1 }),
       dateOn: st.dateOn, dateStr: String(st.dateOn),
       stamp: st.day.split(' · ')[1] + ' 2026',
       dateLabel: st.dateOn ? 'DATE ON' : 'DATE OFF',
-      dateLine: st.dateOn ? '#FF8A3D' : '#26262A', dateBg: st.dateOn ? '#FF8A3D1F' : 'transparent',
+      dateLine: st.dateOn ? '#EDEDE8' : '#26262A', dateBg: st.dateOn ? '#EDEDE81F' : 'transparent',
       toggleDate: () => this.setState({ dateOn: !st.dateOn }),
       reframe: !!this.props.reframe,
       bandY: st.bandY.toFixed(0), bandBot: (st.bandY + 197).toFixed(0),
@@ -249,12 +249,12 @@ class Component extends DCLogic {
       week: dayNames.map((d) => {
         const isDay = d === st.day, isToday = d === 'TUE · 10 NOV';
         const has = filled[d] || isDay;
-        return { d: d.split(' · ')[1].replace(' NOV', ''), bg: has ? (isDay ? 'linear-gradient(160deg, ' + this.col(tc, 14) + ', #0A0806)' : 'linear-gradient(160deg, #4E5A63, #121518)') : '#111113', border: isToday ? '2px solid #FF8A3D' : '1px solid #1F1F22', glow: isDay ? '0 0 16px #FF8A3D66' : 'none', color: isToday ? '#FF8A3D' : '#8E8E88' };
+        return { d: d.split(' · ')[1].replace(' NOV', ''), bg: has ? (isDay ? 'linear-gradient(160deg, ' + this.col(tc, 14) + ', #0A0806)' : 'linear-gradient(160deg, #4E5A63, #121518)') : '#111113', border: isToday ? '2px solid #EDEDE8' : '1px solid #1F1F22', glow: isDay ? 'none' : 'none', color: isToday ? '#EDEDE8' : '#8E8E88' };
       }),
       daySheet: st.daySheet,
       openDays: () => this.setState({ daySheet: true }),
       closeDays: () => this.setState({ daySheet: false }),
-      days: dayNames.slice().reverse().map((d) => ({ n: d === 'TUE · 10 NOV' ? d + ' · TODAY' : d, dot: filled[d] ? '#8E8E88' : (d === st.day ? '#FF8A3D' : '#26262A'), note: filled[d] ? 'Has a clip · replace' : 'Empty', pick: () => this.setState({ day: d, daySheet: false }) }))
+      days: dayNames.slice().reverse().map((d) => ({ n: d === 'TUE · 10 NOV' ? d + ' · TODAY' : d, dot: filled[d] ? '#8E8E88' : (d === st.day ? '#EDEDE8' : '#26262A'), note: filled[d] ? 'Has a clip · replace' : 'Empty', pick: () => this.setState({ day: d, daySheet: false }) }))
     };
   }
 }

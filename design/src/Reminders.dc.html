@@ -31,7 +31,7 @@
     <!-- master switch -->
     <button onClick="{{toggleOn}}" role="switch" aria-checked="{{onStr}}" style="width: 100%; min-height: 60px; display: flex; align-items: center; justify-content: space-between; border: 0; border-bottom: 1px solid #1F1F22; background: transparent; padding: 0; color: #EDEDE8; font-family: Geist, sans-serif; text-align: left">
       <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 500">Remind me to film</span><span style="font-size: 13px; color: #8E8E88">One quiet notification. Never more than two a day.</span></span>
-      <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{onTrack}}"><span style="position: absolute; top: 2px; left: {{onKnob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+      <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{onTrack}}"><span style="position: absolute; top: 2px; left: {{onKnob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; box-sizing: border-box; border: 2px solid #0A0A0B"></span></span>
     </button>
 
     <div style="opacity: {{bodyOp}}">
@@ -39,10 +39,10 @@
       <div style="padding: 20px 0 6px; font-size: 14px; color: #8E8E88">Remind me at</div>
       <button onClick="{{pickTime}}" aria-label="Reminder time, {{time}}. Change" style="border: 0; background: transparent; padding: 0; display: flex; align-items: baseline; gap: 10px; color: #EDEDE8; font-family: Geist, sans-serif">
         <span style="font-size: 64px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">{{time}}</span>
-        <span style="font-size: 15px; color: #FF8A3D; font-weight: 500">Change</span>
+        <span style="font-size: 15px; color: #EDEDE8; font-weight: 500">Change</span>
       </button>
       <sc-if value="{{goldenOn}}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top: 6px; font-size: 13px; color: #FFC58A">Today: 15:24, 20 min before golden hour. Moves with the sun.</div>
+        <div style="margin-top: 6px; font-size: 13px; color: #EDEDE8">Today: 15:24, 20 min before golden hour. Moves with the sun.</div>
       </sc-if>
 
       <!-- days -->
@@ -59,7 +59,7 @@
       <sc-for list="{{smart}}" as="s" hint-placeholder-count="3">
         <button onClick="{{s.toggle}}" role="switch" aria-checked="{{s.on}}" style="width: 100%; min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 0; border-bottom: 1px solid #1F1F22; background: transparent; padding: 10px 0; color: #EDEDE8; font-family: Geist, sans-serif; text-align: left">
           <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 500">{{s.n}}</span><span style="font-size: 13px; line-height: 1.35; color: #8E8E88">{{s.d}}</span></span>
-          <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{s.track}}"><span style="position: absolute; top: 2px; left: {{s.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+          <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{s.track}}"><span style="position: absolute; top: 2px; left: {{s.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; box-sizing: border-box; border: 2px solid #0A0A0B"></span></span>
         </button>
       </sc-for>
 
@@ -72,12 +72,12 @@
       <!-- preview -->
       <div style="padding: 24px 0 10px; font-size: 14px; color: #8E8E88">What it will look like</div>
       <div aria-label="Notification preview" style="border-radius: 22px; background: #1C1C1F; padding: 14px 14px 14px 16px; display: flex; gap: 12px; align-items: flex-start">
-        <span style="flex: 0 0 24px; height: 24px; border-radius: 12px; background: #050505; display: flex; align-items: center; justify-content: center"><span style="width: 2px; height: 13px; border-radius: 1px; background: #FFD2AE"></span></span>
+        <span style="flex: 0 0 24px; height: 24px; border-radius: 12px; background: #050505; display: flex; align-items: center; justify-content: center"><span style="width: 2px; height: 13px; border-radius: 1px; background: #FFFFFF"></span></span>
         <span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px">
           <span style="font-size: 12px; color: #8E8E88">SLIVER · {{time}}</span>
           <span style="font-size: 15px; font-weight: 600">Today's clip</span>
           <span style="font-size: 14px; line-height: 1.35; color: #B9B9B3">{{previewText}}</span>
-          <span style="display: flex; gap: 18px; margin-top: 8px; font-size: 14px; font-weight: 600; color: #FF8A3D"><span>Record</span><span style="color: #B9B9B3">Tomorrow</span></span>
+          <span style="display: flex; gap: 18px; margin-top: 8px; font-size: 14px; font-weight: 600; color: #EDEDE8"><span>Record</span><span style="color: #B9B9B3">Tomorrow</span></span>
         </span>
         <span style="flex: 0 0 52px; height: 52px; border-radius: 10px; background: linear-gradient(160deg, #8A6A48, #1A120B)"></span>
       </div>
@@ -109,14 +109,14 @@ class Component extends DCLogic {
   }
   renderVals() {
     const st = this.state;
-    const sw = (on) => ({ track: on ? '#FF8A3D' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
+    const sw = (on) => ({ track: on ? '#EDEDE8' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
     const L = ['M', 'T', 'W', 'T', 'F', 'S', 'S'], F = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const cnt = st.days.reduce((a, b) => a + b, 0);
     const weekdays = st.days.slice(0, 5).every(Boolean) && !st.days[5] && !st.days[6];
     const weekend = !st.days.slice(0, 5).some(Boolean) && st.days[5] && st.days[6];
     return {
       permOff: this.props.perm === 'off',
-      onStr: String(st.on), onTrack: st.on ? '#FF8A3D' : '#3A3A40', onKnob: st.on ? 20 : 2, toggleOn: () => this.setState({ on: !st.on }),
+      onStr: String(st.on), onTrack: st.on ? '#EDEDE8' : '#3A3A40', onKnob: st.on ? 20 : 2, toggleOn: () => this.setState({ on: !st.on }),
       bodyOp: st.on ? 1 : 0.35,
       time: st.golden ? '≈15:24' : st.time, goldenOn: st.golden,
       pickTime: () => this.setState({ picker: true }), closePicker: () => this.setState({ picker: false }), picker: st.picker,
@@ -129,7 +129,7 @@ class Component extends DCLogic {
         Object.assign({ n: 'Follow golden hour', d: 'Remind me 20 min before the evening light, instead of a fixed time. Uses approximate location.', toggle: () => this.setState({ golden: !st.golden }) }, sw(st.golden))
       ],
       previewText: 'Tuesday is still empty. A few seconds is enough.',
-      presets: [['07:30', 'Morning'], ['12:30', 'Lunch'], ['17:30', 'After work'], ['19:00', 'Evening'], ['20:00', 'Default'], ['21:30', 'Late']].map((p) => ({ t: p[0], n: p[1], border: st.time === p[0] ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: st.time === p[0] ? '#FF8A3D14' : '#111113', pick: () => this.setState({ time: p[0], picker: false }) }))
+      presets: [['07:30', 'Morning'], ['12:30', 'Lunch'], ['17:30', 'After work'], ['19:00', 'Evening'], ['20:00', 'Default'], ['21:30', 'Late']].map((p) => ({ t: p[0], n: p[1], border: st.time === p[0] ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: st.time === p[0] ? '#EDEDE814' : '#111113', pick: () => this.setState({ time: p[0], picker: false }) }))
     };
   }
 }

@@ -21,7 +21,7 @@
     </div>
     <div style="position: absolute; left: 20px; top: 250px; width: 350px; height: 197px; border-radius: 10px; overflow: hidden; background: {{tileBg}}; border: 1px solid #26262A"></div>
     <h1 style="position: absolute; left: 20px; right: 20px; top: 480px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.05; letter-spacing: -0.02em">Cutting your film…</h1>
-    <div style="position: absolute; left: 20px; right: 20px; top: 548px; height: 2px; background: #26262A"><div style="height: 2px; width: {{pct}}%; background: #FF8A3D; box-shadow: 0 0 8px #FF8A3D"></div></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 548px; height: 2px; background: #26262A"><div style="height: 2px; width: {{pct}}%; background: #EDEDE8; box-shadow: none"></div></div>
     <div style="position: absolute; left: 20px; right: 20px; top: 562px; display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; color: #8E8E88">
       <span>{{doneSec}} / 129 CLIPS</span><span>{{pctLabel}}%</span>
     </div>
@@ -30,14 +30,14 @@
 
   <!-- PREMIERE -->
   <sc-if value="{{isPremiere}}" hint-placeholder-val="{{ false }}">
-    <div style="position: absolute; left: {{slitX}}px; top: 200px; width: {{slitW}}px; height: 197px; border-radius: 4px; overflow: hidden; background: linear-gradient(160deg, #8A6A48 0%, #2A1A10 60%, #0C0806 100%); box-shadow: 0 0 {{slitGlow}}px #FF8A3D88"></div>
+    <div style="position: absolute; left: {{slitX}}px; top: 200px; width: {{slitW}}px; height: 197px; border-radius: 4px; overflow: hidden; background: linear-gradient(160deg, #8A6A48 0%, #2A1A10 60%, #0C0806 100%); box-shadow: none"></div>
     <div style="position: absolute; left: 0; right: 0; top: 440px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: {{titleO}}">
       <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.4em; color: #8E8E88">A FILM BY YOU</span>
       <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 67px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">2026</span>
       <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #B9B9B3">21 JUN — 10 NOV · 129 CLIPS · 02:09</span>
     </div>
     <sc-if value="{{showActions}}" hint-placeholder-val="{{ false }}">
-      <a href="FilmPlayer.dc.html" style="position: absolute; left: 20px; right: 20px; top: 656px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Play film</a>
+      <a href="FilmPlayer.dc.html" style="position: absolute; left: 20px; right: 20px; top: 656px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Play film</a>
       <div style="position: absolute; left: 20px; right: 20px; top: 724px; display: flex; gap: 10px">
         <button onClick="{{save}}" style="flex: 1 1 0; height: 50px; border-radius: 25px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">{{saveLabel}}</button>
         <a href="FilmPlayer.dc.html" style="flex: 1 1 0; height: 50px; box-sizing: border-box; border-radius: 25px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 15px">Share…</a>

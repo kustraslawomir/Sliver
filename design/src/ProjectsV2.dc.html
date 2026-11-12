@@ -47,7 +47,7 @@
           </button>
         </sc-for>
       </div>
-      <a href="CameraV2.dc.html" style="height: 56px; margin-top: 22px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Create project</a>
+      <a href="CameraV2.dc.html" style="height: 56px; margin-top: 22px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Create project</a>
       <button onClick="{{back}}" style="height: 44px; margin-top: 4px; border: 0; background: transparent; color: #8E8E88; font-family: Geist, sans-serif; font-size: 15px">Back</button>
     </sc-if>
   </div>
@@ -65,10 +65,10 @@ class Component extends DCLogic {
     ];
     return {
       isList: st.view === 'list', isNew: st.view === 'new',
-      projects: P.map((p, i) => ({ n: p[0], meta: p[1], cw: p[2] === 'cinema' ? 92 : 30, bg: 'linear-gradient(160deg, ' + p[3] + ', #0C0B0A)', on: String(i === st.active), pick: () => this.setState({ active: i }), dot: i === st.active ? '#FF8A3D' : 'transparent', checkVis: i === st.active ? 'visible' : 'hidden' })),
+      projects: P.map((p, i) => ({ n: p[0], meta: p[1], cw: p[2] === 'cinema' ? 92 : 30, bg: 'linear-gradient(160deg, ' + p[3] + ', #0C0B0A)', on: String(i === st.active), pick: () => this.setState({ active: i }), dot: i === st.active ? '#EDEDE8' : 'transparent', checkVis: i === st.active ? 'visible' : 'hidden' })),
       openNew: () => this.setState({ view: 'new' }), back: () => this.setState({ view: 'list' }),
       name: st.name, onName: (e) => this.setState({ name: e.target.value }),
-      formats: [['cinema', 'Cinema 16:9', 'For TV & YouTube', 44, 25], ['story', 'Story 9:16', 'For Instagram & TikTok', 18, 32]].map((f) => ({ n: f[1], d: f[2], w: f[3], h: f[4], on: String(st.fmt === f[0]), pick: () => this.setState({ fmt: f[0] }), border: st.fmt === f[0] ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: st.fmt === f[0] ? '#FF8A3D14' : 'transparent', shape: st.fmt === f[0] ? '#FF8A3D' : '#8E8E88' }))
+      formats: [['cinema', 'Cinema 16:9', 'For TV & YouTube', 44, 25], ['story', 'Story 9:16', 'For Instagram & TikTok', 18, 32]].map((f) => ({ n: f[1], d: f[2], w: f[3], h: f[4], on: String(st.fmt === f[0]), pick: () => this.setState({ fmt: f[0] }), border: st.fmt === f[0] ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: st.fmt === f[0] ? '#EDEDE814' : 'transparent', shape: st.fmt === f[0] ? '#EDEDE8' : '#8E8E88' }))
     };
   }
 }

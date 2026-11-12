@@ -104,3 +104,15 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Date on the video | `FilmPlayer.dc.html` | **No date overlay on the player.** The date stamp is already burned into each clip, so drawing it again on top doubles it (bug seen on device: "11 Nov 2026" small + "11 NOV 2026" big). |
 | Scrubber | `FilmPlayer.dc.html` | One tick per clip, ember progress line, light head 3×20dp. Times under it: Geist tabular, "0:12" and "-0:17". |
 | Actions | `FilmPlayer.dc.html` | "Share film…" full width (ember). Under it, side by side: "Save to Photos" and "Edit film" (outline). A one-line file info at the bottom in muted text. |
+
+## v1.4: accent = mono + red dot (supersedes every ember/orange rule above)
+
+| Item | Design | Notes |
+|---|---|---|
+| Accent | all boards in `design/src`, `design/png`, `tokens.json → accent` | **No accent colour in the UI.** Primary buttons, selected states, switches, tabs, the today ring: dark theme = #EDEDE8 with #0A0A0B text, light theme = #141413 with #F6F4EF text. Colour on screen comes only from the clips (thumbnails, the light of the year). |
+| Red = recording, nothing else | `CameraV2`, `CameraV2Rec`, `ProjectHub` | #FF3B30 for: the record button, "Record today", the recording dot and the timer after 1 s. Never for anything else. |
+| Destructive | all | Red **text** only (dark #E5675F, light #C0392B). Never a filled red button, so delete can't look like record. |
+| Glow | `tokens.json → glow` | Removed everywhere. `GLOW.md` and `Modifier.glow()` are superseded: delete the usages. Recording "breathes" with opacity 1 → 0.78 over 1.6 s (off when animations are disabled). |
+| Switches | `Settings`, `Reminders` | On = filled track in the primary colour, knob with a 2dp ring in the background colour so it stays visible. |
+| Brand | `brand/`, `android-res/` | Unchanged for now: the icon/logo slit stays warm. That's the one place colour stays. |
+| Player in light theme | `FilmPlayer.dc.html` | Reminder from v1.3: the player, camera, recording and edit preview are dark in BOTH themes. Use a forced dark surface for these screens, not `BgBase`. |

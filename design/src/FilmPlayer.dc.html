@@ -40,8 +40,8 @@
       <sc-for list="{{ticks}}" as="tk" hint-placeholder-count="28">
         <span style="position: absolute; left: {{tk}}%; top: 8px; width: 1px; height: 8px; background: #3A3A40"></span>
       </sc-for>
-      <div style="position: absolute; left: 0; top: 11px; height: 2px; width: {{headPct}}%; background: #FF8A3D"></div>
-      <span style="position: absolute; left: {{headPct}}%; top: 2px; width: 3px; height: 20px; margin-left: -1px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+      <div style="position: absolute; left: 0; top: 11px; height: 2px; width: {{headPct}}%; background: #EDEDE8"></div>
+      <span style="position: absolute; left: {{headPct}}%; top: 2px; width: 3px; height: 20px; margin-left: -1px; border-radius: 2px; background: #FFFFFF; box-shadow: none"></span>
     </div>
     <div style="display: flex; justify-content: space-between; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 11px; color: #8E8E88"><span>{{timeLabel}}</span><span>-{{remain}}</span></div>
   </div>
@@ -57,7 +57,7 @@
   </div>
 
   <!-- actions -->
-  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 660px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 6px 20px #FF8A3D33">Share film…</button>
+  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 660px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Share film…</button>
   <div style="position: absolute; left: 20px; right: 20px; top: 728px; display: flex; gap: 10px">
     <button onClick="{{save}}" style="flex: 1 1 0; height: 48px; border-radius: 24px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">{{saveLabel}}</button>
     <a href="FilmBuilder.dc.html" style="flex: 1 1 0; height: 48px; box-sizing: border-box; border-radius: 24px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 15px">Edit film</a>

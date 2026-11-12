@@ -19,7 +19,7 @@
   </div>
 
   <div style="position: absolute; left: 20px; right: 20px; top: 110px; display: flex; gap: 12px; align-items: center">
-    <span aria-hidden="true" style="flex: 0 0 2px; height: 34px; border-radius: 1px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></span>
+    <span aria-hidden="true" style="flex: 0 0 2px; height: 34px; border-radius: 1px; background: #FFFFFF; box-shadow: none"></span>
     <span style="font-size: 14px; line-height: 1.4; color: #B9B9B3">Your clips live in your Drive. We never store your videos.</span>
   </div>
 
@@ -28,7 +28,7 @@
     <span style="display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{dot}}"></span>{{title}}</span>
     <span style="font-size: 14px; line-height: 1.45; color: #B9B9B3">{{desc}}</span>
     <sc-if value="{{hasBar}}" hint-placeholder-val="{{ false }}">
-      <div style="height: 3px; border-radius: 2px; background: #26262A; margin-top: 4px"><div style="height: 3px; border-radius: 2px; width: {{bar}}%; background: #FF8A3D"></div></div>
+      <div style="height: 3px; border-radius: 2px; background: #26262A; margin-top: 4px"><div style="height: 3px; border-radius: 2px; width: {{bar}}%; background: #EDEDE8"></div></div>
     </sc-if>
     <sc-if value="{{hasAct}}" hint-placeholder-val="{{ false }}">
       <button onClick="{{doAct}}" style="align-self: flex-start; height: 40px; margin-top: 4px; padding: 0 16px; border-radius: 20px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 14px; font-weight: 500">{{act}}</button>
@@ -45,7 +45,7 @@
     <sc-for list="{{toggles}}" as="t" hint-placeholder-count="2">
       <button onClick="{{t.toggle}}" role="switch" aria-checked="{{t.on}}" style="height: 64px; display: flex; align-items: center; justify-content: space-between; border: 0; border-top: 1px solid #1F1F22; background: transparent; color: #EDEDE8; padding: 0; font-family: Geist, sans-serif; text-align: left">
         <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px">{{t.n}}</span><span style="font-size: 12px; color: #8E8E88">{{t.d}}</span></span>
-        <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{t.track}}"><span style="position: absolute; top: 2px; left: {{t.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+        <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{t.track}}"><span style="position: absolute; top: 2px; left: {{t.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; box-sizing: border-box; border: 2px solid #0A0A0B"></span></span>
       </button>
     </sc-for>
   </div>
@@ -82,7 +82,7 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const S = {
-      progress: { dot: '#FF8A3D', t: 'Backing up · ' + Math.round(st.pct / 100 * 129) + ' of 129', d: 'You can close SLIVER — it keeps going in the background and picks up where it left off.', act: null },
+      progress: { dot: '#EDEDE8', t: 'Backing up · ' + Math.round(st.pct / 100 * 129) + ' of 129', d: 'You can close SLIVER — it keeps going in the background and picks up where it left off.', act: null },
       uptodate: { dot: '#8FC7A4', t: 'Up to date', d: 'All 129 clips are in your Drive · 3 min ago', act: null },
       paused: { dot: '#E8C27A', t: 'Paused — waiting for Wi-Fi', d: '3 new clips will upload when you’re on Wi-Fi.', act: 'Use mobile data this time' },
       failed: { dot: '#E5675F', t: 'Backup didn’t finish', d: 'Couldn’t reach Google Drive. We’ll try again in 15 minutes.', act: 'Try again now' },
@@ -92,7 +92,7 @@ class Component extends DCLogic {
     };
     const key = st.over || this.props.state || 'uptodate';
     const s = S[key];
-    const sw = (on) => ({ track: on ? '#FF8A3D' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
+    const sw = (on) => ({ track: on ? '#EDEDE8' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
     return {
       dot: s.dot, title: s.t, desc: s.d, act: s.act || '', hasAct: !!s.act,
       hasBar: key === 'progress', bar: key === 'progress' ? (st.over ? st.pct : 65) : 0,

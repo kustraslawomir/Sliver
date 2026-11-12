@@ -61,9 +61,9 @@ body{margin:0}
     <sc-if value="{{hasLook}}" hint-placeholder-val="{{ true }}">
       <div style="position: absolute; left: 20px; right: 20px; top: 640px; display: flex; justify-content: space-between; align-items: baseline">
         <span style="font-size: 15px">Intensity · {{lookName}}</span>
-        <span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #FF8A3D">{{intensity}}%</span>
+        <span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #EDEDE8">{{intensity}}%</span>
       </div>
-      <input type="range" min="0" max="100" step="1" value="{{intensity}}" onChange="{{onIntensity}}" aria-label="Look intensity" style="position: absolute; left: 20px; top: 664px; width: 350px; height: 28px; margin: 0; accent-color: #FF8A3D">
+      <input type="range" min="0" max="100" step="1" value="{{intensity}}" onChange="{{onIntensity}}" aria-label="Look intensity" style="position: absolute; left: 20px; top: 664px; width: 350px; height: 28px; margin: 0; accent-color: #EDEDE8">
     </sc-if>
     <sc-if value="{{noLook}}" hint-placeholder-val="{{ false }}">
       <span style="position: absolute; left: 20px; right: 20px; top: 652px; font-size: 14px; color: #8E8E88">Original — no look applied. Adjustments still work.</span>
@@ -81,7 +81,7 @@ body{margin:0}
       <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 24px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">{{toolName}}</span>
       <span style="font-family: 'Geist Mono', monospace; font-size: 16px; color: {{toolValColor}}">{{toolValLabel}}</span>
     </div>
-    <input type="range" min="{{toolMin}}" max="{{toolMax}}" step="1" value="{{toolVal}}" onChange="{{onTool}}" onDoubleClick="{{resetTool}}" aria-label="{{toolName}}" style="position: absolute; left: 20px; top: 626px; width: 350px; height: 28px; margin: 0; accent-color: #FF8A3D">
+    <input type="range" min="{{toolMin}}" max="{{toolMax}}" step="1" value="{{toolVal}}" onChange="{{onTool}}" onDoubleClick="{{resetTool}}" aria-label="{{toolName}}" style="position: absolute; left: 20px; top: 626px; width: 350px; height: 28px; margin: 0; accent-color: #EDEDE8">
     <div style="position: absolute; left: 20px; right: 20px; top: 660px; height: 36px; display: flex; justify-content: space-between; align-items: center">
       <span style="font-size: 12px; color: #8E8E88">{{toolHint}}</span>
       <sc-if value="{{toolChanged}}" hint-placeholder-val="{{ false }}">
@@ -91,7 +91,7 @@ body{margin:0}
   </sc-if>
 
   <!-- bottom -->
-  <a href="Trim.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Apply filter</a>
+  <a href="Trim.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Apply filter</a>
   <div style="position: absolute; left: 20px; right: 20px; top: 778px; height: 44px; display: flex; justify-content: space-between; align-items: center">
     <button onClick="{{resetAll}}" style="height: 44px; padding: 0 4px; border: 0; background: transparent; color: #B9B9B3; font-family: Geist, sans-serif; font-size: 15px">Reset all</button>
     <button onClick="{{toggleDef}}" role="switch" aria-checked="{{defStr}}" style="height: 44px; padding: 0; border: 0; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px; display: flex; align-items: center; gap: 10px">
@@ -149,9 +149,9 @@ class Component extends DCLogic {
       presets: names.map((n, i) => ({
         i, n: n.toUpperCase(), int: st.ints[i], adj: zero, on: String(i === st.look),
         pick: () => this.setState({ look: i }),
-        border: i === st.look ? '2px solid #FF8A3D' : '1px solid #26262A',
-        glow: i === st.look ? '0 0 14px #FF8A3D55' : 'none',
-        color: i === st.look ? '#FF8A3D' : '#8E8E88'
+        border: i === st.look ? '2px solid #EDEDE8' : '1px solid #26262A',
+        glow: i === st.look ? 'none' : 'none',
+        color: i === st.look ? '#EDEDE8' : '#8E8E88'
       })),
       hasLook: st.look !== 0, noLook: st.look === 0,
       lookName: names[st.look],
@@ -159,13 +159,13 @@ class Component extends DCLogic {
       tools: T.map((t) => ({
         n: t[1], on: String(t[0] === st.tool),
         pick: () => this.setState({ tool: t[0] }),
-        border: t[0] === st.tool ? '1px solid #EDEDE8' : (t[0] === 'sharp' ? '1px solid #FF8A3D55' : '1px solid #26262A'),
+        border: t[0] === st.tool ? '1px solid #EDEDE8' : (t[0] === 'sharp' ? '1px solid #EDEDE855' : '1px solid #26262A'),
         bg: t[0] === st.tool ? '#EDEDE8' : 'transparent',
         color: t[0] === st.tool ? '#0A0A0B' : '#B9B9B3',
-        dot: st.adj[t[0]] ? '#FF8A3D' : 'transparent'
+        dot: st.adj[t[0]] ? '#EDEDE8' : 'transparent'
       })),
       toolName: tool[1], toolMin: tool[2], toolMax: tool[3], toolVal: tv, toolHint: tool[4],
-      toolValLabel: fmt(tv, tool), toolValColor: tv ? '#FF8A3D' : '#8E8E88',
+      toolValLabel: fmt(tv, tool), toolValColor: tv ? '#EDEDE8' : '#8E8E88',
       toolChanged: tv !== 0,
       onTool: (e) => setAdj(tool[0], Number(e.target.value)),
       resetTool: () => setAdj(tool[0], 0),
@@ -173,7 +173,7 @@ class Component extends DCLogic {
       toggleDef: () => this.setState({ def: !st.def }),
       defStr: String(st.def),
       defLabel: st.def ? 'Default for new clips' : 'Set as default look',
-      trackBg: st.def ? '#FF8A3D' : '#3A3A40',
+      trackBg: st.def ? '#EDEDE8' : '#3A3A40',
       knobX: st.def ? 20 : 2
     };
   }

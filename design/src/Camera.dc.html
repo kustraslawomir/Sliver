@@ -55,7 +55,7 @@
       <span style="display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 14px; border-radius: 16px; background: #05050566; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #EDEDE8">TUE · 10 NOV</span>
     </sc-if>
     <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
-      <span role="timer" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 14px; letter-spacing: 0.06em; color: #FF8A3D"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D; opacity: {{blink}}"></span>{{elapsed}}</span>
+      <span role="timer" style="display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 16px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 14px; letter-spacing: 0.06em; color: #EDEDE8"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF3B30; opacity: {{blink}}"></span>{{elapsed}}</span>
     </sc-if>
     <button onClick="{{toggleFlash}}" aria-label="{{flashLabel}}" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{flashColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"></path></svg></button>
   </div>
@@ -89,7 +89,7 @@
   <!-- today captured -->
   <sc-if value="{{showCaptured}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 20px; right: 70px; top: 112px; height: 64px; box-sizing: border-box; border-radius: 20px; background: #111113E6; border: 1px solid #26262A; padding: 8px 8px 8px 8px; display: flex; align-items: center; gap: 12px">
-      <div style="width: 36px; height: 48px; border-radius: 8px; border: 1.5px solid #FF8A3D; box-sizing: border-box; background: linear-gradient(160deg, #8A6A48, #1A120B)"></div>
+      <div style="width: 36px; height: 48px; border-radius: 8px; border: 1.5px solid #EDEDE8; box-sizing: border-box; background: linear-gradient(160deg, #8A6A48, #1A120B)"></div>
       <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
         <span style="font-size: 14px">Today's second is in.</span>
         <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8E8E88">00:01.00 · NOIR · 07:42 PM</span>
@@ -123,10 +123,10 @@
     <a href="Gallery.dc.html" aria-label="Open gallery" style="width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #EDEDE8; box-sizing: border-box; background: linear-gradient(160deg, #6A7A86, #1A2026); visibility: {{sideVis}}"></a>
 
     <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{startRec}}" aria-label="Record" style="width: 80px; height: 80px; border-radius: 40px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 62px; height: 62px; border-radius: 31px; background: #FF8A3D"></span></button>
+      <button onClick="{{startRec}}" aria-label="Record" style="width: 80px; height: 80px; border-radius: 40px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 62px; height: 62px; border-radius: 31px; background: #EDEDE8"></span></button>
     </sc-if>
     <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
-      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; box-sizing: border-box; border-radius: 40px; border: 3px solid #FF8A3D; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px #FF8A3D66"><span style="width: 28px; height: 28px; border-radius: 8px; background: #FF8A3D"></span></a>
+      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; box-sizing: border-box; border-radius: 40px; border: 3px solid #EDEDE8; display: flex; align-items: center; justify-content: center; box-shadow: none"><span style="width: 28px; height: 28px; border-radius: 8px; background: #EDEDE8"></span></a>
     </sc-if>
     <sc-if value="{{photoMode}}" hint-placeholder-val="{{ false }}">
       <a href="PhotoTrim.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; box-sizing: border-box; border-radius: 40px; border: 3px solid #EDEDE8; display: flex; align-items: center; justify-content: center"><span style="width: 62px; height: 62px; border-radius: 31px; background: #EDEDE8"></span></a>
@@ -174,14 +174,14 @@ class Component extends DCLogic {
       lookFilter: filters[st.look],
       lookName: names[st.look],
       lookFlash: st.now - st.flashAt < 900,
-      looks: names.map((n, i) => ({ n, pick: () => setLook(i), bg: i === st.look ? '#FF8A3D1F' : 'transparent', color: i === st.look ? '#FF8A3D' : '#B9B9B3' })),
+      looks: names.map((n, i) => ({ n, pick: () => setLook(i), bg: i === st.look ? '#EDEDE81F' : 'transparent', color: i === st.look ? '#EDEDE8' : '#B9B9B3' })),
       vfDown: (e) => { this._x = e.clientX; },
       vfUp: (e) => { if (this._x == null) return; const dx = e.clientX - this._x; this._x = null; if (Math.abs(dx) > 40 && !st.rec) setLook(st.look + (dx < 0 ? 1 : -1)); },
-      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#FF8A3D' : '#EDEDE8',
+      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#EDEDE8' : '#EDEDE8',
       toggleGrid: () => this.setState({ grid: !st.grid }),
-      flashColor: st.flash ? '#FF8A3D' : '#EDEDE8', flashLabel: st.flash ? 'Flash on' : 'Flash off',
+      flashColor: st.flash ? '#EDEDE8' : '#EDEDE8', flashLabel: st.flash ? 'Flash on' : 'Flash off',
       toggleFlash: () => this.setState({ flash: !st.flash }),
-      timerOff: st.timer === 0, timerOn: st.timer !== 0, timerLabel: st.timer + 's', timerColor: st.timer ? '#FF8A3D' : '#EDEDE8',
+      timerOff: st.timer === 0, timerOn: st.timer !== 0, timerLabel: st.timer + 's', timerColor: st.timer ? '#EDEDE8' : '#EDEDE8',
       cycleTimer: () => this.setState({ timer: st.timer === 0 ? 3 : (st.timer === 3 ? 10 : 0) }),
       setPhoto: () => this.setState({ mode: 'photo' }), setVideo: () => this.setState({ mode: 'video' }),
       photoBg: video ? 'transparent' : '#EDEDE8', photoColor: video ? '#8E8E88' : '#0A0A0B',

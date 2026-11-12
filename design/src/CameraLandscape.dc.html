@@ -39,9 +39,9 @@
     <span style="display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #8FC7A4"><span style="width: 6px; height: 6px; border-radius: 3px; background: #8FC7A4"></span>CINEMA 16:9 · FULL FRAME</span>
   </div>
   <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
-    <span role="timer" style="position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 15px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 13px; color: #FF8A3D"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF8A3D"></span>{{elapsed}}</span>
+    <span role="timer" style="position: absolute; left: 50%; top: 16px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-radius: 15px; background: #050505B3; font-family: 'Geist Mono', monospace; font-size: 13px; color: #EDEDE8"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF3B30"></span>{{elapsed}}</span>
   </sc-if>
-  <span style="position: absolute; left: 91px; bottom: 16px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #FF8A3D">NOIR ▾</span>
+  <span style="position: absolute; left: 91px; bottom: 16px; height: 30px; padding: 0 12px; border-radius: 15px; background: #05050580; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #EDEDE8">NOIR ▾</span>
 
   <!-- left rail (portrait top bar, rotated) -->
   <div style="position: absolute; left: 15px; top: 0; height: 390px; display: flex; flex-direction: column; justify-content: center; gap: 12px">
@@ -54,10 +54,10 @@
   <div style="position: absolute; right: 8px; top: 0; height: 390px; width: 64px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 22px 0; box-sizing: border-box">
     <button aria-label="Flip camera" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF1A; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0; visibility: {{sideVis}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></button>
     <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{startRec}}" aria-label="Record" style="width: 64px; height: 64px; border-radius: 32px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 48px; height: 48px; border-radius: 24px; background: #FF8A3D"></span></button>
+      <button onClick="{{startRec}}" aria-label="Record" style="width: 64px; height: 64px; border-radius: 32px; border: 3px solid #EDEDE8; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><span style="width: 48px; height: 48px; border-radius: 24px; background: #EDEDE8"></span></button>
     </sc-if>
     <sc-if value="{{recording}}" hint-placeholder-val="{{ false }}">
-      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 64px; height: 64px; box-sizing: border-box; border-radius: 32px; border: 3px solid #FF8A3D; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 22px #FF8A3D66"><span style="width: 24px; height: 24px; border-radius: 7px; background: #FF8A3D"></span></a>
+      <a href="Trim.dc.html" aria-label="Stop recording" style="width: 64px; height: 64px; box-sizing: border-box; border-radius: 32px; border: 3px solid #EDEDE8; display: flex; align-items: center; justify-content: center; box-shadow: none"><span style="width: 24px; height: 24px; border-radius: 7px; background: #EDEDE8"></span></a>
     </sc-if>
     <a href="Gallery.dc.html" aria-label="Open gallery" style="width: 44px; height: 44px; border-radius: 11px; border: 1.5px solid #EDEDE8; box-sizing: border-box; background: linear-gradient(160deg, #6A7A86, #1A2026); visibility: {{sideVis}}"></a>
   </div>
@@ -76,7 +76,7 @@ class Component extends DCLogic {
       startRec: () => this.setState({ rec: true, ms: 0 }),
       elapsed: '00:' + String(s).padStart(2, '0') + '.' + ds,
       sideVis: st.rec ? 'hidden' : 'visible',
-      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#FF8A3D' : '#EDEDE8',
+      grid: st.grid, gridStr: String(st.grid), gridColor: st.grid ? '#EDEDE8' : '#EDEDE8',
       toggleGrid: () => this.setState({ grid: !st.grid })
     };
   }

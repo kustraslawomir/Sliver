@@ -29,7 +29,7 @@
     </div>
     <span style="position: absolute; left: 14px; top: 14px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; background: #050505CC; border: 1px solid #3A3A40; border-radius: 999px; padding: 7px 11px">PHOTO · TAKEN SUN 8 NOV</span>
     <sc-if value="{{dateOn}}" hint-placeholder-val="{{ true }}">
-      <span style="position: absolute; right: 16px; bottom: 26px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">10 NOV 2026</span>
+      <span style="position: absolute; right: 16px; bottom: 26px; font-family: 'Geist Mono', monospace; font-size: 15px; letter-spacing: 0.08em; color: #EDEDE8; text-shadow: none">10 NOV 2026</span>
     </sc-if>
     <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 2px; background: #FFFFFF26"><div style="height: 2px; width: {{loopPct}}%; background: #EDEDE8"></div></div>
   </div>
@@ -44,7 +44,7 @@
       </sc-for>
     </div>
     <span style="position: absolute; left: 20px; right: 20px; top: 650px; font-size: 13px; color: #8E8E88">Subtle by default — 8% travel over one second, eased.</span>
-    <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Save clip</button>
+    <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Save clip</button>
     <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
       <a href="CameraV2.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Retake</a>
       <a href="Looks.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #B9B9B3; text-decoration: none; font-size: 15px">Filters</a>
@@ -74,9 +74,9 @@ class Component extends DCLogic {
     return {
       bgT: bg, fgT: fg, loopPct: (p * 100).toFixed(1),
       motionName: names[st.m].toUpperCase(),
-      motions: names.map((n, i) => ({ n, on: String(i === st.m), pick: () => this.setState({ m: i }), border: i === st.m ? '1px solid #FF8A3D' : '1px solid #26262A', bg: i === st.m ? '#FF8A3D1F' : 'transparent', color: i === st.m ? '#EDEDE8' : '#B9B9B3' })),
+      motions: names.map((n, i) => ({ n, on: String(i === st.m), pick: () => this.setState({ m: i }), border: i === st.m ? '1px solid #EDEDE8' : '1px solid #26262A', bg: i === st.m ? '#EDEDE81F' : 'transparent', color: i === st.m ? '#EDEDE8' : '#B9B9B3' })),
       dateOn: st.dateOn, dateStr: String(st.dateOn),
-      dateLabel: st.dateOn ? 'Date: on' : 'Date: off', dateColor: st.dateOn ? '#FF8A3D' : '#B9B9B3',
+      dateLabel: st.dateOn ? 'Date: on' : 'Date: off', dateColor: st.dateOn ? '#EDEDE8' : '#B9B9B3',
       toggleDate: () => this.setState({ dateOn: !st.dateOn }),
       notSaved: !st.saved, saved: st.saved,
       save: () => this.setState({ saved: true }), undo: () => this.setState({ saved: false })

@@ -19,10 +19,10 @@
   </div>
 
   <sc-if value="{{s0}}" hint-placeholder-val="{{ true }}">
-    <div style="position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center"><span aria-hidden="true" style="width: 4px; height: 260px; border-radius: 2px; background: #FFD2AE; box-shadow: 0 0 12px #FF8A3D, 0 0 44px #FF8A3D, 0 0 110px #FF8A3D88"></span></div>
+    <div style="position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center"><span aria-hidden="true" style="width: 4px; height: 260px; border-radius: 2px; background: #FFFFFF; box-shadow: none"></span></div>
     <h1 style="position: absolute; left: 24px; right: 24px; top: 488px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -0.02em">One clip a day.<br>One film a year.</h1>
     <p style="position: absolute; left: 24px; right: 24px; top: 600px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">Catch a moment, keep the best part. SLIVER turns your clips into a film.</p>
-    <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Start</button>
+    <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Start</button>
   </sc-if>
 
   <sc-if value="{{s1}}" hint-placeholder-val="{{ false }}">
@@ -39,15 +39,15 @@
         </button>
       </sc-for>
     </div>
-    <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Create project</button>
+    <button onClick="{{next}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Create project</button>
   </sc-if>
 
   <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
-    <div style="position: absolute; left: 24px; top: 150px; width: 72px; height: 72px; border-radius: 22px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #FF8A3D"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg></div>
+    <div style="position: absolute; left: 24px; top: 150px; width: 72px; height: 72px; border-radius: 22px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg></div>
     <h1 style="position: absolute; left: 24px; right: 24px; top: 250px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 40px; line-height: 1; letter-spacing: -0.02em">Camera, please.</h1>
     <p style="position: absolute; left: 24px; right: 24px; top: 316px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">SLIVER only records while you tap or hold. Nothing leaves your phone.</p>
     <span style="position: absolute; left: 24px; right: 24px; top: 650px; font-size: 13px; color: #8E8E88">Photos and reminders are asked later, when you need them.</span>
-    <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Allow camera</a>
+    <a href="CameraV2.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">Allow camera</a>
   </sc-if>
 </div>
 </x-dc>
@@ -57,10 +57,10 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     return {
-      dots: [0, 1, 2].map((i) => ({ h: i === st.s ? 22 : 14, c: i <= st.s ? '#FFD2AE' : '#3A3A40' })),
+      dots: [0, 1, 2].map((i) => ({ h: i === st.s ? 22 : 14, c: i <= st.s ? '#FFFFFF' : '#3A3A40' })),
       s0: st.s === 0, s1: st.s === 1, s2: st.s === 2,
       next: () => this.setState({ s: Math.min(2, st.s + 1) }),
-      formats: [['cinema', 'Cinema 16:9', 'For TV & YouTube', 52, 29], ['story', 'Story 9:16', 'For Instagram & TikTok', 20, 36]].map((f) => ({ n: f[1], d: f[2], w: f[3], h: f[4], on: String(st.fmt === f[0]), pick: () => this.setState({ fmt: f[0] }), border: st.fmt === f[0] ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: st.fmt === f[0] ? '#FF8A3D14' : 'transparent', shape: st.fmt === f[0] ? '#FF8A3D' : '#8E8E88' }))
+      formats: [['cinema', 'Cinema 16:9', 'For TV & YouTube', 52, 29], ['story', 'Story 9:16', 'For Instagram & TikTok', 20, 36]].map((f) => ({ n: f[1], d: f[2], w: f[3], h: f[4], on: String(st.fmt === f[0]), pick: () => this.setState({ fmt: f[0] }), border: st.fmt === f[0] ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: st.fmt === f[0] ? '#EDEDE814' : 'transparent', shape: st.fmt === f[0] ? '#EDEDE8' : '#8E8E88' }))
     };
   }
 }

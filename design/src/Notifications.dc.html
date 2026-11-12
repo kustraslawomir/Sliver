@@ -52,7 +52,7 @@
       <sc-for list="{{types}}" as="t" hint-placeholder-count="4">
         <button onClick="{{t.toggle}}" role="switch" aria-checked="{{t.on}}" style="height: 58px; display: flex; align-items: center; justify-content: space-between; border: 0; border-top: 1px solid #1F1F22; background: transparent; color: #EDEDE8; padding: 0; font-family: Geist, sans-serif; text-align: left">
           <span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px">{{t.n}}</span><span style="font-size: 12px; color: #8E8E88">{{t.d}}</span></span>
-          <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{t.track}}"><span style="position: absolute; top: 2px; left: {{t.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8"></span></span>
+          <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{t.track}}"><span style="position: absolute; top: 2px; left: {{t.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #EDEDE8; box-sizing: border-box; border: 2px solid #0A0A0B"></span></span>
         </button>
       </sc-for>
     </div>
@@ -66,8 +66,8 @@ class Component extends DCLogic {
     const st = this.state;
     const denied = !!this.props.denied;
     const seg = (on) => ({ bg: on ? '#EDEDE8' : 'transparent', color: on ? '#0A0A0B' : '#B9B9B3', on: String(on) });
-    const pill = (on) => ({ border: on ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: on ? '#FF8A3D1F' : '#111113', on: String(on) });
-    const sw = (on) => ({ track: on ? '#FF8A3D' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
+    const pill = (on) => ({ border: on ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: on ? '#EDEDE81F' : '#111113', on: String(on) });
+    const sw = (on) => ({ track: on ? '#EDEDE8' : '#3A3A40', knob: on ? 20 : 2, on: String(on) });
     const fixed = st.mode === 'fixed';
     const opts = fixed ? ['09:00', '13:00', '19:30', '21:30'] : ['8—12', '10—20', '17—22'];
     const sel = fixed ? st.time : st.win;

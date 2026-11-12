@@ -88,7 +88,7 @@ class Component extends DCLogic {
       sc: sc.toFixed(4), ox: ((fw - 350 * sc) / 2).toFixed(1), oy: ((fh - 420 * sc) / 2).toFixed(1),
       filter: 'brightness(' + b.toFixed(3) + ') contrast(' + c.toFixed(3) + ') saturate(' + s.toFixed(3) + ') sepia(' + v.sep.toFixed(3) + ') grayscale(' + v.g.toFixed(3) + ') hue-rotate(' + v.h.toFixed(1) + 'deg) blur(' + bl.toFixed(2) + 'px)',
       tint: p.tint || '#000000', tintO: v.tintO.toFixed(3),
-      tempC: temp > 0 ? '#FF8A3D' : '#3A7AFF', tempO: (Math.abs(temp) * 0.6).toFixed(3),
+      tempC: temp > 0 ? '#EDEDE8' : '#3A7AFF', tempO: (Math.abs(temp) * 0.6).toFixed(3),
       shUp: (sh > 0 ? sh * 0.55 : 0).toFixed(3), shDown: (sh < 0 ? -sh * 0.35 : 0).toFixed(3),
       hlDown: (hl < 0 ? -hl * 0.8 : 0).toFixed(3),
       fade: clamp(v.fade + A('fade') * 0.7).toFixed(3),

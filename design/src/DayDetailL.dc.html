@@ -26,7 +26,7 @@ body{margin:0}
       <dc-import name="Frame" look="{{look}}" intensity="{{intensity}}" adj="{{noAdj}}" frame-w="{{ 390 }}" frame-h="{{ 580 }}" radius="{{ 0 }}" hint-size="390px,580px"></dc-import>
     </div>
     <div style="position: absolute; left: 0; right: 0; top: 0; height: 140px; background: linear-gradient(180deg, #050505B3, transparent)"></div>
-    <span style="position: absolute; right: 18px; bottom: 44px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 15px; color: #FF9A4D; text-shadow: 0 0 6px #FF8A3D99">{{stamp}}</span>
+    <span style="position: absolute; right: 18px; bottom: 44px; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 15px; color: #141413; text-shadow: none">{{stamp}}</span>
     <div style="position: absolute; left: 16px; right: 16px; bottom: 32px; height: 2px; background: #FFFFFF26"><div class="sl-bar" style="height: 2px; background: #141413"></div></div>
     <button onClick="{{older}}" aria-label="Previous day" disabled="{{noOlder}}" style="position: absolute; left: 8px; top: 260px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{olderColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
     <button onClick="{{newer}}" aria-label="Next day" disabled="{{noNewer}}" style="position: absolute; right: 8px; top: 260px; width: 44px; height: 44px; border-radius: 22px; border: 0; background: #05050566; color: {{newerColor}}; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></button>
@@ -50,7 +50,7 @@ body{margin:0}
     <span style="height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #E2DED6; display: flex; align-items: center; gap: 6px; color: #4A4843; font-size: 13px; white-space: nowrap; overflow: hidden"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>{{place}}</span>
   </div>
 
-  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">Share this clip</button>
+  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #141413; color: #F6F4EF; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Share this clip</button>
   <div style="position: absolute; left: 20px; right: 20px; top: 776px; display: flex; justify-content: space-between">
     <a href="Trim.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #4A4843; text-decoration: none; font-size: 15px">Replace</a>
     <a href="Looks.dc.html" style="height: 44px; padding: 0 12px; display: flex; align-items: center; color: #4A4843; text-decoration: none; font-size: 15px">Change filter</a>
@@ -86,7 +86,7 @@ body{margin:0}
       <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
         <button onClick="{{o.toggle}}" role="switch" aria-checked="{{o.on}}" style="height: 50px; display: flex; align-items: center; justify-content: space-between; border: 0; border-top: 1px solid #E2DED6; background: transparent; color: #141413; font-family: Geist, sans-serif; font-size: 15px; padding: 0">
           <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px"><span>{{o.n}}</span><span style="font-size: 12px; color: #6E6B64">{{o.d}}</span></span>
-          <span style="position: relative; width: 44px; height: 26px; border-radius: 13px; background: {{o.track}}"><span style="position: absolute; top: 2px; left: {{o.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #FFFFFF"></span></span>
+          <span style="position: relative; width: 44px; height: 26px; border-radius: 13px; background: {{o.track}}"><span style="position: absolute; top: 2px; left: {{o.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #FFFFFF; box-sizing: border-box; border: 2px solid #141413"></span></span>
         </button>
       </sc-for>
       <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding-top: 14px; border-top: 1px solid #E2DED6">
@@ -118,7 +118,7 @@ class Component extends DCLogic {
     const d = D[st.idx];
     const inc = st.inc;
     const tog = (k) => () => { const n = Object.assign({}, inc); n[k] = !n[k]; this.setState({ inc: n }); };
-    const sw = (on) => ({ track: on ? '#FF8A3D' : '#CFCAC0', knob: on ? 20 : 2, on: String(on) });
+    const sw = (on) => ({ track: on ? '#141413' : '#CFCAC0', knob: on ? 20 : 2, on: String(on) });
     return {
       look: d.look, intensity: d.int, noAdj: {},
       stamp: d.stamp, dateLabel: d.label, weekday: d.wd, dayN: d.n, time: d.time, lookName: d.lookName, place: d.place,

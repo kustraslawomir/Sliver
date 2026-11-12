@@ -72,8 +72,8 @@ class Component extends DCLogic {
       cards: L.map((l, i) => ({
         i: i + 1, n: l[0], d: l[1], r: l[2],
         num: String(i + 1).padStart(2, '0') + (i === 4 ? ' · HOUSE LOOK' : ''),
-        numColor: i === 4 ? '#FF8A3D' : '#8E8E88',
-        border: i === 4 ? '1px solid #FF8A3D88' : '1px solid #26262A'
+        numColor: i === 4 ? '#EDEDE8' : '#8E8E88',
+        border: i === 4 ? '1px solid #EDEDE888' : '1px solid #26262A'
       }))
     };
   }

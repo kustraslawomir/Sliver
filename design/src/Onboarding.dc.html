@@ -27,7 +27,7 @@
   <!-- 0 concept: one second -->
   <sc-if value="{{s0}}" hint-placeholder-val="{{ true }}">
     <div style="position: absolute; left: 0; right: 0; top: 120px; height: 360px; display: flex; align-items: center; justify-content: center">
-      <div style="width: {{slitW}}px; height: 260px; border-radius: 3px; background: #FFD2AE; box-shadow: 0 0 12px #FF8A3D, 0 0 40px #FF8A3D, 0 0 {{slitGlow}}px #FF8A3D88"></div>
+      <div style="width: {{slitW}}px; height: 260px; border-radius: 3px; background: #FFFFFF; box-shadow: none"></div>
     </div>
     <h1 style="position: absolute; left: 24px; right: 24px; top: 500px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.02; letter-spacing: -0.02em">One second.<br>Every day.</h1>
     <p style="position: absolute; left: 24px; right: 24px; top: 610px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">Keep one moment from each day. In a year, it's a film only you could make.</p>
@@ -43,8 +43,8 @@
       </div>
       <div style="position: absolute; left: 20px; width: 112px; top: 112px; height: 64px; background: #0D0D0FA8"></div>
       <div style="position: absolute; right: 20px; width: 160px; top: 112px; height: 64px; background: #0D0D0FA8"></div>
-      <div style="position: absolute; left: 130px; top: 102px; width: 50px; height: 84px; box-sizing: border-box; border: 2.5px solid #FF8A3D; border-radius: 10px; box-shadow: 0 0 14px #FF8A3D99, 0 0 36px #FF8A3D55"></div>
-      <span style="position: absolute; left: 106px; top: 54px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #FF8A3D; border: 1px solid #FF8A3D55; border-radius: 999px; padding: 7px 11px">✦ AUTO-PICKED</span>
+      <div style="position: absolute; left: 130px; top: 102px; width: 50px; height: 84px; box-sizing: border-box; border: 2.5px solid #EDEDE8; border-radius: 10px; box-shadow: none"></div>
+      <span style="position: absolute; left: 106px; top: 54px; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: #EDEDE8; border: 1px solid #EDEDE855; border-radius: 999px; padding: 7px 11px">✦ AUTO-PICKED</span>
       <span style="position: absolute; left: 0; right: 0; top: 214px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: #8E8E88">DAY 142 · 00:01.00</span>
     </div>
     <h1 style="position: absolute; left: 24px; right: 24px; top: 500px; margin: 0; font-family: Geist, Inter, system-ui, sans-serif; font-weight: 600; font-size: 35px; line-height: 1.04; letter-spacing: -0.02em">We find the best second.<br>You have the final say.</h1>
@@ -54,7 +54,7 @@
   <!-- 2 concept: private film -->
   <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 0; right: 0; top: 130px; height: 340px; display: flex; align-items: center; justify-content: center">
-      <div style="width: {{posterW}}px; height: {{posterH}}px; transition: width 320ms cubic-bezier(0.3, 0, 0, 1), height 320ms cubic-bezier(0.3, 0, 0, 1); box-sizing: border-box; border-radius: 18px; border: 1px solid #26262A; background: linear-gradient(180deg, #2A2018 0%, #050505 70%); padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; box-shadow: 0 20px 60px #FF8A3D22">
+      <div style="width: {{posterW}}px; height: {{posterH}}px; transition: width 320ms cubic-bezier(0.3, 0, 0, 1), height 320ms cubic-bezier(0.3, 0, 0, 1); box-sizing: border-box; border-radius: 18px; border: 1px solid #26262A; background: linear-gradient(180deg, #2A2018 0%, #050505 70%); padding: 18px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; box-shadow: none">
         <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: #8E8E88">A FILM BY YOU</span>
         <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 38px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em">2026</span>
         <span style="font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #B9B9B3">365 DAYS · 06:05</span>
@@ -70,7 +70,7 @@
 
   <!-- 3–4 permissions -->
   <sc-if value="{{perm}}" hint-placeholder-val="{{ false }}">
-    <div style="position: absolute; left: 24px; top: 170px; width: 72px; height: 72px; border-radius: 22px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #FF8A3D">
+    <div style="position: absolute; left: 24px; top: 170px; width: 72px; height: 72px; border-radius: 22px; border: 1px solid #26262A; background: #111113; display: flex; align-items: center; justify-content: center; color: #EDEDE8">
       <sc-if value="{{s3}}" hint-placeholder-val="{{ true }}"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M8 7l1.5-3h5L16 7"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg></sc-if>
       <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}"><svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 9"></path></svg></sc-if>
     </div>
@@ -79,7 +79,7 @@
     <p style="position: absolute; left: 24px; right: 24px; top: 420px; margin: 0; font-size: 17px; line-height: 1.5; color: #B9B9B3">{{permBody}}</p>
     <div style="position: absolute; left: 24px; right: 24px; top: 560px; display: flex; flex-direction: column; gap: 10px">
       <sc-for list="{{permPoints}}" as="pp" hint-placeholder-count="2">
-        <span style="display: flex; gap: 10px; align-items: center; font-size: 14px; color: #B9B9B3"><span style="width: 2px; height: 14px; background: #FF8A3D"></span>{{pp}}</span>
+        <span style="display: flex; gap: 10px; align-items: center; font-size: 14px; color: #B9B9B3"><span style="width: 2px; height: 14px; background: #EDEDE8"></span>{{pp}}</span>
       </sc-for>
     </div>
   </sc-if>
@@ -102,18 +102,18 @@
     <sc-if value="{{isRandom}}" hint-placeholder-val="{{ false }}">
       <div style="position: absolute; left: 24px; right: 24px; top: 300px; height: 40px">
         <div style="position: absolute; left: 0; right: 0; top: 19px; height: 2px; background: #26262A"></div>
-        <div style="position: absolute; left: 30%; right: 18%; top: 18px; height: 4px; border-radius: 2px; background: #FF8A3D66"></div>
+        <div style="position: absolute; left: 30%; right: 18%; top: 18px; height: 4px; border-radius: 2px; background: #EDEDE866"></div>
         <div style="position: absolute; left: calc(30% - 2px); top: 6px; width: 4px; height: 28px; border-radius: 2px; background: #EDEDE8"></div>
         <div style="position: absolute; left: calc(82% - 2px); top: 6px; width: 4px; height: 28px; border-radius: 2px; background: #EDEDE8"></div>
-        <div style="position: absolute; left: {{randX}}%; top: 12px; width: 2px; height: 16px; background: #FFD2AE; box-shadow: 0 0 8px #FF8A3D"></div>
+        <div style="position: absolute; left: {{randX}}%; top: 12px; width: 2px; height: 16px; background: #FFFFFF; box-shadow: none"></div>
       </div>
       <div style="position: absolute; left: 24px; right: 24px; top: 346px; display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 12px; color: #B9B9B3"><span>07:00</span><span style="color: #EDEDE8">10:00 — 20:00</span><span>24:00</span></div>
     </sc-if>
     <span style="position: absolute; left: 24px; top: 404px; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8E8E88">PREVIEW · LOCK SCREEN</span>
     <div style="position: absolute; left: 20px; right: 20px; top: 428px; border-radius: 22px; background: #2A2A2EE6; padding: 14px; display: flex; gap: 12px">
       <div style="position: relative; flex: 0 0 38px; height: 38px; border-radius: 9px; background: #050505; overflow: hidden">
-        <div style="position: absolute; left: 13px; top: 0; width: 30px; height: 38px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, #FF8A3D66, transparent)"></div>
-        <div style="position: absolute; left: 12px; top: 8px; width: 2px; height: 22px; background: #FFD2AE"></div>
+        <div style="position: absolute; left: 13px; top: 0; width: 30px; height: 38px; clip-path: polygon(0 22%, 0 78%, 100% 100%, 100% 0); background: linear-gradient(90deg, #EDEDE866, transparent)"></div>
+        <div style="position: absolute; left: 12px; top: 8px; width: 2px; height: 22px; background: #FFFFFF"></div>
       </div>
       <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
         <div style="display: flex; justify-content: space-between; font-size: 13px; color: #B9B9B3"><span style="font-weight: 600; color: #EDEDE8">SLIVER</span><span>{{notifTime}}</span></div>
@@ -136,10 +136,10 @@
 
   <!-- CTA -->
   <sc-if value="{{ctaButton}}" hint-placeholder-val="{{ true }}">
-    <button onClick="{{primary}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{ctaLabel}}</button>
+    <button onClick="{{primary}}" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">{{ctaLabel}}</button>
   </sc-if>
   <sc-if value="{{ctaLink}}" hint-placeholder-val="{{ false }}">
-    <a href="Camera.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #FF8A3D; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: 0 8px 32px #FF8A3D44">{{ctaLabel}}</a>
+    <a href="Camera.dc.html" style="position: absolute; left: 20px; right: 20px; top: 716px; height: 56px; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px; box-shadow: none">{{ctaLabel}}</a>
   </sc-if>
   <sc-if value="{{hasSecondary}}" hint-placeholder-val="{{ false }}">
     <sc-if value="{{secLinks}}" hint-placeholder-val="{{ false }}">
@@ -191,7 +191,7 @@ class Component extends DCLogic {
     const ctaLabels = ['Continue', 'Continue', 'Set it up', 'Allow camera & mic', 'Allow photo access', 'Turn on reminders', '', 'Add ' + kept + ' days'];
     const secLabels = ['', '', '', 'Not now', 'Not now', 'No reminders', 'Skip — start as guest', 'Start fresh'];
     return {
-      slits: [0, 1, 2, 3, 4, 5, 6].map((i) => ({ h: i === s ? 22 : 14, bg: i <= s ? '#FFD2AE' : '#3A3A40', glow: i === s ? '0 0 8px #FF8A3D' : 'none' })),
+      slits: [0, 1, 2, 3, 4, 5, 6].map((i) => ({ h: i === s ? 22 : 14, bg: i <= s ? '#FFFFFF' : '#3A3A40', glow: i === s ? 'none' : 'none' })),
       back: () => go(s - 1), backVis: s > 0 ? 'visible' : 'hidden',
       skip: () => go(3), skipVis: s < 3 ? 'visible' : 'hidden',
       posterW: st.fmt === 'cinema' ? 320 : 180, posterH: st.fmt === 'cinema' ? 180 : 320,
@@ -211,7 +211,7 @@ class Component extends DCLogic {
       setFixed: () => this.setState({ rem: 'fixed' }), setRandom: () => this.setState({ rem: 'random' }),
       fixedBg: st.rem === 'fixed' ? '#EDEDE8' : 'transparent', fixedColor: st.rem === 'fixed' ? '#0A0A0B' : '#B9B9B3',
       randBg: st.rem === 'random' ? '#EDEDE8' : 'transparent', randColor: st.rem === 'random' ? '#0A0A0B' : '#B9B9B3',
-      times: times.map((n, i) => ({ n, pick: () => this.setState({ time: i }), border: i === st.time ? '1.5px solid #FF8A3D' : '1px solid #26262A', bg: i === st.time ? '#FF8A3D1F' : '#111113', color: i === st.time ? '#EDEDE8' : '#B9B9B3' })),
+      times: times.map((n, i) => ({ n, pick: () => this.setState({ time: i }), border: i === st.time ? '1.5px solid #EDEDE8' : '1px solid #26262A', bg: i === st.time ? '#EDEDE81F' : '#111113', color: i === st.time ? '#EDEDE8' : '#B9B9B3' })),
       randX: (30 + 52 * p).toFixed(1),
       notifTime: st.rem === 'fixed' ? times[st.time] : 'now',
       notifBody: st.rem === 'fixed' ? 'Your second for today? Whatever’s in front of you counts.' : 'Right now. Whatever you’re looking at — that’s today.',
@@ -221,8 +221,8 @@ class Component extends DCLogic {
         on: String(st.bf[i] && hasVid[i]),
         toggle: () => { if (!hasVid[i]) return; const b = st.bf.slice(); b[i] = !b[i]; this.setState({ bf: b }); },
         bg: hasVid[i] ? 'linear-gradient(160deg, ' + d[1] + ', #0A0A0B)' : '#111113',
-        border: hasVid[i] && st.bf[i] ? '2px solid #FF8A3D' : '1px solid #1F1F22',
-        ring: '#EDEDE8', dot: st.bf[i] ? '#FF8A3D' : 'transparent', check: hasVid[i] ? 'block' : 'none'
+        border: hasVid[i] && st.bf[i] ? '2px solid #EDEDE8' : '1px solid #1F1F22',
+        ring: '#EDEDE8', dot: st.bf[i] ? '#EDEDE8' : 'transparent', check: hasVid[i] ? 'block' : 'none'
       }) : null).filter(Boolean),
       ctaButton: s !== 6 && s !== 7, ctaLink: s === 7,
       ctaLabel: ctaLabels[s],
