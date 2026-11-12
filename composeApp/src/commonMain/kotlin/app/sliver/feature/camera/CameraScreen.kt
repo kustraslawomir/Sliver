@@ -165,8 +165,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     var recording by remember { mutableStateOf(false) }
     var holding by remember { mutableStateOf(false) }
     var elapsedMs by remember { mutableLongStateOf(0L) }
-    var zoom by rememberSaveable(cam.lens) { mutableFloatStateOf(1f) }
-    // Owner decision: the light always starts off when the camera opens, like the system camera.
+    // Owner decision: mode, lens and light are not remembered; the camera always opens on Video, back lens, 1×, light off.
+    var mode by rememberSaveable { mutableStateOf(CameraMode.VIDEO) }
+    var lens by rememberSaveable { mutableStateOf(Lens.BACK) }
+    var zoom by rememberSaveable(lens) { mutableFloatStateOf(1f) }
     var light by rememberSaveable { mutableStateOf(false) }
     var zoomRange by remember { mutableStateOf<ClosedFloatingPointRange<Float>?>(null) }
     var zoomJob by remember { mutableStateOf<Job?>(null) }
@@ -230,7 +232,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     fun onTap() {
         when {
             recording -> stopRecording()
-            cam.mode == CameraMode.PHOTO -> capturePhoto()
+            mode == CameraMode.PHOTO -> capturePhoto()
             else -> startRecording()
         }
     }
@@ -244,13 +246,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 .padding(bottom = if (side) 0.dp else 248.dp, end = if (side) SideControlsWidth else 0.dp)
                 .clip(RoundedCornerShape(24.dp)),
         ) {
-            CameraPreview(engine, cam.mode, cam.lens, light, Modifier.fillMaxSize()) {
+            CameraPreview(engine, mode, lens, light, Modifier.fillMaxSize()) {
                 ready = true
                 zoomRange = engine.zoomRange()
             }
             if (bandActive) CinemaBandDim()
             if (cam.grid) GridOverlay()
-            FocusOverlay(!recording && ready, cam.lens to cam.mode, engine::exposureRange, engine::focus, engine::setExposureIndex, { factor ->
+            FocusOverlay(!recording && ready, lens to mode, engine::exposureRange, engine::focus, engine::setExposureIndex, { factor ->
                 zoomJob?.cancel()
                 zoomRange?.let { zoom = (zoom * factor).coerceIn(it) }
             })
@@ -325,8 +327,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
         ) {
             Box(Modifier.alpha(if (recording) 0f else 1f)) {
             Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                ModeWord("Photo", cam.mode == CameraMode.PHOTO) { if (!recording) update { s -> s.copy(mode = CameraMode.PHOTO) } }
-                ModeWord("Video", cam.mode == CameraMode.VIDEO) { if (!recording) update { s -> s.copy(mode = CameraMode.VIDEO) } }
+                ModeWord("Photo", mode == CameraMode.PHOTO) { if (!recording) mode = CameraMode.PHOTO }
+                ModeWord("Video", mode == CameraMode.VIDEO) { if (!recording) mode = CameraMode.VIDEO }
             }
             if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
             }
@@ -339,14 +341,14 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 RecordButton(
                     state = when {
                         recording -> RecordState.Recording
-                        cam.mode == CameraMode.PHOTO -> RecordState.Photo
+                        mode == CameraMode.PHOTO -> RecordState.Photo
                         else -> RecordState.VideoIdle
                     },
                     holding = holding,
                     enabled = ready,
                     onTap = ::onTap,
                     onHoldStart = {
-                        if (cam.mode == CameraMode.VIDEO && !recording) {
+                        if (mode == CameraMode.VIDEO && !recording) {
                             holding = true
                             startRecording()
                         }
@@ -359,7 +361,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     val turn by animateFloatAsState(flipTurns * 180f, tween(240), label = "flip")
                     CameraAction(SliverIcons.SwitchCamera, "Flip", "Switch camera", turn) {
                         flipTurns++
-                        update { it.copy(lens = if (it.lens == Lens.BACK) Lens.FRONT else Lens.BACK) }
+                        lens = if (lens == Lens.BACK) Lens.FRONT else Lens.BACK
                     }
                 }
             }

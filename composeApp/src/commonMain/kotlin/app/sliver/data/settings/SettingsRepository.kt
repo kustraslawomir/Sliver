@@ -44,9 +44,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val notifFilmReady = booleanPreferencesKey("notif.filmReady")
         val notifBackupProblems = booleanPreferencesKey("notif.backupProblems")
         val notifOnThisDay = booleanPreferencesKey("notif.onThisDay")
-        val cameraMode = stringPreferencesKey("camera.mode")
         val cameraLook = stringPreferencesKey("camera.look")
-        val cameraLens = stringPreferencesKey("camera.lens")
         val cameraGrid = booleanPreferencesKey("camera.grid")
         val cameraActiveFilmId = stringPreferencesKey("camera.activeFilmId")
         val onboardingDone = booleanPreferencesKey("onboardingDone")
@@ -94,9 +92,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
                 onThisDay = this[K.notifOnThisDay] ?: d.notif.onThisDay,
             ),
             camera = CameraSettings(
-                mode = enum(K.cameraMode, d.camera.mode),
                 look = enum(K.cameraLook, d.camera.look),
-                lens = enum(K.cameraLens, d.camera.lens),
                 grid = this[K.cameraGrid] ?: d.camera.grid,
                 activeFilmId = this[K.cameraActiveFilmId],
             ),
@@ -142,9 +138,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.notifFilmReady, s.notif.filmReady)
         put(K.notifBackupProblems, s.notif.backupProblems)
         put(K.notifOnThisDay, s.notif.onThisDay)
-        put(K.cameraMode, s.camera.mode.name)
         put(K.cameraLook, s.camera.look.name)
-        put(K.cameraLens, s.camera.lens.name)
         put(K.cameraGrid, s.camera.grid)
         put(K.cameraActiveFilmId, s.camera.activeFilmId)
         put(K.onboardingDone, s.onboardingDone)

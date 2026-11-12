@@ -30,9 +30,7 @@ data class NotifSettings(
 )
 
 data class CameraSettings(
-    val mode: CameraMode = CameraMode.VIDEO,
     val look: LookPreset = LookPreset.NATURAL,
-    val lens: Lens = Lens.BACK,
     val grid: Boolean = false,
     val activeFilmId: String? = null,
 )

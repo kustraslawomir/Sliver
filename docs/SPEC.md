@@ -9,7 +9,7 @@ Free, offline-first, private. Account only for optional backup to the user's own
 - **No streaks.** Empty days are neutral. Archive header shows "N SECONDS · SINCE <first day>".
 - **Date stamp**: global setting, default ON. Shown on previews; burned in only at export; each film can turn it off before rendering.
 - **Formats**: each film is Cinema 16:9 (default) or Story 9:16. Camera suggests the orientation of the *active film*. Clips that don't match are center-cropped (or blurred fill) at render. Never block, never nag.
-- **Camera settings persist** between launches (mode, look, lens, grid, active film). Self-timer and the light (flash) always start OFF.
+- **Camera settings persist** between launches (look, grid, active film). Mode (Video), lens (back), zoom (1×), self-timer and the light (flash) are NOT remembered: the camera always opens on those defaults.
 
 ## Screens
 
