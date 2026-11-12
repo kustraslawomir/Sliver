@@ -41,3 +41,20 @@ Put a clear line in HANDOFF.md "Owner TODO".
 Build + tests + lint + designLint + verifyRoborazziDebug green; device check on Xiaomi/emulator with
 synthetic HEIC, HEVC-HDR .mov, a Motion Photo and a Live Photo pair placed in the SliverDemo folders
 (only those folders are safe); screenshots of the Video · Photo choice (dark + light).
+
+## 5. Dates from messengers (Telegram, WhatsApp, Signal…)
+Today: date = EXIF/QuickTime → else MediaStore DATE_TAKEN/DATE_MODIFIED, and `checkCaptureDate` is
+strict (only that day; no date = blocked). Messengers that compress (Telegram "photo/video", WhatsApp,
+Messenger) strip EXIF, so DATE_MODIFIED = the day it was received → a Tuesday photo received on
+Thursday can only go to Thursday. Fix:
+- Treat DATE_MODIFIED (and DATE_ADDED) as **not a capture date**. Only EXIF DateTimeOriginal /
+  QuickTime creationdate / MediaStore DATE_TAKEN from a camera count as "known".
+- Next fallback: date in the file name (display name from the picker Uri), unit-tested patterns:
+  Telegram `photo_2026-11-10_14-22-31`, `video_2026-11-10_14-22-31`; WhatsApp `IMG-20261110-WA0001`,
+  `VID-20261110-WA0001`; Signal `signal-2026-11-10-142231`; generic `IMG_20261110_142231`,
+  `PXL_20261110_142231`, `Screenshot_20261110-142231`. This is the date it was **sent/saved**, so it is
+  a hint, not proof.
+- New rule: known capture date → only that day (as today). Hint or no date → allow adding to the day
+  the user chose, with a one-line notice "Date unknown — added to <day>" (or "Sent on <date> — added to
+  <day>" for a hint). Never block a messenger photo just because its date is missing.
+- Update the DECISION comment, SPEC and tests (`GalleryDatesTest`, `CaptureDateTest`).
