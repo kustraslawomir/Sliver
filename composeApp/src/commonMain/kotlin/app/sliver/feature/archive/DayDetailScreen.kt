@@ -121,7 +121,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             if (app?.dateStamp == true) {
                 SliverText(
                     "${current.day.toString().padStart(2, '0')}.${current.month.ordinal.plus(1).toString().padStart(2, '0')}.${current.year}",
-                    SliverType.MonoS.copy(shadow = Shadow(SliverColors.Accent.copy(alpha = Glow.stampShadowAlpha), blurRadius = 6f * LocalDensity.current.density)),
+                    SliverType.Stamp.copy(shadow = Shadow(SliverColors.Accent.copy(alpha = Glow.stampShadowAlpha), blurRadius = 6f * LocalDensity.current.density)),
                     Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 56.dp, end = SliverSpace.Gutter),
                     SliverColors.AccentCore,
                 )
@@ -160,8 +160,8 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 SliverText(weekdayName(current), SliverType.DisplayL)
                 val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
                 SliverText(
-                    "DAY ${dayNumber(current, first)}" + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                    SliverType.MonoS,
+                    "Day ${dayNumber(current, first)}" + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
+                    SliverType.Meta,
                 )
                 if (day != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {

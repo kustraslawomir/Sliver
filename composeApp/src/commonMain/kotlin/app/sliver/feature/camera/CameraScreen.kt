@@ -422,8 +422,8 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Box(Modifier.size(8.dp).background(SliverColors.Accent, CircleShape))
-        SliverText(time, SliverType.MonoL, color = color, maxLines = 1)
-        if (clipOk) SliverText("\u00B7 CLIP OK", SliverType.MonoS, color = color, maxLines = 1)
+        SliverText(time, SliverType.Num, color = color, maxLines = 1)
+        if (clipOk) SliverText("\u00B7 Clip OK", SliverType.Meta, color = color, maxLines = 1)
     }
 }
 

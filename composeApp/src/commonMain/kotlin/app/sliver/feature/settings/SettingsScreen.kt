@@ -103,7 +103,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "SLIVER feedback") }
 
         SliverText(
-            "SLIVER ${platform.versionName}", SliverType.MonoS, Modifier.padding(top = SliverSpace.S6),
+            "Sliver ${platform.versionName}", SliverType.Meta, Modifier.padding(top = SliverSpace.S6),
             color = SliverColors.TextTertiary,
         )
     }

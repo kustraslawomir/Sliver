@@ -56,10 +56,10 @@ fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12
 }
 
 fun clipsHeader(count: Int, first: LocalDate, format: FilmFormat? = null): String =
-    "$count ${if (count == 1) "CLIP" else "CLIPS"} · SINCE ${first.day} ${MonthNames[first.month.ordinal]}" +
-        (format?.let { " · ${it.label().uppercase()}" } ?: "")
+    "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthNames[first.month.ordinal]}" +
+        (format?.let { " · ${it.label()}" } ?: "")
 
-val MonthNames = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+val MonthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 val MonthLong = listOf(
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",

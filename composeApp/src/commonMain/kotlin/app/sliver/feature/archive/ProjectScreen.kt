@@ -113,7 +113,7 @@ object ArchiveSession {
 }
 
 private val WeekDays = listOf("M", "T", "W", "T", "F", "S", "S")
-private val Weekdays3 = listOf("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
+private val Weekdays3 = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 private val CellShape get() = SliverShapes.S
 private val YearEmpty = Color(0xFF1C1C20)
 private val CellEmptyLine = Color(0xFF1F1F22)
@@ -224,7 +224,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                             }
                         } else {
                             val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month } }
-                            MonthHeading(MonthLong[shown.month - 1], "$count ${if (count == 1) "CLIP" else "CLIPS"}")
+                            MonthHeading(MonthLong[shown.month - 1], "$count ${if (count == 1) "clip" else "clips"}")
                             MonthGrid(shown, byDate, today, first, ::onCell, ::replaceDay, ::removeDay)
                         }
 
@@ -484,7 +484,7 @@ private fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, f
     val rows = remember(year, byDate) { yearColors(year, byDate) }
     val inYear = remember(byDate, year) { byDate.keys.count { it.year == year } }
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        MonthHeading("$year", "$inYear ${if (inYear == 1) "CLIP" else "CLIPS"} · ${doubleDigits(inYear / 60)}:${doubleDigits(inYear % 60)} OF FILM")
+        MonthHeading("$year", "$inYear ${if (inYear == 1) "clip" else "clips"} · ${doubleDigits(inYear / 60)}:${doubleDigits(inYear % 60)} of film")
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             rows.forEachIndexed { m, row ->
                 val inRange = YearMonth(year, m + 1) in first.toYearMonth()..today.toYearMonth()
@@ -538,7 +538,7 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             SliverText(
-                "ONE MONTH AGO · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
+                "One month ago · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
                 mono(11.sp, 0.06.em, SliverColors.Accent), maxLines = 1,
             )
             SliverText("A clip you might have forgotten", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp))

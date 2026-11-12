@@ -52,7 +52,7 @@ fun ComponentGallery() {
         ) {
             SliverText("Gallery", SliverType.DisplayL)
             SliverText("Display M", SliverType.DisplayM)
-            SliverText("12:04.5 mono", SliverType.MonoL)
+            SliverText("12:04.5 mono", SliverType.Num)
             Badge("badge")
             PrimaryButton("Primary", {})
             PrimaryButton("Disabled", {}, enabled = false)

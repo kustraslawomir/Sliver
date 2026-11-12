@@ -179,7 +179,7 @@ private fun ProjectList(
             val (open, archived) = projects.partition { !it.archived }
             open.forEach { ProjectRow(it, stats[it.id], it.id == activeId, onPick, onMenu) }
             if (archived.isNotEmpty()) {
-                SliverText("ARCHIVED", SliverType.MonoS, Modifier.padding(top = SliverSpace.S3), SliverColors.TextTertiary)
+                SliverText("Archived", SliverType.Meta, Modifier.padding(top = SliverSpace.S3), SliverColors.TextTertiary)
                 archived.forEach { ProjectRow(it, stats[it.id], false, onPick, onMenu) }
             }
         }
@@ -207,7 +207,7 @@ private fun ProjectRow(
         }
         Column(Modifier.weight(1f)) {
             SliverText(project.name, SliverType.DisplayS, maxLines = 1)
-            SliverText(projectMeta(project, stats), SliverType.MonoS, color = SliverColors.TextTertiary, maxLines = 2)
+            SliverText(projectMeta(project, stats), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 2)
         }
         if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary)
         IconButton44({ onMenu(project) }, "Project options") { SliverIcon(SliverIcons.More, SliverColors.TextSecondary) }
@@ -228,7 +228,7 @@ private fun NewProject(
         SheetHeader("New project", onBack)
         SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name")
         FormatCards(format) { format = it }
-        SliverText("STARTS TODAY", SliverType.MonoS, color = SliverColors.TextTertiary)
+        SliverText("Starts today", SliverType.Meta, color = SliverColors.TextTertiary)
         PrimaryButton(
             if (busy) "Creating..." else "Create project",
             { clean?.let { onCreate(it, format) } },

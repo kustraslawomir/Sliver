@@ -20,8 +20,8 @@ fun cleanProjectName(raw: String): String? = raw.trim().take(MAX_PROJECT_NAME).i
 fun projectMeta(project: Project, stats: ProjectStats?): String {
     val clips = stats?.clips ?: 0
     val since = stats?.since ?: project.startDate
-    return "${project.format.label().uppercase()} · $clips ${if (clips == 1) "CLIP" else "CLIPS"} · " +
-        "SINCE ${since.day} ${MonthNames[since.month.ordinal]}"
+    return "${project.format.label()} · $clips ${if (clips == 1) "clip" else "clips"} · " +
+        "since ${since.day} ${MonthNames[since.month.ordinal]}"
 }
 
 /** Archiving or deleting the last open project would leave the camera with nowhere to save. */

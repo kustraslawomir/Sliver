@@ -159,7 +159,7 @@ internal fun NotifPreview(copy: NotifCopy, modifier: Modifier = Modifier) {
         modifier.fillMaxWidth().clip(SliverShapes.M).background(SliverColors.Surface2)
             .border(1.dp, SliverColors.LineHairline, SliverShapes.M).padding(SliverSpace.S4),
     ) {
-        SliverText("SLIVER  ·  now", SliverType.MonoS, color = SliverColors.TextTertiary)
+        SliverText("Sliver  ·  now", SliverType.Meta, color = SliverColors.TextTertiary)
         SliverText(copy.title, SliverType.Headline, Modifier.padding(top = SliverSpace.S1))
         SliverText(copy.body, SliverType.BodySmall, color = SliverColors.TextSecondary)
     }

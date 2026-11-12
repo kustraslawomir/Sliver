@@ -139,13 +139,13 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 val index = position.first.coerceIn(0, clips.size - 1)
                 if (dateOn) {
                     SliverText(
-                        stampText(plan.days[index].date), SliverType.MonoS,
+                        stampText(plan.days[index].date), SliverType.Stamp,
                         Modifier.align(Alignment.TopEnd).padding(SliverSpace.S3), SliverColors.AccentCore,
                     )
                 }
                 val dip = fadeAlpha(options.cut, position.second)
                 if (dip > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = dip)))
-                if (paused) SliverText("Paused", SliverType.MonoS, Modifier.align(Alignment.Center), SliverColors.TextPrimary)
+                if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.TextPrimary)
             }
         }
 
@@ -159,7 +159,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 }
             }
             SliverSlider(fraction, { seek = FilmSeek(it) })
-            SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.MonoS, color = SliverColors.TextSecondary)
+            SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.Meta, color = SliverColors.TextSecondary)
         }
 
         Section("Range") {
@@ -249,7 +249,7 @@ private val MonthLong = listOf(
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText(title.uppercase(), SliverType.MonoS, color = SliverColors.TextSecondary)
+        SliverText(title, SliverType.Meta, color = SliverColors.TextSecondary)
         content()
     }
 }
@@ -260,7 +260,7 @@ private fun DateStepper(label: String, date: LocalDate, onChange: (LocalDate) ->
         SliverText(label, SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextSecondary)
         GhostButton("-7", { onChange(date.plus(-7, DateTimeUnit.DAY)) })
         GhostButton("-1", { onChange(date.plus(-1, DateTimeUnit.DAY)) })
-        SliverText(stampText(date), SliverType.MonoS, Modifier.padding(horizontal = SliverSpace.S2))
+        SliverText(stampText(date), SliverType.Stamp, Modifier.padding(horizontal = SliverSpace.S2))
         GhostButton("+1", { onChange(date.plus(1, DateTimeUnit.DAY)) })
         GhostButton("+7", { onChange(date.plus(7, DateTimeUnit.DAY)) })
     }

@@ -153,7 +153,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText("FOR ${dayLabel(day, today).uppercase()}", SliverType.MonoS, color = SliverColors.TextSecondary)
+            SliverText("For ${dayLabel(day, today).lowercase()}", SliverType.Meta, color = SliverColors.TextSecondary)
             Box(Modifier.padding(SliverSpace.S6))
         }
         ClipFrame(

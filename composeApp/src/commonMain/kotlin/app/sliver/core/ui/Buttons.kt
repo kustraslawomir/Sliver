@@ -103,5 +103,5 @@ fun IconButton44(
 
 @Composable
 fun Badge(text: String, modifier: Modifier = Modifier, color: Color = SliverColors.Accent) {
-    SliverText(text.uppercase(), SliverType.MonoS, modifier, color)
+    SliverText(text, SliverType.Meta, modifier, color)
 }

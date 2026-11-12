@@ -269,7 +269,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                Chip(dayLabel(day, today).uppercase(), selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
+                Chip(dayLabel(day, today), selected = false, onClick = { sheet = true }, trailing = SliverIcons.ChevronDown)
                 IconButton44(
                     { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
                     if (previewSound) "Mute" else "Unmute",
@@ -397,7 +397,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                             dayLabel(d, today), SliverType.Body,
                             color = if (d == day) SliverColors.Accent else SliverColors.TextPrimary,
                         )
-                        if (filled.any { it.date == d }) SliverText("HAS A CLIP", SliverType.MonoS, color = SliverColors.TextTertiary)
+                        if (filled.any { it.date == d }) SliverText("Has a clip", SliverType.Meta, color = SliverColors.TextTertiary)
                     }
                 }
             }
@@ -528,6 +528,6 @@ private fun PrepareSkeleton(progress: Float, info: String, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SlitLoader()
         SliverText("Preparing video… ${(progress * 100).roundToInt()}%", SliverType.Body, color = SliverColors.TextPrimary)
-        if (info.isNotEmpty()) SliverText(info, SliverType.MonoS, color = SliverColors.TextTertiary)
+        if (info.isNotEmpty()) SliverText(info, SliverType.Meta, color = SliverColors.TextTertiary)
     }
 }

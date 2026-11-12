@@ -171,7 +171,7 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset) {
                 },
             ) {
                 SliverText(
-                    "AE/AF LOCK", SliverType.MonoS.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
+                    "AE/AF lock", SliverType.Meta.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
                     Modifier.background(SliverColors.Accent, CircleShape).padding(horizontal = 10.dp, vertical = 4.dp),
                     SliverColors.OnAccent, maxLines = 1,
                 )
@@ -239,7 +239,7 @@ private fun ExposureSlider(
         ) { SliverIcon(SliverIcons.Sun, tint, size = 16.dp) }
         if (dragging) {
             SliverText(
-                formatEv(index, range.step), SliverType.MonoS.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
+                formatEv(index, range.step), SliverType.Meta.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
                 Modifier.align(if (onRight) Alignment.TopEnd else Alignment.TopStart)
                     .offset { IntOffset(0, ((trackPx - with(density) { 28.dp.toPx() }) * fraction).roundToInt() - with(density) { 18.dp.toPx() }.roundToInt()) },
                 Color.White, maxLines = 1,

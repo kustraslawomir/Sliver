@@ -91,7 +91,7 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
         when (val s = state) {
             is RenderState.Running -> {
                 SliverText("Rendering your film", SliverType.BodySmall, Modifier.padding(top = SliverSpace.S2), SliverColors.TextSecondary)
-                SliverText("${s.percent}%", SliverType.MonoS, Modifier.padding(top = SliverSpace.S6), SliverColors.AccentCore)
+                SliverText("${s.percent}%", SliverType.Meta, Modifier.padding(top = SliverSpace.S6), SliverColors.AccentCore)
                 Box(Modifier.padding(vertical = SliverSpace.S3).fillMaxWidth().height(4.dp).clip(SliverShapes.Pill).background(SliverColors.Surface3)) {
                     Box(Modifier.fillMaxHeight().fillMaxWidth(s.percent.coerceIn(0, 100) / 100f).background(SliverColors.Accent))
                 }
@@ -166,9 +166,9 @@ fun PremiereScreen(onDone: () -> Unit) {
                 Box(Modifier.fillMaxSize().background(SliverColors.BgVoid.copy(alpha = 0.55f * titleAlpha(ms))))
             }
             Column(Modifier.alpha(titleAlpha(ms)), horizontalAlignment = Alignment.CenterHorizontally) {
-                SliverText("A FILM BY YOU", SliverType.MonoS, color = SliverColors.TextTertiary)
+                SliverText("A film by you", SliverType.Meta, color = SliverColors.TextTertiary)
                 SliverText(f?.name ?: "", SliverType.DisplayM, Modifier.padding(vertical = SliverSpace.S2))
-                f?.let { SliverText(it.rangeText(), SliverType.MonoS, color = SliverColors.TextSecondary) }
+                f?.let { SliverText(it.rangeText(), SliverType.Meta, color = SliverColors.TextSecondary) }
             }
         }
     }
@@ -239,7 +239,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     if (fullscreen) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
             Video(Modifier.fillMaxSize().clickable { playing = !playing })
-            SliverText(dateLabel, SliverType.MonoS, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S4), SliverColors.AccentCore)
+            SliverText(dateLabel, SliverType.Stamp, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S4), SliverColors.AccentCore)
             Controls(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = SliverSpace.Gutter))
         }
         return
@@ -260,7 +260,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 .clickable { playing = !playing },
         ) {
             Video(Modifier.fillMaxSize())
-            SliverText(dateLabel, SliverType.MonoS, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S3), SliverColors.AccentCore)
+            SliverText(dateLabel, SliverType.Stamp, Modifier.align(Alignment.TopEnd).padding(SliverSpace.S3), SliverColors.AccentCore)
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {

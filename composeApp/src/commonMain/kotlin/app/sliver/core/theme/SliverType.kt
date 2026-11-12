@@ -25,6 +25,8 @@ object SliverType {
     val Body get() = TextStyle(SliverColors.TextPrimary, 17.sp, FontWeight.Normal, fontFamily = SliverFonts.Sans, lineHeight = 26.sp)
     val BodySmall get() = TextStyle(SliverColors.TextSecondary, 15.sp, FontWeight.Normal, fontFamily = SliverFonts.Sans, lineHeight = 22.sp)
     val Caption get() = TextStyle(SliverColors.TextTertiary, 13.sp, FontWeight.Normal, fontFamily = SliverFonts.Sans, lineHeight = 18.sp)
-    val MonoL get() = TextStyle(SliverColors.TextPrimary, 15.sp, FontWeight.Medium, fontFamily = SliverFonts.Mono, lineHeight = 20.sp, letterSpacing = 0.9.sp)
-    val MonoS get() = TextStyle(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Mono, lineHeight = 16.sp, letterSpacing = 1.44.sp)
+    val Num get() = TextStyle(SliverColors.TextPrimary, 15.sp, FontWeight.Medium, fontFamily = SliverFonts.Sans, lineHeight = 20.sp, fontFeatureSettings = "tnum")
+    val Meta get() = TextStyle(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Sans, lineHeight = 16.sp, fontFeatureSettings = "tnum")
+    /** Burned-in date stamp: the only uppercase mono text. */
+    val Stamp get() = TextStyle(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Mono, lineHeight = 16.sp, letterSpacing = 1.44.sp)
 }

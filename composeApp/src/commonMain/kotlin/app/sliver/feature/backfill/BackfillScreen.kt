@@ -164,7 +164,7 @@ fun BackfillScreen(onBack: () -> Unit) {
 private fun Mosaic(rows: List<YearRow>, off: Set<YearMonth>, onToggle: (YearMonth) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         rows.forEach { row ->
-            SliverText(row.year.toString(), SliverType.MonoS, color = SliverColors.TextTertiary)
+            SliverText(row.year.toString(), SliverType.Meta, color = SliverColors.TextTertiary)
             Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
                 row.counts.forEachIndexed { i, count ->
                     val month = YearMonth(row.year, i + 1)
@@ -177,9 +177,9 @@ private fun Mosaic(rows: List<YearRow>, off: Set<YearMonth>, onToggle: (YearMont
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        SliverText(MonthNames[i].take(1), SliverType.MonoS, color = SliverColors.TextTertiary)
+                        SliverText(MonthNames[i].take(1), SliverType.Meta, color = SliverColors.TextTertiary)
                         SliverText(
-                            if (count > 0) count.toString() else "-", SliverType.MonoS,
+                            if (count > 0) count.toString() else "-", SliverType.Meta,
                             color = if (on) SliverColors.Accent else SliverColors.TextDisabled,
                         )
                     }
