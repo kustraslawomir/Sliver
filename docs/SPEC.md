@@ -69,7 +69,7 @@ Preview (hold to compare with original), tabs LOOKS / ADJUST.
 - Add sheet for an empty day: Video from gallery / Photo → 1 second (gallery opens for that date), Leave it open.
 
 ### Day detail
-Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n, time. Chips: look (→ editor), place (from file location; name cached when online). CTA "Share this second" (sheet: date stamp, original sound, SLIVER mark off by default → share intent). Replace / Change look / Remove (confirm; original in gallery untouched; Drive copy trashed).
+Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n, time. Chips: look (→ editor), place (from file location; name cached when online). Replace / Change look / Remove (confirm; original in gallery untouched; Drive copy trashed).
 
 ### Fill the past (opt-in tool, Archive Year + Settings)
 Intro (needs full photo access, nothing leaves the phone, filled days never touched) + range: Since I started / This year / Everything → scan by taken date → mosaic of empty days that can be filled → toggle months, "Use photos too" → "Fill N days" (background, progress) → Undo all. Limited access banner with "Allow all".

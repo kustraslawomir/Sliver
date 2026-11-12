@@ -13,7 +13,7 @@ Project (root)
  │                                                  ├─ record stop ─► Edit clip ─► Save ─► Project
  │                                                  └─ Add ─► system Photo Picker ─► Edit clip | Photo clip
  ├─ Done for today (today has a clip) ─► Clip detail (today)
- ├─ day cell (filled) ─► Clip detail ─► Share sheet
+ ├─ day cell (filled) ─► Clip detail (Replace, Remove)
  ├─ day cell (empty) ─► system Photo Picker(forDate) ─► Edit clip | Photo clip
  ├─ Make film ─► Film builder ─► Export ─► Player
  ├─ film poster ─► Player

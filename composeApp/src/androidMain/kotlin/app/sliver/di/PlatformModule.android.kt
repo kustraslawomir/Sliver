@@ -24,9 +24,7 @@ import app.sliver.data.backup.DayFileReader
 import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.AndroidClipExporter
-import app.sliver.data.export.AndroidDayShare
 import app.sliver.data.export.ClipExporter
-import app.sliver.data.export.DayShare
 import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.repo.AndroidPlaceResolver
 import app.sliver.data.repo.PlaceResolver
@@ -52,12 +50,8 @@ import org.koin.dsl.module
 @androidx.annotation.OptIn(UnstableApi::class)
 private fun clipExporter(ctx: Context): ClipExporter = AndroidClipExporter(ctx)
 
-@androidx.annotation.OptIn(UnstableApi::class)
-private fun dayShare(ctx: Context): DayShare = AndroidDayShare(ctx)
-
 actual val platformModule: Module = module {
     single<PlaceResolver> { AndroidPlaceResolver(get<Context>()) }
-    single<DayShare> { dayShare(get<Context>()) }
     single {
         val ctx = get<Context>()
         Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath)

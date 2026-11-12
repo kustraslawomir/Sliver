@@ -27,7 +27,6 @@ Legend: ok = matches, no = does not match / not done.
 - ok App icon, splash theme + installSplashScreen, `ic_stat_sliver` on all notifications (code)
 - no Not captured: home screen with themed icons on/off and a notification (would show the user's launcher/shade); splash only captured masked
 - no Design boards are template-driven HTML and render with unresolved placeholders headless; design PNGs in design/png are partial, so comparison is by measuring the HTML
-- no AndroidDayShare draws "SLIVER" as canvas text for the share watermark; left as is
 
 ## User decisions applied in this run
 - Timer, Filter strip and countdown removed from Camera; Grid moved into a 3-dots menu (switch, persisted); Light is a plain icon (zap / zap-off, 44 dp, Role.Switch). The design board still shows Timer/Filter/tools row: the decision wins.
@@ -104,7 +103,7 @@ Without `GOOGLE_WEB_CLIENT_ID` the app uses `FakeGoogleAuth` and an in-memory Dr
 - Film render has no chunked resume; "Try again" restarts. The film's look is applied on top of each day's baked look.
 - On restore conflict a local day wins.
 - Delete account moves the Drive folder to trash (recoverable).
-- Not-built iOS: `iosMain` holds `TODO("iOS later")` stubs, never compiled. `DayShare` has no iOS stub.
+- Not-built iOS: `iosMain` holds `TODO("iOS later")` stubs, never compiled.
 
 ## How to run
 ```
