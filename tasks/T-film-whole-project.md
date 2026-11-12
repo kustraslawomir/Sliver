@@ -27,3 +27,18 @@ This overrides the RANGE section in `design/src/FilmBuilder.dc.html` and docs/SP
 Build + tests + lint + designLint green; film builder screenshot (dark + light, seeded synthetic
 data, Xiaomi or emulator only) in docs/qa/film-whole-project/; a seeded project's film includes
 all its days.
+
+## Also: delete a film (owner request, 2026-11-12)
+`FilmRepository.delete` exists but no UI reaches it. Add it per tasks/U12-undo-not-confirm.md
+("remove film" = act now + undo toast, no confirm dialog) and reuse the undo pattern already used
+for removing a clip in `DayDetailScreen` (same toast, same 6 s window).
+- Film player: in the `⋯` / secondary actions, "Delete film" as **red text only** (v1.4: destructive
+  = red text, never a filled red button). Deleting closes the player, returns to the project/library
+  and shows "Film deleted · Undo".
+- Library/Project screen: long-press a film poster → small sheet with "Delete film" (red text).
+- After the undo window: delete the rendered file and poster from app storage, remove the DB row,
+  and let the next backup remove it from Drive (check BackupEngine handles a deleted film; fix if
+  not). Clips are never touched.
+- A collecting (LIVE) film can be deleted too; it simply stops existing until the user makes a new one.
+- Unit test: delete + undo restores the film; delete without undo removes row and files.
+- If design/src has no board for this, keep it minimal in existing components (DECISION comment).
