@@ -28,6 +28,9 @@ interface DriveClient {
         existingId: String? = null,
     ): DriveFile
 
+    /** Replaces the appProperties of [fileId] without touching its content. */
+    suspend fun setProperties(fileId: String, appProperties: Map<String, String>)
+
     suspend fun list(folderId: String): List<DriveFile>
     suspend fun download(fileId: String): ByteArray
     suspend fun trash(fileId: String)
@@ -41,7 +44,6 @@ interface DriveClient {
 data class DriveQuota(val used: Long, val limit: Long?)
 
 const val DRIVE_FOLDER_NAME = "Fragments"
-const val MANIFEST_NAME = "manifest.json"
 
 class InMemoryDriveClient : DriveClient {
     private class Entry(var file: DriveFile, val parent: String?, var bytes: ByteArray, var trashed: Boolean = false, val folder: Boolean = false)
@@ -51,6 +53,10 @@ class InMemoryDriveClient : DriveClient {
 
     /** Makes every upload fail with this error (tests, offline/full demos). */
     var failUploads: BackupError? = null
+
+    /** Lets this many more uploads / downloads succeed, then fails every one (simulates a connection dropping mid-sync). */
+    var uploadsBeforeFailure: Int? = null
+    var downloadsBeforeFailure: Int? = null
     var limitBytes: Long? = null
 
     override suspend fun storageQuota() = DriveQuota(entries.values.filter { !it.trashed }.sumOf { it.bytes.size.toLong() }, limitBytes)
@@ -81,6 +87,7 @@ class InMemoryDriveClient : DriveClient {
         existingId: String?,
     ): DriveFile {
         failUploads?.let { throw DriveException(it) }
+        uploadsBeforeFailure?.let { left -> if (left <= 0) throw DriveException(BackupError.OFFLINE) else uploadsBeforeFailure = left - 1 }
         val e = existingId?.let { entries[it] }
         if (e == null) return add(name, folderId, appProperties, bytes)
         e.file = e.file.copy(name = name, appProperties = appProperties)
@@ -88,12 +95,18 @@ class InMemoryDriveClient : DriveClient {
         return e.file
     }
 
+    override suspend fun setProperties(fileId: String, appProperties: Map<String, String>) {
+        entries[fileId]?.let { it.file = it.file.copy(appProperties = appProperties) }
+    }
+
     override suspend fun list(folderId: String) =
         if (entries[folderId]?.trashed == true) emptyList()
         else entries.values.filter { it.parent == folderId && !it.trashed && !it.folder }.map { it.file }
 
-    override suspend fun download(fileId: String): ByteArray =
-        entries[fileId]?.bytes ?: throw DriveException(BackupError.OTHER, "not found")
+    override suspend fun download(fileId: String): ByteArray {
+        downloadsBeforeFailure?.let { left -> if (left <= 0) throw DriveException(BackupError.OFFLINE) else downloadsBeforeFailure = left - 1 }
+        return entries[fileId]?.bytes ?: throw DriveException(BackupError.OTHER, "not found")
+    }
 
     override suspend fun trash(fileId: String) {
         entries[fileId]?.trashed = true

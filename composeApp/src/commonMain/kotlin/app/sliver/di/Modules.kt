@@ -5,7 +5,9 @@ import app.sliver.data.auth.AccountManager
 import kotlinx.coroutines.flow.first
 import app.sliver.data.auth.GoogleAuth
 import app.sliver.data.backup.BackupCoordinator
-import app.sliver.data.backup.BackupEngine
+import app.sliver.data.backup.DaoTombstoneStore
+import app.sliver.data.backup.SyncEngine
+import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.backup.DriveClient
 import app.sliver.data.backup.RestoreEngine
 import app.sliver.data.backup.DriveTrashQueue
@@ -36,18 +38,20 @@ val commonModule: Module = module {
     single { get<SliverDatabase>().projectDao() }
     single { get<SliverDatabase>().dayDao() }
     single { get<SliverDatabase>().filmDao() }
+    single { get<SliverDatabase>().tombstoneDao() }
+    single<TombstoneStore> { DaoTombstoneStore(get()) }
     single<DriveTrashQueue> { SettingsTrashQueue(get()) }
-    single<ProjectRepository> { ProjectRepositoryImpl(get(), get(), get(), get(), get(), get()) }
-    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get(), get()) }
-    single { BackupEngine(get(), get(), get(), get(), get(), get()) }
+    single<ProjectRepository> { ProjectRepositoryImpl(get(), get(), get(), get(), get(), get(), get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { SyncEngine(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
-    single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
+    single { RestoreEngine(get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
     single { FilmDeleter(get(), get(), get()) }
     single { AutoImportStore(get()) }
     single { DraftActions(get(), get(), get(), get()) }
     single { AutoImportExecutor(get(), get(), get(), get(), get(), get(), get()) }
-    single<FilmRepository> { FilmRepositoryImpl(get(), get()) }
+    single<FilmRepository> { FilmRepositoryImpl(get(), get(), get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }
     single {

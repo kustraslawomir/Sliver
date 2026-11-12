@@ -8,6 +8,7 @@ import app.sliver.data.db.Migration2To3
 import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.Migration4To5
 import app.sliver.data.db.Migration5To6
+import app.sliver.data.db.Migration6To7
 import app.sliver.data.db.SliverDatabase
 import java.io.File
 import kotlin.test.Test
@@ -64,7 +65,7 @@ class MigrationTest {
         val path = ctx.getDatabasePath("migration.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
         createV2(path)
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
         val projects = db.projectDao().observeAll().first()
         assertEquals(1, projects.size)
         val project = projects.single()
@@ -86,7 +87,7 @@ class MigrationTest {
         val path = ctx.getDatabasePath("migration-empty.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
         createV2(path, withEmptyProjectTable = true)
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
         val project = db.projectDao().observeAll().first().single()
         assertEquals(2, db.dayDao().observeAll(project.id).first().size)
         db.close()
@@ -101,7 +102,7 @@ class MigrationTest {
             it.execSQL("INSERT INTO project VALUES ('p1', 'Mine', 'CINEMA', '2025-01-01', NULL, 1, 0, 0)")
         }
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
         assertEquals(listOf("p1"), db.projectDao().observeAll().first().map { it.id })
         assertEquals(2, db.dayDao().observeAll("p1").first().size)
         db.close()
@@ -124,7 +125,7 @@ class MigrationTest {
         sql.version = 5
         sql.close()
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
         val day = db.dayDao().observeAll("p1").first().single()
         assertEquals(false, day.draft)
         assertEquals(null, day.draftCandidates)
@@ -153,7 +154,7 @@ class MigrationTest {
         sql.version = 3
         sql.close()
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
         val day = db.dayDao().observeAll("p1").first().single()
         assertEquals(-1f, day.luma)
         assertEquals(0, day.tone)
@@ -161,6 +162,38 @@ class MigrationTest {
         db.dayDao().setLight("p1", day.date, 0.5f, 0xFF112233.toInt())
         assertEquals(0, db.dayDao().withoutLight().size)
         assertEquals(0.5f, db.dayDao().observeAll("p1").first().single().luma)
+        db.close()
+    }
+
+    @Test
+    fun v6ToV7StampsRowsWithTheirCreationTimeAndAddsTombstones() = runTest {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val path = ctx.getDatabasePath("migration-v6.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
+        val schema = JSONObject(File("schemas/app.sliver.data.db.SliverDatabase/6.json").readText()).getJSONObject("database")
+        val sql = SQLiteDatabase.openOrCreateDatabase(path, null)
+        val entities = schema.getJSONArray("entities")
+        for (i in 0 until entities.length()) {
+            sql.execSQL(entities.getJSONObject(i).getString("createSql").replace("\${TABLE_NAME}", entities.getJSONObject(i).getString("tableName")))
+        }
+        sql.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+        sql.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES (42, '${schema.getString("identityHash")}')")
+        sql.execSQL("INSERT INTO project VALUES ('p1', 'Mine', 'CINEMA', '2025-01-01', NULL, 5000, 0, 0)")
+        sql.execSQL("INSERT INTO day (projectId, date, file, thumb, source, look, motion, keepAudio, speed, color, cropY, takenAt, createdAt, driveFileId, backup, place, luma, tone, draft) VALUES ('p1', '2025-03-02', 'a.mp4', 'a.jpg', 'CAMERA', '{}', 'STILL', 1, 1.0, 0, NULL, 1000, 7000, 'drv', 'DONE', NULL, -1, 0, 0)")
+        sql.execSQL("INSERT INTO film (id, name, format, rangeType, live, audio, cut, dateOn, mismatch, projectId) VALUES ('f1', 'All', 'CINEMA', 'YEAR', 0, 'ORIGINAL', 'CUT', 1, 'CENTER', 'p1')")
+        sql.version = 6
+        sql.close()
+
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).allowMainThreadQueries().build()
+        val project = db.projectDao().getById("p1")!!
+        assertEquals(5000L, project.updatedAt)
+        assertEquals("", project.updatedBy)
+        val day = db.dayDao().observeAll("p1").first().single()
+        assertEquals(7000L, day.updatedAt)
+        assertEquals("drv", day.driveFileId)
+        assertEquals(5000L, db.filmDao().getById("f1")!!.updatedAt)
+        assertEquals(0, db.tombstoneDao().all().size)
+        db.tombstoneDao().upsert(app.sliver.data.db.Tombstone("DAY", "p1", "2025-03-02", 9L))
+        assertEquals(1, db.tombstoneDao().all().size)
         db.close()
     }
 }

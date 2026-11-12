@@ -97,6 +97,8 @@ private class RecordingDays : DayRepository {
     override suspend fun deleteRow(projectId: String, date: LocalDate) = Unit
     override suspend fun save(day: Day) = Unit
     override suspend fun delete(date: LocalDate) = Unit
+    override suspend fun applyRemote(day: Day) = Unit
+    override suspend fun removeRemote(projectId: String, date: LocalDate) = Unit
 }
 
 private class RecordingFilms : FilmRepository {
@@ -108,4 +110,6 @@ private class RecordingFilms : FilmRepository {
     override suspend fun getFilm(id: String): Film? = null
     override suspend fun save(film: Film) { saved += film }
     override suspend fun delete(id: String) = Unit
+    override suspend fun applyRemote(film: Film) = Unit
+    override suspend fun removeRemote(id: String) = Unit
 }

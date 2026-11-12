@@ -1,7 +1,7 @@
 package app.sliver.feature.notifications
 
 import android.content.Context
-import app.sliver.data.backup.BackupEngine
+import app.sliver.data.backup.SyncEngine
 import app.sliver.data.backup.BackupProgress
 import app.sliver.data.backup.RestoreEngine
 import app.sliver.feature.autoimport.AutoImportStore
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 /** Mirrors backup, restore and auto-import progress into notifications; each posts at most once a second. */
 class ProgressCoordinator(
     private val context: Context,
-    private val backup: BackupEngine,
+    private val backup: SyncEngine,
     private val restore: RestoreEngine,
     private val autoImport: AutoImportStore,
 ) {

@@ -98,7 +98,7 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         val koin = KoinPlatform.getKoin()
         val settings = koin.get<SettingsRepository>()
         if (!settings.settings.first().account.signedIn) return Result.success()
-        val error = koin.get<BackupEngine>().run()
+        val error = koin.get<SyncEngine>().run()
         val now = settings.settings.first()
         val account = now.account
         if (shouldNotifyBackupProblem(account, now.notif.backupProblems, System.currentTimeMillis())) {

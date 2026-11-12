@@ -138,6 +138,12 @@ class RestDriveClient(
         }
     }
 
+    override suspend fun setProperties(fileId: String, appProperties: Map<String, String>) {
+        call(HttpMethod.Patch, "/drive/v3/files/$fileId") {
+            jsonBody(buildJsonObject { put("appProperties", JsonObject(appProperties.mapValues { JsonPrimitive(it.value) })) })
+        }.checked()
+    }
+
     override suspend fun list(folderId: String): List<DriveFile> =
         query("'$folderId' in parents and trashed = false")
 

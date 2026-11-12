@@ -7,13 +7,14 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Project::class, Day::class, Film::class], version = 6, exportSchema = true, autoMigrations = [AutoMigration(from = 1, to = 2)])
+@Database(entities = [Project::class, Day::class, Film::class, Tombstone::class], version = 7, exportSchema = true, autoMigrations = [AutoMigration(from = 1, to = 2)])
 @TypeConverters(Converters::class)
 @ConstructedBy(SliverDatabaseConstructor::class)
 abstract class SliverDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun dayDao(): DayDao
     abstract fun filmDao(): FilmDao
+    abstract fun tombstoneDao(): TombstoneDao
 }
 
 @Suppress("KotlinNoActualForExpect")

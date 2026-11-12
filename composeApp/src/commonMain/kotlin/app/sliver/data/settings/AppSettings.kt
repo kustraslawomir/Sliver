@@ -45,6 +45,15 @@ data class AccountSettings(
     val failingSince: Long? = null,
     val problemNotified: Boolean = false,
     val pendingTrash: List<String> = emptyList(),
+    /** Stable id of this install in the shared Drive; never synced. */
+    val deviceId: String = "",
+    val lastSyncAt: Long? = null,
+    /** Start time of the last cycle that finished; local edits after it still have to be pushed. */
+    val lastPushedAt: Long = 0,
+    /** Distinct phones seen on Drive in the last 30 days, this one included. */
+    val phones: Int = 1,
+    /** "projectId|date" of days another phone replaced since the notice was last shown. */
+    val changedNotices: List<String> = emptyList(),
 )
 
 data class AppSettings(

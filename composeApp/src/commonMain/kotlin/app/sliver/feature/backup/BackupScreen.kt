@@ -42,7 +42,7 @@ import app.sliver.core.icons.SliverIcons
 import app.sliver.data.auth.AccountDeleter
 import app.sliver.data.auth.AccountManager
 import app.sliver.data.backup.ArchiveExporter
-import app.sliver.data.backup.BackupEngine
+import app.sliver.data.backup.SyncEngine
 import app.sliver.data.backup.BackupProgress
 import app.sliver.data.backup.BackupScheduler
 import app.sliver.data.backup.BackupSnapshot
@@ -84,7 +84,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val manager = remember { koin.get<AccountManager>() }
-    val engine = remember { koin.get<BackupEngine>() }
+    val engine = remember { koin.get<SyncEngine>() }
     val days = remember { koin.get<DayRepository>() }
     val drive = remember { koin.get<DriveClient>() }
     val scheduler = remember { koin.get<BackupScheduler>() }

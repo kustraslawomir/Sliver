@@ -2,6 +2,9 @@ package app.sliver.data.repo
 
 import app.sliver.data.FilmFormat
 import app.sliver.data.backup.DriveTrashQueue
+import app.sliver.data.backup.NoTombstones
+import app.sliver.data.backup.TombstoneKind
+import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.db.DayDao
 import app.sliver.data.db.FilmDao
 import app.sliver.data.db.Project
@@ -37,6 +40,9 @@ interface ProjectRepository {
 
     /** Removes the project with its clips, films and local files; Drive copies are queued for trash. */
     suspend fun delete(id: String)
+
+    /** Removes a project because another phone deleted it: same cleanup, no tombstone and nothing to trash. */
+    suspend fun removeRemote(id: String)
     val stats: Flow<Map<String, ProjectStats>>
 }
 
@@ -48,6 +54,8 @@ class ProjectRepositoryImpl(
     private val films: FilmDao,
     private val files: FileStore,
     private val trash: DriveTrashQueue,
+    private val tombstones: TombstoneStore = NoTombstones,
+    private val nowMillis: () -> Long = { Clock.System.now().toEpochMilliseconds() },
 ) : ProjectRepository {
     override val stats = dao.observeStats().map { list -> list.associateBy { it.projectId } }
 
@@ -71,7 +79,7 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun create(name: String, format: FilmFormat, startDate: LocalDate): Project {
-        val project = Project(Uuid.random().toString(), name, format, startDate, createdAt = Clock.System.now())
+        val project = Project(Uuid.random().toString(), name, format, startDate, createdAt = Clock.System.now(), updatedAt = nowMillis())
         dao.upsert(project)
         settings.update { it.copy(activeProjectId = project.id) }
         return project
@@ -83,20 +91,24 @@ class ProjectRepositoryImpl(
         settings.update { it.copy(activeProjectId = id) }
     }
 
-    override suspend fun rename(id: String, name: String) = dao.rename(id, name)
-    override suspend fun setFormat(id: String, format: FilmFormat) = dao.setFormat(id, format)
+    override suspend fun rename(id: String, name: String) = dao.rename(id, name, nowMillis())
+    override suspend fun setFormat(id: String, format: FilmFormat) = dao.setFormat(id, format, nowMillis())
     override suspend fun setArchived(id: String, archived: Boolean) {
-        dao.setArchived(id, archived)
+        dao.setArchived(id, archived, nowMillis())
         if (archived && activeId() == id) {
             projects.first().firstOrNull { !it.archived && it.id != id }?.let { setActive(it.id) }
         }
     }
 
-    override suspend fun delete(id: String) {
+    override suspend fun delete(id: String) = remove(id, local = true)
+    override suspend fun removeRemote(id: String) = remove(id, local = false)
+
+    private suspend fun remove(id: String, local: Boolean) {
+        if (local) tombstones.record(TombstoneKind.PROJECT, id, "", nowMillis())
         days.listOf(id).forEach { day ->
             files.delete(day.file)
             files.delete(day.thumb)
-            day.driveFileId?.let { trash.enqueue(it) }
+            if (local) day.driveFileId?.let { trash.enqueue(it) }
         }
         films.listOf(id).forEach { film -> film.renderPath?.let(files::delete) }
         days.deleteAll(id)

@@ -24,14 +24,14 @@ interface ProjectDao {
     @Query("DELETE FROM project WHERE id = :id")
     suspend fun delete(id: String)
 
-    @Query("UPDATE project SET name = :name WHERE id = :id")
-    suspend fun rename(id: String, name: String)
+    @Query("UPDATE project SET name = :name, updatedAt = :now, updatedBy = '' WHERE id = :id")
+    suspend fun rename(id: String, name: String, now: Long)
 
-    @Query("UPDATE project SET format = :format WHERE id = :id")
-    suspend fun setFormat(id: String, format: FilmFormat)
+    @Query("UPDATE project SET format = :format, updatedAt = :now, updatedBy = '' WHERE id = :id")
+    suspend fun setFormat(id: String, format: FilmFormat, now: Long)
 
-    @Query("UPDATE project SET archived = :archived WHERE id = :id")
-    suspend fun setArchived(id: String, archived: Boolean)
+    @Query("UPDATE project SET archived = :archived, updatedAt = :now, updatedBy = '' WHERE id = :id")
+    suspend fun setArchived(id: String, archived: Boolean, now: Long)
 
     @Query(
         "SELECT projectId, COUNT(*) AS clips, MIN(date) AS since, " +
@@ -116,4 +116,16 @@ interface FilmDao {
 
     @Query("DELETE FROM film WHERE id = :id")
     suspend fun delete(id: String)
+}
+
+@Dao
+interface TombstoneDao {
+    @Query("SELECT * FROM tombstone")
+    suspend fun all(): List<Tombstone>
+
+    @Upsert
+    suspend fun upsert(tombstone: Tombstone)
+
+    @Query("DELETE FROM tombstone WHERE kind = :kind AND projectId = :projectId AND `key` = :key")
+    suspend fun delete(kind: String, projectId: String, key: String)
 }

@@ -63,10 +63,7 @@ data class RestoreItem(
 /** Project details written into a backup manifest. */
 data class ManifestProject(val id: String, val name: String, val format: FilmFormat, val startDate: LocalDate)
 
-/** A Drive folder holding one project's clips; the legacy flat layout is the root folder with [project] null. */
-data class RestoreSource(val folderId: String, val project: ManifestProject?, val manifest: String?)
-
-data class RestoreScan(val folderId: String, val items: List<RestoreItem>, val sources: List<RestoreSource> = emptyList())
+data class RestoreScan(val folderId: String, val items: List<RestoreItem>)
 
 fun parseManifestProject(json: String): ManifestProject? = runCatching {
     val root = Json.parseToJsonElement(json).jsonObject
@@ -91,35 +88,34 @@ fun parseRestoreItem(file: DriveFile): RestoreItem? {
     )
 }
 
-private inline fun <reified E : Enum<E>> JsonObject.enum(key: String): E? =
+internal inline fun <reified E : Enum<E>> JsonObject.enum(key: String): E? =
     this[key]?.jsonPrimitive?.contentOrNull?.let { v -> enumValues<E>().firstOrNull { it.name == v } }
 
-private fun JsonObject.date(key: String): LocalDate? =
+internal fun JsonObject.date(key: String): LocalDate? =
     this[key]?.jsonPrimitive?.contentOrNull?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
 fun parseManifestFilms(json: String): List<Film> = runCatching {
     val root = Json.parseToJsonElement(json).jsonObject
-    (root["films"] as? JsonArray).orEmpty().mapNotNull { el ->
-        val f = el.jsonObject
-        Film(
-            id = f["id"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null,
-            name = f["name"]?.jsonPrimitive?.contentOrNull ?: "Film",
-            format = f.enum<FilmFormat>("format") ?: FilmFormat.CINEMA,
-            rangeType = f.enum<FilmRangeType>("rangeType") ?: FilmRangeType.YEAR,
-            rangeFrom = f.date("rangeFrom"),
-            rangeTo = f.date("rangeTo"),
-            live = f["live"]?.jsonPrimitive?.boolean ?: false,
-            audio = f.enum<FilmAudio>("audio") ?: FilmAudio.ORIGINAL,
-            track = f["track"]?.jsonPrimitive?.contentOrNull,
-            cut = f.enum<FilmCut>("cut") ?: FilmCut.CUT,
-            dateOn = f["dateOn"]?.jsonPrimitive?.boolean ?: true,
-            look = f.enum<LookPreset>("look"),
-            lookIntensity = f["lookIntensity"]?.jsonPrimitive?.intOrNull ?: 100,
-            lookGrain = f["lookGrain"]?.jsonPrimitive?.intOrNull,
-            mismatch = f.enum<Mismatch>("mismatch") ?: Mismatch.CENTER,
-        )
-    }
+    (root["films"] as? JsonArray).orEmpty().mapNotNull { parseFilmObject(it.jsonObject) }
 }.getOrDefault(emptyList())
+
+fun parseFilmObject(f: JsonObject): Film? = Film(
+    id = f["id"]?.jsonPrimitive?.contentOrNull ?: return null,
+    name = f["name"]?.jsonPrimitive?.contentOrNull ?: "Film",
+    format = f.enum<FilmFormat>("format") ?: FilmFormat.CINEMA,
+    rangeType = f.enum<FilmRangeType>("rangeType") ?: FilmRangeType.YEAR,
+    rangeFrom = f.date("rangeFrom"),
+    rangeTo = f.date("rangeTo"),
+    live = f["live"]?.jsonPrimitive?.boolean ?: false,
+    audio = f.enum<FilmAudio>("audio") ?: FilmAudio.ORIGINAL,
+    track = f["track"]?.jsonPrimitive?.contentOrNull,
+    cut = f.enum<FilmCut>("cut") ?: FilmCut.CUT,
+    dateOn = f["dateOn"]?.jsonPrimitive?.boolean ?: true,
+    look = f.enum<LookPreset>("look"),
+    lookIntensity = f["lookIntensity"]?.jsonPrimitive?.intOrNull ?: 100,
+    lookGrain = f["lookGrain"]?.jsonPrimitive?.intOrNull,
+    mismatch = f.enum<Mismatch>("mismatch") ?: Mismatch.CENTER,
+)
 
 /** Applies the manifest's preferences on top of [s]; account and onboarding state are never touched. */
 fun applyManifestSettings(s: AppSettings, json: String): AppSettings = runCatching {
@@ -150,101 +146,23 @@ fun applyManifestSettings(s: AppSettings, json: String): AppSettings = runCatchi
     )
 }.getOrDefault(s)
 
+/** Restore on a fresh install is simply the first pull of a sync. */
 class RestoreEngine(
-    private val drive: DriveClient,
+    private val sync: SyncEngine,
     private val days: DayRepository,
-    private val films: FilmRepository,
-    private val settings: SettingsRepository,
-    private val files: FileStore,
-    private val writer: RestoredDayWriter,
     private val projects: ProjectRepository,
 ) {
-    private val lock = Mutex()
-    private val _progress = MutableStateFlow<BackupProgress?>(null)
-    val progress: StateFlow<BackupProgress?> = _progress
+    val progress: StateFlow<BackupProgress?> = sync.progress
 
-    /** Lists what Drive holds: the legacy flat root plus one subfolder per project. Items are oldest first. */
-    suspend fun scan(): RestoreScan {
-        val account = settings.settings.first().account
-        val root = drive.ensureFolder(account.driveFolderId)
-        if (root != account.driveFolderId) {
-            settings.update { s -> s.copy(account = s.account.copy(driveFolderId = root)) }
-        }
-        val activeId = projects.activeId()
-        val sources = mutableListOf(RestoreSource(root, null, drive.readManifest(root)))
-        for (folder in drive.listFolders(root)) {
-            val manifest = drive.readManifest(folder.id) ?: continue
-            sources += RestoreSource(folder.id, parseManifestProject(manifest), manifest)
-        }
-        val items = sources.flatMap { source ->
-            val projectId = source.project?.id ?: activeId
-            drive.list(source.folderId).mapNotNull(::parseRestoreItem).map { it.copy(projectId = projectId) }
-        }
-        return RestoreScan(root, items.sortedBy { it.date }, sources)
-    }
+    suspend fun scan(): RestoreScan = sync.scanRemote()
 
-    /** Downloads every second Drive has and this phone lacks. A day captured here always wins. Null on success. */
-    suspend fun run(): BackupError? = lock.withLock {
-        try {
-            _progress.value = BackupProgress(0, 0)
-            val scan = scan()
-            val emptyBefore = days.observeCount().first() == 0
-            for (project in scan.sources.mapNotNull { it.project }.distinctBy { it.id }) ensureProject(project)
-            val todo = scan.items.filter { days.getDay(it.projectId ?: projects.activeId(), it.date) == null }
-            var done = 0
-            _progress.value = BackupProgress(0, todo.size)
-            for (item in todo) {
-                restoreDay(item)
-                _progress.value = BackupProgress(++done, todo.size)
-            }
-            for (source in scan.sources) {
-                val manifest = source.manifest ?: continue
-                val projectId = source.project?.id ?: projects.activeId()
-                parseManifestFilms(manifest).filter { films.getFilm(it.id) == null }.forEach { films.save(it.copy(projectId = projectId)) }
-                settings.update { applyManifestSettings(it, manifest) }
-            }
-            if (emptyBefore) scan.items.firstOrNull { it.projectId != null }?.projectId?.let { projects.setActive(it) }
-            null
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            (e as? DriveException)?.error ?: BackupError.OTHER
-        } finally {
-            _progress.value = null
-        }
-    }
-
-    private suspend fun ensureProject(p: ManifestProject) {
-        if (projects.projects.first().any { it.id == p.id }) return
-        projects.restore(Project(p.id, p.name, p.format, p.startDate, createdAt = Clock.System.now()))
-    }
-
-    private suspend fun restoreDay(item: RestoreItem) {
-        val bytes = drive.download(item.fileId)
-        val tmpVideo = files.newTmpPath(Clock.System.now().toEpochMilliseconds())
-        val tmpThumb = "$tmpVideo.jpg"
-        val projectId = item.projectId ?: projects.activeId()
-        val file = files.dayPath(projectId, item.date)
-        val thumb = files.thumbPath(projectId, item.date)
-        val color = try {
-            writer.write(bytes, tmpVideo, tmpThumb)
-        } catch (e: Exception) {
-            files.delete(tmpVideo)
-            files.delete(tmpThumb)
-            throw e
-        }
-        if (days.getDay(projectId, item.date) != null || !(files.move(tmpVideo, file) && files.move(tmpThumb, thumb))) {
-            files.delete(tmpVideo)
-            files.delete(tmpThumb)
-            return
-        }
-        val noon = LocalDateTime(item.date, LocalTime(12, 0)).toInstant(TimeZone.currentSystemDefault())
-        days.save(
-            Day(
-                projectId = projectId, date = item.date, file = file, thumb = thumb, source = item.source, look = item.look, motion = item.motion,
-                color = color, takenAt = noon, createdAt = Clock.System.now(),
-                driveFileId = item.fileId, backup = BackupState.DONE,
-            ),
-        )
+    /** Null on success. A day captured here always wins over an older one on Drive. */
+    suspend fun run(): BackupError? {
+        val emptyBefore = days.observeCount().first() == 0
+        val first = runCatching { sync.scanRemote().items.firstOrNull { it.projectId != null } }.getOrNull()
+        val error = sync.run()
+        if (error == null && emptyBefore) first?.projectId?.let { projects.setActive(it) }
+        return error
     }
 }
+

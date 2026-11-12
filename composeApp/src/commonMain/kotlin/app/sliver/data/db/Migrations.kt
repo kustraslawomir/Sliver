@@ -65,3 +65,20 @@ val Migration5To6 = object : Migration(5, 6) {
         connection.execSQL("ALTER TABLE day ADD COLUMN importRunId TEXT")
     }
 }
+
+/** Sync: a last-edit stamp on every record (existing rows start at their creation time) and the delete queue. */
+val Migration6To7 = object : Migration(6, 7) {
+    override fun migrate(connection: SQLiteConnection) {
+        for (table in listOf("project", "day", "film")) {
+            connection.execSQL("ALTER TABLE $table ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+            connection.execSQL("ALTER TABLE $table ADD COLUMN updatedBy TEXT NOT NULL DEFAULT ''")
+        }
+        connection.execSQL("UPDATE project SET updatedAt = createdAt")
+        connection.execSQL("UPDATE day SET updatedAt = createdAt")
+        connection.execSQL("UPDATE film SET updatedAt = COALESCE((SELECT createdAt FROM project WHERE project.id = film.projectId), 0)")
+        connection.execSQL(
+            "CREATE TABLE IF NOT EXISTS `tombstone` (`kind` TEXT NOT NULL, `projectId` TEXT NOT NULL, `key` TEXT NOT NULL, " +
+                "`deletedAt` INTEGER NOT NULL, PRIMARY KEY(`kind`, `projectId`, `key`))",
+        )
+    }
+}

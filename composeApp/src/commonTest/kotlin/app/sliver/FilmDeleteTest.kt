@@ -31,6 +31,8 @@ class FilmDeleteTest {
         override suspend fun getFilm(id: String) = rows.firstOrNull { it.id == id }
         override suspend fun save(film: Film) { rows.removeAll { it.id == film.id }; rows += film }
         override suspend fun delete(id: String) { rows.removeAll { it.id == id } }
+        override suspend fun applyRemote(film: Film) = Unit
+        override suspend fun removeRemote(id: String) = Unit
     }
 
     private class Files(vararg initial: String) : FileStore {

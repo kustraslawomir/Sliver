@@ -58,6 +58,8 @@ class DataLayerTest {
     private lateinit var days: DayRepositoryImpl
     private lateinit var films: FilmRepositoryImpl
     private lateinit var projects: ProjectRepositoryImpl
+    private lateinit var tombs: app.sliver.data.backup.DaoTombstoneStore
+    private var clock = 5_000L
 
     @BeforeTest
     fun setUp() {
@@ -69,9 +71,10 @@ class DataLayerTest {
                 File.createTempFile("prefs", ".preferences_pb").apply { delete() }
             },
         )
-        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files) {}
-        days = DayRepositoryImpl(db.dayDao(), projects, FakeExporter, files)
-        films = FilmRepositoryImpl(db.filmDao(), projects)
+        tombs = app.sliver.data.backup.DaoTombstoneStore(db.tombstoneDao())
+        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files, app.sliver.data.backup.DriveTrashQueue {}, tombs, nowMillis = { clock })
+        days = DayRepositoryImpl(db.dayDao(), projects, FakeExporter, files, tombstones = tombs, nowMillis = { clock })
+        films = FilmRepositoryImpl(db.filmDao(), projects, tombs, nowMillis = { clock })
     }
 
     @Test
@@ -111,7 +114,7 @@ class DataLayerTest {
     fun insertReplaceDelete() = runTest {
         val d = day("2026-11-10", look = LookParams(LookPreset.SILVER, grain = 40))
         days.save(d)
-        assertEquals(d.copy(projectId = projects.activeId()), days.getDay(d.date))
+        assertEquals(d.copy(projectId = projects.activeId(), updatedAt = 5_000L), days.getDay(d.date))
         assertEquals(1, days.observeCount().first())
 
         days.save(d.copy(file = "days/new.mp4"))
@@ -121,6 +124,36 @@ class DataLayerTest {
         days.delete(d.date)
         assertNull(days.getDay(d.date))
         assertEquals(0, days.observeCount().first())
+    }
+
+    @Test
+    fun editsAreStampedAndDeletesLeaveTombstones() = runTest {
+        val d = day("2026-11-10")
+        days.save(d)
+        clock = 6_000L
+        days.save(days.getDay(d.date)!!.copy(driveFileId = "x", backup = BackupState.DONE))
+        assertEquals(5_000L, days.getDay(d.date)!!.updatedAt)
+        days.save(days.getDay(d.date)!!.copy(file = "days/other.mp4"))
+        assertEquals(6_000L, days.getDay(d.date)!!.updatedAt)
+        assertEquals(BackupState.PENDING, days.getDay(d.date)!!.backup)
+
+        clock = 7_000L
+        days.delete(d.date)
+        films.save(Film(id = "f", name = "N"))
+        films.delete("f")
+        val id = projects.activeId()
+        assertEquals(
+            setOf(Triple("DAY", id, "2026-11-10"), Triple("FILM", id, "f")),
+            tombs.all().map { Triple(it.kind, it.projectId, it.key) }.toSet(),
+        )
+        assertEquals(7_000L, tombs.all().first().deletedAt)
+
+        projects.rename(id, "Renamed")
+        assertEquals(7_000L, projects.projects.first().single().updatedAt)
+        days.applyRemote(day("2026-11-11").copy(projectId = id, updatedAt = 42, updatedBy = "other"))
+        assertEquals("other", days.getDay(LocalDate.parse("2026-11-11"))!!.updatedBy)
+        days.removeRemote(id, LocalDate.parse("2026-11-11"))
+        assertEquals(2, tombs.all().size)
     }
 
     @Test
@@ -175,7 +208,7 @@ class DataLayerTest {
             rangeFrom = LocalDate.parse("2026-11-01"), rangeTo = LocalDate.parse("2026-11-07"), look = LookPreset.KIOSK,
         )
         films.save(f)
-        assertEquals(f.copy(projectId = projects.activeId()), films.getFilm("a"))
+        assertEquals(f.copy(projectId = projects.activeId(), updatedAt = 5_000L), films.getFilm("a"))
         films.save(f.copy(name = "Renamed"))
         assertEquals(listOf("Renamed"), films.observeAll().first().map { it.name })
         films.delete("a")

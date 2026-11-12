@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.sliver.data.backup.BackupError
@@ -62,6 +63,11 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val accountFailingSince = longPreferencesKey("account.failingSince")
         val accountProblemNotified = booleanPreferencesKey("account.problemNotified")
         val accountPendingTrash = stringPreferencesKey("account.pendingTrash")
+        val accountDeviceId = stringPreferencesKey("account.deviceId")
+        val accountLastSyncAt = longPreferencesKey("account.lastSyncAt")
+        val accountLastPushedAt = longPreferencesKey("account.lastPushedAt")
+        val accountPhones = intPreferencesKey("account.phones")
+        val accountChangedNotices = stringPreferencesKey("account.changedNotices")
     }
 
     private inline fun <reified E : Enum<E>> Preferences.enum(key: Preferences.Key<String>, default: E): E =
@@ -112,6 +118,11 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
                 failingSince = this[K.accountFailingSince],
                 problemNotified = this[K.accountProblemNotified] ?: false,
                 pendingTrash = this[K.accountPendingTrash]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList(),
+                deviceId = this[K.accountDeviceId].orEmpty(),
+                lastSyncAt = this[K.accountLastSyncAt],
+                lastPushedAt = this[K.accountLastPushedAt] ?: 0,
+                phones = this[K.accountPhones] ?: 1,
+                changedNotices = this[K.accountChangedNotices]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList(),
             ),
         )
     }
@@ -156,5 +167,10 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.accountFailingSince, s.account.failingSince)
         put(K.accountProblemNotified, s.account.problemNotified)
         put(K.accountPendingTrash, s.account.pendingTrash.joinToString(","))
+        put(K.accountDeviceId, s.account.deviceId)
+        put(K.accountLastSyncAt, s.account.lastSyncAt)
+        put(K.accountLastPushedAt, s.account.lastPushedAt)
+        put(K.accountPhones, s.account.phones)
+        put(K.accountChangedNotices, s.account.changedNotices.joinToString(","))
     }
 }

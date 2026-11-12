@@ -104,7 +104,7 @@ class AutoImportExecutorTest {
         val files = AndroidFileStore(ctx.filesDir, ctx.cacheDir)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         val settings = DataStoreSettingsRepository(PreferenceDataStoreFactory.create(scope = scope) { File.createTempFile("prefs", ".preferences_pb").apply { delete() } })
-        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files) {}
+        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files, app.sliver.data.backup.DriveTrashQueue {})
         exporter = Recording()
         days = DayRepositoryImpl(db.dayDao(), projects, exporter, files)
         store = AutoImportStore(PreferenceDataStoreFactory.create(scope = scope) { File.createTempFile("run", ".preferences_pb").apply { delete() } })

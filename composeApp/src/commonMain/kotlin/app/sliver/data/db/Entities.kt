@@ -26,6 +26,10 @@ data class Project(
     val createdAt: Instant,
     val archived: Boolean = false,
     val colorSeed: Int = 0,
+    /** Millis of the last edit; the sync rule is last writer wins per record. */
+    @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
+    /** Device that made the last edit; empty = this device. */
+    @ColumnInfo(defaultValue = "''") val updatedBy: String = "",
 )
 
 // DECISION: projectId "" means "not assigned yet"; repositories stamp the active project on save.
@@ -56,6 +60,8 @@ data class Day(
     /** JSON list of the day's gallery items (DraftCandidate), default pick first; null for normal days. */
     val draftCandidates: String? = null,
     val importRunId: String? = null,
+    @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
+    @ColumnInfo(defaultValue = "''") val updatedBy: String = "",
 )
 
 @Entity(tableName = "film")
@@ -80,4 +86,10 @@ data class Film(
     val renderPath: String? = null,
     val renderedAt: Instant? = null,
     val projectId: String = "",
+    @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
+    @ColumnInfo(defaultValue = "''") val updatedBy: String = "",
 )
+
+/** A local delete waiting to be written to Drive so other phones delete too. */
+@Entity(tableName = "tombstone", primaryKeys = ["kind", "projectId", "key"])
+data class Tombstone(val kind: String, val projectId: String, val key: String, val deletedAt: Long)
