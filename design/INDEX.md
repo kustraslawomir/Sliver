@@ -95,3 +95,12 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Permission | `RemindersOff.dc.html` | Ask for `POST_NOTIFICATIONS` only when the user turns the reminder on (or taps "Set reminder" on the nudge card), never at app start. If Android notifications are off: the yellow row with "Turn on" → `Settings.ACTION_APP_NOTIFICATION_SETTINGS`. |
 | The notification | preview at the bottom of `Reminders` | Title "Today's clip". Text "<Weekday> is still empty. A few seconds is enough." Large icon = yesterday's clip thumbnail (if any). Actions: **Record** (opens the camera directly) and **Tomorrow** (just dismisses; nothing is counted, no guilt copy). Small icon `ic_stat_sliver`. Channel "Daily reminder", default importance. |
 | Time presets sheet | `RemindersTime.dc.html` | 6 presets + "Other time…" → Material 3 `TimePicker` dialog, 24h/12h from the system setting. |
+
+## v1.3.3: film player
+
+| Item | Design | Notes |
+|---|---|---|
+| Player controls | `FilmPlayer.dc.html` | **Icons, not words.** Three round buttons in one row: sound (48dp, outline, speaker / speaker-off icon), play/pause (72dp, filled light, the main one), full screen (48dp, outline, corners icon). Labels go to `contentDescription` only. The words "Play / Mute / Full screen" must not be visible. |
+| Date on the video | `FilmPlayer.dc.html` | **No date overlay on the player.** The date stamp is already burned into each clip, so drawing it again on top doubles it (bug seen on device: "11 Nov 2026" small + "11 NOV 2026" big). |
+| Scrubber | `FilmPlayer.dc.html` | One tick per clip, ember progress line, light head 3×20dp. Times under it: Geist tabular, "0:12" and "-0:17". |
+| Actions | `FilmPlayer.dc.html` | "Share film…" full width (ember). Under it, side by side: "Save to Photos" and "Edit film" (outline). A one-line file info at the bottom in muted text. |
