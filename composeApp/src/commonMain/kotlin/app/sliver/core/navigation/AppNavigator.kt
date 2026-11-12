@@ -40,6 +40,13 @@ class AppNavigator(private val nav: NavController) {
         }
     }
 
+    /** Swaps Edit clip for Photo clip (or back) in place; same route means the screen was already rebuilt by the session revision. */
+    fun swapEditor(target: Route) {
+        val from = current ?: return
+        if (from == target || from !in CaptureRoutes) return
+        nav.navigate(target.path) { popUpTo(from.path) { inclusive = true } }
+    }
+
     fun back() {
         if (settled) nav.popBackStack()
     }

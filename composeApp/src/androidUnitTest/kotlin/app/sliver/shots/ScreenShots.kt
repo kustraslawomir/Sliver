@@ -10,7 +10,7 @@ import app.sliver.core.navigation.Route
 import app.sliver.feature.archive.ArchiveSession
 import app.sliver.feature.archive.DayDetailScreen
 import app.sliver.feature.archive.ProjectScreen
-import app.sliver.feature.backfill.BackfillScreen
+import app.sliver.feature.autoimport.AutoImportScreen
 import app.sliver.feature.backup.BackupScreen
 import app.sliver.feature.backup.RestoreScreen
 import app.sliver.feature.camera.CameraScreen
@@ -43,7 +43,7 @@ class ScreenShots : ShotTest() {
         ArchiveSession.selected = kotlinx.datetime.LocalDate(2026, 11, 9)
         shoot("DayDetail", inspection = true) { DayDetailScreen({}, {}) }
     }
-    @Test fun backfill() = shoot("Backfill", inspection = true) { BackfillScreen {} }
+    @Test fun autoImport() = shoot("AutoImport", inspection = true) { AutoImportScreen({}, {}) }
     @Test fun filmBuilder() = shoot("FilmBuilder", inspection = true) { FilmBuilderScreen({}, {}) }
     @Test fun filterPicker() {
         val frame = android.graphics.Bitmap.createBitmap(90, 120, android.graphics.Bitmap.Config.ARGB_8888).also { b ->

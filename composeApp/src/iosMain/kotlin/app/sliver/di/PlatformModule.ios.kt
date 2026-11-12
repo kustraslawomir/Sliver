@@ -24,7 +24,8 @@ import app.sliver.data.files.documentsDir
 import app.sliver.data.files.readFileBytes
 import app.sliver.data.files.writeFileBytes
 import app.sliver.data.repo.PlaceResolver
-import app.sliver.feature.backfill.BackfillRunner
+import app.sliver.feature.autoimport.AutoImportRunner
+import app.sliver.feature.autoimport.MediaScanner
 import app.sliver.feature.films.FilmRenderer
 import app.sliver.feature.films.FilmShare
 import app.sliver.feature.gallery.GalleryProvider
@@ -52,7 +53,8 @@ actual val platformModule: Module = module {
     single<FileStore> { IosFileStore() }
     single<ClipExporter> { IosClipExporter }
     single<TrimMedia> { IosTrimMedia }
-    single<BackfillRunner> { IosBackfillRunner }
+    single<AutoImportRunner> { IosAutoImportRunner }
+    single<MediaScanner> { IosMediaScanner }
     single<FilmRenderer> { IosFilmRenderer }
     single<app.sliver.feature.notifications.ReminderLog> { IosReminderLog }
     single<ClipLightReader> { ClipLightReader { null } }

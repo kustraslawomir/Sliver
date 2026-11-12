@@ -40,16 +40,3 @@ class CaptureDateTest {
         assertEquals(AddCheck.Blocked(NO_CAPTURE_DATE), checkCaptureDate(parseExifDate("garbage"), day))
     }
 }
-
-class NotAddedTest {
-    private val today = LocalDate(2026, 3, 10)
-    private fun item(d: LocalDate) = app.sliver.feature.gallery.GalleryItem("u$d", true, d, 1000)
-
-    @Test
-    fun countsUnreadableOutOfRangeAndFilled() {
-        val items = listOf(item(LocalDate(2026, 3, 5)), item(LocalDate(2026, 3, 5)), item(LocalDate(2026, 3, 6)), item(LocalDate(2025, 1, 1)), item(today))
-        val n = app.sliver.feature.backfill.notAddedCount(6, items, setOf(LocalDate(2026, 3, 6)), today, LocalDate(2026, 3, 1))
-        assertEquals(4, n)
-        assertEquals("4 not added: no date / outside this project", app.sliver.feature.backfill.notAddedLabel(n))
-    }
-}

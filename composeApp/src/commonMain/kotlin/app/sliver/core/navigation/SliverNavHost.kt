@@ -42,7 +42,7 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.archive.ProjectScreen
 import app.sliver.feature.archive.ArchiveSession
 import app.sliver.feature.archive.DayDetailScreen
-import app.sliver.feature.backfill.BackfillScreen
+import app.sliver.feature.autoimport.AutoImportScreen
 import app.sliver.feature.backup.BackupScreen
 import app.sliver.feature.backup.RestoreScreen
 import app.sliver.feature.camera.CameraScreen
@@ -116,7 +116,7 @@ fun SliverNavHost() {
                             }
                             Route.Project -> ProjectScreen(go)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
-                            Route.FillThePast -> BackfillScreen(onBack = back)
+                            Route.FillThePast -> AutoImportScreen(go, onBack = back)
                             Route.FilmBuilder -> FilmBuilderScreen(
                                 onBack = back,
                                 onSaved = { id ->

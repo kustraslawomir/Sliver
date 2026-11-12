@@ -1,6 +1,8 @@
 package app.sliver.feature.camera
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import app.sliver.data.settings.CameraMode
@@ -47,8 +49,24 @@ expect fun CameraPreview(
 /** Hand-off from capture to Trim / PhotoTrim until those screens take a route argument. */
 object CaptureSession {
     var path: String? = null
+        set(v) {
+            field = v
+            sourceUri = null
+            motionPhoto = false
+            draft = null
+        }
     var forDate: kotlinx.datetime.LocalDate? = null
     var source: app.sliver.data.DaySource = app.sliver.data.DaySource.CAMERA
     var motionPresentationUs: Long? = null
     var motion: Boolean = false
+
+    /** Gallery uri the current path was copied from, and whether it is a Motion Photo (so Video / Photo can be switched). */
+    var sourceUri: String? = null
+    var motionPhoto: Boolean = false
+
+    /** Set while a draft is being reviewed; the editor then shows the draft header and "Keep this clip". */
+    var draft: app.sliver.feature.autoimport.DraftContext? = null
+
+    /** Bumped to rebuild the editor in place after a swap or a move to another draft. */
+    var revision by androidx.compose.runtime.mutableIntStateOf(0)
 }

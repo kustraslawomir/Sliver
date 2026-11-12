@@ -34,8 +34,10 @@ import app.sliver.data.files.AndroidFileStore
 import app.sliver.data.repo.AndroidPlaceResolver
 import app.sliver.data.repo.PlaceResolver
 import app.sliver.data.files.FileStore
-import app.sliver.feature.backfill.AndroidBackfillRunner
-import app.sliver.feature.backfill.BackfillRunner
+import app.sliver.feature.autoimport.AndroidAutoImportRunner
+import app.sliver.feature.autoimport.AndroidMediaScanner
+import app.sliver.feature.autoimport.AutoImportRunner
+import app.sliver.feature.autoimport.MediaScanner
 import app.sliver.feature.films.AndroidFilmRenderer
 import app.sliver.feature.films.AndroidFilmShare
 import app.sliver.feature.films.FilmRenderer
@@ -70,7 +72,8 @@ actual val platformModule: Module = module {
     single<ClipExporter> { clipExporter(get<Context>()) }
     single<TrimMedia> { AndroidTrimMedia() }
     single { ProgressCoordinator(get<Context>(), get(), get(), get()) }
-    single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
+    single<AutoImportRunner> { AndroidAutoImportRunner(get<Context>()) }
+    single<MediaScanner> { AndroidMediaScanner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
     single<ClipLightReader> { AndroidClipLight }
     single<ReminderLog> { AndroidReminderLog(get<Context>()) }

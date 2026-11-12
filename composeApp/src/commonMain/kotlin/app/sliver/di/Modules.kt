@@ -23,8 +23,9 @@ import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.ProjectRepositoryImpl
 import app.sliver.data.settings.DataStoreSettingsRepository
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.feature.backfill.BackfillExecutor
-import app.sliver.feature.backfill.BackfillStore
+import app.sliver.feature.autoimport.AutoImportExecutor
+import app.sliver.feature.autoimport.AutoImportStore
+import app.sliver.feature.autoimport.DraftActions
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.films.FilmDeleter
@@ -43,8 +44,9 @@ val commonModule: Module = module {
     single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
     single { SaveUndo(get(), get(), get()) }
     single { FilmDeleter(get(), get(), get()) }
-    single { BackfillStore(get()) }
-    single { BackfillExecutor(get(), get(), get(), get(), get(), get()) }
+    single { AutoImportStore(get()) }
+    single { DraftActions(get(), get(), get(), get()) }
+    single { AutoImportExecutor(get(), get(), get(), get(), get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }

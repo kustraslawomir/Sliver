@@ -7,7 +7,7 @@ enum class Route(val path: String, val title: String) {
     PhotoTrim("photo-trim", "Photo trim"),
     Project("project", "Project"),
     DayDetail("day", "Clip detail"),
-    FillThePast("fill-the-past", "Fill empty days"),
+    FillThePast("fill-the-past", "Auto-import"),
     FilmBuilder("film-builder", "Film builder"),
     Export("export", "Export"),
     FilmPlayer("film-player", "Film player"),

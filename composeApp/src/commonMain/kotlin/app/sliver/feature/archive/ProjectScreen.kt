@@ -550,7 +550,7 @@ private fun ProjectMenu(
         ) {
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
             MenuItem(HubIcons.Shape, "Change shape", SliverColors.TextPrimary, onShape)
-            MenuItem(HubIcons.FillDays, "Fill empty days", SliverColors.TextPrimary, onFill)
+            MenuItem(HubIcons.FillDays, "Auto-import from…", SliverColors.TextPrimary, onFill)
             MenuItem(SliverIcons.Calendar, "Year in clips", SliverColors.TextPrimary, onYear)
             MenuItem(HubIcons.Archive, "Archive project", SliverColors.TextPrimary, onArchive, canLeave)
             MenuItem(HubIcons.Trash, "Delete project", SliverColors.Error, onDelete, canLeave)

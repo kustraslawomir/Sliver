@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.Route
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Notices
-import app.sliver.data.DaySource
+import app.sliver.data.files.FileStore
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -22,6 +22,7 @@ import org.koin.mp.KoinPlatform
 @Composable
 fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
     val provider = remember { KoinPlatform.getKoin().get<GalleryProvider>() }
+    val files = remember { KoinPlatform.getKoin().get<FileStore>() }
     val scope = rememberCoroutineScope()
     var target by remember { mutableStateOf<LocalDate?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -38,20 +39,13 @@ fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
                 Notices.show(check.message)
                 return@launch
             }
-            val motion = runCatching { provider.extractMotionVideo(uri) }.getOrNull()
-            val video = motion != null || provider.isVideo(uri)
-            val path = motion?.path ?: runCatching { provider.copyToTmp(uri) }.getOrNull()
+            val route = loadIntoSession(provider, files, uri, forDate)
             busy = false
-            if (path == null) {
+            if (route == null) {
                 Notices.show("Couldn't read that item. Pick another.")
                 return@launch
             }
-            CaptureSession.path = path
-            CaptureSession.forDate = forDate
-            CaptureSession.motion = motion != null
-            CaptureSession.motionPresentationUs = motion?.presentationUs
-            CaptureSession.source = if (video) DaySource.GALLERY else DaySource.PHOTO
-            onNavigate(if (video) Route.Trim else Route.PhotoTrim)
+            onNavigate(route)
         }
     }
     return { date ->

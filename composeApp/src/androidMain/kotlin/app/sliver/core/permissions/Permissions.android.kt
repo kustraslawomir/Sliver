@@ -25,6 +25,11 @@ private fun permissionsFor(kind: PermissionKind, sdk: Int): List<String> = when 
     PermissionKind.CameraMic -> listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
     PermissionKind.CoarseLocation -> listOf(Manifest.permission.ACCESS_COARSE_LOCATION)
     PermissionKind.Notifications -> if (sdk >= 33) listOf(Manifest.permission.POST_NOTIFICATIONS) else emptyList()
+    PermissionKind.MediaLibrary -> when {
+        sdk >= 34 -> listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+        sdk >= 33 -> listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+        else -> listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
 }
 
 private class AndroidPermissionController(
@@ -40,7 +45,10 @@ private class AndroidPermissionController(
     override fun status(kind: PermissionKind): PermissionStatus {
         val perms = permissionsFor(kind, sdk)
         val asked = prefs.getBoolean(kind.name, false)
+        val partial = kind == PermissionKind.MediaLibrary && sdk >= 34 &&
+            granted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED) && !granted(Manifest.permission.READ_MEDIA_IMAGES)
         return when {
+            partial -> PermissionStatus.Partial
             perms.all(::granted) -> PermissionStatus.Granted
             asked -> PermissionStatus.Denied
             else -> PermissionStatus.NotAsked

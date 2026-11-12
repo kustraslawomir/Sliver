@@ -11,7 +11,8 @@ import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.export.ExportedClip
-import app.sliver.feature.backfill.BackfillRunner
+import app.sliver.feature.autoimport.AutoImportRunner
+import app.sliver.feature.autoimport.MediaScanner
 import app.sliver.feature.films.FilmRenderer
 import app.sliver.feature.films.FilmShare
 import app.sliver.feature.films.RenderState
@@ -48,7 +49,13 @@ internal object IosTrimMedia : TrimMedia {
         emptyList<ImageBitmap>()
 }
 
-internal object IosBackfillRunner : BackfillRunner {
+internal object IosMediaScanner : MediaScanner {
+    override suspend fun scan(
+        from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, sniffDays: Set<kotlinx.datetime.LocalDate>,
+    ) = TODO("iOS later")
+}
+
+internal object IosAutoImportRunner : AutoImportRunner {
     override fun start() = Unit
     override fun cancel() = Unit
 }

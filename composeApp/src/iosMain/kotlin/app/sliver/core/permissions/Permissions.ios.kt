@@ -31,7 +31,7 @@ actual fun rememberPermissionController(): PermissionController {
     return remember(version, notif) {
         object : PermissionController {
             override fun status(kind: PermissionKind): PermissionStatus = when (kind) {
-                PermissionKind.CoarseLocation -> TODO("iOS later")
+                PermissionKind.CoarseLocation, PermissionKind.MediaLibrary -> TODO("iOS later")
                 PermissionKind.CameraMic -> {
                     val v = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
                     val a = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeAudio)
@@ -56,7 +56,7 @@ actual fun rememberPermissionController(): PermissionController {
 
             override fun request(kind: PermissionKind) {
                 when (kind) {
-                    PermissionKind.CoarseLocation -> TODO("iOS later")
+                    PermissionKind.CoarseLocation, PermissionKind.MediaLibrary -> TODO("iOS later")
                     PermissionKind.CameraMic -> AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo) {
                         AVCaptureDevice.requestAccessForMediaType(AVMediaTypeAudio) { bump() }
                     }
