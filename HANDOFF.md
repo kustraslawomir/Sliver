@@ -261,3 +261,14 @@ Not verified on device: the phone was not unlocked, so no on-device or screensho
 
 ## Filters cleanup
 - Removed unreachable `LookSession`, `LooksLogic` (AdjustTool), `LookRenderer` and the Trim/PhotoTrim resume/applied-look plumbing. DB `look` columns and stored data untouched. To restore Filters, use git history before commit a78807d (plus this cleanup commit's parent).
+
+## Light theme colour fixes
+Contrast (WCAG, light palette) before -> after; verified by `ContrastTest` (text tokens on Bg/S1/S2/S3 >= 4.5, rings >= 3, both palettes).
+- Clip detail: was BgVoid page with light-palette text (~1.1:1). Now follows the theme (DayDetailL): themed page/panel, only the video frame is black; X/prev/next/sound drawn with OnMedia on a soft scrim disc. Same composable in the two-pane layout.
+- Inverted pills (selected Segmented, "Set reminder"): OnAccent on TextPrimary ~1.1:1 -> new OnInverse token (#EDEDE8 light / #0A0A0B dark), ~16:1.
+- Film posters, film builder preview, calendar day numbers over thumbnails: OnMedia (+ overMedia shadow, bottom scrim on cells); badges use Accent on black.
+- Tokens (light): AccentText #C2540F -> #9E4108 (4.5 on Surface3; was 4.0 there), TextTertiary #6E6B64 -> #625F59, Error #C0392B -> #B5301F, Success #2F7D55 -> #266B46, Warning #9A6A0B -> #7F5508 (were 4.1-4.4 on Surface2/3). New AccentMark (#DE6218 light, 3.2+ on page) for today ring, ringed cells, year marker (Accent #FF8A3D was ~2.2). Switch off-track and unselected Chip border use LineStrong; disabled PrimaryButton label uses TextTertiary. The 4.5 floor on Surface3 made AccentText darker than the ~#B04A0B suggested.
+- forceDark: now set during composition (no late frame); an outgoing screen whose palette differs from the target is hidden during the transition (palette is a global, so true per-screen palettes would need all SliverColors reads to be composable).
+- iOS SystemBars actual: no-op.
+- Splash/initial frame (item 7): accepted as brand splash. The system splash is dark #0A0A0B and App's first frame uses the SYSTEM default until the DataStore value loads, so a Light-choice user on a dark system may see one dark frame. Making it theme-aware needs a synchronous pre-read of the Appearance setting.
+- Device check (Xiaomi b798509a, light): Project home, Clip detail, Settings read correctly. Projects sheet and Film builder were not re-screenshotted. Screenshots were NOT saved to docs/qa/light/: the auto-mode classifier blocked copying device screenshots into the repo (provenance), so the images stay only in the scratchpad.
