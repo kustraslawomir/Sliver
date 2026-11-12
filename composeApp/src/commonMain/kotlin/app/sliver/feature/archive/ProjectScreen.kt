@@ -127,7 +127,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
     val first = project?.startDate ?: app?.firstDay ?: all.minOfOrNull { it.date } ?: today
-    val memoryDay = remember(byDate, today) { byDate[today.minus(DatePeriod(months = 1))] }
+    val memory = remember(byDate, today) { pickMemory(today, byDate.keys)?.let { m -> byDate[m.date]?.let { it to m.kind } } }
 
     val controller = rememberPermissionController()
     val scope = rememberCoroutineScope()
@@ -229,7 +229,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                             MonthGrid(shown, byDate, today, first, ::onCell, ::replaceDay, ::removeDay)
                         }
 
-                        memoryDay?.let { MemoryCard(it, today) { openDay(it.date) } }
+                        memory?.let { (day, kind) -> MemoryCard(day, kind) { openDay(day.date) } }
                     }
                     if (!wide) FilmsSection(onNavigate)
                 }
@@ -497,7 +497,7 @@ private fun YearView(
 }
 
 @Composable
-private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
+private fun MemoryCard(day: Day, kind: MemoryKind, onClick: () -> Unit) {
     val thumb = rememberPhoto(day.thumb)
     val d = day.date
     Row(
@@ -513,7 +513,7 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             SliverText(
-                "One month ago · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
+                "${kind.label} · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
                 SliverType.tnum(11.sp, 0.06.em, SliverColors.AccentText), maxLines = 1,
             )
             SliverText("A clip you might have forgotten", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp))

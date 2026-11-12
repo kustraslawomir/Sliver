@@ -36,7 +36,7 @@ fun cellState(date: LocalDate, today: LocalDate, day: Day?, start: LocalDate? = 
 }
 
 enum class MemoryKind(val label: String) {
-    YEAR("1 year ago"), HUNDRED("100 days ago"), MONTH("1 month ago"),
+    YEAR("One year ago"), HUNDRED("100 days ago"), MONTH("One month ago"),
 }
 
 data class Memory(val date: LocalDate, val kind: MemoryKind)
