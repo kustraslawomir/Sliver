@@ -84,13 +84,11 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.rememberTapGate
 import app.sliver.feature.archive.ArchiveSession
 import app.sliver.data.repo.DayRepository
 import app.sliver.core.ui.Segmented
 import app.sliver.data.repo.ProjectRepository
-import app.sliver.feature.projects.ProjectsSheet
 import app.sliver.data.files.FileStore
 import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.CameraSettings
@@ -139,7 +137,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     var flipTurns by remember { mutableIntStateOf(0) }
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
-    var projectsOpen by remember { mutableStateOf(false) }
     val rotation = rememberDeviceRotation()
     SideEffect { engine.deviceDegrees = rotation }
     val iconRot = iconRotation(rotation)
@@ -254,19 +251,11 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
                     TimerPill(formatTimer(elapsedMs), long, Modifier.align(Alignment.CenterVertically))
                 } else {
-                    Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        CameraChip(
-                            project?.name ?: "My ${today.year}",
-                            onClick = { projectsOpen = true }, trailing = SliverIcons.ChevronDown,
-                            modifier = Modifier.widthIn(max = 220.dp),
-                        )
-                    }
-                    CameraChip(
-                        "Today", leading = SliverIcons.Calendar,
-                        onClick = { onNavigate(Route.Project) },
-                    )
+                    CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, Color.White) }
+                    Spacer(Modifier.weight(1f))
                     LightToggle(cam.flash, iconRot) { update { it.copy(flash = !it.flash) } }
-                    IconButton44({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, Color.White) }
+                    Spacer(Modifier.width(SliverSpace.S2))
+                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, Color.White) }
                 }
             }
             if (saved?.coachRecordSeen == false && !recording) {
@@ -355,7 +344,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 }
             }
         }
-        ProjectsSheet(projectsOpen, { projectsOpen = false })
         SliverBottomSheet(menuOpen, { menuOpen = false }) {
             Column {
                 SwitchRow("Grid", cam.grid, { on -> update { it.copy(grid = on) } })
@@ -413,28 +401,13 @@ private fun GridOverlay() {
 }
 
 @Composable
-private fun CameraChip(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    leading: ImageVector? = null,
-    trailing: ImageVector? = null,
-) {
-    val plate = Color.Black.copy(alpha = 0.7f)
+private fun CameraRoundButton(onClick: () -> Unit, label: String, icon: @Composable () -> Unit) {
     Box(
-        modifier.height(48.dp).clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Row(
-            Modifier.height(36.dp).clip(SliverShapes.Pill).background(plate).padding(horizontal = SliverSpace.S3),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            if (leading != null) SliverIcon(leading, Color.White, size = 18.dp)
-            SliverText(text, SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f, fill = false), Color.White, maxLines = 1)
-            if (trailing != null) SliverIcon(trailing, Color.White.copy(alpha = 0.7f), size = 14.dp)
-        }
-    }
+        Modifier.size(44.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f))
+            .semantics { contentDescription = label }
+            .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
+        Alignment.Center,
+    ) { icon() }
 }
 
 @Composable
@@ -457,7 +430,7 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
 private fun LightToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "light-upright")
     Box(
-        Modifier.size(44.dp).clip(CircleShape)
+        Modifier.size(44.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.5f))
             .semantics { contentDescription = if (on) "Light on" else "Light off"; role = Role.Switch; selected = on }
             .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
         Alignment.Center,
