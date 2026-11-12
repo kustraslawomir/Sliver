@@ -69,7 +69,7 @@ fun Chip(
         Row(
             Modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
                 .background(if (selected) SliverColors.AccentTint else Color.Transparent)
-                .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineHairline, SliverShapes.Pill)
+                .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineStrong, SliverShapes.Pill)
                 .padding(horizontal = SliverSpace.S4),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
@@ -131,7 +131,7 @@ fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit
 
 @Composable
 fun SliverSwitch(checked: Boolean, modifier: Modifier = Modifier) {
-    val track by animateColorAsState(if (checked) SliverColors.Accent else SliverColors.Surface3, SliverMotion.standard(SliverMotion.Quick))
+    val track by animateColorAsState(if (checked) SliverColors.Accent else SliverColors.LineStrong, SliverMotion.standard(SliverMotion.Quick))
     val x by animateDpAsState(if (checked) 20.dp else 2.dp, SliverMotion.standard(SliverMotion.Quick))
     Box(modifier.size(width = 48.dp, height = 28.dp).clip(CircleShape).background(track)) {
         Box(

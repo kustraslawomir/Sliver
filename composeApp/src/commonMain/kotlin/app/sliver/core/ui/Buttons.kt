@@ -44,7 +44,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled, maxLines = 1, softWrap = false)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.OnAccent else SliverColors.TextTertiary, maxLines = 1, softWrap = false)
     }
 }
 

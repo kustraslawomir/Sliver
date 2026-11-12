@@ -442,8 +442,8 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     val surface = when (state) {
         CellState.FUTURE -> base
         CellState.EMPTY -> base.background(SliverColors.Surface1).border(1.dp, SliverColors.CellEmptyLine, CellShape)
-        CellState.TODAY -> base.border(2.dp, SliverColors.Accent, CellShape)
-        else -> base.then(if (ringed) Modifier.border(2.dp, SliverColors.Accent, CellShape) else Modifier)
+        CellState.TODAY -> base.border(2.dp, SliverColors.AccentMark, CellShape)
+        else -> base.then(if (ringed) Modifier.border(2.dp, SliverColors.AccentMark, CellShape) else Modifier)
     }
     Box(
         surface.semantics(mergeDescendants = true) {
@@ -513,7 +513,7 @@ private fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, f
                                     val s = 1.dp.toPx()
                                     drawRoundRect(SliverColors.LineHairline, Offset(x + s / 2, s / 2), Size(w - s, size.height - s), r, style = androidx.compose.ui.graphics.drawscope.Stroke(s))
                                 }
-                                date == today -> drawRoundRect(SliverColors.Accent, Offset(x, 0f), box, r)
+                                date == today -> drawRoundRect(SliverColors.AccentMark, Offset(x, 0f), box, r)
                                 date < first -> drawRoundRect(SliverColors.Surface1, Offset(x, 0f), box, r)
                                 else -> drawRoundRect(SliverColors.CellEmpty, Offset(x, 0f), box, r)
                             }
