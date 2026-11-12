@@ -37,6 +37,13 @@ interface DayRepository {
     suspend fun save(day: Day)
     suspend fun delete(date: LocalDate)
 
+    /** Unconfirmed auto-imported days of the active project, by date. Every other observer here sees confirmed days only. */
+    fun observeDrafts(): Flow<List<Day>>
+    suspend fun draftsOfRun(projectId: String, runId: String): List<Day>
+
+    /** Removes a draft row; its files are the caller's to delete. */
+    suspend fun deleteRow(projectId: String, date: LocalDate)
+
     /** Exports 1 s of the source, then moves video + thumb into place and upserts the row. */
     suspend fun saveClip(request: SaveClipRequest): Day
 }
@@ -56,6 +63,11 @@ data class SaveClipRequest(
     val keepAudio: Boolean = true,
     val color: Int = 0,
     val isPhoto: Boolean = daySource == DaySource.PHOTO,
+    /** Null = the active project. */
+    val projectId: String? = null,
+    val draft: Boolean = false,
+    val draftCandidates: String? = null,
+    val importRunId: String? = null,
 )
 
 /** Best-effort place name for a media source that carries a location; null when absent or unresolvable. */
@@ -94,7 +106,7 @@ class DayRepositoryImpl(
             else exporter.exportClip(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val place = places.resolve(source)
             val stats = light.read(tmpVideo)
-            val projectId = projects.activeId()
+            val projectId = request.projectId ?: projects.activeId()
             val file = files.dayPath(projectId, date)
             val thumb = files.thumbPath(projectId, date)
             check(files.move(tmpVideo, file) && files.move(tmpThumb, thumb)) { "Could not move export into place" }
@@ -104,6 +116,7 @@ class DayRepositoryImpl(
                 takenAt = takenAt, createdAt = Clock.System.now(), place = place,
                 driveFileId = dao.getByDate(projectId, date)?.driveFileId,
                 luma = stats?.luma ?: NO_LUMA, tone = stats?.tone ?: 0,
+                draft = draft, draftCandidates = draftCandidates, importRunId = importRunId,
             )
             dao.upsert(day)
             day
@@ -122,6 +135,9 @@ class DayRepositoryImpl(
     override suspend fun getDay(date: LocalDate) = dao.getByDate(projects.activeId(), date)
     override suspend fun getDay(projectId: String, date: LocalDate) = dao.getByDate(projectId, date)
     override fun observeAllProjects() = dao.observeEverything()
+    override fun observeDrafts() = activeIds.flatMapLatest { dao.observeDrafts(it) }
+    override suspend fun draftsOfRun(projectId: String, runId: String) = dao.draftsOfRun(projectId, runId)
+    override suspend fun deleteRow(projectId: String, date: LocalDate) = dao.delete(projectId, date)
     override suspend fun save(day: Day) = dao.upsert(day.copy(projectId = day.projectId.ifEmpty { projects.activeId() }))
     override suspend fun delete(date: LocalDate) {
         val projectId = projects.activeId()

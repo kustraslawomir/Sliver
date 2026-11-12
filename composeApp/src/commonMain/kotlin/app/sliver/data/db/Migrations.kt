@@ -56,3 +56,12 @@ val Migration4To5 = object : Migration(4, 5) {
         connection.execSQL("UPDATE film SET look = NULL WHERE look NOT IN ('KIOSK','AFTERHOURS','SILVER','SUNDAY','TAPE','HALO')")
     }
 }
+
+/** Auto-import drafts: confirmed days keep draft = 0. */
+val Migration5To6 = object : Migration(5, 6) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE day ADD COLUMN draft INTEGER NOT NULL DEFAULT 0")
+        connection.execSQL("ALTER TABLE day ADD COLUMN draftCandidates TEXT")
+        connection.execSQL("ALTER TABLE day ADD COLUMN importRunId TEXT")
+    }
+}

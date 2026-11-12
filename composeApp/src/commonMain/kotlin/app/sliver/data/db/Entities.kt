@@ -51,6 +51,11 @@ data class Day(
     @ColumnInfo(defaultValue = "-1") val luma: Float = -1f,
     /** Dominant colour (opaque ARGB), or 0 until computed. */
     @ColumnInfo(defaultValue = "0") val tone: Int = 0,
+    /** Auto-imported and not yet confirmed: shown in the calendar only, never counted anywhere else. */
+    @ColumnInfo(defaultValue = "0") val draft: Boolean = false,
+    /** JSON list of the day's gallery items (DraftCandidate), default pick first; null for normal days. */
+    val draftCandidates: String? = null,
+    val importRunId: String? = null,
 )
 
 @Entity(tableName = "film")

@@ -137,6 +137,31 @@ class DataLayerTest {
     }
 
     @Test
+    fun draftsAreInvisibleToEveryCountingObserver() = runTest {
+        days.save(day("2026-11-10"))
+        days.save(day("2026-11-09").copy(draft = true, importRunId = "run1", draftCandidates = "[]"))
+        assertEquals(listOf("2026-11-10"), days.observeAll().first().map { it.date.toString() })
+        assertEquals(1, days.observeCount().first())
+        assertEquals(listOf("2026-11-10"), days.observeAllProjects().first().map { it.date.toString() })
+        assertEquals(listOf("2026-11-09"), days.observeDrafts().first().map { it.date.toString() })
+        assertEquals(true, days.getDay(LocalDate.parse("2026-11-09"))?.draft)
+        assertEquals(1, projects.stats.first().values.single().clips)
+        assertEquals(1, days.draftsOfRun(projects.activeId(), "run1").size)
+        assertEquals(0, days.draftsOfRun(projects.activeId(), "other").size)
+    }
+
+    @Test
+    fun savingOverADraftConfirmsIt() = runTest {
+        val date = LocalDate(2026, 3, 1)
+        val request = SaveClipRequest(date, "/src.mp4", 0, 1f, null, FilmFormat.CINEMA, DaySource.GALLERY, Instant.fromEpochSeconds(0))
+        days.saveClip(request.copy(draft = true, importRunId = "r", draftCandidates = "[]"))
+        assertEquals(0, days.observeCount().first())
+        days.saveClip(request)
+        assertEquals(1, days.observeCount().first())
+        assertEquals(0, days.observeDrafts().first().size)
+    }
+
+    @Test
     fun rangeQueryInclusiveAndOrdered() = runTest {
         listOf("2026-11-12", "2026-11-10", "2026-11-11", "2026-11-20").forEach { days.save(day(it)) }
         val r = days.observeRange(LocalDate.parse("2026-11-10"), LocalDate.parse("2026-11-12")).first()

@@ -54,6 +54,9 @@ private class Days(vararg initial: Day) : DayRepository {
     override suspend fun getDay(date: LocalDate) = rows.value[date]
     override suspend fun getDay(projectId: String, date: LocalDate) = rows.value[date]
     override fun observeAllProjects(): Flow<List<Day>> = observeAll()
+    override fun observeDrafts(): Flow<List<Day>> = kotlinx.coroutines.flow.flowOf(emptyList())
+    override suspend fun draftsOfRun(projectId: String, runId: String): List<Day> = emptyList()
+    override suspend fun deleteRow(projectId: String, date: LocalDate) = Unit
     override suspend fun save(day: Day) { rows.value = rows.value + (day.date to day) }
     override suspend fun delete(date: LocalDate) { rows.value = rows.value - date }
     override suspend fun saveClip(request: SaveClipRequest): Day = error("unused")

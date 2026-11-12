@@ -44,6 +44,9 @@ private class MultiDays : DayRepository {
     override suspend fun getDay(date: LocalDate): Day? = null
     override suspend fun getDay(projectId: String, date: LocalDate) = rows.value[projectId to date]
     override fun observeAllProjects() = observeAll()
+    override fun observeDrafts(): Flow<List<Day>> = kotlinx.coroutines.flow.flowOf(emptyList())
+    override suspend fun draftsOfRun(projectId: String, runId: String): List<Day> = emptyList()
+    override suspend fun deleteRow(projectId: String, date: LocalDate) = Unit
     override suspend fun save(day: Day) { rows.value = rows.value + ((day.projectId to day.date) to day) }
     override suspend fun delete(date: LocalDate) = Unit
     override suspend fun saveClip(request: SaveClipRequest): Day = error("unused")

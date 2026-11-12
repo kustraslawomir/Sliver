@@ -92,6 +92,9 @@ private class RecordingDays : DayRepository {
     override suspend fun getDay(date: LocalDate): Day? = null
     override suspend fun getDay(projectId: String, date: LocalDate): Day? = null
     override fun observeAllProjects(): Flow<List<Day>> = emptyFlow()
+    override fun observeDrafts(): Flow<List<Day>> = emptyFlow()
+    override suspend fun draftsOfRun(projectId: String, runId: String): List<Day> = emptyList()
+    override suspend fun deleteRow(projectId: String, date: LocalDate) = Unit
     override suspend fun save(day: Day) = Unit
     override suspend fun delete(date: LocalDate) = Unit
 }

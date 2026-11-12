@@ -35,8 +35,8 @@ interface ProjectDao {
 
     @Query(
         "SELECT projectId, COUNT(*) AS clips, MIN(date) AS since, " +
-            "(SELECT thumb FROM day d2 WHERE d2.projectId = d.projectId ORDER BY d2.date DESC LIMIT 1) AS cover " +
-            "FROM day d GROUP BY projectId",
+            "(SELECT thumb FROM day d2 WHERE d2.projectId = d.projectId AND d2.draft = 0 ORDER BY d2.date DESC LIMIT 1) AS cover " +
+            "FROM day d WHERE draft = 0 GROUP BY projectId",
     )
     fun observeStats(): Flow<List<ProjectStats>>
 }
@@ -60,17 +60,23 @@ interface DayDao {
     @Query("SELECT * FROM day WHERE projectId = :projectId AND date = :date")
     suspend fun getByDate(projectId: String, date: LocalDate): Day?
 
-    @Query("SELECT COUNT(*) FROM day WHERE projectId = :projectId")
+    @Query("SELECT COUNT(*) FROM day WHERE projectId = :projectId AND draft = 0")
     fun observeCount(projectId: String): Flow<Int>
 
-    @Query("SELECT * FROM day WHERE projectId = :projectId ORDER BY date")
+    @Query("SELECT * FROM day WHERE projectId = :projectId AND draft = 0 ORDER BY date")
     fun observeAll(projectId: String): Flow<List<Day>>
 
     @Query("SELECT * FROM day WHERE projectId = :projectId")
     suspend fun listOf(projectId: String): List<Day>
 
-    @Query("SELECT * FROM day")
+    @Query("SELECT * FROM day WHERE draft = 0")
     fun observeEverything(): Flow<List<Day>>
+
+    @Query("SELECT * FROM day WHERE projectId = :projectId AND draft = 1 ORDER BY date")
+    fun observeDrafts(projectId: String): Flow<List<Day>>
+
+    @Query("SELECT * FROM day WHERE projectId = :projectId AND draft = 1 AND importRunId = :runId")
+    suspend fun draftsOfRun(projectId: String, runId: String): List<Day>
 
     @Query("DELETE FROM day WHERE projectId = :projectId")
     suspend fun deleteAll(projectId: String)
