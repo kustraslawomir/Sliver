@@ -295,13 +295,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
             }
         }
 
-        ProjectsSheet(projectsOpen, { projectsOpen = false })
-        SliverBottomSheet(menuOpen, { menuOpen = false }) {
-            Column {
-                SwitchRow("Grid", cam.grid, { on -> update { it.copy(grid = on) } })
-            }
-        }
-
         Column(
             (if (side) Modifier.align(Alignment.CenterEnd).width(SideControlsWidth).statusBarsPadding()
             else Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth).fillMaxWidth())
@@ -362,6 +355,13 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 }
             }
         }
+        ProjectsSheet(projectsOpen, { projectsOpen = false })
+        SliverBottomSheet(menuOpen, { menuOpen = false }) {
+            Column {
+                SwitchRow("Grid", cam.grid, { on -> update { it.copy(grid = on) } })
+            }
+        }
+
         if (storageFull) StorageFullOverlay({ storageFull = false })
     }
 }
