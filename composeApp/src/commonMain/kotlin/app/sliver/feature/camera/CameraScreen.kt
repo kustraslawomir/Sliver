@@ -3,6 +3,11 @@ package app.sliver.feature.camera
 import app.sliver.feature.gallery.rememberAddMedia
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.motionSpec
@@ -469,15 +474,22 @@ private fun CameraRoundButton(onClick: () -> Unit, label: String, icon: @Composa
 
 @Composable
 private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifier) {
-    val color = if (clipOk) SliverColors.Accent else SliverColors.TextSecondary
+    val color = if (clipOk) SliverColors.Record else SliverColors.TextSecondary
+    val reduced = LocalReducedMotion.current
+    val dotAlpha = if (reduced) 1f else {
+        val t by rememberInfiniteTransition(label = "dot").animateFloat(
+            1f, 0.78f, infiniteRepeatable(tween(800, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)), RepeatMode.Reverse), label = "dot",
+        )
+        t
+    }
     Row(
         modifier.height(34.dp).clip(SliverShapes.Pill).background(SliverColors.BgVoid.copy(alpha = 0.7f))
-            .border(1.dp, if (clipOk) SliverColors.Accent.copy(alpha = 0.4f) else SliverColors.LineStrong, SliverShapes.Pill)
+            .border(1.dp, if (clipOk) SliverColors.Record.copy(alpha = 0.4f) else SliverColors.LineStrong, SliverShapes.Pill)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
-        Box(Modifier.size(8.dp).background(SliverColors.Accent, CircleShape))
+        Box(Modifier.size(8.dp).alpha(dotAlpha).background(SliverColors.Record, CircleShape))
         SliverText(time, SliverType.Num, color = color, maxLines = 1)
         if (clipOk) SliverText("\u00B7 Clip OK", SliverType.Meta, color = color, maxLines = 1)
     }

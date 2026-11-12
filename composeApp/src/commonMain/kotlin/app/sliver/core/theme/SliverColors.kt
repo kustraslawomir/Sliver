@@ -26,16 +26,16 @@ object SliverColors {
     val TextSecondary get() = pick(0xFFB9B9B3, 0xFF4A4843)
     val TextTertiary get() = pick(0xFF8E8E88, 0xFF625F59)
     val TextDisabled get() = pick(0xFF55555A, 0xFFA8A49B)
-    /** Ember fill (buttons, record dot, selected borders). */
-    val Accent = Color(0xFFFF8A3D)
-    /** Ember as text or icon on the page: emberOnLight in the light theme. */
-    val AccentText get() = pick(0xFFFF8A3D, 0xFF9E4108)
-    /** Ember for rings and markers that must reach 3:1 on the page (DE6218 in light). */
-    val AccentMark get() = pick(0xFFFF8A3D, 0xFFDE6218)
-    val AccentCore get() = pick(0xFFFFD2AE, 0xFFE8671C)
-    val AccentLine get() = pick(0x55FF8A3D, 0x55E8671C)
-    val AccentTint get() = pick(0x1FFF8A3D, 0x1FE8671C)
-    val OnAccent = Color(0xFF0A0A0B)
+    /** v1.4 mono accent: primary fill, selected, switch-on. No hue. */
+    val Accent get() = pick(0xFFEDEDE8, 0xFF141413)
+    val OnAccent get() = pick(0xFF0A0A0B, 0xFFF6F4EF)
+    val AccentText get() = Accent
+    val AccentMark get() = Accent
+    val AccentCore get() = Accent
+    val AccentLine get() = pick(0x55EDEDE8, 0x55141413)
+    val AccentTint get() = pick(0x1FEDEDE8, 0x14141413)
+    /** Red is only for recording: record button, "Record today", recording dot, timer after 1 s. */
+    val Record = Color(0xFFFF3B30)
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
     val OnInverse get() = pick(0xFF0A0A0B, 0xFFEDEDE8)
     val Success get() = pick(0xFF8FC7A4, 0xFF266B46)

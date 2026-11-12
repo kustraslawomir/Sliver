@@ -9,7 +9,7 @@ import android.os.Build
 import app.sliver.R
 
 private const val CH_PROGRESS = "progress"
-private const val EMBER = 0xFFFF8A3D.toInt()
+private const val DONE = 0xFFEDEDE8.toInt()
 private const val PENDING = 0xFF6B6B70.toInt()
 
 /**
@@ -40,10 +40,10 @@ class ProgressNotifier(
             val finished = segmentsDone(n, done, total)
             val style = Notification.ProgressStyle()
                 .setStyledByProgress(false)
-                .setProgressSegments(List(n) { Notification.ProgressStyle.Segment(100).setColor(if (it < finished) EMBER else PENDING) })
+                .setProgressSegments(List(n) { Notification.ProgressStyle.Segment(100).setColor(if (it < finished) DONE else PENDING) })
                 .setProgress((if (total <= 0) 0 else done.coerceIn(0, total) * n * 100 / total))
                 .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_stat_sliver))
-            if (n > 1) style.setProgressPoints(listOf(Notification.ProgressStyle.Point((finished.coerceAtMost(n - 1) * 100 + 50)).setColor(EMBER)))
+            if (n > 1) style.setProgressPoints(listOf(Notification.ProgressStyle.Point((finished.coerceAtMost(n - 1) * 100 + 50)).setColor(DONE)))
             if (total <= 0) style.setProgressIndeterminate(true)
             b.setStyle(style)
             if (Build.VERSION.SDK_INT_FULL >= Build.VERSION_CODES_FULL.BAKLAVA_1) {

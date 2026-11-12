@@ -127,7 +127,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                             SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (nextDay(current, filled) != null) 1f else 0.4f))
                         }
                         IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on", overCamera = true) {
-                            SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.OnMedia.copy(alpha = 0.75f) else SliverColors.Accent)
+                            SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.OnMedia.copy(alpha = 0.75f) else SliverColors.OnMedia)
                         }
                     }
                 }

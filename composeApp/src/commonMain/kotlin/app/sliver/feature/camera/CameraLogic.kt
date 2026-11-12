@@ -82,7 +82,7 @@ fun focusRingCenter(x: Float, y: Float, width: Float, height: Float, ringPx: Flo
         y.coerceIn(half.coerceAtMost(height / 2f), (height - half).coerceAtLeast(height / 2f))
 }
 
-/** The clip-length pill turns ember once a recording is at least 1 s. */
+/** The clip-length pill turns red once a recording is at least 1 s. */
 fun clipLongEnough(elapsedMs: Long): Boolean = elapsedMs >= 1000L
 
 const val EXPOSURE_HIDE_AFTER_MS = 3000L

@@ -1,7 +1,5 @@
 package app.sliver.core.ui
 
-import app.sliver.core.designsystem.Glow
-import app.sliver.core.designsystem.glow
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -28,7 +26,7 @@ import app.sliver.core.theme.SliverShapes
 private const val SWEEP_MS = 1100
 private const val SEGMENT = 0.35f
 
-/** The one loading indicator: a thin ember line sweeping along a hairline track. Static under reduced motion. */
+/** The one loading indicator: a thin line sweeping along a hairline track. Static under reduced motion. */
 @Composable
 fun SlitLoader(modifier: Modifier = Modifier, width: Dp = 120.dp) {
     val reduced = LocalReducedMotion.current
@@ -45,7 +43,6 @@ fun SlitLoader(modifier: Modifier = Modifier, width: Dp = 120.dp) {
                     val p = m.measure(c)
                     layout(p.width, p.height) { p.place((start * c.maxWidth / SEGMENT).toInt(), 0) }
                 }
-                .glow(SliverShapes.Pill, *Glow.slit)
                 .background(SliverColors.Accent, SliverShapes.Pill),
         )
     }

@@ -16,10 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
@@ -37,11 +35,12 @@ enum class RecordState { Photo, VideoIdle, Recording }
 
 private const val BREATH_MS = 1600
 
-/** CSS ease-in-out, as in design sv-breathe (1600 ms, 0%/100% = 12 px, 50% = 18 px). */
+/** CSS ease-in-out, as in design sv-breathe (1600 ms). */
 private val EaseInOut = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
+private const val BREATH_LOW = 0.78f
 private val Disc = 72.dp
 
-/** Option D "Ember": 72 dp disc in an 80 dp hit area, glow (tokens glow.record, breathing to recordBreathPeak) drawn as a radial gradient (no blur). */
+/** 72 dp red disc in an 80 dp hit area; while recording it breathes in opacity 1 to 0.78 over 1.6 s (static with reduced motion). */
 @Composable
 fun RecordButton(
     state: RecordState,
@@ -53,16 +52,14 @@ fun RecordButton(
     modifier: Modifier = Modifier,
 ) {
     val reduced = LocalReducedMotion.current
-    val breath = if (state == RecordState.Recording && !reduced) {
+    val alpha = if (state == RecordState.Recording && !reduced) {
         val t by rememberInfiniteTransition(label = "breath").animateFloat(
-            0f, 1f, infiniteRepeatable(tween(BREATH_MS / 2, easing = EaseInOut), RepeatMode.Reverse), label = "breath",
+            1f, BREATH_LOW, infiniteRepeatable(tween(BREATH_MS / 2, easing = EaseInOut), RepeatMode.Reverse), label = "breath",
         )
         t
-    } else 0f
+    } else 1f
     val white = state == RecordState.Photo
-    val base = if (white) SliverColors.TextPrimary else SliverColors.Accent
-    val inner = if (white) 0x33 / 255f else lerpF(0x4D / 255f, 0x73 / 255f, breath)
-    val reach = if (white) 12f else lerpF(12f, 18f, breath)
+    val base = if (white) SliverColors.TextPrimary else SliverColors.Record
     Box(
         modifier.size(80.dp).scale(if (holding) 1.2f else 1f)
             .semantics { contentDescription = if (state == RecordState.Recording) "Stop recording" else "Record"; role = Role.Button }
@@ -88,30 +85,12 @@ fun RecordButton(
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            Modifier.size(Disc)
-                .drawBehind {
-                    val r = size.minDimension / 2f
-                    val reachPx = reach.dp.toPx()
-                    val edge = r / (r + reachPx)
-                    val mid = (r + reachPx * 0.45f) / (r + reachPx)
-                    drawCircle(
-                        Brush.radialGradient(
-                            edge to base.copy(alpha = inner),
-                            mid to base.copy(alpha = inner * 0.4f),
-                            1f to Color.Transparent,
-                            center = Offset(r, r), radius = r + reachPx,
-                        ),
-                        radius = r + reachPx, center = Offset(r, r),
-                    )
-                }
-                .background(base, CircleShape),
+            Modifier.size(Disc).alpha(alpha).background(base, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             if (state == RecordState.Recording) {
-                Box(Modifier.size(24.dp).background(SliverColors.OnAccent, RoundedCornerShape(6.dp)))
+                Box(Modifier.size(24.dp).background(Color.White, RoundedCornerShape(6.dp)))
             }
         }
     }
 }
-
-private fun lerpF(a: Float, b: Float, t: Float) = a + (b - a) * t

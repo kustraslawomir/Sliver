@@ -53,7 +53,3 @@ fun SliverText(
     BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines)
 }
 
-/** Neutral sheet shadow only; ember glow lives in core/designsystem/Glow.kt. */
-object SliverGlow {
-    fun sheet(shape: Shape): Modifier = Modifier.shadow(24.dp, shape, ambientColor = Color.Black, spotColor = Color.Black)
-}

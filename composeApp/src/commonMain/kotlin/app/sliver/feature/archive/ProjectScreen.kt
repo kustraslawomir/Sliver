@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -64,8 +65,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import app.sliver.core.designsystem.Glow
-import app.sliver.core.designsystem.glow
 import app.sliver.core.icons.HubIcons
 import app.sliver.core.icons.SliverIcons
 import app.sliver.core.icons.SliverIcon
@@ -533,7 +532,7 @@ private fun ProjectMenu(
     Box(Modifier.fillMaxSize().padding(top = top, end = 12.dp), Alignment.TopEnd) {
         Column(
             Modifier.width(230.dp)
-                .then(app.sliver.core.theme.SliverGlow.sheet(SliverShapes.R18))
+                .shadow(24.dp, SliverShapes.R18, ambientColor = Color.Black, spotColor = Color.Black)
                 .clip(SliverShapes.R18).background(SliverColors.Surface2)
                 .border(1.dp, SliverColors.LineStrong, SliverShapes.R18)
                 .clickable(remember { MutableInteractionSource() }, null) {}
@@ -578,7 +577,7 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
         SliverText("Add a clip for this day", SliverType.DisplayM.copy(lineHeight = 25.sp), Modifier.padding(bottom = 8.dp))
         val pick = rememberTapGate(onPick)
         Row(
-            Modifier.fillMaxWidth().height(56.dp).glow(SliverShapes.Pill, *Glow.cta).clip(SliverShapes.Pill)
+            Modifier.fillMaxWidth().height(56.dp).clip(SliverShapes.Pill)
                 .background(SliverColors.Accent).clickable(role = Role.Button, onClick = pick),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -594,7 +593,7 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
 
 private val RecordDockHeight = 148.dp
 
-/** Fixed bottom action: ember "Record today", or an outlined check once today has a clip. */
+/** Fixed bottom action: red "Record today", or an outlined check once today has a clip. */
 @Composable
 private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> Unit, modifier: Modifier = Modifier) {
     val tap = rememberTapGate(if (done) onOpenToday else onRecord)
@@ -608,9 +607,8 @@ private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> U
     ) {
         Box(
             Modifier.size(72.dp)
-                .then(if (done) Modifier else Modifier.glow(CircleShape, *Glow.record))
                 .clip(CircleShape)
-                .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Accent))
+                .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Record))
                 .semantics { contentDescription = label }
                 .clickable(role = Role.Button, onClick = tap),
             Alignment.Center,

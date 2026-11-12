@@ -47,8 +47,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import app.sliver.core.designsystem.Glow
-import app.sliver.core.designsystem.glow
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import app.sliver.core.theme.LocalReducedMotion
@@ -190,7 +188,6 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibilit
         Box(
             Modifier.offset { IntOffset((center.x - d.dp.toPx() / 2).roundToInt(), (center.y - d.dp.toPx() / 2).roundToInt()) }
                 .size(d.dp)
-                .then(if (f.locked) Modifier.glow(CircleShape, *Glow.lock, stroke = 1.5.dp) else Modifier)
                 .border(1.5.dp, color, CircleShape)
         )
         if (f.locked) {
@@ -215,7 +212,7 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibilit
 private val SliderWidth = 32.dp
 private val SliderGap = 48.dp
 
-/** Neutral white vertical slider beside the focus ring; ember only while AE/AF is locked. */
+/** Neutral white vertical slider beside the focus ring; accent only while AE/AF is locked. */
 @Composable
 private fun ExposureSlider(
     visible: Boolean,

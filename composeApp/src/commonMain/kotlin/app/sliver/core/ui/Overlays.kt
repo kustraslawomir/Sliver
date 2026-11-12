@@ -40,12 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverColors
-import app.sliver.core.designsystem.Glow
-import app.sliver.core.designsystem.glow
-import app.sliver.core.theme.SliverGlow
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -85,7 +83,7 @@ fun SliverBottomSheet(
                         translationY = back * 24.dp.toPx()
                         transformOrigin = TransformOrigin(0.5f, 1f)
                     }
-                    .then(SliverGlow.sheet(SliverShapes.SheetTop))
+                    .then(Modifier.shadow(24.dp, SliverShapes.SheetTop, ambientColor = Color.Black, spotColor = Color.Black))
                     .clip(SliverShapes.SheetTop)
                     .background(SliverColors.Surface2)
                     .border(1.dp, SliverColors.LineHairline, SliverShapes.SheetTop)
@@ -118,7 +116,6 @@ fun SliverFrame(state: SliverFrameState, modifier: Modifier = Modifier) {
     val color = if (state == SliverFrameState.Dragging) SliverColors.AccentCore else SliverColors.Accent
     Box(
         modifier.scale(scale)
-            .glow(SliverShapes.S, *Glow.frame, stroke = borderWidth.dp)
             .border(borderWidth.dp, color, SliverShapes.S),
     )
 }

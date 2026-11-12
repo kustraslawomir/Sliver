@@ -136,7 +136,7 @@ fun SliverSwitch(checked: Boolean, modifier: Modifier = Modifier) {
     Box(modifier.size(width = 44.dp, height = 26.dp).clip(CircleShape).background(track)) {
         Box(
             Modifier.offset(x, 2.dp).size(22.dp).clip(CircleShape)
-                .background(if (SliverColors.light) Color.White else SliverColors.TextPrimary),
+                .background(SliverColors.TextPrimary).border(2.dp, SliverColors.BgBase, CircleShape),
         )
     }
 }

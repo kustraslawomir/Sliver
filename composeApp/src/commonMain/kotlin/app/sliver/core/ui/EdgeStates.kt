@@ -1,7 +1,5 @@
 package app.sliver.core.ui
 
-import app.sliver.core.designsystem.Glow
-import app.sliver.core.designsystem.glow
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +57,7 @@ fun StorageFullOverlay(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-/** Black launch screen: an ember slit widens, the wordmark fades in, then the whole layer cross-fades away. */
+/** Black launch screen: a slit widens, the wordmark fades in, then the whole layer cross-fades away. */
 @Composable
 fun SplashOverlay(onFinished: () -> Unit) {
     val reduced = LocalReducedMotion.current
@@ -72,6 +70,6 @@ fun SplashOverlay(onFinished: () -> Unit) {
     }
     Box(Modifier.fillMaxSize().alpha(fade.value).background(SliverColors.BgVoid), contentAlignment = Alignment.Center) {
         val p = progress.value
-        Box(Modifier.width(2.dp).height((220 * p).dp).glow(SliverShapes.Pill, *Glow.slitHero).background(SliverColors.Accent, SliverShapes.Pill))
+        Box(Modifier.width(2.dp).height((220 * p).dp).background(SliverColors.Accent, SliverShapes.Pill))
     }
 }

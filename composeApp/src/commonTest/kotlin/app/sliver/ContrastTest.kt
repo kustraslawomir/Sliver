@@ -28,7 +28,7 @@ class ContrastTest {
         assertTrue(ratio(SliverColors.OnInverse, SliverColors.TextPrimary) >= 4.5f, "$name onInverse")
         assertTrue(ratio(SliverColors.TextTertiary, SliverColors.Surface3) >= 4.5f, "$name disabled primary label")
         assertTrue(ratio(SliverColors.OnMedia, SliverColors.Media) >= 4.5f, "$name onMedia")
-        assertTrue(ratio(SliverColors.Accent, SliverColors.Media) >= 4.5f, "$name accent on media")
+        assertTrue(ratio(SliverColors.Record, SliverColors.Media) >= 4.5f, "$name record on media")
     }
 
     @Test fun darkMeetsAa() = check(false)
