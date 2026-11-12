@@ -46,6 +46,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import app.sliver.feature.camera.overMedia
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -470,8 +471,9 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                 val thumb = if (day != null) rememberPhoto(day.thumb) else null
                 Box(Modifier.fillMaxSize().background(Color(day!!.color)))
                 if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
-                    date.day.toString(), mono(10.sp, 0.sp),
+                    date.day.toString(), mono(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
                     Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp),
                 )
             }
