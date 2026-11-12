@@ -133,10 +133,10 @@ fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit
 fun SliverSwitch(checked: Boolean, modifier: Modifier = Modifier) {
     val track by animateColorAsState(if (checked) SliverColors.Accent else SliverColors.LineStrong, SliverMotion.standard(SliverMotion.Quick))
     val x by animateDpAsState(if (checked) 20.dp else 2.dp, SliverMotion.standard(SliverMotion.Quick))
-    Box(modifier.size(width = 48.dp, height = 28.dp).clip(CircleShape).background(track)) {
+    Box(modifier.size(width = 44.dp, height = 26.dp).clip(CircleShape).background(track)) {
         Box(
-            Modifier.offset(x, 2.dp).size(24.dp).clip(CircleShape)
-                .background(if (checked) SliverColors.OnAccent else SliverColors.TextSecondary),
+            Modifier.offset(x, 2.dp).size(22.dp).clip(CircleShape)
+                .background(if (SliverColors.light) Color.White else SliverColors.TextPrimary),
         )
     }
 }
