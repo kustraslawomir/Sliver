@@ -22,16 +22,19 @@ Product rules still apply: filters are never burned into stored clips, only into
   per clip (deterministic per clip id so preview = export).
 - All params deterministic from (clip id, frame time) so preview and export match.
 
-## 2. New presets (LUT + shader params), names in docs/TERMS.md style
-- **Disposable**: Kodak-Gold-like warm LUT (warm yellows/reds, cyan-green shadows, lifted blacks 6–8 %),
-  flash falloff, heavy colour grain, soft lens, strong vignette, occasional light leak; date stamp default
-  style "LED" (orange segmented digits, bottom-right) when the date stamp is on.
-- **Dark**: low-key; crushed blacks, mids −0.3 EV, cool green-teal shadows, saturation −30, heavy vignette,
-  dense grain.
-- **Black**: B&W, channel mix R 0.5 / G 0.4 / B 0.1, high contrast S-curve with deep blacks, coarse
-  mono grain (Tri-X feel), light halation.
-- **Portra**: warm, soft contrast, gentle skin tones, fine grain.
-- **Night 800**: tungsten-balanced, blue shadows, strong halation around lights, medium grain.
+## 2. New presets — our own family (names and concepts are original; owner approved the direction)
+Inspiration is only the general genre (grainy analog / disposable / dark / B&W). Order in the picker:
+- **Kiosk** (disposable camera from a kiosk): warm cheap-film LUT (warm yellows/reds, cyan-green shadows,
+  lifted blacks 6–8 %), flash falloff, heavy colour grain, soft plastic lens, strong vignette, occasional
+  light leak; date stamp default style "LED" (orange segmented digits, bottom-right) when the stamp is on.
+- **Afterhours** (dark, night, city): low-key; crushed blacks, mids −0.3 EV, teal-green shadows,
+  saturation −30, halation around lights, dense grain, heavy vignette.
+- **Silver** (B&W silver film): channel mix R 0.5 / G 0.4 / B 0.1, high-contrast S-curve, deep blacks,
+  coarse mono grain, light halation.
+- **Sunday** (soft warm memory): faded blacks, warm highlights, gentle skin, fine grain, low contrast.
+- **Tape** (our VHS, evolves the existing VHS 94): chroma bleed, faint scanlines, slight weave,
+  date in a camcorder-style stamp variant.
+- **Halo** (dreamy night lights): bloom + halation, cool shadows, soft image, medium grain.
 Keep the existing presets that still make sense; drop or rename any that duplicate these (note in HANDOFF).
 Generate LUTs with the Kotlin LUT generator (commit 0c90b44) from documented curves/matrices, 33³ `.cube`.
 
@@ -39,7 +42,7 @@ Generate LUTs with the Kotlin LUT generator (commit 0c90b44) from documented cur
 - Filters are chosen only in the **Film builder** and apply to the whole film (preview + render/export).
   The builder's existing single-look option becomes the "Filter" section: horizontal row of thumbnails
   rendered from a frame of the project's film with each filter (cached), intensity slider, Grain slider.
-  Disposable first. Saved in the film definition (synced later with T-sync-two-devices).
+  Kiosk first. Saved in the film definition (synced later with T-sync-two-devices).
 - **Remove filters from single clips**: no filter control in Edit clip / Photo clip / Day detail, and no
   "Change look"/filter entry on a day. Clips play and save clean. Existing per-day `look` values are ignored
   for playback and render (keep the DB column readable; migration not needed); the film's filter is the only
