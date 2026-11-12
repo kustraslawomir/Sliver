@@ -11,6 +11,20 @@ private class AndroidSettingsPlatform(private val context: Context) : SettingsPl
     override val versionName: String =
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: "0"
 
+    override fun notificationsEnabled() = androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+    override fun openNotificationSettings() {
+        runCatching {
+            context.startActivity(
+                Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }
+    }
+
+    override val is24Hour: Boolean get() = android.text.format.DateFormat.is24HourFormat(context)
+
     override fun sendFeedback(address: String, subject: String) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$address?subject=${Uri.encode(subject)}"))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

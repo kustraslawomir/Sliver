@@ -53,7 +53,7 @@ val commonModule: Module = module {
         val auth = get<GoogleAuth>()
         if (auth.isFake) InMemoryDriveClient() else RestDriveClient(get<HttpClientEngine>(), auth::accessToken)
     }
-    single { ReminderCoordinator(get(), get(), get()) }
+    single { ReminderCoordinator(get(), get(), get(), get(), get(), get()) }
 }
 
 expect val platformModule: Module

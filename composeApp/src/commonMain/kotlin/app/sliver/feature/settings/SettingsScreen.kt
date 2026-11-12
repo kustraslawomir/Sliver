@@ -33,6 +33,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.Chip
 import app.sliver.feature.camera.label
+import app.sliver.feature.notifications.reminderSummary
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.SwitchRow
 import app.sliver.data.FilmFormat
@@ -95,7 +96,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         SwitchRow("Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } })
 
         Group("More")
-        NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Notifications) }
+        NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
         NavRow("Fill empty days", null) { onGo(Route.FillThePast) }
         NavRow("What SLIVER stores", null) { showStores = !showStores }
         if (showStores) {
@@ -111,18 +112,6 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             color = SliverColors.TextTertiary,
         )
     }
-}
-
-@Composable
-private fun reminderSummary(r: app.sliver.data.settings.ReminderSettings): String {
-    if (r.mode == app.sliver.data.settings.ReminderMode.OFF) return "Off"
-    val n = r.days.count { it }
-    val days = when {
-        n == 7 -> "every day"
-        n == 0 -> "no days"
-        else -> "$n days a week"
-    }
-    return "${r.time.hour.toString().padStart(2, '0')}:${r.time.minute.toString().padStart(2, '0')}, $days"
 }
 
 @Composable

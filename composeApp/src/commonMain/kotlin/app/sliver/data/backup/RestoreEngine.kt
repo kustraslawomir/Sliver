@@ -18,7 +18,6 @@ import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.settings.AppSettings
-import app.sliver.data.settings.ReminderMode
 import app.sliver.data.settings.SettingsRepository
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
@@ -133,14 +132,14 @@ fun applyManifestSettings(s: AppSettings, json: String): AppSettings = runCatchi
         dateStamp = m.flag("dateStamp", s.dateStamp),
         saveFullRecordings = m.flag("saveFullRecordings", s.saveFullRecordings),
         reminder = s.reminder.copy(
-            mode = r?.enum<ReminderMode>("mode") ?: s.reminder.mode,
+            enabled = r.flag("enabled", s.reminder.enabled),
             time = r.time("time", s.reminder.time),
-            windowStart = r.time("windowStart", s.reminder.windowStart),
-            windowEnd = r.time("windowEnd", s.reminder.windowEnd),
+            skipIfDone = r.flag("skipIfDone", s.reminder.skipIfDone),
+            lastCall = r.flag("lastCall", s.reminder.lastCall),
+            followGoldenHour = r.flag("followGoldenHour", s.reminder.followGoldenHour),
             days = r?.get("days")?.jsonPrimitive?.contentOrNull?.takeIf { it.length == 7 }?.map { it == '1' } ?: s.reminder.days,
         ),
         notif = s.notif.copy(
-            runningLate = n.flag("runningLate", s.notif.runningLate),
             filmReady = n.flag("filmReady", s.notif.filmReady),
             backupProblems = n.flag("backupProblems", s.notif.backupProblems),
             onThisDay = n.flag("onThisDay", s.notif.onThisDay),

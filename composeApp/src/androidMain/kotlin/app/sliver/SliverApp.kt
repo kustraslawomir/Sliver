@@ -31,6 +31,8 @@ class SliverApp : Application(), KoinComponent {
         }
         val store: FileStore by inject()
         ensureChannels(this)
+        val golden: app.sliver.feature.notifications.GoldenHourProvider by inject()
+        golden.refresh()
         val coordinator: ReminderCoordinator by inject()
         coordinator.start(AppScope)
         val backup: BackupCoordinator by inject()

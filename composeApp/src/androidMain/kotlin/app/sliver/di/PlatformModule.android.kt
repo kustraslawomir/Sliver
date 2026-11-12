@@ -37,7 +37,11 @@ import app.sliver.feature.films.FilmRenderer
 import app.sliver.feature.films.FilmShare
 import app.sliver.feature.gallery.AndroidGalleryProvider
 import app.sliver.feature.gallery.GalleryProvider
+import app.sliver.feature.notifications.AndroidGoldenHour
 import app.sliver.feature.notifications.AndroidReminderScheduler
+import app.sliver.feature.notifications.GoldenHourProvider
+import app.sliver.feature.notifications.AndroidReminderLog
+import app.sliver.feature.notifications.ReminderLog
 import app.sliver.feature.notifications.ReminderScheduler
 import app.sliver.feature.trim.AndroidTrimMedia
 import app.sliver.feature.trim.TrimMedia
@@ -63,6 +67,8 @@ actual val platformModule: Module = module {
     single { ProgressCoordinator(get<Context>(), get(), get(), get()) }
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
+    single<ReminderLog> { AndroidReminderLog(get<Context>()) }
+    single<GoldenHourProvider> { AndroidGoldenHour(get<Context>()) }
     single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }
     single<GoogleAuth> {
         if (googleConfigured) AndroidGoogleAuth(get<Context>(), BuildConfig.GOOGLE_WEB_CLIENT_ID) else FakeGoogleAuth()

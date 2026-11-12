@@ -49,6 +49,7 @@ fun PermissionDenied(kind: PermissionKind, onOpenSettings: () -> Unit, onAlterna
     val (title, body) = when (kind) {
         PermissionKind.CameraMic -> "Camera access is off" to "Turn it on in Settings to record your clip, or add one from your gallery."
         PermissionKind.Notifications -> "Reminders are off" to "Turn notifications on in Settings to get your daily nudge."
+        PermissionKind.CoarseLocation -> "Location is off" to "Turn on approximate location in Settings to see golden hour."
     }
     PermissionLayout(title, body) {
         PrimaryButton("Open Settings", onOpenSettings)

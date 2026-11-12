@@ -2,7 +2,7 @@ package app.sliver.core.permissions
 
 import androidx.compose.runtime.Composable
 
-enum class PermissionKind { CameraMic, Notifications }
+enum class PermissionKind { CameraMic, Notifications, CoarseLocation }
 
 enum class PermissionStatus {
     NotAsked, Granted, Denied;
@@ -32,5 +32,10 @@ fun PermissionKind.copy() = when (this) {
         "A gentle nudge each day",
         "SLIVER reminds you once a day to capture your clip.",
         "Allow notifications",
+    )
+    PermissionKind.CoarseLocation -> PermissionCopy(
+        "Know when the light is good",
+        "Approximate location is used on this phone only, to time golden hour.",
+        "Allow approximate location",
     )
 }

@@ -55,7 +55,7 @@ import app.sliver.feature.films.PremiereScreen
 import app.sliver.feature.films.YearInClipsScreen
 import app.sliver.feature.notifications.DeepLink
 import app.sliver.feature.notifications.DeepLinkTarget
-import app.sliver.feature.notifications.NotificationsScreen
+import app.sliver.feature.notifications.RemindersScreen
 import app.sliver.feature.onboarding.OnboardingScreen
 import app.sliver.feature.settings.SettingsScreen
 import app.sliver.feature.trim.PhotoTrimScreen
@@ -136,7 +136,7 @@ fun SliverNavHost() {
                             Route.Settings -> SettingsScreen(go, onBack = back)
                             Route.Backup -> BackupScreen(onBack = back, onRestore = { go(Route.Restore) })
                             Route.Restore -> RestoreScreen(onDone = { navigator.openStack(DeepLinkTarget.Project) })
-                            Route.Notifications -> NotificationsScreen(onBack = back)
+                            Route.Reminders -> RemindersScreen(onBack = back)
                             Route.Onboarding -> OnboardingScreen(
                                 onFinished = {
                                     nav.navigate(Route.Project.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
@@ -160,7 +160,7 @@ fun SliverNavHost() {
 private val DarkRoutes = setOf(Route.Camera, Route.Trim, Route.PhotoTrim, Route.Export, Route.Premiere, Route.FilmPlayer, Route.YearInClips)
 
 private val CappedRoutes = setOf(
-    Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Notifications,
+    Route.FillThePast, Route.Settings, Route.Backup, Route.Restore, Route.Reminders,
     Route.FilmBuilder, Route.Export, Route.Premiere, Route.YearInClips, Route.Onboarding,
 )
 

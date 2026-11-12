@@ -33,12 +33,14 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val dateStamp = booleanPreferencesKey("dateStamp")
         val saveFullRecordings = booleanPreferencesKey("saveFullRecordings")
         val volumeKeyRecords = booleanPreferencesKey("volumeKeyRecords")
-        val reminderMode = stringPreferencesKey("reminder.mode")
+        val showGoldenHour = booleanPreferencesKey("showGoldenHour")
+        val reminderEnabled = booleanPreferencesKey("reminder.enabled")
         val reminderTime = stringPreferencesKey("reminder.time")
-        val reminderWindowStart = stringPreferencesKey("reminder.windowStart")
-        val reminderWindowEnd = stringPreferencesKey("reminder.windowEnd")
         val reminderDays = stringPreferencesKey("reminder.days")
-        val notifRunningLate = booleanPreferencesKey("notif.runningLate")
+        val reminderSkipIfDone = booleanPreferencesKey("reminder.skipIfDone")
+        val reminderLastCall = booleanPreferencesKey("reminder.lastCall")
+        val reminderFollowGolden = booleanPreferencesKey("reminder.followGoldenHour")
+        val reminderProjects = stringPreferencesKey("reminder.projects")
         val notifFilmReady = booleanPreferencesKey("notif.filmReady")
         val notifBackupProblems = booleanPreferencesKey("notif.backupProblems")
         val notifOnThisDay = booleanPreferencesKey("notif.onThisDay")
@@ -77,15 +79,17 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
             dateStamp = this[K.dateStamp] ?: d.dateStamp,
             saveFullRecordings = this[K.saveFullRecordings] ?: d.saveFullRecordings,
             volumeKeyRecords = this[K.volumeKeyRecords] ?: d.volumeKeyRecords,
+            showGoldenHour = this[K.showGoldenHour] ?: d.showGoldenHour,
             reminder = ReminderSettings(
-                mode = enum(K.reminderMode, d.reminder.mode),
+                enabled = this[K.reminderEnabled] ?: d.reminder.enabled,
                 time = this[K.reminderTime]?.let(LocalTime::parse) ?: d.reminder.time,
-                windowStart = this[K.reminderWindowStart]?.let(LocalTime::parse) ?: d.reminder.windowStart,
-                windowEnd = this[K.reminderWindowEnd]?.let(LocalTime::parse) ?: d.reminder.windowEnd,
                 days = this[K.reminderDays]?.takeIf { it.length == 7 }?.map { it == '1' } ?: d.reminder.days,
+                skipIfDone = this[K.reminderSkipIfDone] ?: d.reminder.skipIfDone,
+                lastCall = this[K.reminderLastCall] ?: d.reminder.lastCall,
+                followGoldenHour = this[K.reminderFollowGolden] ?: d.reminder.followGoldenHour,
+                projects = this[K.reminderProjects]?.split(",")?.filter { it.isNotEmpty() }?.toSet() ?: d.reminder.projects,
             ),
             notif = NotifSettings(
-                runningLate = this[K.notifRunningLate] ?: d.notif.runningLate,
                 filmReady = this[K.notifFilmReady] ?: d.notif.filmReady,
                 backupProblems = this[K.notifBackupProblems] ?: d.notif.backupProblems,
                 onThisDay = this[K.notifOnThisDay] ?: d.notif.onThisDay,
@@ -129,12 +133,14 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         put(K.dateStamp, s.dateStamp)
         put(K.saveFullRecordings, s.saveFullRecordings)
         put(K.volumeKeyRecords, s.volumeKeyRecords)
-        put(K.reminderMode, s.reminder.mode.name)
+        put(K.showGoldenHour, s.showGoldenHour)
+        put(K.reminderEnabled, s.reminder.enabled)
         put(K.reminderTime, s.reminder.time.toString())
-        put(K.reminderWindowStart, s.reminder.windowStart.toString())
-        put(K.reminderWindowEnd, s.reminder.windowEnd.toString())
         put(K.reminderDays, s.reminder.days.joinToString("") { if (it) "1" else "0" })
-        put(K.notifRunningLate, s.notif.runningLate)
+        put(K.reminderSkipIfDone, s.reminder.skipIfDone)
+        put(K.reminderLastCall, s.reminder.lastCall)
+        put(K.reminderFollowGolden, s.reminder.followGoldenHour)
+        put(K.reminderProjects, s.reminder.projects.joinToString(","))
         put(K.notifFilmReady, s.notif.filmReady)
         put(K.notifBackupProblems, s.notif.backupProblems)
         put(K.notifOnThisDay, s.notif.onThisDay)

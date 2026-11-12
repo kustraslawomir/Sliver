@@ -47,6 +47,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+            implementation(compose.material3)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.splashscreen)
             implementation(libs.ktor.client.okhttp)

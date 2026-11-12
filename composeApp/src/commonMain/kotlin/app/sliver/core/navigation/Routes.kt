@@ -16,7 +16,7 @@ enum class Route(val path: String, val title: String) {
     Settings("settings", "Settings"),
     Backup("backup", "Backup & account"),
     Restore("restore", "Restore"),
-    Notifications("notifications", "Notifications"),
+    Reminders("reminders", "Daily reminder"),
     ;
 
     companion object {

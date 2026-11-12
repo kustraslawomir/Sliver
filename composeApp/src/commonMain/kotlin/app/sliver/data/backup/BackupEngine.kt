@@ -184,14 +184,14 @@ fun buildManifest(s: AppSettings, films: List<Film>, nowMillis: Long, project: P
         put("dateStamp", s.dateStamp)
         put("saveFullRecordings", s.saveFullRecordings)
         putJsonObject("reminder") {
-            put("mode", s.reminder.mode.name)
+            put("enabled", s.reminder.enabled)
             put("time", s.reminder.time.toString())
-            put("windowStart", s.reminder.windowStart.toString())
-            put("windowEnd", s.reminder.windowEnd.toString())
+            put("skipIfDone", s.reminder.skipIfDone)
+            put("lastCall", s.reminder.lastCall)
+            put("followGoldenHour", s.reminder.followGoldenHour)
             put("days", s.reminder.days.joinToString("") { if (it) "1" else "0" })
         }
         putJsonObject("notif") {
-            put("runningLate", s.notif.runningLate)
             put("filmReady", s.notif.filmReady)
             put("backupProblems", s.notif.backupProblems)
             put("onThisDay", s.notif.onThisDay)

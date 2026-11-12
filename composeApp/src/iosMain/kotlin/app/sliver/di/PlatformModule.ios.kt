@@ -24,6 +24,8 @@ import app.sliver.feature.backfill.BackfillRunner
 import app.sliver.feature.films.FilmRenderer
 import app.sliver.feature.films.FilmShare
 import app.sliver.feature.gallery.GalleryProvider
+import app.sliver.feature.notifications.GoldenHourProvider
+import app.sliver.feature.notifications.NoGoldenHour
 import app.sliver.feature.notifications.ReminderScheduler
 import app.sliver.feature.trim.TrimMedia
 import io.ktor.client.engine.HttpClientEngine
@@ -48,6 +50,8 @@ actual val platformModule: Module = module {
     single<TrimMedia> { IosTrimMedia }
     single<BackfillRunner> { IosBackfillRunner }
     single<FilmRenderer> { IosFilmRenderer }
+    single<app.sliver.feature.notifications.ReminderLog> { IosReminderLog }
+    single<GoldenHourProvider> { NoGoldenHour }
     single<ReminderScheduler> { IosReminderScheduler }
     // DECISION: Google sign-in on iOS needs its own client id; fake auth + in-memory Drive until then.
     single<GoogleAuth> { FakeGoogleAuth() }

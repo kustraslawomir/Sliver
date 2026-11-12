@@ -1,68 +1,94 @@
 package app.sliver.feature.notifications
 
 import app.sliver.data.settings.AppSettings
-import app.sliver.data.settings.ReminderMode
+import app.sliver.data.settings.LastCallTime
 import app.sliver.data.settings.ReminderSettings
-import kotlin.random.Random
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 
-enum class NotifKind { REMINDER, RANDOM, RUNNING_LATE, ON_THIS_DAY }
+enum class NotifKind { REMINDER, LAST_CALL, ON_THIS_DAY }
 
 data class PlannedNotif(val kind: NotifKind, val at: LocalDateTime)
 
 const val HORIZON_DAYS = 7
-val RunningLateTime = LocalTime(21, 0)
+const val MAX_PER_DAY = 2
+const val WINDOW_MS = 10 * 60_000L
+const val GOLDEN_LEAD_MINUTES = 20
 val OnThisDayTime = LocalTime(12, 0)
 
-/** Same day always yields the same minute, so rescheduling on every app open never moves it. */
-fun randomTimeFor(date: LocalDate, start: LocalTime, end: LocalTime): LocalTime? {
-    val from = start.toSecondOfDay() / 60
-    val to = end.toSecondOfDay() / 60
-    if (to <= from) return null
-    val minute = from + Random(date.toEpochDays() * 1009L + from * 31 + to).nextInt(to - from + 1)
-    return LocalTime(minute / 60, minute % 60)
+fun ReminderSettings.enabledOn(date: LocalDate) = days.getOrElse(date.dayOfWeek.isoDayNumber - 1) { false }
+
+/** Fixed time, or [GOLDEN_LEAD_MINUTES] before the evening golden hour when that is known for [date]. */
+fun ReminderSettings.timeOn(date: LocalDate, golden: (LocalDate) -> LocalTime?): LocalTime {
+    val sun = (if (followGoldenHour) golden(date) else null) ?: return time
+    val minutes = (sun.toSecondOfDay() / 60 - GOLDEN_LEAD_MINUTES).coerceAtLeast(0)
+    return LocalTime(minutes / 60, minutes % 60)
 }
 
-private fun ReminderSettings.enabledOn(date: LocalDate) = days.getOrElse(date.dayOfWeek.isoDayNumber - 1) { false }
-
-/** Reminder fire times for the next [HORIZON_DAYS] days, skipping days that already have a second. */
-fun nextReminderTimes(r: ReminderSettings, now: LocalDateTime, withSecond: Set<LocalDate>): List<LocalDateTime> {
-    if (r.mode == ReminderMode.OFF) return emptyList()
-    return horizon(now).mapNotNull { date ->
-        if (date in withSecond || !r.enabledOn(date)) return@mapNotNull null
-        val time = if (r.mode == ReminderMode.FIXED) r.time else randomTimeFor(date, r.windowStart, r.windowEnd)
-        time?.let { LocalDateTime(date, it) }?.takeIf { it > now }
-    }
-}
-
-fun planNotifications(s: AppSettings, now: LocalDateTime, withSecond: Set<LocalDate>): List<PlannedNotif> {
-    val kind = if (s.reminder.mode == ReminderMode.RANDOM) NotifKind.RANDOM else NotifKind.REMINDER
-    val plan = nextReminderTimes(s.reminder, now, withSecond).map { PlannedNotif(kind, it) }.toMutableList()
-    horizon(now).forEach { date ->
-        if (s.notif.runningLate && date !in withSecond) {
-            plan += PlannedNotif(NotifKind.RUNNING_LATE, LocalDateTime(date, RunningLateTime))
+/** First moment after [now] (searching a week ahead) at which [kind] is due, honouring the days mask. */
+fun nextFire(
+    r: ReminderSettings, kind: NotifKind, now: LocalDateTime, golden: (LocalDate) -> LocalTime? = { null },
+    handledToday: Set<NotifKind> = emptySet(),
+): LocalDateTime? {
+    if (!r.enabled) return null
+    for (i in 0..HORIZON_DAYS) {
+        val date = now.date.plus(DatePeriod(days = i))
+        if (!r.enabledOn(date)) continue
+        val main = r.timeOn(date, golden)
+        val time = when (kind) {
+            NotifKind.REMINDER -> main
+            NotifKind.LAST_CALL -> if (r.lastCall && main < LastCallTime) LastCallTime else continue
+            NotifKind.ON_THIS_DAY -> return null
         }
-        if (s.notif.onThisDay && date.minus(DatePeriod(months = 1)) in withSecond) {
-            plan += PlannedNotif(NotifKind.ON_THIS_DAY, LocalDateTime(date, OnThisDayTime))
-        }
+        val at = LocalDateTime(date, time)
+        if (at > now) return at
+        // Inside its delivery window and not yet handled: keep it, so a re-plan never swallows a reminder that is merely late.
+        if (i == 0 && kind !in handledToday && at.epochMillisIn(TimeZone.UTC) + WINDOW_MS > now.epochMillisIn(TimeZone.UTC)) return at
     }
-    return plan.filter { it.at > now }.sortedBy { it.at }
+    return null
 }
 
-private fun horizon(now: LocalDateTime) = List(HORIZON_DAYS) { now.date.plus(DatePeriod(days = it)) }
+/** One alarm for the next reminder, one for the next last call, plus any "on this day" memories within the week. */
+fun planNotifications(
+    s: AppSettings, now: LocalDateTime, withClip: Set<LocalDate>, golden: (LocalDate) -> LocalTime? = { null },
+    handledToday: Set<NotifKind> = emptySet(),
+): List<PlannedNotif> {
+    val plan = listOf(NotifKind.REMINDER, NotifKind.LAST_CALL)
+        .mapNotNull { k -> nextFire(s.reminder, k, now, golden, handledToday)?.let { PlannedNotif(k, it) } }.toMutableList()
+    if (s.notif.onThisDay) List(HORIZON_DAYS) { now.date.plus(DatePeriod(days = it)) }.forEach { date ->
+        if (date.minus(DatePeriod(months = 1)) in withClip) plan += PlannedNotif(NotifKind.ON_THIS_DAY, LocalDateTime(date, OnThisDayTime))
+    }
+    return plan.filter { it.kind != NotifKind.ON_THIS_DAY || it.at > now }.sortedBy { it.at }
+}
+
+/** What fired today: [handled] = every fire (posted or skipped), [posted] = notifications actually shown. */
+interface ReminderLog {
+    fun handled(today: LocalDate): Set<NotifKind>
+    fun posted(today: LocalDate): Set<NotifKind>
+    fun record(today: LocalDate, kind: NotifKind, posted: Boolean)
+}
+
+/** Fire-time decision: [posted] is what was already posted today (max [MAX_PER_DAY], each kind once). */
+fun shouldPost(kind: NotifKind, r: ReminderSettings, todayHasClip: Boolean, posted: Set<NotifKind>): Boolean = when (kind) {
+    NotifKind.ON_THIS_DAY -> true
+    NotifKind.REMINDER -> r.enabled && kind !in posted && posted.size < MAX_PER_DAY && !(r.skipIfDone && todayHasClip)
+    NotifKind.LAST_CALL -> r.enabled && r.lastCall && kind !in posted && posted.size < MAX_PER_DAY && !todayHasClip
+}
 
 data class NotifCopy(val title: String, val body: String)
 
+fun weekdayName(date: LocalDate) = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+
 fun reminderCopy(kind: NotifKind, date: LocalDate): NotifCopy = when (kind) {
-    NotifKind.REMINDER -> NotifCopy("Your clip for today", "Whatever's in front of you counts.")
-    NotifKind.RANDOM -> NotifCopy("Right now.", "Whatever you're looking at — that's today.")
-    NotifKind.RUNNING_LATE -> NotifCopy("Still time for today", "Even the ceiling counts.")
+    NotifKind.REMINDER -> NotifCopy("Today's clip", "${weekdayName(date)} is still empty. A few seconds is enough.")
+    NotifKind.LAST_CALL -> NotifCopy("Today's clip", "Still time for ${weekdayName(date)}. A few seconds is enough.")
     NotifKind.ON_THIS_DAY -> {
         val then = date.minus(DatePeriod(months = 1))
         NotifCopy("One month ago today", "${then.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }}, ${then.day} ${then.month.name.lowercase().replaceFirstChar { it.uppercase() }}. Want to see it?")
@@ -111,3 +137,5 @@ fun parseDeepLink(raw: String?): DeepLinkTarget? = when {
     raw.startsWith("day:") -> runCatching { LocalDate.parse(raw.removePrefix("day:")) }.getOrNull()?.let(DeepLinkTarget::Day)
     else -> null
 }
+
+fun LocalDateTime.epochMillisIn(zone: TimeZone): Long = toInstant(zone).toEpochMilliseconds()

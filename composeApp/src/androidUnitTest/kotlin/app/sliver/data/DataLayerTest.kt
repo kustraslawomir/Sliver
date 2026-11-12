@@ -16,7 +16,6 @@ import app.sliver.data.repo.FilmRepositoryImpl
 import app.sliver.data.repo.ProjectRepositoryImpl
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.DataStoreSettingsRepository
-import app.sliver.data.settings.ReminderMode
 import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -168,10 +167,11 @@ class DataLayerTest {
         assertEquals(true, s.dateStamp)
         assertEquals(app.sliver.data.settings.Appearance.SYSTEM, s.appearance)
         assertEquals(false, s.saveFullRecordings)
-        assertEquals(LocalTime(19, 30), s.reminder.time)
+        assertEquals(LocalTime(20, 0), s.reminder.time)
         assertEquals(List(7) { true }, s.reminder.days)
         assertEquals(true, s.notif.filmReady)
-        assertEquals(false, s.notif.runningLate)
+        assertEquals(false, s.reminder.enabled)
+        assertEquals(true, s.reminder.skipIfDone)
         assertEquals(true, s.account.wifiOnly)
         assertNull(s.firstDay)
 
@@ -179,11 +179,13 @@ class DataLayerTest {
             it.copy(
                 firstDay = LocalDate.parse("2026-01-01"),
                 appearance = app.sliver.data.settings.Appearance.LIGHT,
-                reminder = it.reminder.copy(mode = ReminderMode.RANDOM, days = List(7) { i -> i < 5 }),
+                reminder = it.reminder.copy(enabled = true, lastCall = true, projects = setOf("a", "b"), days = List(7) { i -> i < 5 }),
             )
         }
         val u = repo.settings.first()
-        assertEquals(ReminderMode.RANDOM, u.reminder.mode)
+        assertEquals(true, u.reminder.enabled)
+        assertEquals(true, u.reminder.lastCall)
+        assertEquals(setOf("a", "b"), u.reminder.projects)
         assertEquals(app.sliver.data.settings.Appearance.LIGHT, u.appearance)
         assertEquals(List(7) { i -> i < 5 }, u.reminder.days)
         assertEquals(LocalDate.parse("2026-01-01"), u.firstDay)

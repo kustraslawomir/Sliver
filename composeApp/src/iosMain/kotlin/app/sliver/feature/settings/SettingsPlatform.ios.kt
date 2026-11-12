@@ -16,6 +16,10 @@ actual fun rememberSettingsPlatform(): SettingsPlatform = remember {
         override val versionName: String =
             NSBundle.mainBundle.objectForInfoDictionaryKey("CFBundleShortVersionString") as? String ?: ""
 
+        override fun notificationsEnabled(): Boolean = TODO("iOS later")
+        override fun openNotificationSettings(): Unit = TODO("iOS later")
+        override val is24Hour: Boolean get() = TODO("iOS later")
+
         override fun sendFeedback(address: String, subject: String) {
             @Suppress("CAST_NEVER_SUCCEEDS")
             val s = (subject as NSString).stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet) ?: ""

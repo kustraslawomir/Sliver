@@ -48,12 +48,9 @@ import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.Segmented
 import app.sliver.data.FilmFormat
 import app.sliver.data.settings.AppSettings
-import app.sliver.data.settings.ReminderMode
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.backup.GoogleSignInPanel
-import app.sliver.feature.notifications.FixedTimes
 import app.sliver.feature.notifications.NotifKind
-import app.sliver.feature.notifications.NotifPreview
 import app.sliver.feature.notifications.label
 import app.sliver.feature.notifications.reminderCopy
 import kotlinx.coroutines.launch

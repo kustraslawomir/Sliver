@@ -6,21 +6,24 @@ import app.sliver.data.LookPreset
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-enum class ReminderMode { FIXED, RANDOM, OFF }
 enum class CameraMode { VIDEO, PHOTO }
 enum class Appearance { SYSTEM, LIGHT, DARK }
 enum class Lens { BACK, FRONT }
 
+val LastCallTime = LocalTime(22, 30)
+
 data class ReminderSettings(
-    val mode: ReminderMode = ReminderMode.FIXED,
-    val time: LocalTime = LocalTime(19, 30),
-    val windowStart: LocalTime = LocalTime(10, 0),
-    val windowEnd: LocalTime = LocalTime(20, 0),
+    val enabled: Boolean = false,
+    val time: LocalTime = LocalTime(20, 0),
     val days: List<Boolean> = List(7) { true },
+    val skipIfDone: Boolean = true,
+    val lastCall: Boolean = false,
+    val followGoldenHour: Boolean = false,
+    /** Ids of the projects that count; empty means every open project. */
+    val projects: Set<String> = emptySet(),
 )
 
 data class NotifSettings(
-    val runningLate: Boolean = false,
     val filmReady: Boolean = true,
     val backupProblems: Boolean = true,
     val onThisDay: Boolean = true,
@@ -54,6 +57,7 @@ data class AppSettings(
     val dateStamp: Boolean = true,
     val saveFullRecordings: Boolean = false,
     val volumeKeyRecords: Boolean = false,
+    val showGoldenHour: Boolean = false,
     val reminder: ReminderSettings = ReminderSettings(),
     val notif: NotifSettings = NotifSettings(),
     val camera: CameraSettings = CameraSettings(),

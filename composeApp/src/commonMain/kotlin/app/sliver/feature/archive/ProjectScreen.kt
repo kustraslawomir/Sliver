@@ -92,7 +92,6 @@ import app.sliver.core.ui.rememberTapGate
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
-import app.sliver.data.settings.ReminderMode
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.films.FilmsSection
@@ -178,7 +177,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
         scope.launch { if (runCatching { undo.remove(d) }.isFailure) notice = "Couldn't remove this clip. Try again." }
     }
 
-    val reminderOff = app?.reminder?.mode == ReminderMode.OFF ||
+    val reminderOff = app?.reminder?.enabled == false ||
         controller.status(PermissionKind.Notifications) != PermissionStatus.Granted
     val showNudge = app != null && !app!!.nudgeDismissed && reminderOff
 
@@ -212,7 +211,11 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
 
                         if (showNudge) {
                             NudgeCard(
-                                onSet = { onNavigate(Route.Notifications) },
+                                onSet = {
+                                    scope.launch { settings.update { it.copy(reminder = it.reminder.copy(enabled = true)) } }
+                                    if (controller.status(PermissionKind.Notifications) == PermissionStatus.NotAsked) controller.request(PermissionKind.Notifications)
+                                    onNavigate(Route.Reminders)
+                                },
                                 onDismiss = { scope.launch { settings.update { it.copy(nudgeDismissed = true) } } },
                             )
                         }

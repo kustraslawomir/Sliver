@@ -59,6 +59,12 @@ internal object IosFilmRenderer : FilmRenderer {
     override fun state(filmId: String): Flow<RenderState> = flowOf(RenderState.Idle)
 }
 
+internal object IosReminderLog : app.sliver.feature.notifications.ReminderLog {
+    override fun handled(today: kotlinx.datetime.LocalDate): Set<app.sliver.feature.notifications.NotifKind> = TODO("iOS later")
+    override fun posted(today: kotlinx.datetime.LocalDate): Set<app.sliver.feature.notifications.NotifKind> = TODO("iOS later")
+    override fun record(today: kotlinx.datetime.LocalDate, kind: app.sliver.feature.notifications.NotifKind, posted: Boolean): Unit = TODO("iOS later")
+}
+
 internal object IosReminderScheduler : ReminderScheduler {
     override fun schedule(plan: List<PlannedNotif>) = Unit
 }

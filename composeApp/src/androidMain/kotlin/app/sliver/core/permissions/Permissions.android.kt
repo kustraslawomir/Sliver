@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleEventObserver
 
 private fun permissionsFor(kind: PermissionKind, sdk: Int): List<String> = when (kind) {
     PermissionKind.CameraMic -> listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+    PermissionKind.CoarseLocation -> listOf(Manifest.permission.ACCESS_COARSE_LOCATION)
     PermissionKind.Notifications -> if (sdk >= 33) listOf(Manifest.permission.POST_NOTIFICATIONS) else emptyList()
 }
 
