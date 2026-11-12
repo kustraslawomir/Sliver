@@ -14,6 +14,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,8 +63,6 @@ import app.sliver.core.ui.isStorageLow
 import app.sliver.data.files.FileStore
 import app.sliver.core.ui.SliverSlider
 import app.sliver.data.FilmFormat
-import app.sliver.core.ui.DateStamp
-import app.sliver.data.export.stampText
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.feature.camera.rememberDeviceRotation
@@ -205,8 +208,6 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val (pos, dur) = position
     val total = dur.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
     val ticks = remember(plan, dur) { playerTicks(plan, dur) }
-    val onTitleCard = pos >= plan.clips * FILM_FRAME_MS
-    val dateLabel = if (onTitleCard || plan.days.isEmpty()) f.name else stampText(plan.days[dayIndexAtMs(pos, plan.clips)].date)
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
     val landscape = rememberDeviceRotation().let { it in 60..120 || it in 240..300 }
@@ -223,10 +224,20 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 }
             }
             SliverSlider((pos.toFloat() / total).coerceIn(0f, 1f), { seek = PlayerSeek((it * total).toLong()); playing = true })
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                GhostButton(if (playing) "Pause" else "Play", { playing = !playing })
-                GhostButton(if (muted) "Unmute" else "Mute", { muted = !muted })
-                GhostButton(if (fullscreen) "Exit full screen" else "Full screen", { fullscreen = !fullscreen })
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                SliverText(clock(pos), SliverType.Meta, color = SliverColors.TextTertiary)
+                SliverText("-" + clock((total - pos).coerceAtLeast(0)), SliverType.Meta, color = SliverColors.TextTertiary)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterHorizontally), modifier = Modifier.fillMaxWidth().padding(top = SliverSpace.S4)) {
+                PlayerRoundButton(48.dp, if (muted) "Unmute" else "Mute", { muted = !muted }) {
+                    SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.TextPrimary, size = 20.dp)
+                }
+                PlayerRoundButton(72.dp, if (playing) "Pause" else "Play", { playing = !playing }, filled = true) {
+                    SliverIcon(if (playing) SliverIcons.Pause else SliverIcons.Play, SliverColors.BgBase, size = 28.dp)
+                }
+                PlayerRoundButton(48.dp, if (fullscreen) "Exit full screen" else "Full screen", { fullscreen = !fullscreen }) {
+                    SliverIcon(SliverIcons.Maximize, SliverColors.TextPrimary, size = 20.dp)
+                }
             }
         }
     }
@@ -243,7 +254,6 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
             Video(Modifier.fillMaxSize().clickable { playing = !playing })
             Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-                Box(Modifier.fillMaxWidth()) { DateStamp(dateLabel) }
                 Controls(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter))
             }
         }
@@ -265,16 +275,34 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 .clickable { playing = !playing },
         ) {
             Video(Modifier.fillMaxSize())
-            DateStamp(dateLabel)
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
             PrimaryButton("Share film…", { share.share(path, f.name) }, Modifier.fillMaxWidth())
-            SecondaryButton("Save to Photos", {
-                scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos" else "Could not save" }
-            }, Modifier.fillMaxWidth())
-            SecondaryButton("Edit film", onEdit, Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                SecondaryButton("Save to Photos", {
+                    scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos" else "Could not save" }
+                }, Modifier.weight(1f))
+                SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
+            }
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
         }
     }
+}
+
+private fun clock(ms: Long): String {
+    val s = ms / 1000
+    return "${s / 60}:${(s % 60).toString().padStart(2, '0')}"
+}
+
+@Composable
+private fun PlayerRoundButton(size: androidx.compose.ui.unit.Dp, description: String, onClick: () -> Unit, filled: Boolean = false, icon: @Composable () -> Unit) {
+    Box(
+        Modifier.size(size).clip(androidx.compose.foundation.shape.CircleShape)
+            .background(if (filled) SliverColors.TextPrimary else androidx.compose.ui.graphics.Color.Transparent)
+            .then(if (filled) Modifier else Modifier.border(1.dp, SliverColors.LineHairline, androidx.compose.foundation.shape.CircleShape))
+            .semantics { contentDescription = description }
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { icon() }
 }

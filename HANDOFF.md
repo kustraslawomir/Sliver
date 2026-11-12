@@ -305,3 +305,8 @@ Commits: P-v132-1 (switch + settings row), -2 (reminder), -3 (golden hour), -4 (
 - Light theme of the Year chart and the reminders-off row in light; Reminders light screenshot has the old nudge preview only partly visible (cropped by the screen, scrollable).
 - Time-zone change re-plan and reboot re-plan are implemented (receiver) but not exercised on a device.
 - Samsung/One UI behaviour; iOS stubs only (`TODO("iOS later")`).
+
+## T-design-v1.3
+- Done by earlier commits: home first, camera modal, zoom/golden hour, typography base style, light of the year, reminders, light theme, switch.
+- Film player (v1.3.3): icon-only round buttons (mute 48, play/pause 72, full screen 48) with contentDescription, date overlay removed, times under the scrubber ("0:12", "-0:17"), Save/Edit side by side. Film poster now uses the first clip thumbnail. Fake Google account label is "Demo account" instead of guest@example.com.
+- NOT verified on device (player shows real clips, no safe screenshot); no docs/qa/v1.3 compare images produced; font scale 1.3 pass not done. The file-info line under the player actions is not built. Mono helper `mono()` still used in Project grid/posters (draws Geist tnum via SliverType.Meta, not Geist Mono). Filled-day box and projects-sheet cover code already render thumbnail+number / cover; root cause of the device bug not reproduced.

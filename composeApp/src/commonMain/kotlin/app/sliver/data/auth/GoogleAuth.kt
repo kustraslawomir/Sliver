@@ -35,7 +35,7 @@ class FakeGoogleAuth : GoogleAuth {
     }
 
     companion object {
-        const val FAKE_EMAIL = "guest@example.com"
+        const val FAKE_EMAIL = "Demo account"
     }
 }
 

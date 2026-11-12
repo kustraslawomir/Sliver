@@ -118,16 +118,22 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit)
             Modifier.fillMaxWidth().height(198.dp).clip(SliverShapes.R14)
                 .background(Brush.verticalGradient(0f to tint, 0.75f to SliverColors.BgVoid, 1f to SliverColors.BgVoid))
                 .border(1.dp, SliverColors.LineHairline, SliverShapes.R14)
-                .padding(12.dp),
         ) {
-            Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                SliverText("A film by you", mono(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
-                SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
+            val poster = plan.days.firstOrNull()?.let { rememberPhoto(it.thumb) }
+            if (poster != null) {
+                Image(poster, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.4f to Color.Transparent, 1f to SliverColors.Scrim)))
             }
-            when (val s = state) {
-                is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
-                RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) }, SliverColors.Accent)
-                RenderState.Idle -> Unit
+            Box(Modifier.fillMaxSize().padding(12.dp)) {
+                Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    SliverText("A film by you", mono(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
+                    SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
+                }
+                when (val s = state) {
+                    is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
+                    RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) }, SliverColors.Accent)
+                    RenderState.Idle -> Unit
+                }
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
