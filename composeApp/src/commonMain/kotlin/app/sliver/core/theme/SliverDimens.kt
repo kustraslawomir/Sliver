@@ -2,28 +2,29 @@ package app.sliver.core.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
+import app.sliver.core.theme.generated.Tokens
 
 object SliverSpace {
-    val S1 = 4.dp
-    val S2 = 8.dp
-    val S3 = 12.dp
-    val S4 = 16.dp
-    val S5 = 20.dp
-    val S6 = 24.dp
-    val S7 = 32.dp
-    val S8 = 40.dp
-    val S9 = 56.dp
-    val S10 = 72.dp
+    val S1 = Tokens.Space1.dp
+    val S2 = Tokens.Space2.dp
+    val S3 = Tokens.Space3.dp
+    val S4 = Tokens.Space4.dp
+    val S5 = Tokens.Space5.dp
+    val S6 = Tokens.Space6.dp
+    val S7 = Tokens.Space7.dp
+    val S8 = Tokens.Space8.dp
+    val S9 = Tokens.Space9.dp
+    val S10 = Tokens.Space10.dp
     val Gutter = 20.dp
 }
 
 object SliverRadius {
-    val Xs = 4.dp
-    val S = 10.dp
-    val M = 16.dp
-    val L = 24.dp
-    val Xl = 32.dp
-    val Pill = 999.dp
+    val Xs = Tokens.RadiusXs.dp
+    val S = Tokens.RadiusS.dp
+    val M = Tokens.RadiusM.dp
+    val L = Tokens.RadiusL.dp
+    val Xl = Tokens.RadiusXl.dp
+    val Pill = Tokens.RadiusPill.dp
     val R12 = 12.dp
     val R14 = 14.dp
     val R18 = 18.dp

@@ -4,8 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import app.sliver.core.theme.generated.Tokens
 
-/** Two palettes from tokens.json (themeDarkMap / themeLight); every read follows the active one. */
+/** Two palettes generated from design/tokens.json (Tokens.DarkColors / LightColors); every read follows the active one. Hand-written extras below are not in tokens.json. */
 object SliverColors {
     /** User choice. */
     var userLight by mutableStateOf(false)
@@ -13,39 +14,40 @@ object SliverColors {
     var forceDark by mutableStateOf(false)
     val light get() = userLight && !forceDark
 
-    private fun pick(dark: Long, light: Long) = Color(if (this.light) light else dark)
+    private val p get() = if (this.light) Tokens.LightColors else Tokens.DarkColors
 
-    val BgVoid = Color(0xFF050505)
-    val BgBase get() = pick(0xFF0A0A0B, 0xFFF6F4EF)
-    val Surface1 get() = pick(0xFF111113, 0xFFFFFFFF)
-    val Surface2 get() = pick(0xFF18181B, 0xFFECE8E0)
-    val Surface3 get() = pick(0xFF202024, 0xFFE2DED6)
-    val LineHairline get() = pick(0xFF26262A, 0xFFE2DED6)
-    val LineStrong get() = pick(0xFF3A3A40, 0xFFCFCAC0)
-    val TextPrimary get() = pick(0xFFEDEDE8, 0xFF141413)
-    val TextSecondary get() = pick(0xFFB9B9B3, 0xFF4A4843)
-    val TextTertiary get() = pick(0xFF8E8E88, 0xFF625F59)
-    val TextDisabled get() = pick(0xFF55555A, 0xFFA8A49B)
+    val BgVoid = Tokens.DarkColors.bgVoid
+    val BgBase get() = p.bgBase
+    val Surface1 get() = p.surface1
+    val Surface2 get() = p.surface2
+    val Surface3 get() = p.surface3
+    val LineHairline get() = p.lineHairline
+    val LineStrong get() = p.lineStrong
+    val TextPrimary get() = p.textPrimary
+    val TextSecondary get() = p.textSecondary
+    val TextTertiary get() = p.textTertiary
+    val TextDisabled get() = p.textDisabled
     /** v1.4 mono accent: primary fill, selected, switch-on. No hue. */
-    val Accent get() = pick(0xFFEDEDE8, 0xFF141413)
-    val OnAccent get() = pick(0xFF0A0A0B, 0xFFF6F4EF)
+    val Accent get() = p.accent
+    val OnAccent get() = p.onAccent
     val AccentText get() = Accent
     val AccentMark get() = Accent
     val AccentCore get() = Accent
-    val AccentLine get() = pick(0x55EDEDE8, 0x55141413)
-    val AccentTint get() = pick(0x1FEDEDE8, 0x14141413)
+    val AccentLine get() = p.accentLine
+    val AccentTint get() = p.accentTint
     /** Red is only for recording: record button, "Record today", recording dot, timer after 1 s. */
-    val Record = Color(0xFFFF3B30)
+    val Record = Tokens.RecordRed
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
-    val OnInverse get() = pick(0xFF0A0A0B, 0xFFEDEDE8)
-    val Success get() = pick(0xFF8FC7A4, 0xFF266B46)
-    val Warning get() = pick(0xFFE8C27A, 0xFF7F5508)
-    val Error get() = pick(0xFFE5675F, 0xFFB5301F)
+    val OnInverse get() = p.onInverse
+    val Success get() = p.success
+    val Warning get() = p.warning
+    // DECISION: light error stays #B5301F (AA contrast on surfaces); tokens.json themeLight.danger (#C0392B) is not used for text.
+    val Error get() = if (this.light) Color(0xFFB5301F) else p.error
     val Media = Color.Black
     val OnMedia = Color.White
-    val Scrim = Color(0xB3000000)
-    val CellEmpty get() = pick(0xFF1C1C20, 0xFFECE8E0)
-    val CellEmptyLine get() = pick(0xFF1F1F22, 0xFFE2DED6)
+    val Scrim = Tokens.Scrim
+    val CellEmpty get() = if (this.light) Color(0xFFECE8E0) else Color(0xFF1C1C20)
+    val CellEmptyLine get() = if (this.light) Color(0xFFE2DED6) else Color(0xFF1F1F22)
     val GoldenNow = Color(0xFFFFC58A)
     val GoldenIdle = Color(0xD9FFFFFF)
     val PermBannerBg = Color(0xFF1A1710)

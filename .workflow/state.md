@@ -44,3 +44,4 @@
 - T-design-v1.4-mono: DONE except leftovers (seeder-dependent bugs, reminder emulator test); see HANDOFF.md.
 - T-auto-1: DONE (seeder, thumbnail self-heal, memory card checked, reminder emulator test; see HANDOFF.md section T-auto-1)
 - T-auto-3: DONE (scripts/design-lint.sh in check; see HANDOFF.md section T-auto-3)
+- [x] T-auto-6 (tokens.json codegen, see HANDOFF)
