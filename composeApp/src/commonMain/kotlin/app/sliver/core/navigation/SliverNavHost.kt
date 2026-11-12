@@ -95,7 +95,7 @@ fun SliverNavHost() {
                         val back = navigator::back
                         CappedWidth(route in CappedRoutes) {
                         when (route) {
-                            Route.Camera -> CameraScreen(go)
+                            Route.Camera -> CameraScreen(go, onClose = back)
                             Route.Trim -> {
                                 restoreCapture(entry.savedStateHandle)
                                 TrimScreen(go, entry.savedStateHandle)
@@ -104,7 +104,7 @@ fun SliverNavHost() {
                                 restoreCapture(entry.savedStateHandle)
                                 PhotoTrimScreen(go)
                             }
-                            Route.Project -> ProjectScreen(go, onBack = back)
+                            Route.Project -> ProjectScreen(go)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
                             Route.FillThePast -> BackfillScreen(onBack = back)
                             Route.FilmBuilder -> FilmBuilderScreen(
@@ -125,11 +125,11 @@ fun SliverNavHost() {
                             Route.YearInClips -> YearInClipsScreen(go, onBack = back)
                             Route.Settings -> SettingsScreen(go, onBack = back)
                             Route.Backup -> BackupScreen(onBack = back, onRestore = { go(Route.Restore) })
-                            Route.Restore -> RestoreScreen(onDone = { navigator.openStack(DeepLinkTarget.Camera) })
+                            Route.Restore -> RestoreScreen(onDone = { navigator.openStack(DeepLinkTarget.Project) })
                             Route.Notifications -> NotificationsScreen(onBack = back)
                             Route.Onboarding -> OnboardingScreen(
                                 onFinished = {
-                                    nav.navigate(Route.Camera.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
+                                    nav.navigate(Route.Project.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
                                 },
                                 onRestore = {
                                     nav.navigate(Route.Restore.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
@@ -159,7 +159,7 @@ private fun CappedWidth(capped: Boolean, content: @Composable () -> Unit) {
     }
 }
 
-/** Camera and Project are one vertical axis: Project slides up over Camera. */
+/** Camera is a modal over Project: it slides up over home. */
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isVertical(): Boolean {
     val from = initialState.destination.route
     val to = targetState.destination.route

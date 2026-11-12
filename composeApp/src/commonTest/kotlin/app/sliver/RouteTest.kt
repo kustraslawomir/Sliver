@@ -8,7 +8,7 @@ class RouteTest {
     @Test
     fun startDestinationFollowsOnboardingFlag() {
         assertEquals(Route.Onboarding, Route.start(false))
-        assertEquals(Route.Camera, Route.start(true))
+        assertEquals(Route.Project, Route.start(true))
     }
 
     @Test

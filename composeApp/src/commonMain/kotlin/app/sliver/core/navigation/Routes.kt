@@ -22,6 +22,6 @@ enum class Route(val path: String, val title: String) {
     companion object {
         fun fromPath(path: String?): Route? = entries.firstOrNull { it.path == path }
 
-        fun start(onboardingDone: Boolean): Route = if (onboardingDone) Camera else Onboarding
+        fun start(onboardingDone: Boolean): Route = if (onboardingDone) Project else Onboarding
     }
 }

@@ -111,18 +111,18 @@ import kotlin.time.Clock
 private val SideControlsWidth = 280.dp
 
 @Composable
-fun CameraScreen(onNavigate: (Route) -> Unit) {
+fun CameraScreen(onNavigate: (Route) -> Unit, onClose: () -> Unit) {
     val addMedia = rememberAddMedia(onNavigate)
     PermissionGate(
         PermissionKind.CameraMic,
         onDeniedAlternative = { addMedia(null) },
     ) {
-        CameraContent(onNavigate, addMedia)
+        CameraContent(onNavigate, addMedia, onClose)
     }
 }
 
 @Composable
-private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.datetime.LocalDate?) -> Unit) {
+private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.datetime.LocalDate?) -> Unit, onClose: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val files = remember { koin.get<FileStore>() }

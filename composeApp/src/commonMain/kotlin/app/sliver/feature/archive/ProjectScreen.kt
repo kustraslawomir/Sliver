@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -118,7 +119,7 @@ private val YearEmpty = Color(0xFF1C1C20)
 private val CellEmptyLine = Color(0xFF1F1F22)
 
 @Composable
-fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
+fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
@@ -189,10 +190,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             ) {
                 Header(
                     project?.name.orEmpty(), clipsHeader(all.size, first, project?.format), menuOpen,
-                    onBack, { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true },
+                    { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true },
                 )
                 Column(
-                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 48.dp),
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = RecordDockHeight),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     Column(
@@ -246,6 +247,12 @@ fun ProjectScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             }
         }
 
+        RecordDock(
+            done = byDate[today] != null,
+            onRecord = { CaptureSession.forDate = null; onNavigate(Route.Camera) },
+            onOpenToday = { openDay(today) },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
         ProjectsSheet(projectsOpen, { projectsOpen = false })
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
         NoticeSheet(notice) { notice = null }
@@ -277,7 +284,7 @@ private val hubTitle get() = SliverType.DisplayM.copy(lineHeight = 24.sp)
 @Composable
 private fun Header(
     name: String, line: String, menuOpen: Boolean,
-    onBack: () -> Unit, onSwitch: () -> Unit, onSettings: () -> Unit, onMore: () -> Unit,
+    onSwitch: () -> Unit, onSettings: () -> Unit, onMore: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().background(SliverColors.BgBase).statusBarsPadding().padding(top = 11.dp)) {
         Row(
@@ -285,9 +292,8 @@ private fun Header(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            HubButton(HubIcons.Back, "Back to camera", onBack, SliverColors.TextPrimary, 22.dp)
             Row(
-                Modifier.weight(1f).height(44.dp).clickable(role = Role.Button, onClick = rememberTapGate(onSwitch))
+                Modifier.weight(1f).height(44.dp).padding(start = 12.dp).clickable(role = Role.Button, onClick = rememberTapGate(onSwitch))
                     .semantics { contentDescription = "Switch project" },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -615,5 +621,32 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
         Box(Modifier.fillMaxWidth().height(48.dp).clickable(role = Role.Button, onClick = onClose), Alignment.Center) {
             SliverText("Leave it empty", SliverType.BodySmall.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextSecondary)
         }
+    }
+}
+
+private val RecordDockHeight = 148.dp
+
+/** Fixed bottom action: ember "Record today", or an outlined check once today has a clip. */
+@Composable
+private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> Unit, modifier: Modifier = Modifier) {
+    val tap = rememberTapGate(if (done) onOpenToday else onRecord)
+    val label = if (done) "Done for today" else "Record today"
+    Column(
+        modifier.fillMaxWidth().navigationBarsPadding()
+            .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to SliverColors.BgBase.copy(alpha = 0.92f), 1f to SliverColors.BgBase))
+            .padding(top = 28.dp, bottom = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            Modifier.size(72.dp)
+                .then(if (done) Modifier else Modifier.glow(CircleShape, *Glow.record))
+                .clip(CircleShape)
+                .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Accent))
+                .semantics { contentDescription = label }
+                .clickable(role = Role.Button, onClick = tap),
+            Alignment.Center,
+        ) { if (done) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 28.dp) }
+        SliverText(label, SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), color = if (done) SliverColors.TextSecondary else SliverColors.TextPrimary)
     }
 }

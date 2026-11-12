@@ -44,46 +44,49 @@ class AppNavigator(private val nav: NavController) {
         if (settled) nav.popBackStack()
     }
 
+    private fun popToHome() {
+        if (!nav.popBackStack(Route.Project.path, inclusive = false)) {
+            nav.navigate(Route.Project.path) { popUpTo(nav.graph.id) { inclusive = true } }
+        }
+    }
+
     private fun popToCamera() {
         if (!nav.popBackStack(Route.Camera.path, inclusive = false)) {
-            nav.navigate(Route.Camera.path) { popUpTo(nav.graph.id) { inclusive = true } }
+            popToHome()
+            push(Route.Camera)
         }
     }
 
     /** Save lands on the Project screen: capture screens are popped, Back from Project goes to Camera. Replace flows return to Clip detail. */
     fun finishFlow(date: LocalDate) {
         val stack = nav.currentBackStack.value.mapNotNull { route(it.destination.route) }
-        val origin = stack.lastOrNull { it !in CaptureRoutes } ?: Route.Camera
+        val origin = stack.lastOrNull { it !in CaptureRoutes } ?: Route.Project
         ClipDrop.pending = date
         when (origin) {
             Route.Project, Route.DayDetail -> nav.popBackStack(origin.path, inclusive = false)
-            else -> nav.navigate(Route.Project.path) {
-                popUpTo(Route.Camera.path) { inclusive = false }
-                launchSingleTop = true
-            }
+            else -> popToHome()
         }
     }
 
-    /** Notification, widget and tile entries: always Camera at the bottom, then the stack from NAVIGATION.md. */
+    /** Notification, widget and tile entries: Project (home) at the bottom, then the stack from NAVIGATION.md; record opens the camera modal. */
     fun openStack(target: DeepLinkTarget) {
-        popToCamera()
+        popToHome()
         when (target) {
-            DeepLinkTarget.Camera -> Unit
-            DeepLinkTarget.Backup -> listOf(Route.Project, Route.Settings, Route.Backup).forEach(::push)
-            DeepLinkTarget.Project -> push(Route.Project)
-            DeepLinkTarget.Gallery -> push(Route.Project)
+            DeepLinkTarget.Camera -> push(Route.Camera)
+            DeepLinkTarget.Backup -> listOf(Route.Settings, Route.Backup).forEach(::push)
+            DeepLinkTarget.Project, DeepLinkTarget.Gallery -> Unit
             DeepLinkTarget.MakeFilm -> {
                 FilmNav.editId = null
-                listOf(Route.Project, Route.FilmBuilder).forEach(::push)
+                push(Route.FilmBuilder)
             }
-            DeepLinkTarget.FillThePast -> listOf(Route.Project, Route.FillThePast).forEach(::push)
+            DeepLinkTarget.FillThePast -> push(Route.FillThePast)
             is DeepLinkTarget.Film -> {
                 FilmNav.id = target.id
-                listOf(Route.Project, Route.FilmPlayer).forEach(::push)
+                push(Route.FilmPlayer)
             }
             is DeepLinkTarget.Day -> {
                 ArchiveSession.selected = target.date
-                listOf(Route.Project, Route.DayDetail).forEach(::push)
+                push(Route.DayDetail)
             }
         }
     }
