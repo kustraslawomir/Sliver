@@ -221,10 +221,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         }
 
                         if (yearView) {
-                            YearView(shown.year, byDate, today, first, all.size) { month ->
-                                show(YearMonth(shown.year, month))
+                            YearView(shown.year, byDate, today, first, { ym ->
+                                show(ym)
                                 yearView = false
-                            }
+                            }, ::openDay)
                         } else {
                             val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month } }
                             MonthHeading(MonthLong[shown.month - 1], "$count ${if (count == 1) "clip" else "clips"}")
@@ -487,44 +487,14 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
 private fun doubleDigits(n: Int) = n.toString().padStart(2, '0')
 
 @Composable
-private fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, first: LocalDate, total: Int, onMonth: (Int) -> Unit) {
-    val rows = remember(year, byDate) { yearColors(year, byDate) }
+private fun YearView(
+    year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, first: LocalDate,
+    onMonth: (YearMonth) -> Unit, onOpenDay: (LocalDate) -> Unit,
+) {
     val inYear = remember(byDate, year) { byDate.keys.count { it.year == year } }
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         MonthHeading("$year", "$inYear ${if (inYear == 1) "clip" else "clips"} · ${doubleDigits(inYear / 60)}:${doubleDigits(inYear % 60)} of film")
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            rows.forEachIndexed { m, row ->
-                val inRange = YearMonth(year, m + 1) in first.toYearMonth()..today.toYearMonth()
-                Row(
-                    Modifier.fillMaxWidth().height(16.dp).clickable(enabled = inRange, role = Role.Button) { onMonth(m + 1) }
-                        .semantics { contentDescription = MonthLong[m] },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SliverText(MonthNames[m], mono(10.sp, 0.sp, if (inRange) SliverColors.TextSecondary else SliverColors.TextDisabled), Modifier.width(32.dp))
-                    Canvas(Modifier.weight(1f).height(16.dp)) {
-                        val w = 7.8.dp.toPx()
-                        val step = w + 2.3.dp.toPx()
-                        val r = CornerRadius(2.dp.toPx())
-                        row.forEachIndexed { d, color ->
-                            if (color == null) return@forEachIndexed
-                            val date = LocalDate(year, m + 1, d + 1)
-                            val x = d * step
-                            val box = Size(w, size.height)
-                            when {
-                                color != 0 -> drawRoundRect(Color(color), Offset(x, 0f), box, r)
-                                date > today -> {
-                                    val s = 1.dp.toPx()
-                                    drawRoundRect(SliverColors.LineHairline, Offset(x + s / 2, s / 2), Size(w - s, size.height - s), r, style = androidx.compose.ui.graphics.drawscope.Stroke(s))
-                                }
-                                date == today -> drawRoundRect(SliverColors.AccentMark, Offset(x, 0f), box, r)
-                                date < first -> drawRoundRect(SliverColors.Surface1, Offset(x, 0f), box, r)
-                                else -> drawRoundRect(SliverColors.CellEmpty, Offset(x, 0f), box, r)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        LightOfYear(byDate, today, first, onMonth, onOpenDay)
     }
 }
 

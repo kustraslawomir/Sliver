@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.sliver.data.db.Migration2To3
+import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.SliverDatabase
 import java.io.File
 import kotlin.test.Test
@@ -61,7 +62,7 @@ class MigrationTest {
         val path = ctx.getDatabasePath("migration.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
         createV2(path)
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4).allowMainThreadQueries().build()
         val projects = db.projectDao().observeAll().first()
         assertEquals(1, projects.size)
         val project = projects.single()
@@ -83,7 +84,7 @@ class MigrationTest {
         val path = ctx.getDatabasePath("migration-empty.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
         createV2(path, withEmptyProjectTable = true)
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4).allowMainThreadQueries().build()
         val project = db.projectDao().observeAll().first().single()
         assertEquals(2, db.dayDao().observeAll(project.id).first().size)
         db.close()
@@ -98,9 +99,37 @@ class MigrationTest {
             it.execSQL("INSERT INTO project VALUES ('p1', 'Mine', 'CINEMA', '2025-01-01', NULL, 1, 0, 0)")
         }
 
-        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4).allowMainThreadQueries().build()
         assertEquals(listOf("p1"), db.projectDao().observeAll().first().map { it.id })
         assertEquals(2, db.dayDao().observeAll("p1").first().size)
+        db.close()
+    }
+
+    @Test
+    fun v3ToV4AddsLightColumnsWithDefaults() = runTest {
+        val ctx = ApplicationProvider.getApplicationContext<Context>()
+        val path = ctx.getDatabasePath("migration-v3.db").apply { parentFile?.mkdirs(); delete() }.absolutePath
+        val schema = JSONObject(File("schemas/app.sliver.data.db.SliverDatabase/3.json").readText()).getJSONObject("database")
+        val sql = SQLiteDatabase.openOrCreateDatabase(path, null)
+        val entities = schema.getJSONArray("entities")
+        for (i in 0 until entities.length()) {
+            sql.execSQL(entities.getJSONObject(i).getString("createSql").replace("\${TABLE_NAME}", entities.getJSONObject(i).getString("tableName")))
+        }
+        sql.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+        sql.execSQL("INSERT OR REPLACE INTO room_master_table (id, identity_hash) VALUES (42, '${schema.getString("identityHash")}')")
+        sql.execSQL("INSERT INTO project VALUES ('p1', 'Mine', 'CINEMA', '2025-01-01', NULL, 1, 0, 0)")
+        sql.execSQL("INSERT INTO day VALUES ('p1', '2025-03-02', 'a.mp4', 'a.jpg', 'CAMERA', '{}', 'STILL', 1, 1.0, 0, NULL, 1000, 2000, NULL, 'PENDING', NULL)")
+        sql.version = 3
+        sql.close()
+
+        val db = Room.databaseBuilder<SliverDatabase>(ctx, path).addMigrations(Migration2To3, Migration3To4).allowMainThreadQueries().build()
+        val day = db.dayDao().observeAll("p1").first().single()
+        assertEquals(-1f, day.luma)
+        assertEquals(0, day.tone)
+        assertEquals(1, db.dayDao().withoutLight().size)
+        db.dayDao().setLight("p1", day.date, 0.5f, 0xFF112233.toInt())
+        assertEquals(0, db.dayDao().withoutLight().size)
+        assertEquals(0.5f, db.dayDao().observeAll("p1").first().single().luma)
         db.close()
     }
 }

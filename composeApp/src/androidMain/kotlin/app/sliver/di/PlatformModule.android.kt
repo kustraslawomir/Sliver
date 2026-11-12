@@ -5,6 +5,9 @@ import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import app.sliver.data.db.Migration2To3
+import app.sliver.data.db.Migration3To4
+import app.sliver.data.light.AndroidClipLight
+import app.sliver.data.light.ClipLightReader
 import app.sliver.BuildConfig
 import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
@@ -59,7 +62,7 @@ actual val platformModule: Module = module {
     single {
         val ctx = get<Context>()
         Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath)
-            .addMigrations(Migration2To3).build()
+            .addMigrations(Migration2To3, Migration3To4).build()
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }
@@ -67,6 +70,7 @@ actual val platformModule: Module = module {
     single { ProgressCoordinator(get<Context>(), get(), get(), get()) }
     single<BackfillRunner> { AndroidBackfillRunner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
+    single<ClipLightReader> { AndroidClipLight }
     single<ReminderLog> { AndroidReminderLog(get<Context>()) }
     single<GoldenHourProvider> { AndroidGoldenHour(get<Context>()) }
     single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }

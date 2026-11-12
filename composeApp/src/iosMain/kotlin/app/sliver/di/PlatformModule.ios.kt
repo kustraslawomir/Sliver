@@ -12,6 +12,8 @@ import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.backup.RestoredDayWriter
 import app.sliver.data.db.Migration2To3
+import app.sliver.data.db.Migration3To4
+import app.sliver.data.light.ClipLightReader
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.FileStore
@@ -42,7 +44,7 @@ actual val platformModule: Module = module {
         Room.databaseBuilder<SliverDatabase>(name = "${documentsDir()}/sliver.db")
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
-            .addMigrations(Migration2To3)
+            .addMigrations(Migration2To3, Migration3To4)
             .build()
     }
     single<FileStore> { IosFileStore() }
@@ -51,6 +53,7 @@ actual val platformModule: Module = module {
     single<BackfillRunner> { IosBackfillRunner }
     single<FilmRenderer> { IosFilmRenderer }
     single<app.sliver.feature.notifications.ReminderLog> { IosReminderLog }
+    single<ClipLightReader> { ClipLightReader { null } }
     single<GoldenHourProvider> { NoGoldenHour }
     single<ReminderScheduler> { IosReminderScheduler }
     // DECISION: Google sign-in on iOS needs its own client id; fake auth + in-memory Drive until then.

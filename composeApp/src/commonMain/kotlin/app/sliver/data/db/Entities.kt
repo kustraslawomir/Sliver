@@ -1,5 +1,6 @@
 package app.sliver.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import app.sliver.data.BackupState
@@ -46,6 +47,10 @@ data class Day(
     val backup: BackupState = BackupState.PENDING,
     val place: String? = null,
     val projectId: String = "",
+    /** Average brightness 0..1, or -1 until computed. */
+    @ColumnInfo(defaultValue = "-1") val luma: Float = -1f,
+    /** Dominant colour (opaque ARGB), or 0 until computed. */
+    @ColumnInfo(defaultValue = "0") val tone: Int = 0,
 )
 
 @Entity(tableName = "film")

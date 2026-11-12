@@ -39,3 +39,11 @@ val Migration2To3 = object : Migration(2, 3) {
         connection.execSQL("UPDATE film SET projectId = (SELECT id FROM project LIMIT 1)")
     }
 }
+
+/** Adds the per-clip light stats; existing rows are filled lazily. */
+val Migration3To4 = object : Migration(3, 4) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE day ADD COLUMN luma REAL NOT NULL DEFAULT -1")
+        connection.execSQL("ALTER TABLE day ADD COLUMN tone INTEGER NOT NULL DEFAULT 0")
+    }
+}

@@ -7,6 +7,8 @@ import app.sliver.data.Motion
 import app.sliver.data.backup.DriveTrashQueue
 import app.sliver.data.db.Day
 import app.sliver.data.export.ClipExporter
+import app.sliver.data.light.ClipLightReader
+import app.sliver.data.light.NO_LUMA
 import app.sliver.data.export.ShortMode
 import app.sliver.data.files.FileStore
 import kotlin.time.Clock
@@ -81,6 +83,7 @@ class DayRepositoryImpl(
     private val files: FileStore,
     private val places: PlaceResolver = PlaceResolver { null },
     private val trash: DriveTrashQueue = DriveTrashQueue {},
+    private val light: ClipLightReader = ClipLightReader { null },
 ) : DayRepository {
     override suspend fun saveClip(request: SaveClipRequest): Day = with(request) {
         val stamp = takenAt.toEpochMilliseconds()
@@ -90,6 +93,7 @@ class DayRepositoryImpl(
             val clip = if (isPhoto) exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look)
             else exporter.exportClip(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val place = places.resolve(source)
+            val stats = light.read(tmpVideo)
             val projectId = projects.activeId()
             val file = files.dayPath(projectId, date)
             val thumb = files.thumbPath(projectId, date)
@@ -99,6 +103,7 @@ class DayRepositoryImpl(
                 keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY,
                 takenAt = takenAt, createdAt = Clock.System.now(), place = place,
                 driveFileId = dao.getByDate(projectId, date)?.driveFileId,
+                luma = stats?.luma ?: NO_LUMA, tone = stats?.tone ?: 0,
             )
             dao.upsert(day)
             day

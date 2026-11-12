@@ -16,6 +16,7 @@ import app.sliver.data.db.SliverDatabase
 import io.ktor.client.engine.HttpClientEngine
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.DayRepositoryImpl
+import app.sliver.data.light.LightBackfill
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.FilmRepositoryImpl
 import app.sliver.data.repo.ProjectRepository
@@ -35,7 +36,7 @@ val commonModule: Module = module {
     single { get<SliverDatabase>().filmDao() }
     single<DriveTrashQueue> { SettingsTrashQueue(get()) }
     single<ProjectRepository> { ProjectRepositoryImpl(get(), get(), get(), get(), get(), get()) }
-    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get()) }
+    single<DayRepository> { DayRepositoryImpl(get(), get(), get(), get(), get(), get(), get()) }
     single { BackupEngine(get(), get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
     single { RestoreEngine(get(), get(), get(), get(), get(), get(), get()) }
@@ -53,6 +54,7 @@ val commonModule: Module = module {
         val auth = get<GoogleAuth>()
         if (auth.isFake) InMemoryDriveClient() else RestDriveClient(get<HttpClientEngine>(), auth::accessToken)
     }
+    single { LightBackfill(get<SliverDatabase>().dayDao(), get()) }
     single { ReminderCoordinator(get(), get(), get(), get(), get(), get()) }
 }
 

@@ -51,6 +51,12 @@ interface DayDao {
     @Query("SELECT * FROM day WHERE projectId = :projectId AND date = :date")
     fun observeByDate(projectId: String, date: LocalDate): Flow<Day?>
 
+    @Query("SELECT * FROM day WHERE luma < 0")
+    suspend fun withoutLight(): List<Day>
+
+    @Query("UPDATE day SET luma = :luma, tone = :tone WHERE projectId = :projectId AND date = :date")
+    suspend fun setLight(projectId: String, date: LocalDate, luma: Float, tone: Int)
+
     @Query("SELECT * FROM day WHERE projectId = :projectId AND date = :date")
     suspend fun getByDate(projectId: String, date: LocalDate): Day?
 
