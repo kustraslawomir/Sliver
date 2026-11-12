@@ -7,7 +7,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.EnterExitState
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.widthIn
@@ -18,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,7 +71,8 @@ fun SliverNavHost() {
     val go = navigator::go
     val entry by nav.currentBackStackEntryAsState()
     val dark = Route.fromPath(entry?.destination?.route) in DarkRoutes
-    SideEffect { SliverColors.forceDark = dark }
+    // Set during composition, not in a SideEffect, so the incoming screen never paints one frame in the old palette.
+    SliverColors.forceDark = dark
 
     val link by DeepLink.target.collectAsState()
 
@@ -98,6 +100,9 @@ fun SliverNavHost() {
                 Route.entries.forEach { route ->
                     composable(route.path) { entry ->
                         val back = navigator::back
+                        // The palette is global, so an outgoing screen whose palette differs from the target would repaint wrongly: hide it.
+                        val wrongPalette = transition.targetState == EnterExitState.PostExit && (route in DarkRoutes) != dark
+                        Box(Modifier.fillMaxSize().graphicsLayer { alpha = if (wrongPalette) 0f else 1f }) {
                         CappedWidth(route in CappedRoutes) {
                         when (route) {
                             Route.Camera -> CameraScreen(go, onClose = back)
@@ -140,6 +145,7 @@ fun SliverNavHost() {
                                     nav.navigate(Route.Restore.path) { popUpTo(Route.Onboarding.path) { inclusive = true } }
                                 },
                             )
+                        }
                         }
                         }
                     }
