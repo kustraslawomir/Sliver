@@ -95,7 +95,6 @@ import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.films.FilmsSection
-import app.sliver.feature.films.mono
 import app.sliver.feature.gallery.rememberAddMedia
 import app.sliver.feature.projects.ProjectAction
 import app.sliver.feature.projects.ProjectsSheet
@@ -307,7 +306,7 @@ private fun Header(
             HubButton(HubIcons.Gear, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
             HubButton(HubIcons.More, "More", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
         }
-        SliverText(line, mono(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 2.dp), maxLines = 1)
+        SliverText(line, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 2.dp), maxLines = 1)
         Box(Modifier.height(20.dp))
     }
 }
@@ -394,7 +393,7 @@ private fun MonthHeading(left: String, right: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), Modifier.alignByBaseline(), maxLines = 1, softWrap = false)
         Box(Modifier.weight(1f).alignByBaseline(), contentAlignment = Alignment.CenterEnd) {
-            SliverText(right, mono(11.sp, 0.06.em, SliverColors.TextTertiary), maxLines = 1, softWrap = false)
+            SliverText(right, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), maxLines = 1, softWrap = false)
         }
     }
 }
@@ -408,7 +407,7 @@ private fun MonthGrid(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             WeekDays.forEach {
-                SliverText(it, mono(10.sp, 0.sp, SliverColors.TextTertiary).copy(textAlign = TextAlign.Center), Modifier.weight(1f))
+                SliverText(it, SliverType.tnum(10.sp, 0.sp, SliverColors.TextTertiary).copy(textAlign = TextAlign.Center), Modifier.weight(1f))
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -462,11 +461,11 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
         Alignment.Center,
     ) {
         when (state) {
-            CellState.FUTURE -> SliverText(date.day.toString(), mono(11.sp, 0.sp, SliverColors.TextDisabled))
+            CellState.FUTURE -> SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, SliverColors.TextDisabled))
             CellState.EMPTY, CellState.TODAY -> {
                 val tint = if (state == CellState.TODAY) SliverColors.AccentText else null
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SliverText(date.day.toString(), mono(11.sp, 0.sp, tint ?: SliverColors.TextTertiary))
+                    SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, tint ?: SliverColors.TextTertiary))
                     Box(Modifier.size(4.dp).clip(CircleShape).background(tint ?: SliverColors.LineStrong))
                 }
             }
@@ -476,7 +475,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                 if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
-                    date.day.toString(), mono(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
+                    date.day.toString(), SliverType.tnum(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
                     Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp),
                 )
             }
@@ -516,7 +515,7 @@ private fun MemoryCard(day: Day, today: LocalDate, onClick: () -> Unit) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             SliverText(
                 "One month ago · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
-                mono(11.sp, 0.06.em, SliverColors.AccentText), maxLines = 1,
+                SliverType.tnum(11.sp, 0.06.em, SliverColors.AccentText), maxLines = 1,
             )
             SliverText("A clip you might have forgotten", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp))
         }
@@ -574,7 +573,7 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SliverText(
             "${Weekdays3[date.dayOfWeek.ordinal]} · ${date.day} ${MonthNames[date.month.ordinal]} ${date.year}",
-            mono(11.sp, 0.08.em, SliverColors.TextTertiary),
+            SliverType.tnum(11.sp, 0.08.em, SliverColors.TextTertiary),
         )
         SliverText("Add a clip for this day", SliverType.DisplayM.copy(lineHeight = 25.sp), Modifier.padding(bottom = 8.dp))
         val pick = rememberTapGate(onPick)

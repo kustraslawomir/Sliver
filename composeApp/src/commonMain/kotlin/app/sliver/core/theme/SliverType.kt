@@ -7,6 +7,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
@@ -33,6 +35,10 @@ object SliverType {
     val Caption get() = Base.copy(SliverColors.TextTertiary, 13.sp, FontWeight.Normal, fontFamily = SliverFonts.Sans, lineHeight = 18.sp)
     val Num get() = Base.copy(SliverColors.TextPrimary, 15.sp, FontWeight.Medium, fontFamily = SliverFonts.Sans, lineHeight = 20.sp, fontFeatureSettings = "tnum")
     val Meta get() = Base.copy(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Sans, lineHeight = 16.sp, fontFeatureSettings = "tnum")
+    /** Geist with tabular figures at a given size, regular weight: grid and poster labels. */
+    fun tnum(size: TextUnit, tracking: TextUnit, color: Color = SliverColors.TextPrimary) =
+        Meta.copy(color = color, fontSize = size, letterSpacing = tracking, fontWeight = FontWeight.Normal, lineHeight = TextUnit.Unspecified)
+
     /** Burned-in date stamp: the only uppercase mono text. */
     val Stamp get() = Base.copy(SliverColors.TextSecondary, 12.sp, FontWeight.Medium, fontFamily = SliverFonts.Mono, lineHeight = 16.sp, letterSpacing = 1.44.sp)
 }

@@ -40,7 +40,6 @@ import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.data.db.Day
-import app.sliver.feature.films.mono
 import app.sliver.feature.trim.rememberPhoto
 import kotlin.math.abs
 import kotlinx.datetime.DatePeriod
@@ -164,7 +163,7 @@ private fun BoxWithMonthLabels(first: LocalDate, today: LocalDate, span: Int, on
                 lastX = x
                 val target = ym
                 SliverText(
-                    MonthNames[ym.month - 1], mono(12.sp, 0.sp, SliverColors.TextTertiary),
+                    MonthNames[ym.month - 1], SliverType.tnum(12.sp, 0.sp, SliverColors.TextTertiary),
                     Modifier.offset(x = x).height(32.dp).clickable(role = Role.Button) { onMonth(target) }
                         .semantics { contentDescription = MonthLong[target.month - 1] },
                 )

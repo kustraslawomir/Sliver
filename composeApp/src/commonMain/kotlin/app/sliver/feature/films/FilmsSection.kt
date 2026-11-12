@@ -126,7 +126,7 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit)
             }
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    SliverText("A film by you", mono(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
+                    SliverText("A film by you", SliverType.tnum(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
                     SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
                 }
                 when (val s = state) {
@@ -137,12 +137,8 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onClick: () -> Unit)
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            SliverText(formatRuntime(plan.clips), mono(10.sp, 0.sp), color = SliverColors.TextPrimary)
-            SliverText(if (film.live) "Live" else film.rangeText(), mono(10.sp, 0.sp), color = SliverColors.TextTertiary)
+            SliverText(formatRuntime(plan.clips), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextPrimary)
+            SliverText(if (film.live) "Live" else film.rangeText(), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary)
         }
     }
 }
-
-/** Geist (tabular figures) at regular weight, as the Project boards use it. */
-fun mono(size: TextUnit, tracking: TextUnit, color: Color = SliverColors.TextPrimary) =
-    SliverType.Meta.copy(color = color, fontSize = size, letterSpacing = tracking, fontWeight = FontWeight.Normal, lineHeight = TextUnit.Unspecified)
