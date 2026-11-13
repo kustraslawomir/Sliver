@@ -125,3 +125,7 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Delete film | `FilmPlayer.dc.html` | "Delete film" as red text only, in the player and in a long-press sheet on a poster. Acts at once, toast "Film deleted · Undo" for 6 s, no confirm dialog. |
 | Camera start state | `CameraV2.dc.html` | The camera opens on Video / back lens / 1x / light off every time. Mode, lens and light are not remembered. |
 | Filters are film-level only | `FilmBuilder.dc.html` | Filters live only in the Film builder (None + Kiosk, Afterhours, Silver, Sunday, Tape, Halo, Intensity and Grain sliders). No filter control on clips, camera, Edit clip or Day detail. |
+
+## Owner decision 2026-11-13: liquid glow
+
+Supersedes the v1.4 "no glow" line for the camera record button only: a soft, slow, additive multi-colour "liquid" glow (`liquidGlow` in `RecordButton.kt`). Still when animations are disabled. Everything else stays glow-free.

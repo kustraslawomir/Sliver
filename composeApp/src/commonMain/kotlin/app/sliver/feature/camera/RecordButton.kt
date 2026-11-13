@@ -1,7 +1,9 @@
 package app.sliver.feature.camera
 
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -13,7 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -84,6 +94,13 @@ fun RecordButton(
             },
         contentAlignment = Alignment.Center,
     ) {
+        val phase = if (reduced) null else rememberInfiniteTransition(label = "liquid").animateFloat(
+            0f, 1f, infiniteRepeatable(tween(LIQUID_MS, easing = LinearEasing)), label = "liquid",
+        )
+        val strength = animateFloatAsState(
+            when { !enabled -> 0f; state == RecordState.Recording -> 1f; else -> 0.6f }, tween(450), label = "glow",
+        )
+        Box(Modifier.size(80.dp).liquidGlow(phase, strength, if (white) WhiteGlow else RedGlow))
         Box(
             Modifier.size(Disc).alpha(alpha).background(base, CircleShape),
             contentAlignment = Alignment.Center,
@@ -92,5 +109,34 @@ fun RecordButton(
                 Box(Modifier.size(24.dp).background(Color.White, RoundedCornerShape(6.dp)))
             }
         }
+    }
+}
+
+private const val LIQUID_MS = 12_000
+private val RedGlow = listOf(Color(0xFFFF3B30), Color(0xFFFF7A45), Color(0xFFFF2D7A))
+private val WhiteGlow = listOf(Color(0xFFFFFFFF), Color(0xFFBFD4FF), Color(0xFFFFE9D6))
+
+/**
+ * Soft light that flows around the button: three radial blobs drift on looping orbits and are added to the picture
+ * (BlendMode.Plus), so where they overlap the colours mix like liquid light. Whole-number speeds make the loop seamless.
+ * [phase] null (reduced motion) = a still glow.
+ */
+private fun Modifier.liquidGlow(phase: State<Float>?, strength: State<Float>, colors: List<Color>): Modifier = drawBehind {
+    val s = strength.value
+    if (s <= 0f) return@drawBehind
+    val p = (phase?.value ?: 0.1f) * 2f * PI.toFloat()
+    val base = size.minDimension / 2f
+    colors.forEachIndexed { i, color ->
+        val k = i + 1
+        val orbit = base * (0.22f + 0.08f * sin(p * 2 + i))
+        val c = Offset(center.x + cos(p * k + i * 2.1f) * orbit, center.y + sin(p * (4 - k) + i * 1.3f) * orbit)
+        val r = base * (1.75f + 0.25f * sin(p * 2 + i * 2f)) * (0.85f + 0.15f * s)
+        drawCircle(
+            Brush.radialGradient(
+                0f to color.copy(alpha = 0.50f * s), 0.45f to color.copy(alpha = 0.20f * s), 1f to Color.Transparent,
+                center = c, radius = r,
+            ),
+            radius = r, center = c, blendMode = BlendMode.Plus,
+        )
     }
 }
