@@ -96,6 +96,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 
     var notice by remember { mutableStateOf<String?>(null) }
+    var confirmRemove by remember { mutableStateOf(false) }
 
     fun remove(d: app.sliver.data.db.Day) {
         val next = nextDay(d.date, filled) ?: prevDay(d.date, filled)
@@ -154,10 +155,15 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))
-                SecondaryButton("Remove", { day?.let(::remove) }, Modifier.weight(1f), destructive = true, enabled = day != null)
+                SecondaryButton("Remove", { confirmRemove = true }, Modifier.weight(1f), destructive = true, enabled = day != null)
             }
         }
 
+        app.sliver.core.ui.ConfirmSheet(
+            confirmRemove, "Remove this day?",
+            "The clip is deleted from the project. The photo or video stays in your gallery.",
+            "Remove day", { day?.let(::remove) }, { confirmRemove = false },
+        )
         NoticeSheet(notice) { notice = null }
     }
 }

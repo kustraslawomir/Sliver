@@ -80,13 +80,14 @@ class DraftActions(
         return list.size
     }
 
-    suspend fun skip(day: Day) = remove(listOf(day), "Day removed")
+    /** Owner: a single day is removed after a confirm, with no undo bar. */
+    suspend fun skip(day: Day) = remove(listOf(day), null)
 
     /**
      * Deletes the days the way a user delete does (confirmed days leave a tombstone for sync); the files wait in tmp for
      * [UNDO_WINDOW_MS] so Undo can put everything back.
      */
-    suspend fun remove(list: List<Day>, message: String) {
+    suspend fun remove(list: List<Day>, message: String?) {
         if (list.isEmpty()) return
         val stamp = Clock.System.now().toEpochMilliseconds()
         val parked = list.mapIndexed { i, day ->
@@ -99,6 +100,13 @@ class DraftActions(
         val remembered = list.filter { it.draftCandidates != null || it.importRunId != null }
             .map { it to decodeCandidates(it.draftCandidates).map { c -> c.uri } }
         remembered.forEach { (d, uris) -> store?.dismiss(d.projectId, d.date, uris) }
+        if (message == null) {
+            parked.forEach { (p, _) ->
+                files.delete(p.second)
+                files.delete(p.third)
+            }
+            return
+        }
         val timer = AppScope.launch {
             delay(UNDO_WINDOW_MS)
             parked.forEach { (p, _) ->

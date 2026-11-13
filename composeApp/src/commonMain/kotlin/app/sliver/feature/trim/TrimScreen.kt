@@ -370,7 +370,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     if (draft != null) {
-                        GhostButton("Remove day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
+                        GhostButton("Remove day", { if (!saving) draftNav.askSkip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
                     } else {
                         GhostButton(
                             if (inApp) "Retake" else "Pick another",
@@ -392,6 +392,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 Controls()
             }
         }
+        app.sliver.feature.autoimport.RemoveDayConfirm(draftNav)
         DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
     }
 }

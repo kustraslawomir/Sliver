@@ -115,6 +115,13 @@ class DraftNav(
         if (next == null || !show(next)) finished()
     }
 
+    /** Day waiting for the Remove day confirm. */
+    var confirmSkip by mutableStateOf<DraftContext?>(null)
+
+    fun askSkip(ctx: DraftContext) {
+        if (!busy) confirmSkip = ctx
+    }
+
     fun skip(ctx: DraftContext) = run {
         actions.skip(ctx.day)
         afterResolved(ctx.day.date) { navigator.back() }
@@ -256,4 +263,15 @@ fun durationLabel(ms: Long): String {
 @Composable
 fun MotionChoice(video: Boolean, nav: DraftNav, modifier: Modifier = Modifier) {
     Segmented(listOf("Video", "Photo"), if (video) 0 else 1, { nav.switchKind(it == 0) }, modifier)
+}
+
+/** Owner: removing a day asks first; there is no undo bar for it. */
+@Composable
+fun RemoveDayConfirm(nav: DraftNav) {
+    val ctx = nav.confirmSkip
+    app.sliver.core.ui.ConfirmSheet(
+        ctx != null, "Remove this day?",
+        "The clip is deleted from the project. The photo or video stays in your gallery.",
+        "Remove day", { ctx?.let(nav::skip) }, { nav.confirmSkip = null },
+    )
 }
