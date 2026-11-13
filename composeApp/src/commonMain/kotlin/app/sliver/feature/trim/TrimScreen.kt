@@ -298,15 +298,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging,
                         scrubMs = if (dragging) startMs else null,
                     ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
-                    if (!soundTouched) {
-                        SliverText(
-                            "Clip keeps its sound", SliverType.BodySmall,
-                            Modifier.align(Alignment.BottomCenter).padding(SliverSpace.S3)
-                                .clip(SliverShapes.Pill).background(SliverColors.Surface2)
-                                .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
-                            SliverColors.TextPrimary,
-                        )
-                    }
                     if (saved?.dateStamp == true) DateStamp(stampText(day))
                     Badge(
                         if (custom) "Custom" else "Auto-picked",
