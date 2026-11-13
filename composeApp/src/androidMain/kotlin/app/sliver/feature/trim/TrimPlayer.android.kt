@@ -18,6 +18,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -47,6 +48,17 @@ actual fun TrimPlayer(
     }
     val context = LocalContext.current
     val player = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ONE } }
+    // A second player stays prepared on the full file so a drag starts instantly and seeks to key frames (fast).
+    val scrubPlayer = remember(path) {
+        ExoPlayer.Builder(context).build().apply {
+            setSeekParameters(SeekParameters.CLOSEST_SYNC)
+            playWhenReady = false
+            volume = 0f
+            setMediaItem(MediaItem.fromUri(path))
+            prepare()
+        }
+    }
+    DisposableEffect(scrubPlayer) { onDispose { scrubPlayer.release() } }
     val reportAspect = rememberUpdatedState(onAspect)
     DisposableEffect(player) {
         val listener = object : Player.Listener {
@@ -58,17 +70,22 @@ actual fun TrimPlayer(
             }
         }
         player.addListener(listener)
-        onDispose { player.removeListener(listener); player.release() }
+        scrubPlayer.addListener(listener)
+        onDispose { player.removeListener(listener); scrubPlayer.removeListener(listener); player.release() }
     }
 
     val scrubbing = scrubMs != null
-    LaunchedEffect(path, scrubbing) {
-        if (!scrubbing) return@LaunchedEffect
-        player.playWhenReady = false
-        player.setMediaItem(MediaItem.fromUri(path))
-        player.prepare()
+    val view = remember { arrayOfNulls<PlayerView>(1) }
+    LaunchedEffect(scrubbing) {
+        if (scrubbing) {
+            player.playWhenReady = false
+            scrubPlayer.seekTo(scrubMs ?: startMs)
+            view[0]?.player = scrubPlayer
+        } else {
+            view[0]?.player = player
+        }
     }
-    LaunchedEffect(scrubMs) { scrubMs?.let { player.seekTo(it) } }
+    LaunchedEffect(scrubMs) { scrubMs?.let { scrubPlayer.seekTo(it) } }
 
     LaunchedEffect(path, startMs, windowMs, scrubbing) {
         if (scrubbing) return@LaunchedEffect
@@ -90,6 +107,7 @@ actual fun TrimPlayer(
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 this.player = player
+                view[0] = this
             }
         },
         modifier = modifier,
