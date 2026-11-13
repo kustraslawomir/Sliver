@@ -49,39 +49,41 @@
       </div>
     </sc-for>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 10px">
-      <div style="display: flex; align-items: center; gap: 0.32em; font-family: Geist, sans-serif; font-weight: 300; font-size: 20px; color: #B9B9B3"><span>S</span><span>L</span><span style="width: 1.5px; height: 24px; background: #EDEDE8"></span><span>V</span><span>E</span><span>R</span></div>
-      <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: #55555A">VERSION 1.0 (1) · FREE, NO ADS, NO TRACKING</span>
+      <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: #B9B9B3">{{app}}</span>
+      <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; color: #8E8E88">Version 1.0 (1) · free, no ads, no tracking</span>
     </div>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  constructor(props) { super(props); this.state = { date: true, fullRec: false, fmt: 'cinema' }; }
+  constructor(props) { super(props); this.state = { date: true, fullRec: false, vol: true, gold: false, fmt: 'cinema' }; }
   renderVals() {
-    const st = this.state;
+    const st = this.state, APP = 'Fragments';
     const link = (n, href, v, d, vColor) => ({ isLink: true, isSwitch: false, isSeg: false, n, href, v: v || '', d: d || '', dShow: d ? 'block' : 'none', vColor: vColor || '#8E8E88' });
     const sw = (n, d, on, toggle) => ({ isLink: false, isSwitch: true, isSeg: false, n, d, on: String(on), toggle, track: on ? '#EDEDE8' : '#3A3A40', knob: on ? 20 : 2 });
     const seg = (n, opts) => ({ isLink: false, isSwitch: false, isSeg: true, n, opts });
     return {
+      app: APP,
       groups: [
         { n: 'Account & backup', rows: [
           link('Account', 'AccountSettings.dc.html', 'Google'),
-          link('Backup', 'Backup.dc.html', 'Up to date', '', '#8FC7A4')
+          link('Backup & sync', 'Backup.dc.html', 'Synced · just now', '', '#8FC7A4')
         ]},
-        { n: 'Capture', rows: [
-          link('Appearance', 'Settings.dc.html', 'System'),
-          link('Default filter', 'Looks.dc.html', 'Natural'),
+        { n: 'Films & clips', rows: [
           link('Default film format', 'Settings.dc.html', 'Cinema 16:9'),
-          sw('Date stamp', 'On every clip. You can still turn it off for a film before rendering.', st.date, () => this.setState({ date: !st.date })),
-          sw('Also save full recordings to Photos', 'Off: only the chosen clip is kept, the rest is deleted.', st.fullRec, () => this.setState({ fullRec: !st.fullRec }))
+          sw('Date stamp', 'On every clip. You can still turn it off for a film.', st.date, () => this.setState({ date: !st.date })),
+          sw('Also save full recordings to Photos', 'Off: only the chosen clip is kept, the rest is deleted.', st.fullRec, () => this.setState({ fullRec: !st.fullRec })),
+          sw('Volume key records', 'Press a volume key on the camera to start and stop.', st.vol, () => this.setState({ vol: !st.vol })),
+          sw('Show golden hour', 'A line on the camera in the 3 hours before sunset. Uses rough location.', st.gold, () => this.setState({ gold: !st.gold }))
         ]},
-        { n: 'Reminders & past', rows: [
+        { n: 'App', rows: [
+          link('Appearance', 'SettingsL.dc.html', 'System'),
           link('Daily reminder', 'Reminders.dc.html', '20:00, every day'),
-          link('Fill the past from gallery', 'Backfill.dc.html', '', 'Match photos & videos to empty days')
+          link('Fill the calendar', 'FillCalendar.dc.html', '', 'Put photos and videos from your gallery on empty days')
         ]},
         { n: 'About', rows: [
-          link('What SLIVER stores', 'AccountSettings.dc.html', '', 'Your videos never leave your phone & Drive'),
+          link('What ' + APP + ' stores', 'AccountSettings.dc.html', '', 'Your clips live on your phone, and in your Drive if backup is on'),
           link('Send feedback', 'Settings.dc.html', 'Email')
         ]}
       ]

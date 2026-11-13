@@ -16,8 +16,8 @@
   <div style="position: absolute; left: 12px; right: 12px; top: 50px; height: 48px; display: flex; align-items: center; justify-content: space-between">
     <a href="Films.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #EDEDE8"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
-      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">October</span>
-      <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: #8E8E88">0:29 · 1–31 Oct · Cinema 16:9</span>
+      <span style="font-family: Geist, Inter, system-ui, sans-serif; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">My 2026</span>
+      <span style="font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; color: #8E8E88">21 Jun – 10 Nov 2026 · 129 clips · 2:09</span>
     </div>
     <span style="width: 44px"></span>
   </div>
@@ -56,13 +56,13 @@
     <button aria-label="Full screen — turn your phone sideways" style="width: 48px; height: 48px; border-radius: 24px; border: 1px solid #26262A; background: transparent; color: #EDEDE8; display: flex; align-items: center; justify-content: center; padding: 0"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
   </div>
 
-  <!-- actions -->
-  <button onClick="{{openShare}}" style="position: absolute; left: 20px; right: 20px; top: 660px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px; box-shadow: none">Share film…</button>
+  <!-- actions: Save · Edit · Delete (red text, acts at once, Undo bar) -->
+  <button onClick="{{save}}" style="position: absolute; left: 20px; right: 20px; top: 660px; height: 56px; border: 0; border-radius: 28px; background: #EDEDE8; color: #0A0A0B; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px">{{saveLabel}}</button>
   <div style="position: absolute; left: 20px; right: 20px; top: 728px; display: flex; gap: 10px">
-    <button onClick="{{save}}" style="flex: 1 1 0; height: 48px; border-radius: 24px; border: 1px solid #3A3A40; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">{{saveLabel}}</button>
     <a href="FilmBuilder.dc.html" style="flex: 1 1 0; height: 48px; box-sizing: border-box; border-radius: 24px; border: 1px solid #3A3A40; display: flex; align-items: center; justify-content: center; color: #EDEDE8; text-decoration: none; font-size: 15px">Edit film</a>
+    <a href="ProjectHub.dc.html" style="flex: 1 1 0; height: 48px; display: flex; align-items: center; justify-content: center; color: #E5675F; text-decoration: none; font-size: 15px">Delete film</a>
   </div>
-  <span style="position: absolute; left: 20px; right: 20px; top: 794px; text-align: center; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 10px; color: #55555A">MP4 · 1080p · 30 fps · 9 MB · kept in SLIVER</span>
+  <span style="position: absolute; left: 20px; right: 20px; top: 794px; text-align: center; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 12px; color: #8E8E88">MP4 · 1080p · 30 fps · 38 MB · kept in {{app}}</span>
 
   <!-- system share sheet (mock) -->
   <sc-if value="{{share}}" hint-placeholder-val="{{ false }}">
@@ -71,7 +71,7 @@
       <div style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #3A3A40"></div>
       <div style="display: flex; gap: 12px; align-items: center">
         <div style="flex: 0 0 72px; height: 41px; border-radius: 6px; background: linear-gradient(160deg, #34201A, #050505)"></div>
-        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">October.mp4</span><span style="font-size: 12px; color: #8E8E88">Video · 29 s · 9 MB</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">My 2026.mp4</span><span style="font-size: 12px; color: #8E8E88">Video · 2:09 · 38 MB</span></div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 8px">
         <sc-for list="{{targets}}" as="t" hint-placeholder-count="8">
@@ -88,12 +88,13 @@
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { playing: true, t: 0, sound: true, share: false, saved: false }; }
-  componentDidMount() { this._iv = setInterval(() => { if (this.state.playing && !this.state.share) this.setState({ t: (this.state.t + 100) % 29000 }); }, 100); }
+  componentDidMount() { this._iv = setInterval(() => { if (this.state.playing && !this.state.share) this.setState({ t: (this.state.t + 100) % 129000 }); }, 100); }
   componentWillUnmount() { clearInterval(this._iv); }
   renderVals() {
+    const APP = 'Fragments';
     const st = this.state;
     const days = [];
-    for (let d = 1; d <= 31; d++) { const n = 273 + d; if (n % 13 !== 0) days.push({ d, n }); }
+    for (let d = 1; d <= 143; d++) { const n = 171 + d; if (n % 13 !== 0 && days.length < 129) days.push({ d, n }); }
     const count = days.length, total = count * 1000;
     const idx = Math.floor(st.t / 1000) % count;
     const day = days[idx];
@@ -105,6 +106,7 @@ class Component extends DCLogic {
     const ticks = [];
     for (let i = 1; i < count; i++) ticks.push((i / count * 100).toFixed(2));
     return {
+      app: APP,
       playing: st.playing, paused: !st.playing,
       toggle: () => this.setState({ playing: !st.playing }),
       playLabel: st.playing ? 'Pause' : 'Play',

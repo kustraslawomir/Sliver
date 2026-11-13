@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fill, light</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #F6F4EF; color: #141413; font-family: Geist, Inter, system-ui, sans-serif">
+
+  <div style="position: absolute; left: 12px; right: 20px; top: 50px; height: 48px; display: flex; align-items: center; gap: 4px">
+    <a href="ProjectHub.dc.html" aria-label="Back" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #141413"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <span style="font-size: 26px; line-height: 1; font-weight: 600; letter-spacing: -0.02em">Fill the calendar</span>
+  </div>
+
+  <!-- SETUP -->
+  <sc-if value="{{isSetup}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 116px; display: flex; flex-direction: column; gap: 22px">
+      <span style="font-size: 15px; line-height: 1.45; color: #4A4843">Picks one clip for every empty day from your camera roll — the longest video, else a photo. Nothing leaves your phone.</span>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-size: 13px; font-weight: 500; color: #6E6B64">From</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{froms}}" as="f" hint-placeholder-count="4">
+            <button onClick="{{f.pick}}" aria-pressed="{{f.on}}" style="height: 38px; padding: 0 14px; border-radius: 19px; border: {{f.border}}; background: {{f.bg}}; color: {{f.color}}; font-family: Geist, sans-serif; font-size: 14px; white-space: nowrap">{{f.n}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 6px 0">
+        <span style="font-size: 52px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">{{emptyN}}</span>
+        <span style="font-size: 15px; color: #6E6B64">empty days to fill · {{fromLabel}}</span>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <sc-for list="{{switches}}" as="r" hint-placeholder-count="2">
+          <button onClick="{{r.toggle}}" role="switch" aria-checked="{{r.on}}" style="min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; border-top: 1px solid #E8E4DC; background: transparent; color: #141413; padding: 0; font-family: Geist, sans-serif; text-align: left">
+            <span style="display: flex; flex-direction: column; gap: 3px; padding: 8px 0"><span style="font-size: 15px">{{r.n}}</span><span style="font-size: 12px; line-height: 1.35; color: #6E6B64">{{r.d}}</span></span>
+            <span style="flex: 0 0 44px; position: relative; height: 26px; border-radius: 13px; background: {{r.track}}"><span style="position: absolute; top: 2px; left: {{r.knob}}px; width: 22px; height: 22px; border-radius: 11px; background: #FFFFFF; box-sizing: border-box; border: 2px solid #F6F4EF"></span></span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position: absolute; left: 20px; right: 20px; bottom: 34px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 12px; line-height: 1.4; color: #6E6B64; text-align: center">Screenshots and screen recordings are always skipped. Asks for gallery access once.</span>
+      <button style="height: 56px; border: 0; border-radius: 28px; background: #141413; color: #F6F4EF; font-family: Geist, sans-serif; font-weight: 600; font-size: 17px">Fill {{emptyN}} days</button>
+    </div>
+  </sc-if>
+
+  <!-- PROGRESS (runs in the background, also shown as a notification) -->
+  <sc-if value="{{isProgress}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 116px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 52px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">64<span style="color: #A8A49B"> of 143</span></span>
+        <span style="font-size: 15px; color: #6E6B64">days checked · about 2 min left</span>
+      </div>
+      <div style="height: 4px; border-radius: 2px; background: #E2DED6; overflow: hidden"><div style="width: 45%; height: 4px; background: #141413"></div></div>
+      <span style="font-size: 14px; color: #4A4843">Now: Saturday 22 August</span>
+      <div style="display: grid; grid-template-columns: 1fr auto; border-top: 1px solid #E8E4DC">
+        <sc-for list="{{stats}}" as="s" hint-placeholder-count="6">
+          <span style="padding: 12px 0; border-bottom: 1px solid #E8E4DC; font-size: 15px; color: #4A4843">{{s.k}}</span>
+          <span style="padding: 12px 0; border-bottom: 1px solid #E8E4DC; font-size: 15px; font-variant-numeric: tabular-nums; text-align: right">{{s.v}}</span>
+        </sc-for>
+      </div>
+      <span style="font-size: 13px; line-height: 1.4; color: #6E6B64">You can leave this screen. Your gallery has nothing before 4 March 2025.</span>
+    </div>
+    <div style="position: absolute; left: 20px; right: 20px; bottom: 34px">
+      <button style="width: 100%; height: 52px; box-sizing: border-box; border-radius: 26px; border: 1px solid #CFCAC0; background: transparent; color: #141413; font-family: Geist, sans-serif; font-size: 16px">Stop</button>
+    </div>
+  </sc-if>
+
+  <!-- DONE -->
+  <sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 20px; right: 20px; top: 116px; display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 52px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">118</span>
+        <span style="font-size: 15px; color: #6E6B64">days filled · 21 Jun – 9 Nov</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px">
+        <sc-for list="{{mosaic}}" as="m" hint-placeholder-count="40"><span style="aspect-ratio: 1 / 1; border-radius: 4px; background: {{m.bg}}"></span></sc-for>
+      </div>
+      <span style="font-size: 14px; line-height: 1.4; color: #6E6B64">25 days had nothing in your gallery and stay empty. Filled days are marked until you check them.</span>
+    </div>
+    <div style="position: absolute; left: 20px; right: 20px; bottom: 34px; display: flex; flex-direction: column; gap: 6px">
+      <a href="ProjectHub.dc.html" style="height: 56px; border-radius: 28px; background: #141413; color: #F6F4EF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 600; font-size: 17px">Keep all</a>
+      <a href="EditClipDraft.dc.html" style="height: 52px; box-sizing: border-box; border-radius: 26px; border: 1px solid #CFCAC0; color: #141413; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px">Review one by one</a>
+      <div style="display: flex; justify-content: space-between">
+        <a href="ProjectHub.dc.html" style="height: 44px; display: flex; align-items: center; color: #E5675F; text-decoration: none; font-size: 15px">Remove unchecked</a>
+        <a href="ProjectHub.dc.html" style="height: 44px; display: flex; align-items: center; color: #4A4843; text-decoration: none; font-size: 15px">Undo all</a>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"enum","options":["setup","progress","done"],"default":"setup"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { from: 'start', keep: true, saved: false }; }
+  renderVals() {
+    const st = this.state, step = this.props.step || 'setup';
+    const F = [['start', 'Project start', 143, 'since 21 June'], ['year', 'This year', 268, 'since 1 January'], ['30', 'Last 30 days', 4, 'since 11 October'], ['pick', 'Pick date…', 0, '']];
+    const cur = F.find((f) => f[0] === st.from);
+    const sw = (n, d, on, k) => ({ n, d, on: String(on), toggle: () => this.setState({ [k]: !on }), track: on ? '#141413' : '#CFCAC0', knob: on ? 20 : 2 });
+    const pal = ['#4E5A63', '#7A6A50', '#A07050', '#506A7A', '#6A5A7A', '#5A6A50', '#8A6A48', '#6A4A5A', '#3E5A6A', '#9A7A5A'];
+    const mosaic = []; for (let i = 0; i < 40; i++) mosaic.push({ bg: i % 9 === 4 ? '#1C1C20' : 'linear-gradient(160deg, ' + pal[(i * 7) % pal.length] + ', #0C0B0A)' });
+    return {
+      isSetup: step === 'setup', isProgress: step === 'progress', isDone: step === 'done',
+      froms: F.map((f) => { const on = st.from === f[0]; return { n: f[1], on: String(on), pick: () => this.setState({ from: f[0] }), border: on ? '1px solid #141413' : '1px solid #CFCAC0', bg: on ? '#141413' : 'transparent', color: on ? '#F6F4EF' : '#4A4843' }; }),
+      emptyN: cur[2] || 143, fromLabel: cur[3] || 'since 21 June',
+      switches: [
+        sw('Keep without review', st.keep ? 'Filled days count right away. You can check them later.' : 'Filled days wait as drafts until you keep them.', st.keep, 'keep'),
+        sw('Include saved and received media', 'Off: only photos and videos taken with your camera.', st.saved, 'saved')
+      ],
+      stats: [{ k: 'Days with media', v: '52' }, { k: 'Items found', v: '1 204' }, { k: 'Videos · photos', v: '31 · 21' }, { k: 'Still empty', v: '12' }, { k: 'Couldn’t read', v: '3' }, { k: 'Filled so far', v: '21 Jun – 22 Aug' }],
+      mosaic
+    };
+  }
+}
+</script>
+</body>
+</html>

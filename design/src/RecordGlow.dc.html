@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Record glow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;display=swap">
+<style>body{margin:0}
+@keyframes lg1{0%{transform:translate(9px,0)}25%{transform:translate(0,9px)}50%{transform:translate(-9px,0)}75%{transform:translate(0,-9px)}100%{transform:translate(9px,0)}}
+@keyframes lg2{0%{transform:translate(-4px,8px) scale(1)}50%{transform:translate(6px,-7px) scale(1.12)}100%{transform:translate(-4px,8px) scale(1)}}
+@keyframes lg3{0%{transform:translate(0,-8px) scale(1.08)}33%{transform:translate(8px,5px) scale(.94)}66%{transform:translate(-8px,4px) scale(1.02)}100%{transform:translate(0,-8px) scale(1.08)}}
+.lg{position:absolute;left:50%;top:50%;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;mix-blend-mode:plus-lighter;pointer-events:none}
+.lg1{animation:lg1 12s linear infinite}.lg2{animation:lg2 6s ease-in-out infinite}.lg3{animation:lg3 4s ease-in-out infinite}
+.still .lg{animation:none}
+@media (prefers-reduced-motion: reduce){.lg1,.lg2,.lg3{animation:none}}</style>
+</helmet>
+<div style="width: 1280px; padding: 56px; box-sizing: border-box; background: #0A0A0B; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif">
+  <div style="display: flex; flex-direction: column; gap: 8px; max-width: 760px">
+    <span style="font-size: 40px; line-height: 1.05; font-weight: 600; letter-spacing: -0.025em">Record button · liquid glow</span>
+    <span style="font-size: 16px; line-height: 1.5; color: #B9B9B3">The only glow in the app, and only on the camera's record button. Three soft light blobs drift slowly around the disc and add up (BlendMode.Plus), so where they overlap the colours mix like liquid light. Everything else stays mono and glow-free — the Record today button on the project screen is a plain red disc.</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 40px">
+    <sc-for list="{{tiles}}" as="t" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 14px">
+        <div class="{{t.cls}}" style="position: relative; height: 300px; border-radius: 20px; overflow: hidden; background: radial-gradient(80% 60% at 60% 20%, #6B4A30 0%, #241812 55%, #0C0907 100%); border: 1px solid #26262A">
+          <div style="position: absolute; left: 50%; top: 50%; width: 80px; height: 80px; margin: -40px 0 0 -40px; display: flex; align-items: center; justify-content: center">
+            <sc-for list="{{t.blobs}}" as="b" hint-placeholder-count="3"><span class="lg lg{{b.i}}" style="background: {{b.bg}}"></span></sc-for>
+            <span style="position: relative; width: 72px; height: 72px; border-radius: 36px; background: {{t.disc}}; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B; display: {{t.stop}}"></span></span>
+          </div>
+        </div>
+        <span style="font-size: 17px; font-weight: 600">{{t.n}}</span>
+        <span style="font-size: 14px; line-height: 1.45; color: #8E8E88">{{t.d}}</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top: 44px; display: grid; grid-template-columns: 220px 1fr; border-top: 1px solid #26262A">
+    <sc-for list="{{spec}}" as="r" hint-placeholder-count="8">
+      <span style="padding: 14px 0; border-bottom: 1px solid #1F1F22; font-size: 14px; color: #8E8E88">{{r.k}}</span>
+      <span style="padding: 14px 0; border-bottom: 1px solid #1F1F22; font-size: 14px; line-height: 1.45">{{r.v}}</span>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1130}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const a = (x) => Math.round(x * 255).toString(16).padStart(2, '0').toUpperCase();
+    const blobs = (cols, s) => cols.map((c, i) => ({ i: i + 1, bg: 'radial-gradient(circle, ' + c + a(0.5 * s) + ' 0%, ' + c + a(0.2 * s) + ' 45%, ' + c + '00 70%)' }));
+    const RED = ['#FF3B30', '#FF7A45', '#FF2D7A'], WH = ['#FFFFFF', '#BFD4FF', '#FFE9D6'];
+    return {
+      tiles: [
+        { n: 'Video · ready', d: 'Strength 0.6. Slow drift, 12 s loop.', blobs: blobs(RED, 0.6), disc: '#FF3B30', stop: 'none', cls: '' },
+        { n: 'Video · recording', d: 'Strength 1.0, blobs 15 % larger. Stop square on the disc. No extra pulse — the drift is the motion.', blobs: blobs(RED, 1), disc: '#FF3B30', stop: 'flex', cls: '' },
+        { n: 'Photo · ready', d: 'Same motion, white / cool blue / warm white.', blobs: blobs(WH, 0.6), disc: '#EDEDE8', stop: 'none', cls: '' },
+        { n: 'Reduced motion', d: 'Animations off in system settings: the glow stays, frozen at phase 0.1. Disabled button: no glow at all.', blobs: blobs(RED, 0.6), disc: '#FF3B30', stop: 'none', cls: 'still' }
+      ],
+      spec: [
+        { k: 'Size', v: 'Disc 72 dp in an 80 dp hit area. Glow is drawn behind the 80 dp box and may spill out to ~140 dp; never clip it.' },
+        { k: 'Blobs', v: '3 radial gradients, alpha 0.50·s at the centre → 0.20·s at 45 % → 0 at the edge. Radius 1.75 × 40 dp (±0.25), × (0.85 + 0.15·s).' },
+        { k: 'Motion', v: 'One 12 s linear phase. Blob k orbits ~9 dp around the centre at whole-number speeds (1×, 2×, 3×), so the loop is seamless.' },
+        { k: 'Blend', v: 'BlendMode.Plus (additive). On the viewfinder it reads as light, not as a shadow.' },
+        { k: 'Strength', v: 'Disabled 0 · ready 0.6 · recording 1.0, animated over 450 ms.' },
+        { k: 'Colours', v: 'Video: #FF3B30, #FF7A45, #FF2D7A. Photo: #FFFFFF, #BFD4FF, #FFE9D6. Tokens RecordGlowRed / RecordGlowWhite.' },
+        { k: 'Where', v: 'Camera record button only. Not on Record today, not on chips, not on cells, not in the light theme.' },
+        { k: 'Code', v: 'Already built as Modifier.liquidGlow in RecordButton.kt — this board documents it, it is the spec now.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

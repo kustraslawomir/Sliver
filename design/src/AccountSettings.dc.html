@@ -88,7 +88,7 @@ class Component extends DCLogic {
       askOut: () => this.setState({ sheet: 'out' }), askDel: () => this.setState({ sheet: 'del' }), close: () => this.setState({ sheet: null }),
       sheetOut: st.sheet === 'out', sheetDel: st.sheet === 'del',
       opts: [
-        Object.assign({ n: 'Also delete the SLIVER folder in my Drive', d: '129 clips · 214 MB. Otherwise they stay yours.', toggle: () => this.setState({ drive: !st.drive }) }, cb(st.drive)),
+        Object.assign({ n: 'Also delete the Fragments folder in my Drive', d: '129 clips · 214 MB. Otherwise they stay yours.', toggle: () => this.setState({ drive: !st.drive }) }, cb(st.drive)),
         Object.assign({ n: 'Also delete clips from this phone', d: 'Otherwise the app keeps working as a guest.', toggle: () => this.setState({ phone: !st.phone }) }, cb(st.phone))
       ]
     };

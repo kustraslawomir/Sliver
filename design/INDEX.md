@@ -133,3 +133,23 @@ Supersedes the v1.4 "no glow" line for the camera record button only: a soft, sl
 ## Owner decision 2026-11-13: Year view removed
 
 The Year view, the light-of-the-year chart and the Month/Year tabs are removed. The Project screen is the month grid; the month heading carries Previous/Next month chevrons, and the grid swipes between months. The luma/tone day columns remain in the schema but are no longer written.
+
+## v1.5 — design matches FUNCTIONAL.md (2026-11-13)
+
+`docs/FUNCTIONAL.md` is the behaviour source. These boards are the look for it and supersede every older board for the same screen. **App name is not final:** it appears as one string (`app_name`, currently "Fragments"); never hard-code it in layouts, never draw a wordmark/slit.
+
+| Screen | Board(s) | Notes |
+|---|---|---|
+| Project screen | `ProjectHub` (+`L`), states: `ProjectHubAuto`, `ProjectHubDrafts`, `ProjectHubReview`(+`L`), `ProjectHubNudge`, `ProjectHubSaved`, `ProjectHubUndo` | Header = name ▾ · edit pencil · profile. Month grid only. Cells: filled / auto-filled (dashed white, full opacity) / draft (dashed grey, 40 % thumb, "Draft") / empty past ("+") / today (2dp ring + red dot) / future (#3A3A40, disabled). Review row 52dp → sheet Keep all / Check one by one / Remove unchecked. Films: poster + project span + "N clips · length". Dock: plain red 72dp disc, **no glow**. Undo bar 48dp, sits 132dp above the bottom (above the dock), never over content. |
+| Record button | `RecordGlow`, `CameraV2`, `CameraV2Rec` | Liquid glow = spec of the existing `Modifier.liquidGlow`. Camera only. Zoom stops row (.6 / 1× / 2 / 3, 40dp circles) at 612dp, above Photo · Video. Timer copy "0:03 · Clip OK" in Geist (no mono caps). |
+| Add media to a day | `FromThisDay` (+`L`, `FromThisDayEmpty`) | Replaces the old add-sheet and `PickerV2`. 3-col grid, camera items first, time + duration on tiles, motion-photo badge. Bottom: "Show saved and received too" switch + "Browse all photos" (system picker). |
+| Check an auto-filled day / draft | `EditClipDraft` (auto), `EditClipDraftD` (draft) | Header "Auto-filled · 1 of 3" / "Draft · 1 of 3" + date; ‹ › only when walking one by one. Strip "Other items from this day" (tap = swap, current has 2dp ring). Keep this clip / Remove day (red text). |
+| Fill the calendar | `FillCalendar` (+`L`), `FillCalendarProgress`, `FillCalendarDone` | Supersedes `Backfill*`. Done = Keep all / Review one by one / Remove unchecked / Undo all. |
+| Day detail | `DayDetail`, `DayDetailUndo` | Loop, ‹ › days, sound. Only Replace + Remove (red text, acts at once, undo bar). No share sheet, no "mark" option. |
+| Film builder | `FilmBuilder` | No range. Sound Original/Music/Mix, Music = the user's own audio file (no bundled tracks). Date on screen switch. Filter row with thumbnails (None, Kiosk, Afterhours, Silver, Sunday, Tape, Halo), Intensity + Grain only when a filter is picked. |
+| Film player | `FilmPlayer` | Save to Photos (primary) · Edit film · Delete film (red text). File line "MP4 · 1080p · 30 fps · N MB · kept in <app>" in 12sp #8E8E88. Always dark. |
+| Settings | `Settings` (+`L`) | Order per FUNCTIONAL.md. Footer = plain app name text + version; the slit wordmark is gone. |
+| Onboarding | `OnbV2` | Welcome mark = red dot (name-neutral). Start + "Restore from backup". |
+| Renamed copy | `AccountSettings`, `Backup`, `DriveConnect`, `EdgeStates`, `NotifBoard`, `Notifications`, `Reminders`(+`L`), `Restore`, `Widgets` | Only "SLIVER" → app name. Layout unchanged. |
+
+Dead boards (do not build from): `ProjectHubYear*`, `Backfill*`, `PickerV2`, `Looks*`, `Frame`, `DayShare`, `YearInSeconds`, `Archive*`, `Films`, `Splash` slit variants stay as is (owner kept the old splash).

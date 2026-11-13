@@ -12,7 +12,14 @@
 <style>body{margin:0}
 @keyframes sv-breathe{0%,100%{opacity:1}50%{opacity:.78}}
 .sv-breathe{animation:sv-breathe 1600ms ease-in-out infinite}
-@media (prefers-reduced-motion: reduce){.sv-breathe{animation:none}}</style>
+@media (prefers-reduced-motion: reduce){.sv-breathe{animation:none}}
+@keyframes lg1{0%{transform:translate(9px,0)}25%{transform:translate(0,9px)}50%{transform:translate(-9px,0)}75%{transform:translate(0,-9px)}100%{transform:translate(9px,0)}}
+@keyframes lg2{0%{transform:translate(-4px,8px) scale(1)}50%{transform:translate(6px,-7px) scale(1.12)}100%{transform:translate(-4px,8px) scale(1)}}
+@keyframes lg3{0%{transform:translate(0,-8px) scale(1.08)}33%{transform:translate(8px,5px) scale(.94)}66%{transform:translate(-8px,4px) scale(1.02)}100%{transform:translate(0,-8px) scale(1.08)}}
+.lg{position:absolute;left:50%;top:50%;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;mix-blend-mode:plus-lighter;pointer-events:none}
+.lg1{animation:lg1 12s linear infinite}.lg2{animation:lg2 6s ease-in-out infinite}.lg3{animation:lg3 4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.lg1,.lg2,.lg3{animation:none}}
+</style>
 </helmet>
 <div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #050505; color: #EDEDE8; font-family: Geist, Inter, system-ui, sans-serif; user-select: none">
 
@@ -39,7 +46,7 @@
         <span style="position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 2px; background: {{fColor}}"></span>
       </div>
       <sc-if value="{{locked}}" hint-placeholder-val="{{ false }}">
-        <span style="position: absolute; left: {{fx}}px; top: {{ly}}px; transform: translateX(-50%); height: 24px; padding: 0 10px; border-radius: 12px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 500; white-space: nowrap; pointer-events: none">AE/AF LOCK</span>
+        <span style="position: absolute; left: {{fx}}px; top: {{ly}}px; transform: translateX(-50%); height: 24px; padding: 0 10px; border-radius: 12px; background: #EDEDE8; color: #0A0A0B; display: flex; align-items: center; font-family: Geist, sans-serif; font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none">AE/AF lock</span>
       </sc-if>
     </sc-if>
   </div>
@@ -55,8 +62,8 @@
 
   <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
     <div style="position: absolute; left: 0; right: 0; top: 182px; display: flex; justify-content: center">
-      <span role="timer" aria-label="{{recAria}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: #050505B3; border: 1px solid {{recBorder}}; font-family: 'Geist Mono', monospace; font-size: 13px; letter-spacing: 0.06em; color: {{recColor}}; transition: color 200ms, border-color 200ms">
-        <span style="width: 8px; height: 8px; border-radius: 4px; background: #FF3B30"></span>{{recTime}}<span style="font-size: 10px; letter-spacing: 0.12em; visibility: {{okVis}}">· CLIP OK</span>
+      <span role="timer" aria-label="{{recAria}}" style="display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 17px; background: #050505B3; border: 1px solid {{recBorder}}; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 500; color: {{recColor}}; transition: color 200ms, border-color 200ms">
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #FF3B30"></span>{{recTime}}<span style="visibility: {{okVis}}">· Clip OK</span>
       </span>
     </div>
   </sc-if>
@@ -85,9 +92,16 @@
   <sc-if value="{{more}}" hint-placeholder-val="{{ false }}">
     <div onClick="{{toggleMore}}" style="position: absolute; inset: 0"></div>
     <div role="menu" style="position: absolute; right: 12px; top: 104px; width: 180px; border-radius: 16px; background: #18181BF2; border: 1px solid #3A3A40; padding: 4px; box-shadow: 0 12px 40px #000000">
-      <button onClick="{{toggleGrid}}" role="menuitemcheckbox" aria-checked="{{gridStr}}" style="width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">Grid<span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: {{gridColor}}">{{gridState}}</span></button>
+      <button onClick="{{toggleGrid}}" role="menuitemcheckbox" aria-checked="{{gridStr}}" style="width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; color: #EDEDE8; font-family: Geist, sans-serif; font-size: 15px">Grid<span style="font-size: 13px; color: {{gridColor}}">{{gridState}}</span></button>
     </div>
   </sc-if>
+
+  <!-- zoom stops from the lens' real range; pinch also works, also while recording -->
+  <div role="radiogroup" aria-label="Zoom" style="position: absolute; left: 0; right: 0; top: 612px; display: flex; justify-content: center; gap: 6px">
+    <sc-for list="{{zooms}}" as="z" hint-placeholder-count="4">
+      <button onClick="{{z.pick}}" role="radio" aria-checked="{{z.on}}" aria-label="{{z.aria}}" style="width: 40px; height: 40px; border-radius: 20px; border: 0; background: {{z.bg}}; color: {{z.color}}; font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: {{z.fs}}px; font-weight: 600; padding: 0">{{z.n}}</button>
+    </sc-for>
+  </div>
 
   <!-- mode: plain words, no pill. Active = white + dot under it -->
   <div role="radiogroup" aria-label="Capture mode" style="position: absolute; left: 0; right: 0; top: 664px; display: flex; justify-content: center; gap: 28px; visibility: {{idleVis}}; font-family: Geist, sans-serif; font-size: 15px; font-weight: 500">
@@ -101,15 +115,15 @@
       <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="14" rx="2"></rect><path d="M3 15l4-4 4 4 2-2 4 4"></path><path d="M19 3v6M16 6h6"></path></svg></span>
       <span style="font-family: Geist, sans-serif; font-size: 12px; font-weight: 500; line-height: 16px">Add</span>
     </a>
-    <!-- record button: option D "Ember" -->
+    <!-- record button: liquid glow (owner decision 2026-11-13) — see RecordGlow.dc.html -->
     <sc-if value="{{videoIdle}}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{startRec}}" aria-label="Start recording" style="width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; box-shadow: none"></span></button>
+      <button onClick="{{startRec}}" aria-label="Start recording" style="position: relative; width: 80px; height: 80px; border: 0; border-radius: 40px; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center"><span class="lg lg1" style="background: radial-gradient(circle, #FF3B304C 0%, #FF3B301F 45%, #FF3B3000 70%)"></span><span class="lg lg2" style="background: radial-gradient(circle, #FF7A454C 0%, #FF7A451F 45%, #FF7A4500 70%)"></span><span class="lg lg3" style="background: radial-gradient(circle, #FF2D7A4C 0%, #FF2D7A1F 45%, #FF2D7A00 70%)"></span><span style="position: relative; width: 72px; height: 72px; border-radius: 36px; background: #FF3B30"></span></button>
     </sc-if>
     <sc-if value="{{photoIdle}}" hint-placeholder-val="{{ false }}">
-      <a href="EditClipV2.dc.html" aria-label="Take photo" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span style="width: 72px; height: 72px; border-radius: 36px; background: #EDEDE8; box-shadow: 0 0 16px #FFFFFF33"></span></a>
+      <a href="EditClipV2.dc.html" aria-label="Take photo" style="position: relative; width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="lg lg1" style="background: radial-gradient(circle, #FFFFFF4C 0%, #FFFFFF1F 45%, #FFFFFF00 70%)"></span><span class="lg lg2" style="background: radial-gradient(circle, #BFD4FF4C 0%, #BFD4FF1F 45%, #BFD4FF00 70%)"></span><span class="lg lg3" style="background: radial-gradient(circle, #FFE9D64C 0%, #FFE9D61F 45%, #FFE9D600 70%)"></span><span style="position: relative; width: 72px; height: 72px; border-radius: 36px; background: #EDEDE8"></span></a>
     </sc-if>
     <sc-if value="{{rec}}" hint-placeholder-val="{{ false }}">
-      <a href="EditClipV2.dc.html" aria-label="Stop recording" style="width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="sv-breathe" style="width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B"></span></span></a>
+      <a href="EditClipV2.dc.html" aria-label="Stop recording" style="position: relative; width: 80px; height: 80px; border-radius: 40px; display: flex; align-items: center; justify-content: center"><span class="lg lg1" style="background: radial-gradient(circle, #FF3B3080 0%, #FF3B3033 45%, #FF3B3000 70%)"></span><span class="lg lg2" style="background: radial-gradient(circle, #FF7A4580 0%, #FF7A4533 45%, #FF7A4500 70%)"></span><span class="lg lg3" style="background: radial-gradient(circle, #FF2D7A80 0%, #FF2D7A33 45%, #FF2D7A00 70%)"></span><span style="position: relative; width: 72px; height: 72px; border-radius: 36px; background: #FF3B30; display: flex; align-items: center; justify-content: center"><span style="width: 24px; height: 24px; border-radius: 6px; background: #0A0A0B"></span></span></a>
     </sc-if>
     <button onClick="{{flip}}" aria-label="Switch camera" style="visibility: {{idleVis}}; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; padding: 0; color: #EDEDE8">
       <span style="width: 52px; height: 52px; border-radius: 26px; background: #FFFFFF1A; display: flex; align-items: center; justify-content: center; transform: rotate({{flipDeg}}deg); transition: transform 240ms ease"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"></path></svg></span>
@@ -156,6 +170,7 @@ class Component extends DCLogic {
       fs: st.fBig ? 88 : 64, fm: st.fBig ? -44 : -32, locked: st.lock,
       fColor: st.lock ? '#EDEDE8' : '#FFFFFF', fGlow: st.lock ? 'none' : '0 0 6px #00000066', fOp: st.fDim && !st.lock ? 0.35 : 1,
       calAria: (saved ? 'Today has a clip. ' : '') + 'Open the calendar of this project',
+      zooms: [['0.6', '.6'], ['1', '1×'], ['2', '2'], ['3', '3']].map((q) => { const on = (st.zoom || '1') === q[0]; return { n: on ? (q[0] === '0.6' ? '.6×' : q[0] + '×') : q[1], aria: q[0] + ' times zoom', on: String(on), pick: () => this.setState({ zoom: q[0] }), bg: on ? '#000000A6' : '#0000004D', color: on ? '#EDEDE8' : '#B9B9B3', fs: on ? 13 : 12 }; }),
       recTime: '0:' + String(st.sec).padStart(2, '0'), recColor: ok ? '#FF3B30' : '#B9B9B3', recBorder: ok ? '#FF3B3066' : '#3A3A40', okVis: ok ? 'visible' : 'hidden',
       recAria: 'Recording, ' + st.sec + ' seconds' + (ok ? ', clip is long enough' : ''),
       tools: [
