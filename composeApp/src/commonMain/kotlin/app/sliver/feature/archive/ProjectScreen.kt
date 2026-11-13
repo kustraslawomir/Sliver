@@ -468,11 +468,9 @@ private fun MonthGrid(
 @Composable
 private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Day?, onReplace: () -> Unit, onRemove: () -> Unit, onClick: () -> Unit) {
     val scale = remember { Animatable(1f) }
-    var ringed by remember { mutableStateOf(false) }
     val reduced = LocalReducedMotion.current
     LaunchedEffect(day?.takenAt) {
         if (day != null && ClipDrop.pending == date) {
-            ringed = true
             ClipDrop.clear()
             if (!reduced) {
                 scale.snapTo(0.6f)
@@ -487,7 +485,8 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
         CellState.FUTURE -> base
         CellState.EMPTY -> base.background(SliverColors.Surface1).border(1.dp, SliverColors.CellEmptyLine, CellShape)
         CellState.TODAY -> base.border(2.dp, SliverColors.AccentMark, CellShape)
-        else -> base.then(if (ringed) Modifier.border(2.dp, SliverColors.AccentMark, CellShape) else Modifier)
+        // Owner: a picked day has no border at all on return; only the pop-in shows where it landed.
+        else -> base
     }
     Box(
         surface.semantics(mergeDescendants = true) {
