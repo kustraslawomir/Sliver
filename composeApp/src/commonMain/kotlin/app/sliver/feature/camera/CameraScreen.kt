@@ -1,5 +1,7 @@
 package app.sliver.feature.camera
 
+import app.sliver.core.kit.glass
+
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.feature.gallery.rememberAddMedia
@@ -297,7 +299,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
             if (failed && !recording) {
                 SliverText(
                     "That recording didn't work. Try again.", SliverType.BodySmall,
-                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                    Modifier.glass(app.sliver.core.kit.GlassStyle.Regular, SliverShapes.Pill, overMedia = true)
                         .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
                     SliverColors.TextPrimary,
                 )
@@ -410,7 +412,7 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.OnMedia.copy(alpha = 0.1f)), Alignment.Center) {
+        Box(Modifier.size(52.dp).glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true), Alignment.Center) {
             SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
         SliverText(label, SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.Medium, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
@@ -463,7 +465,7 @@ private fun GridOverlay() {
 @Composable
 private fun CameraRoundButton(onClick: () -> Unit, label: String, icon: @Composable () -> Unit) {
     Box(
-        Modifier.size(44.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = 0.5f))
+        Modifier.size(44.dp).glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true)
             .semantics { contentDescription = label }
             .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
         Alignment.Center,
@@ -481,8 +483,7 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         t
     }
     Row(
-        modifier.height(34.dp).clip(SliverShapes.Pill).background(SliverColors.BgVoid.copy(alpha = 0.7f))
-            .border(1.dp, if (clipOk) SliverColors.Record.copy(alpha = 0.4f) else SliverColors.LineStrong, SliverShapes.Pill)
+        modifier.height(36.dp).glass(app.sliver.core.kit.GlassStyle.Regular, SliverShapes.Pill, overMedia = true)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
@@ -497,7 +498,7 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
 private fun LightToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "light-upright")
     Box(
-        Modifier.size(44.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = 0.5f))
+        Modifier.size(44.dp).glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true)
             .semantics { contentDescription = if (on) "Light on" else "Light off"; role = Role.Switch; selected = on }
             .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
         Alignment.Center,

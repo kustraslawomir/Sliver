@@ -1,5 +1,8 @@
 package app.sliver
 
+import dev.chrisbanes.haze.hazeSource
+import androidx.compose.ui.Modifier
+
 import app.sliver.core.ui.NoticeHost
 import app.sliver.core.ui.UndoToastHost
 import androidx.compose.foundation.layout.Box
@@ -38,10 +41,13 @@ fun App() {
         else {
             var splash by rememberSaveable { mutableStateOf(true) }
             val toProject by remember { repo.settings.map<_, Boolean?> { it.onboardingDone } }.collectAsState(null)
+            val glass = dev.chrisbanes.haze.rememberHazeState()
             Box {
-                SliverNavHost()
+                androidx.compose.runtime.CompositionLocalProvider(app.sliver.core.kit.LocalGlassState provides glass) {
+                    Box(Modifier.hazeSource(glass)) { SliverNavHost() }
+                }
                 NoticeHost()
-                UndoToastHost()
+                androidx.compose.runtime.CompositionLocalProvider(app.sliver.core.kit.LocalGlassState provides glass) { UndoToastHost() }
                 if (splash) SplashOverlay(toProject) { splash = false }
             }
         }

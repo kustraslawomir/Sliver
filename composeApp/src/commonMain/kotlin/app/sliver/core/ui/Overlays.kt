@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.kit.glass
+
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Offset
@@ -88,10 +90,7 @@ fun SliverBottomSheet(
                         translationY = back * 24.dp.toPx()
                         transformOrigin = TransformOrigin(0.5f, 1f)
                     }
-                    .then(Modifier.shadow(24.dp, SliverShapes.SheetTop, ambientColor = Color.Black, spotColor = Color.Black)) // lint-ok: elevation
-                    .clip(SliverShapes.SheetTop)
-                    .background(SliverColors.Surface2)
-                    .border(1.dp, SliverColors.LineHairline, SliverShapes.SheetTop)
+                    .glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.SheetTop)
                     .clickable(remember { MutableInteractionSource() }, null) {}
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
                     .padding(horizontal = SliverSpace.Gutter)

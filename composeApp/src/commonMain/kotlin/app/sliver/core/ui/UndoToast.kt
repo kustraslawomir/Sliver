@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.kit.glass
+
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.foundation.background
@@ -82,19 +84,19 @@ fun UndoToastHost() {
     ) { UndoBar(t.message, { UndoToasts.dismiss(t); t.onUndo() }) }
 }
 
-/** Design v1.5 undo bar: 48dp, radius 14, inverted colours, message left, bold "Undo" right. */
+/** v1.7 undo bar: strong glass, radius 14, message left, bold "Undo" right. */
 @Composable
 fun UndoBar(message: String, onUndo: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.R14).background(SliverColors.TextPrimary).padding(start = 16.dp),
+        modifier.fillMaxWidth().height(52.dp).glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.R14, backdrop = app.sliver.core.kit.LocalGlassState.current).padding(start = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SliverText(
             message, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f),
-            color = SliverColors.OnInverse, maxLines = 1,
+            color = SliverColors.TextPrimary, maxLines = 1,
         )
         Box(Modifier.height(48.dp).clickable(role = Role.Button, onClick = onUndo).padding(horizontal = 16.dp), Alignment.Center) {
-            SliverText("Undo", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnInverse)
+            SliverText("Undo", app.sliver.core.theme.ReelogType.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold), color = SliverColors.TextPrimary)
         }
     }
 }

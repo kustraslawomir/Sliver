@@ -135,6 +135,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.koin.core)
             implementation(libs.navigation.compose)
+            // Real backdrop blur for v1.7 glass (dock, sheets, undo bar); falls back to a solid fill below API 31.
+            implementation(libs.haze)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)

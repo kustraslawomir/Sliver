@@ -86,7 +86,7 @@ fun ReelogButton(
     }
     val surface = when {
         kind != ButtonKind.Secondary -> Modifier.background(fill, Pill)
-        overMedia -> Modifier.glass(GlassStyle.Regular, Pill)
+        overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
         else -> Modifier.background(ink.copy(alpha = 0.06f), Pill).border(1.dp, ink.copy(alpha = 0.12f), Pill)
     }
     Row(
@@ -156,7 +156,7 @@ fun ReelogSegmented(
     BoxWithConstraints(
         modifier.fillMaxWidth().height(44.dp).clip(Pill)
             .then(
-                if (overMedia) Modifier.glass(GlassStyle.Regular, Pill)
+                if (overMedia) Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
                 else Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.10f), Pill),
             )
             .padding(3.dp),
@@ -252,7 +252,7 @@ fun ReelogIconBox(
     ) {
         Box(
             Modifier.size(44.dp).graphicsLayer { scaleX = scale; scaleY = scale }
-                .then(if (overMedia) Modifier.glass(GlassStyle.Regular, CircleShape) else Modifier),
+                .then(if (overMedia) Modifier.glass(GlassStyle.Regular, CircleShape, overMedia = true) else Modifier),
             contentAlignment = Alignment.Center,
         ) { content() }
     }
