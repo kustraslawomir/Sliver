@@ -11,7 +11,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -169,7 +171,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val undo = remember { koin.get<SaveUndo>() }
     var notice by remember { mutableStateOf<String?>(null) }
     var filmMenu by remember { mutableStateOf<app.sliver.data.db.Film?>(null) }
-    var yearView by rememberSaveable { mutableStateOf(false) }
     var shownIndex by rememberSaveable { mutableStateOf(today.toYearMonth().let { it.year * 12 + it.month - 1 }) }
     val shown = YearMonth(shownIndex / 12, shownIndex % 12 + 1)
     fun show(m: YearMonth) { shownIndex = m.year * 12 + m.month - 1 }
@@ -252,8 +253,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
                         if (waiting.isNotEmpty()) DraftsChip(reviewChipLabel(drafts.size, autoCount)) { draftsSheet = true }
-                        ViewRow(yearView, { yearView = it }, canGoPrev(shown, first), canGoNext(shown, today),
-                            { show(shown.plusMonths(-1)) }, { show(shown.plusMonths(1)) })
 
                         if (all.isEmpty() && app != null) {
                             EdgeState(
@@ -273,17 +272,25 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                             )
                         }
 
-                        if (yearView) {
-                            YearView(shown.year, byDate, today, first, { ym ->
-                                show(ym)
-                                yearView = false
-                            }, ::openDay)
-                        } else {
-                            val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month } }
-                            MonthHeading(MonthLong[shown.month - 1], "$count ${if (count == 1) "clip" else "clips"}")
-                            MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay)
-                        }
-
+                        val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month } }
+                        MonthHeading(
+                            MonthLong[shown.month - 1], "$count ${if (count == 1) "clip" else "clips"}",
+                            canGoPrev(shown, first), canGoNext(shown, today),
+                            { show(stepMonth(shown, -1, first, today)) }, { show(stepMonth(shown, 1, first, today)) },
+                        )
+                        Box(
+                            Modifier.pointerInput(shown, first, today) {
+                                var dx = 0f
+                                detectHorizontalDragGestures(
+                                    onDragStart = { dx = 0f },
+                                    onDragEnd = {
+                                        if (dx > SwipePx) show(stepMonth(shown, -1, first, today))
+                                        else if (dx < -SwipePx) show(stepMonth(shown, 1, first, today))
+                                    },
+                                    onDragCancel = { dx = 0f },
+                                ) { _, delta -> dx += delta }
+                            },
+                        ) { MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay) }
                     }
                     if (!wide) FilmsSection(onNavigate, { filmMenu = it })
                 }
@@ -402,37 +409,9 @@ private fun HubButton(icon: ImageVector, label: String, onClick: () -> Unit, tin
 }
 
 @Composable
-private fun ViewRow(yearView: Boolean, onYear: (Boolean) -> Unit, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            listOf("Month" to false, "Year" to true).forEach { (label, isYear) ->
-                val on = yearView == isYear
-                Column(
-                    Modifier.width(IntrinsicSize.Max).semantics { selected = on; role = Role.Tab }.clickable(onClick = { onYear(isYear) }),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    SliverText(
-                        label, SliverType.Headline.copy(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
-                        Modifier.padding(vertical = 8.dp), if (on) SliverColors.TextPrimary else SliverColors.TextTertiary,
-                        maxLines = 1, softWrap = false,
-                    )
-                    Box(Modifier.height(2.dp).fillMaxWidth().background(if (on) SliverColors.TextPrimary else Color.Transparent))
-                }
-            }
-        }
-        if (!yearView) {
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                NavArrow(HubIcons.Prev, "Previous month", canPrev, onPrev)
-                NavArrow(HubIcons.Next, "Next month", canNext, onNext)
-            }
-        }
-    }
-}
-
-@Composable
 private fun NavArrow(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit) {
     Box(
-        Modifier.size(40.dp).clip(CircleShape).semantics { contentDescription = label }
+        Modifier.size(44.dp).clip(CircleShape).semantics { contentDescription = label }
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         Alignment.Center,
     ) { SliverIcon(icon, if (enabled) SliverColors.TextPrimary else SliverColors.LineStrong, size = 18.dp) }
@@ -468,13 +447,15 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
     }
 }
 
+private const val SwipePx = 80f
+
 @Composable
-private fun MonthHeading(left: String, right: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), Modifier.alignByBaseline(), maxLines = 1, softWrap = false)
-        Box(Modifier.weight(1f).alignByBaseline(), contentAlignment = Alignment.CenterEnd) {
-            SliverText(right, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), maxLines = 1, softWrap = false)
-        }
+private fun MonthHeading(left: String, right: String, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), maxLines = 1, softWrap = false)
+        SliverText(right, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.weight(1f), maxLines = 1, softWrap = false)
+        NavArrow(HubIcons.Prev, "Previous month", canPrev, onPrev)
+        NavArrow(HubIcons.Next, "Next month", canNext, onNext)
     }
 }
 
@@ -614,20 +595,6 @@ private fun DraftsChip(label: String, onClick: () -> Unit) {
     ) {
         SliverText(label, SliverType.BodySmall, color = SliverColors.TextPrimary)
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 16.dp)
-    }
-}
-
-private fun doubleDigits(n: Int) = n.toString().padStart(2, '0')
-
-@Composable
-private fun YearView(
-    year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, first: LocalDate,
-    onMonth: (YearMonth) -> Unit, onOpenDay: (LocalDate) -> Unit,
-) {
-    val inYear = remember(byDate, year) { byDate.keys.count { it.year == year } }
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        MonthHeading("$year", "$inYear ${if (inYear == 1) "clip" else "clips"} · ${doubleDigits(inYear / 60)}:${doubleDigits(inYear % 60)} of film")
-        LightOfYear(byDate, today, first, onMonth, onOpenDay)
     }
 }
 

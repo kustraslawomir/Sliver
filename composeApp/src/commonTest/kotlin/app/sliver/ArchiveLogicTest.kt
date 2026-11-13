@@ -11,7 +11,7 @@ import app.sliver.feature.archive.canGoPrev
 import app.sliver.feature.archive.cellState
 import app.sliver.feature.archive.pickMemory
 import app.sliver.feature.archive.clipsHeader
-import app.sliver.feature.archive.yearColors
+import app.sliver.feature.archive.stepMonth
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -68,15 +68,13 @@ class ArchiveLogicTest {
     }
 
     @Test
-    fun yearGrid() {
-        val rows = yearColors(2026, mapOf(LocalDate(2026, 2, 3) to day(LocalDate(2026, 2, 3))))
-        assertEquals(12, rows.size)
-        assertTrue(rows.all { it.size == 31 })
-        assertEquals(0xFF112233.toInt(), rows[1][2])
-        assertEquals(0, rows[1][0])
-        assertNull(rows[1][28])
-        assertEquals(0, rows[0][30])
-        assertNull(rows[3][30])
+    fun stepMonthStaysWithinProject() {
+        val first = LocalDate(2026, 1, 20)
+        val today = LocalDate(2026, 3, 5)
+        assertEquals(YearMonth(2026, 2), stepMonth(YearMonth(2026, 3), -1, first, today))
+        assertEquals(YearMonth(2026, 1), stepMonth(YearMonth(2026, 1), -1, first, today))
+        assertEquals(YearMonth(2026, 3), stepMonth(YearMonth(2026, 3), 1, first, today))
+        assertEquals(YearMonth(2026, 3), stepMonth(YearMonth(2026, 1), 5, first, today))
     }
 
     @Test

@@ -16,7 +16,6 @@ import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.Migration4To5
 import app.sliver.data.db.Migration5To6
 import app.sliver.data.db.Migration6To7
-import app.sliver.data.light.ClipLightReader
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.FileStore
@@ -58,7 +57,6 @@ actual val platformModule: Module = module {
     single<MediaScanner> { IosMediaScanner }
     single<FilmRenderer> { IosFilmRenderer }
     single<app.sliver.feature.notifications.ReminderLog> { IosReminderLog }
-    single<ClipLightReader> { ClipLightReader { null } }
     single<GoldenHourProvider> { NoGoldenHour }
     single<ReminderScheduler> { IosReminderScheduler }
     // DECISION: Google sign-in on iOS needs its own client id; fake auth + in-memory Drive until then.

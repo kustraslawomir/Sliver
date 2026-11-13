@@ -9,8 +9,6 @@ import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.Migration4To5
 import app.sliver.data.db.Migration5To6
 import app.sliver.data.db.Migration6To7
-import app.sliver.data.light.AndroidClipLight
-import app.sliver.data.light.ClipLightReader
 import app.sliver.BuildConfig
 import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
@@ -76,7 +74,6 @@ actual val platformModule: Module = module {
     single<AutoImportRunner> { AndroidAutoImportRunner(get<Context>()) }
     single<MediaScanner> { AndroidMediaScanner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
-    single<ClipLightReader> { AndroidClipLight }
     single<ReminderLog> { AndroidReminderLog(get<Context>()) }
     single<GoldenHourProvider> { AndroidGoldenHour(get<Context>()) }
     single<ReminderScheduler> { AndroidReminderScheduler(get<Context>()) }

@@ -35,8 +35,6 @@ class SliverApp : Application(), KoinComponent {
         golden.refresh()
         val coordinator: ReminderCoordinator by inject()
         coordinator.start(AppScope)
-        val light: app.sliver.data.light.LightBackfill by inject()
-        light.start(AppScope)
         val backup: BackupCoordinator by inject()
         backup.start(AppScope)
         val progress: ProgressCoordinator by inject()

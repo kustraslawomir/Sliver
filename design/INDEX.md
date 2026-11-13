@@ -129,3 +129,7 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 ## Owner decision 2026-11-13: liquid glow
 
 Supersedes the v1.4 "no glow" line for the camera record button only: a soft, slow, additive multi-colour "liquid" glow (`liquidGlow` in `RecordButton.kt`). Still when animations are disabled. Everything else stays glow-free.
+
+## Owner decision 2026-11-13: Year view removed
+
+The Year view, the light-of-the-year chart and the Month/Year tabs are removed. The Project screen is the month grid; the month heading carries Previous/Next month chevrons, and the grid swipes between months. The luma/tone day columns remain in the schema but are no longer written.

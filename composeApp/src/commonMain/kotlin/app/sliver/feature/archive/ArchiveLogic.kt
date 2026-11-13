@@ -28,6 +28,10 @@ fun canGoPrev(shown: YearMonth, first: LocalDate) = shown > first.toYearMonth()
 
 fun canGoNext(shown: YearMonth, today: LocalDate) = shown < today.toYearMonth()
 
+/** [shown] moved by [delta] months, clamped between the month of [first] and the month of [today]. */
+fun stepMonth(shown: YearMonth, delta: Int, first: LocalDate, today: LocalDate): YearMonth =
+    shown.plusMonths(delta).coerceIn(first.toYearMonth(), today.toYearMonth())
+
 fun cellState(date: LocalDate, today: LocalDate, day: Day?, start: LocalDate? = null): CellState = when {
     date > today -> CellState.FUTURE
     day == null && start != null && date < start -> CellState.FUTURE
@@ -52,12 +56,6 @@ fun pickMemory(today: LocalDate, filled: Set<LocalDate>): Memory? = listOf(
 ).filter { it.date in filled }.maxByOrNull { it.date }
 
 /** Year view: 12 rows of 31 entries; null where the day does not exist, 0 where no second, else ARGB. */
-fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12) { m ->
-    val first = LocalDate(year, m + 1, 1)
-    val length = first.daysUntil(first.plus(DatePeriod(months = 1)))
-    List(31) { d -> if (d >= length) null else days[LocalDate(year, m + 1, d + 1)]?.color ?: 0 }
-}
-
 fun clipsHeader(count: Int, first: LocalDate): String =
     "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthNames[first.month.ordinal]}"
 
