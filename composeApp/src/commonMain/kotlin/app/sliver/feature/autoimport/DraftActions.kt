@@ -38,7 +38,14 @@ class DraftActions(
 
     /** Loads [day] (or one of its candidates) into the editor session; returns the editor route, null if the item can't be read. */
     suspend fun open(day: Day, uri: String? = null, asVideo: Boolean? = null, chain: Boolean = true): Route? {
-        val candidates = decodeCandidates(day.draftCandidates)
+        // Days filled before the new order still show videos → moving photos → stills.
+        val candidates = decodeCandidates(day.draftCandidates).sortedBy { c ->
+            when {
+                c.motion || c.live -> 1
+                c.video -> 0
+                else -> 2
+            }
+        }
         val target = uri ?: candidates.firstOrNull()?.uri ?: return null
         val route = loadIntoSession(gallery, files, target, day.date, asVideo) ?: return null
         CaptureSession.draft = DraftContext(day, candidates, target, chain)
