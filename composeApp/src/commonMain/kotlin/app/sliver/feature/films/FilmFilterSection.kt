@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.data.pickerLabel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,7 +70,7 @@ fun FilmFilterSection(
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             Tile("None", frame, selected == null) { onSelect(null) }
             FilterPresets.forEach { p ->
-                Tile(p.info.label, thumbs[p], selected == p) { onSelect(p) }
+                Tile(p.pickerLabel, thumbs[p], selected == p) { onSelect(p) }
             }
         }
         if (selected != null) {

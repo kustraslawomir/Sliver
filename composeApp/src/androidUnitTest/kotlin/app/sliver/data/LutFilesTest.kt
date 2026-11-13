@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class LutFilesTest {
     private val dir = File("src/androidMain/assets/luts")
 
-    private val presets = FilterPresets.map { it.info.lutFile!!.substringAfterLast('/').removeSuffix(".cube") to it.info.model }
+    private val presets = FilterPresets.filter { it.info.lutFile != null }.map { it.info.lutFile!!.substringAfterLast('/').removeSuffix(".cube") to it.info.model }
 
     // Regenerate: ./gradlew :composeApp:testDebugUnitTest --tests '*LutFilesTest*' -PgenLuts=1
     @Test

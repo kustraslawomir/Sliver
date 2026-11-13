@@ -3,7 +3,7 @@ package app.sliver.data
 import kotlinx.serialization.Serializable
 
 enum class DaySource { CAMERA, GALLERY, PHOTO, BACKFILL }
-enum class LookPreset { NATURAL, KIOSK, AFTERHOURS, SILVER, SUNDAY, TAPE, HALO }
+enum class LookPreset { NATURAL, KIOSK, AFTERHOURS, SILVER, SUNDAY, TAPE, HALO, C02, C03, C04, C05, C07, C08, C09, C10, C11, C12, C13, C14, C15, C16, C17, C18, C19, C20, C21, C22, C24, C25, C26, C27, C28, C30, C31, C32, C35, C36, C37, C38, C39, C40 }
 enum class Motion { STILL, ZOOM }
 enum class BackupState { PENDING, DONE, FAILED }
 enum class FilmFormat { CINEMA, STORY }

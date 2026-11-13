@@ -32,8 +32,11 @@ object LookEffects {
         if (params.intensity <= 0 && params.grain <= 0) return emptyList()
         val effects = ArrayList<Effect>()
         val lut = info.lutFile
-        if (lut != null && params.intensity > 0) {
-            val table = tables.getOrPut(lut) { context.assets.open(lut).use { LutCube.parseTable(it) } }
+        if (params.intensity > 0 && (lut != null || info.model.hasLut)) {
+            // Candidates without a shipped .cube get their LUT built from the model's colour part.
+            val table = tables.getOrPut(lut ?: "model:${params.preset.name}") {
+                if (lut != null) context.assets.open(lut).use { LutCube.parseTable(it) } else LutGenerator.table(info.model)
+            }
             effects += SingleColorLut.createFromCube(LutCube.toCube(table, params.intensity / 100f))
         }
         effects += LookShaderEffect(info.model, params.intensity / 100f, params.grain / 100f, seed, forExport || animate)

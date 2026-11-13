@@ -65,10 +65,17 @@ val LookPreset.info: LookInfo
                 softness = 0.5, fade = 0.1,
             ),
         )
+        else -> candidateNumber!!.let { n ->
+            val c = LookCandidates.first { it.number == n }
+            LookInfo(c.name, null, c.model)
+        }
     }
 
-/** Presets in picker order. */
-val FilterPresets: List<LookPreset> = LookPreset.entries.filter { it != LookPreset.NATURAL }
+/** Owner: all 40 candidates in the picker, ordered by their number. */
+val FilterPresets: List<LookPreset> = LookPreset.entries.filter { it != LookPreset.NATURAL }.sortedBy { it.candidateNumber }
+
+/** "7 · Kiosk 400" style label used under picker tiles. */
+val LookPreset.pickerLabel: String get() = "${candidateNumber ?: ""} ${info.label}".trim()
 
 /** Preset number in `looks/candidates.json`. */
 val LookPreset.candidateNumber: Int?
@@ -80,6 +87,7 @@ val LookPreset.candidateNumber: Int?
         LookPreset.SUNDAY -> 6
         LookPreset.TAPE -> 29
         LookPreset.HALO -> 34
+        else -> name.removePrefix("C").toInt()
     }
 
 /** [grain] 0..100 overrides the preset's own grain amount. */

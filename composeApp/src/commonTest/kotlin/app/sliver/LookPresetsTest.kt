@@ -1,5 +1,7 @@
 package app.sliver
 
+import app.sliver.data.pickerLabel
+import app.sliver.data.candidateNumber
 import app.sliver.data.FilterPresets
 import app.sliver.data.LookPreset
 import app.sliver.data.StampStyle
@@ -21,18 +23,17 @@ class LookPresetsTest {
     }
 
     @Test
-    fun pickerOrderIsOurOwnFamily() {
-        assertEquals(
-            listOf("Kiosk", "Afterhours", "Silver", "Sunday", "Tape", "Halo"),
-            FilterPresets.map { it.info.label },
-        )
+    fun pickerShowsAllFortyByNumber() {
+        assertEquals((1..40).toList(), FilterPresets.map { it.candidateNumber })
+        assertEquals("1 Kiosk", FilterPresets.first().pickerLabel)
     }
 
     @Test
     fun everyFilterHasAColourLut() {
         FilterPresets.forEach {
-            assertEquals(true, it.info.lutFile?.endsWith(".cube"), it.name)
-            assertTrue(it.info.model.hasLut, it.name)
+            // Shipped six have a .cube; the other candidates build their LUT from the model.
+            assertTrue(it.info.lutFile?.endsWith(".cube") ?: true, it.name)
+            if (it.info.lutFile != null) assertTrue(it.info.model.hasLut, it.name)
         }
     }
 

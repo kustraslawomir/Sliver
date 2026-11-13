@@ -19,7 +19,7 @@ private const val THUMB_H = 192
 private const val THUMB_SEED = 7L
 
 private val tables = ConcurrentHashMap<LookPreset, FloatArray>()
-private val rendered = LruCache<String, ImageBitmap>(32)
+private val rendered = LruCache<String, ImageBitmap>(96)
 
 actual suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPreset>): Map<LookPreset, ImageBitmap> =
     withContext(Dispatchers.Default) {
