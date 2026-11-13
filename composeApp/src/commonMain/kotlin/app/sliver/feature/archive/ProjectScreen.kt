@@ -202,7 +202,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             }
             CellState.EMPTY -> addFor = date
             CellState.FILLED, CellState.BACKFILLED -> openDay(date)
-            CellState.DRAFT, CellState.AUTO -> reviewRaw = date.toString()
+            // Owner: no in-between sheet — the editor already lists the day's other items, Keep and Remove.
+            CellState.DRAFT, CellState.AUTO -> calendar[date]?.let { draftNav.openFirst(onNavigate, it, chain = false) }
         }
     }
 
