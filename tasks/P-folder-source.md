@@ -1,0 +1,18 @@
+# P-folder-source — pick a custom folder of media (copied from a PC / iPhone)
+
+Owner: "I want to have the option to pick some custom folder with media files (for example copied from PC/iPhone)."
+
+Read CLAUDE.md first (privacy, test devices, package is now `skustra.fragments` with Kotlin namespace `app.sliver`). No questions; decisions go in HANDOFF.md.
+
+## What
+In "Fill the calendar" (feature/autoimport, Settings row + project menu) add a source: **Choose a folder...**. The user picks a folder with the system folder picker (Storage Access Framework `OpenDocumentTree`, persistable read permission: no READ_MEDIA_* permission, consistent with the Photo Picker rule). Fragments then scans that folder (recursively, with a sane depth/count cap) for videos and photos and fills empty days exactly like the gallery source does today: the best video per day or a photo if none, as drafts that count only after the user keeps them; gallery/folder originals are never modified or deleted.
+
+## Rules
+1. **Date of an item** (needed because files copied from PC/iPhone have a copy-time `lastModified`): in this order - EXIF `DateTimeOriginal`/`DateTimeDigitized` (+ offset tags) for photos; container creation time for video (QuickTime `com.apple.quicktime.creationdate` when present, else MP4 `creation_time` via MediaMetadataRetriever `METADATA_KEY_DATE`); filename patterns (`IMG_20240131_...`, `2024-01-31 ...`, `PXL_`, `VID_`) ; last resort `lastModified`. Keep the existing strict anti-cheat rule: an item only counts for the day its capture date says; items with only the last-resort date are accepted but flagged "date from file time" in the draft detail and counted in the summary so the user knows. Pure parser in commonMain with unit tests (several formats, time zones, bad input).
+2. **iPhone/PC media**: support HEIC/HEIF photos (decode via platform ImageDecoder/Coil where available), HEVC/H.265 and .MOV video, Live Photo pairs (.HEIC + .MOV: treat as one photo item, ignore the tiny video), skip unreadable files with a count ("could not read N items"), never crash on a huge folder; scan on a background dispatcher with progress (progress notification per v1.2 rules) and cancel.
+3. **Persistence**: store the folder's tree URI with the persisted grant; settings row shows the folder name and "Change" / "Forget"; if the grant is lost show a clear re-pick state. Survives process death and recreation.
+4. **UI**: follow existing design language (design/ tokens, Geist, SliverIcons - add a `Folder` lucide icon). Light + dark. Copy: sentence case, no jargon. Single-flight scan button, loading state within 100 ms. Empty folder / no matching days states.
+5. **Tests**: date resolution parser, day assignment (strict day rule, duplicates by hash/name+size, Live Photo pairing), folder cap. Instrumented/emulator proof if possible with a generated fixture folder (ffmpeg-made clips with creation_time, jpeg with EXIF) copied to emulator `Download/FragmentsFolderTest` (demo media only - never the owner's real media).
+
+## Process
+Build + tests + lint green, one or two commits (explicit paths, push auto/build only, message ends with 'Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>'), HANDOFF.md section "Folder source". Device rules: do NOT touch the Xiaomi; do not launch or tap on the Samsung (the owner is producing a film). At the end install ONLY on the Samsung: `adb -s 'adb-RFCY30SW5QZ-XscZaw._adb-tls-connect._tcp' install -r composeApp/build/outputs/apk/debug/composeApp-debug.apk` and verify with `dumpsys package skustra.fragments | grep lastUpdateTime` (NOT app.sliver). Report what is unverified.
