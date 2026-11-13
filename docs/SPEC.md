@@ -78,11 +78,10 @@ Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n
 - Draft editor (Edit clip / Photo clip): "Draft - i of N" with previous/next draft, strip "Other items from this day" (swap in place, no picker), "Video | Photo" for motion photos (also after the Photo Picker), "Keep this clip" (confirms, no 6 s undo bar, jumps to the next draft) and "Skip day" (deletes the draft, undo toast).
 
 ### Films
-- Library: Year in Seconds teaser card, posters (title, format, runtime, project span "10 Jan – 12 Nov 2026 · 129 clips"; a collecting film is the project film that grows with new clips). Long-press a poster for "Delete film" (red text, undo toast, no confirm). "+ New film".
+- Library: posters (title, format, runtime, project span "10 Jan – 12 Nov 2026 · 129 clips"; a collecting film is the project film that grows with new clips). Long-press a poster for "Delete film" (red text, undo toast, no confirm). "+ New film".
 - Builder (one screen): live preview (tap = pause), scrubber with day/month ticks (a film is always the whole project, no RANGE), SOUND Original / Music / Mix (Music and Mix need a file picked with "Pick a file"; copied into app storage, shown with Replace / Remove), DATE ON SCREEN On / Off, FILTERS (None, Kiosk, Afterhours, Silver, Sunday, Tape, Halo: thumbnails rendered from a frame of the film, Intensity and Grain sliders; saved on the film; Kiosk shows an orange LED date stamp, Tape a camcorder stamp). CTA "Save film" (runtime shown under the scrubber). Every filled day of the project is used; open days are skipped.
 - Export: progress ("made on your phone"), continues in background → Premiere: slit opens into the frame, title card "A film by you / <name> / project span · N clips · runtime" → Play film / Save to Photos / Share… / Done.
 - Player: play/pause, scrubber, mute, fullscreen (rotate), Share film… (system share sheet → YouTube, Instagram, …), Save to Photos, Edit film.
-- Year in Seconds: unlocks 26 Dec (local). Stats: seconds kept, films made, most filmed month(s), "Watch the premiere".
 
 ### Backup & account (optional)
 - "Save your seconds" sheet: Continue with Google / Not now.

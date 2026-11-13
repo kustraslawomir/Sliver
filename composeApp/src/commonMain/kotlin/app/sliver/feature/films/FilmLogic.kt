@@ -53,12 +53,3 @@ fun yearFilm(year: Int, format: FilmFormat, live: Boolean = true) = Film(
 suspend fun FilmRepository.ensureDefaultFilm(firstDay: LocalDate, format: FilmFormat) {
     if (observeAll().first().isEmpty()) save(yearFilm(firstDay.year, format))
 }
-
-enum class TeaserState { HIDDEN, LOCKED, UNLOCKED }
-
-/** Year in Seconds teaser: visible from 1 Dec, unlocked from 26 Dec (local date). */
-fun teaserState(today: LocalDate): TeaserState = when {
-    today.monthNumber == 12 && today.dayOfMonth >= 26 -> TeaserState.UNLOCKED
-    today.monthNumber == 12 -> TeaserState.LOCKED
-    else -> TeaserState.HIDDEN
-}

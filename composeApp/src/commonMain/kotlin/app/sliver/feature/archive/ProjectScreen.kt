@@ -302,7 +302,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 onRename = { menuOpen = false; projectAction = ProjectAction.Rename },
                 onShape = { menuOpen = false; projectAction = ProjectAction.Format },
                 onFill = { menuOpen = false; onNavigate(Route.FillThePast) },
-                onYear = { menuOpen = false; onNavigate(Route.YearInClips) },
                 onArchive = {
                     menuOpen = false
                     project?.let { p -> scope.launch { koin.get<ProjectRepository>().setArchived(p.id, true) } }
@@ -603,7 +602,7 @@ private fun MemoryCard(day: Day, kind: MemoryKind, onClick: () -> Unit) {
 @Composable
 private fun ProjectMenu(
     canLeave: Boolean,
-    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onYear: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
+    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
 ) {
     app.sliver.core.ui.BackHandler(onBack = onDismiss)
     Box(Modifier.fillMaxSize().clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss))
@@ -621,7 +620,6 @@ private fun ProjectMenu(
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
             MenuItem(HubIcons.Shape, "Change shape", SliverColors.TextPrimary, onShape)
             MenuItem(HubIcons.FillDays, "Auto-import from…", SliverColors.TextPrimary, onFill)
-            MenuItem(SliverIcons.Calendar, "Year in clips", SliverColors.TextPrimary, onYear)
             MenuItem(HubIcons.Archive, "Archive project", SliverColors.TextPrimary, onArchive, canLeave)
             MenuItem(HubIcons.Trash, "Delete project", SliverColors.Error, onDelete, canLeave)
             if (!canLeave) SliverText(

@@ -19,7 +19,6 @@ import app.sliver.feature.films.FilmBuilderScreen
 import app.sliver.feature.films.FilmNav
 import app.sliver.feature.films.FilmPlayerScreen
 import app.sliver.feature.films.PremiereScreen
-import app.sliver.feature.films.YearInClipsScreen
 import app.sliver.feature.notifications.RemindersScreen
 import app.sliver.feature.onboarding.OnboardingScreen
 import app.sliver.feature.settings.SettingsScreen
@@ -81,7 +80,6 @@ class ScreenShots : ShotTest() {
         FilmNav.id = "shot-film"
         shoot("FilmPlayer", darkOnly = true, inspection = true) { FilmPlayerScreen({}, {}) }
     }
-    @Test fun year() = shoot("YearInSeconds", darkOnly = true) { YearInClipsScreen({}, {}) }
     @Test fun backup() = shoot("Backup") { BackupScreen({}, {}) }
     @Test fun restore() {
         // Restore asks for sign-in first; the golden shows the signed-in Drive scan result.

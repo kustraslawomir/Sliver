@@ -17,7 +17,7 @@ Newest board wins. Boards marked *superseded* are kept only for parts not redraw
 | Add to an empty day | the sheet in `ProjectHub.dc.html` (tap an empty day) | `ArchiveAdd.dc.html` is old, don't use it |
 | Fill empty days | `Backfill.dc.html` | after picking in the system picker: results mosaic → filling → done. `BackfillLimited.dc.html` is obsolete (system picker has no 'limited access'), so don't build it |
 | Film builder / export / player | `FilmBuilder.dc.html`, `Export.dc.html`, `ExportPremiere.dc.html`, `FilmPlayer.dc.html` | |
-| Year in Seconds | `YearInSeconds.dc.html` | |
+| Year in Seconds | `YearInSeconds.dc.html` | REMOVED (owner decision 2026-11-13: "Year in clips is useless"); do not build |
 | Back up / Drive / restore / account | `SaveSheet.dc.html`, `DriveConnect.dc.html`, `Backup.dc.html`, `BackupStates.dc.html`, `Restore.dc.html`, `AccountSettings.dc.html` | Google only |
 | Notifications settings + look | `Notifications.dc.html`, `NotifDenied.dc.html`, `NotifBoard.dc.html` | |
 | Settings | `Settings.dc.html` | |

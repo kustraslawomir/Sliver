@@ -4,14 +4,12 @@ import app.sliver.data.DaySource
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
 import app.sliver.data.db.Day
-import app.sliver.feature.films.TeaserState
 import app.sliver.feature.films.buildFilmPlan
 import app.sliver.feature.films.formatRuntime
 import app.sliver.feature.films.plan
 import app.sliver.feature.films.subtitle
 import app.sliver.feature.films.spanText
 import app.sliver.feature.films.clipsText
-import app.sliver.feature.films.teaserState
 import app.sliver.feature.films.yearFilm
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -52,10 +50,4 @@ class FilmLogicTest {
         assertEquals("1 clip", clipsText(1))
     }
 
-    @Test fun teaserWindow() {
-        assertEquals(TeaserState.HIDDEN, teaserState(LocalDate(2026, 11, 30)))
-        assertEquals(TeaserState.LOCKED, teaserState(LocalDate(2026, 12, 1)))
-        assertEquals(TeaserState.LOCKED, teaserState(LocalDate(2026, 12, 25)))
-        assertEquals(TeaserState.UNLOCKED, teaserState(LocalDate(2026, 12, 26)))
-    }
 }
