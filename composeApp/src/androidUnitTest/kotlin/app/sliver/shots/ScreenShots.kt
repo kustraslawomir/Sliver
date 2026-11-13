@@ -115,6 +115,19 @@ class ScreenShots : ShotTest() {
         CaptureSession.path = thumbPath(0)
         shoot("EditClipV2", darkOnly = true, inspection = true) { TrimScreen({}, SavedStateHandle()) }
     }
+    @Test fun editClipDraft() {
+        CaptureSession.path = thumbPath(0)
+        val cands = List(5) { app.sliver.feature.autoimport.DraftCandidate("content://synthetic/$it", video = it != 2, durationMs = 14_000L) }
+        val day = kotlinx.coroutines.runBlocking { db.dayDao().getByDate(ShotProjectId, kotlinx.datetime.LocalDate(2026, 11, 3))!! }
+            .copy(importRunId = "run", draftCandidates = app.sliver.feature.autoimport.encodeCandidates(cands))
+        kotlinx.coroutines.runBlocking { db.dayDao().upsert(day) }
+        CaptureSession.draft = app.sliver.feature.autoimport.DraftContext(day, cands, cands[0].uri, chain = true)
+        try {
+            shoot("EditClipDraft", darkOnly = true, inspection = true) { TrimScreen({}, SavedStateHandle()) }
+        } finally {
+            CaptureSession.draft = null
+        }
+    }
     @Test fun photoTrim() {
         CaptureSession.path = thumbPath(1)
         CaptureSession.source = app.sliver.data.DaySource.PHOTO

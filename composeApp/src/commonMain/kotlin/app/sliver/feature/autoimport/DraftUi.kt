@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import app.sliver.feature.archive.MonthLong
+import app.sliver.feature.archive.weekdayName
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -147,24 +150,39 @@ fun rememberDraftNav(): DraftNav {
     }
 }
 
-/** "Draft · 3 of 12" with Previous / Next draft. */
+/** Board EditClipDraft(D): ✕ · "Auto-filled · 1 of 3" / "Draft · 1 of 3" over the date · ‹ › only when walking one by one. */
 @Composable
-fun DraftBar(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
+fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier: Modifier = Modifier) {
     val actions = remember { KoinPlatform.getKoin().get<DraftActions>() }
     val list by remember { actions.drafts }.collectAsState(emptyList())
     val index = list.indexOfFirst { it.date == ctx.day.date }.coerceAtLeast(0)
-    val several = list.size > 1
-    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-        IconButton44({ if (several) nav.previous(ctx) }, "Previous draft", Modifier.alpha(if (several) 1f else 0.35f)) {
-            SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary)
+    val total = list.size.coerceAtLeast(1)
+    val d = ctx.day.date
+    Row(modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
+        IconButton44(onClose, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
+        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                SliverText(
+                    draftHeaderTitle(ctx.day.draft, index, total), SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp),
+                    color = SliverColors.TextPrimary, maxLines = 1,
+                )
+                if (nav.busy) SlitLoader(width = 24.dp)
+            }
+            SliverText(
+                "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                color = SliverColors.TextTertiary, maxLines = 1,
+            )
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            SliverText(draftPositionLabel(index, list.size.coerceAtLeast(1)), SliverType.Meta, color = SliverColors.TextPrimary)
-            if (nav.busy) SlitLoader(width = 32.dp)
-        }
-        IconButton44({ if (several) nav.next(ctx) }, "Next draft", Modifier.alpha(if (several) 1f else 0.35f)) {
-            SliverIcon(SliverIcons.ChevronRight, SliverColors.TextPrimary)
-        }
+        if (ctx.chain) {
+            val prev = index > 0
+            val next = index < list.size - 1
+            IconButton44({ if (prev) nav.previous(ctx) }, "Previous day", Modifier.alpha(if (prev) 1f else 0.35f)) {
+                SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary)
+            }
+            IconButton44({ if (next) nav.next(ctx) }, "Next day", Modifier.alpha(if (next) 1f else 0.35f)) {
+                SliverIcon(SliverIcons.ChevronRight, SliverColors.TextPrimary)
+            }
+        } else Spacer(Modifier.size(44.dp))
     }
 }
 
@@ -177,7 +195,7 @@ private val strip get() = StripScroll
 fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
     if (ctx.candidates.size < 2) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText("Other items from this day", SliverType.Caption, color = SliverColors.TextTertiary)
+        SliverText("Other items from this day", SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextSecondary)
         val listState = rememberLazyListState(
             initialFirstVisibleItemIndex = if (strip.day == ctx.day.date) strip.index else ctx.candidates.indexOfFirst { it.uri == ctx.selectedUri }.coerceAtLeast(0),
             initialFirstVisibleItemScrollOffset = if (strip.day == ctx.day.date) strip.offset else 0,
@@ -187,10 +205,12 @@ fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifi
                 .collect { (i, o) -> strip.day = ctx.day.date; strip.index = i; strip.offset = o }
         }
         LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(64.dp)) { nav.swap(ctx, c.uri) } }
+            items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(76.dp)) { nav.swap(ctx, c.uri) } }
         }
     }
 }
+
+private val CandidateShape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
 
 @Composable
 internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
@@ -201,8 +221,8 @@ internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modif
         else -> "Photo"
     }
     Box(
-        modifier.clip(SliverShapes.S).background(SliverColors.Surface3)
-            .border(if (selected) 2.dp else 1.dp, if (selected) SliverColors.AccentMark else SliverColors.LineHairline, SliverShapes.S)
+        modifier.clip(CandidateShape).background(SliverColors.Surface3)
+            .then(if (selected) Modifier.border(2.dp, SliverColors.TextPrimary, CandidateShape) else Modifier)
             .semantics { this.selected = selected; contentDescription = kind }
             .clickable(role = Role.Button, onClick = onClick),
     ) {
@@ -220,11 +240,6 @@ internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modif
                 Modifier.align(Alignment.BottomStart).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )
-        }
-        if (selected) {
-            Box(Modifier.align(Alignment.TopEnd).padding(3.dp).size(18.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim), Alignment.Center) {
-                SliverIcon(SliverIcons.Check, SliverColors.OnMedia, size = 12.dp)
-            }
         }
     }
 }

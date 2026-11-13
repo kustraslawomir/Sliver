@@ -147,7 +147,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             .background(SliverColors.BgVoid),
     ) {
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-        Row(
+        if (draft != null) app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close) else Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,

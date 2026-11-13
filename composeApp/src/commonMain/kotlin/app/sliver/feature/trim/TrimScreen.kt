@@ -268,7 +268,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
             .background(SliverColors.BgVoid),
     ) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            Row(
+            if (draft != null) app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close) else Row(
                 Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -306,6 +306,14 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         if (reframeX) ReframeBandX(cropX, { cropX = it })
                     }
                     if (saved?.dateStamp == true) DateStamp(stampText(day))
+                    if (draft != null) {
+                        IconButton44(
+                            { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
+                            // DECISION: top-right, not bottom-right as on the board, so it never covers the date stamp.
+                            if (previewSound) "Sound on" else "Sound off", Modifier.align(Alignment.TopEnd).padding(SliverSpace.S2),
+                            overCamera = true,
+                        ) { SliverIcon(if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX, SliverColors.OnMedia) }
+                    }
                 }
             }
             }

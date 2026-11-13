@@ -144,6 +144,9 @@ fun draftsChipLabel(count: Int) = "$count ${if (count == 1) "draft" else "drafts
 
 fun draftPositionLabel(index: Int, total: Int) = "Draft · ${index + 1} of $total"
 
+/** Editor header: auto-filled days (already in the project) vs drafts. */
+fun draftHeaderTitle(draft: Boolean, index: Int, total: Int) = "${if (draft) "Draft" else "Auto-filled"} · ${index + 1} of $total"
+
 fun importSummary(done: Int, failed: Int, keep: Boolean = false): String =
     "$done ${if (keep) (if (done == 1) "day filled" else "days filled") else (if (done == 1) "draft" else "drafts") + " added"}" +
         if (failed > 0) ", $failed couldn't be read" else ""
