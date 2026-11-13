@@ -160,6 +160,7 @@ class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWo
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
+            android.util.Log.e("FilmRender", "render $id failed", e)
             Result.failure()
         }
     }
@@ -310,7 +311,8 @@ class FilmComposer(
             sequences += EditedMediaItemSequence.Builder(music).setIsLooping(true).build()
         }
 
-        val builder = Composition.Builder(sequences)
+        // Owner's render died at once: an HDR (10-bit) clip made Transformer pick the HEVC HDR encoder. Films are SDR H.264.
+        val builder = Composition.Builder(sequences).setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL)
         if (blur) builder.setVideoCompositorSettings(fitCompositor(clips, outW, outH))
         return builder.build()
     }
