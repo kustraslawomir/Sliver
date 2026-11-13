@@ -163,3 +163,15 @@ Dead boards (do not build from): `ProjectHubYear*`, `Backfill*`, `PickerV2`, `Lo
 | App icon | `brand/reelog/ic_launcher_foreground.xml` (red disc r=15 in 108), `ic_launcher_monochrome.xml`, `reelog-icon.svg` | Background #0A0A0B. Replaces the slit icon in `android-res/`. |
 | Splash | `motion/SplashReelog.mp4` (watch it), `motion/SplashReelog.html` (timings in `frame(t)`), `png/SplashReelog.png` (key frames), `brand/reelog/splash_icon.xml` | System splash (API 31+ SplashScreen): background #0A0A0B, icon = 72dp red disc (`splash_icon.xml`), no icon background. Then the exit animation in Compose: 260–640 ms the disc shrinks into the "o" (easeInOutCubic) while "reel" and "g" slide out from behind it; 640–1100 hold + "One clip a day" 15sp #8E8E88; 1100–1500 letters fade, the disc grows back to 72dp and lands exactly on the Record today button (centre x = screen centre, 44dp + 36dp from the bottom), the splash background fades out over 1200–1500. Reduced motion: show the wordmark 600 ms, then cross-fade. Cold start only; never on resume. The HTML uses local font paths — use it for timings, not for fonts. |
 | Old splash | `Splash.dc.html` | Superseded by the above (the slit only made sense for SLIVER). |
+
+## v1.7 — glass & controls (supersedes all control styling above)
+
+| What | Board | Notes |
+|---|---|---|
+| Spec | `png/GlassKit.png`, `src/GlassKit.dc.html` | Type scale (min 13 sp), glass material (Haze), liquid-glass record button, buttons, chips, segmented, switch, Lucide icons, Record today dock. Task: `tasks/T-glass-v1.7.md`. |
+| Project | `png/HubV17.png` | Glass dock replaces the Record today disc. No animation on this screen — the v1.6 build's Record today glow is removed (CPU/ANR). |
+| Camera | `png/CameraV17.png` | 88 dp liquid-glass record button; dark-tinted glass over bright sky. |
+| Film builder | `png/BuilderV17.png` | Kit controls, 64×84 filter tiles. |
+| Player | `png/PlayerV17.png` | Ambient colour, glass controls, primary Share (no orange). |
+| Settings | `png/SettingsV17.png` | Grouped cards, 17 sp rows, new switch. |
+| Splash change | — | The splash disc now lands on the dock's red core: 48 dp, centre x = 16 + 12 + 24 = 52 dp from the left, centre y = 30 + 36 = 66 dp above the nav bar (was 72 dp at screen centre). |

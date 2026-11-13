@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Glass kit v1.7</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;display=swap">
+<style>body{margin:0}
+.gl{background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 10px 30px rgba(0,0,0,.35);box-sizing:border-box}
+.gls{background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(32px) saturate(1.8);backdrop-filter:blur(32px) saturate(1.8);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 16px 40px rgba(0,0,0,.45);box-sizing:border-box}
+.glL{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 #fff,0 8px 24px rgba(20,20,19,.12);box-sizing:border-box}
+.ib{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;color:#EDEDE8;flex:0 0 44px}
+.ib svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.chip{height:40px;padding:0 16px;border-radius:20px;display:inline-flex;align-items:center;gap:8px;font:500 15px/20px Geist,sans-serif;color:#EDEDE8;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);box-sizing:border-box;white-space:nowrap}
+.chip.on{background:#EDEDE8;color:#0A0A0B;border-color:#EDEDE8}
+.chip svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.seg{height:44px;border-radius:22px;padding:3px;display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);box-sizing:border-box}
+.seg span{flex:1 1 0;display:flex;align-items:center;justify-content:center;border-radius:19px;font:500 15px Geist,sans-serif;color:#B9B9B3;white-space:nowrap;padding:0 12px}
+.seg span.on{background:#EDEDE8;color:#0A0A0B;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.sw{position:relative;width:52px;height:32px;border-radius:16px;background:#2C2C30;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);flex:0 0 52px}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:13px;background:#8E8E88}
+.sw.on{background:#EDEDE8;box-shadow:none}.sw.on::after{left:23px;background:#0A0A0B}
+.btn{height:56px;border-radius:28px;display:flex;align-items:center;justify-content:center;gap:8px;font:600 17px Geist,sans-serif;box-sizing:border-box;color:#EDEDE8;white-space:nowrap}
+.btn.p{background:#EDEDE8;color:#0A0A0B}
+.btn.s{font-weight:500}
+.btn.t{font-weight:500;color:#B9B9B3}
+.btn.d{font-weight:500;color:#E5675F}
+.btn.sm{height:44px;border-radius:22px;padding:0 18px;font-size:15px;font-weight:500}
+.btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.rec{position:relative;width:88px;height:88px;border-radius:44px}
+.rec .core{position:absolute;left:11px;top:11px;width:66px;height:66px;border-radius:33px;background:radial-gradient(circle at 38% 30%,#FF6F63 0%,#FF3B30 55%,#D9281F 100%);box-shadow:inset 0 1px 1px rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.35)}
+.rec .core.sq{left:28px;top:28px;width:32px;height:32px;border-radius:9px}
+.rec .core.wh{background:radial-gradient(circle at 38% 30%,#FFFFFF 0%,#EDEDE8 60%,#CFCFC8 100%)}
+.rec .spec{position:absolute;inset:0;border-radius:44px;background:radial-gradient(60% 38% at 50% 6%,rgba(255,255,255,.5),rgba(255,255,255,0) 70%);pointer-events:none}
+.blob{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;mix-blend-mode:plus-lighter;pointer-events:none}
+.cap{font:400 13px/18px Geist,sans-serif;color:#8E8E88}
+.lab{font:500 15px/20px Geist,sans-serif}
+.body{font:400 17px/24px Geist,sans-serif}
+.h2{font:600 22px/28px Geist,sans-serif;letter-spacing:-.01em}
+.h1{font:600 28px/32px Geist,sans-serif;letter-spacing:-.02em}
+.num{font-variant-numeric:tabular-nums}
+
+.scene{position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(55% 55% at 22% 28%,#E8743B 0%,rgba(232,116,59,0) 70%),radial-gradient(50% 60% at 78% 62%,#1F8A8A 0%,rgba(31,138,138,0) 70%),radial-gradient(45% 45% at 50% 100%,#6A3FA0 0%,rgba(106,63,160,0) 70%),#121216}
+.scene::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 6px,rgba(255,255,255,0) 6px 22px)}
+.vf{position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(180deg,#F2A65A 0%,#C8674A 38%,#3B2A3A 62%,#16161A 100%)}
+.vf::before{content:'';position:absolute;left:-10%;right:-10%;top:58%;height:30%;background:radial-gradient(60% 100% at 30% 0%,#2A3B2E,rgba(0,0,0,0) 70%),radial-gradient(50% 100% at 80% 10%,#1E2A22,rgba(0,0,0,0) 70%)}
+.vf::after{content:'';position:absolute;left:62%;top:20%;width:46px;height:46px;border-radius:50%;background:#FFE3B0;box-shadow:0 0 60px 20px rgba(255,214,150,.55)}
+.k{padding:12px 0;border-bottom:1px solid #1F1F22;font:400 14px/20px Geist,sans-serif;color:#8E8E88}
+.v{padding:12px 0;border-bottom:1px solid #1F1F22;font:400 14px/20px Geist,sans-serif;color:#EDEDE8}
+.sec{font:600 24px/28px Geist,sans-serif;letter-spacing:-.02em;margin:56px 0 6px}
+.sub{font:400 15px/22px Geist,sans-serif;color:#B9B9B3;max-width:900px;margin-bottom:20px}
+.tl{font:500 14px Geist,sans-serif;color:#EDEDE8;margin-top:12px}
+.td{font:400 13px/18px Geist,sans-serif;color:#8E8E88;margin-top:4px}
+</style>
+</helmet>
+<div style="width: 1280px; padding: 56px; box-sizing: border-box; background: #0A0A0B; color: #EDEDE8; font-family: Geist, sans-serif">
+  <div style="font: 600 40px/44px Geist, sans-serif; letter-spacing: -0.025em">Reelog v1.7 · glass &amp; controls</div>
+  <div class="sub" style="margin-top: 10px">Every control rebuilt: one type scale with nothing under 13 sp, one switch, one chip, one segmented control, one icon style. Glass only where something moves behind it — the camera, video, and the calendar scrolling under the dock. On a flat black screen glass is just grey, so plain surfaces stay plain. Orange is gone; the only colour is the record red.</div>
+
+  <!-- TYPE -->
+  <div class="sec">1 · Type scale (Geist)</div>
+  <div class="sub">The old build used 11–12 sp captions and 14 sp list rows — too small, that's most of the "cheap" feel. New minimum is 13 sp. Rows are 17 sp like iOS / Pixel settings.</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px">
+    <div style="display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Display 40/44</span><span style="font: 600 40px/44px Geist; letter-spacing: -0.02em">One clip a day.</span></div>
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Title 28/32</span><span class="h1">My 2026</span></div>
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Headline 22/28</span><span class="h2">November</span></div>
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Body 17/24</span><span class="body">Daily reminder</span></div>
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Label 15/20 ·500</span><span class="lab">Make film</span></div>
+      <div style="display: flex; align-items: baseline; gap: 20px"><span class="cap" style="width: 120px">Caption 13/18</span><span class="cap" style="color: #B9B9B3">16 clips · since 21 Oct</span></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 170px 1fr; align-content: start; border-top: 1px solid #26262A">
+      <span class="k">Weights</span><span class="v">400 body · 500 labels, buttons, chips · 600 titles. Never 700, never all-caps, no mono except the date stamp burned into video.</span>
+      <span class="k">Tracking</span><span class="v">Display / Title −0.02em, Headline −0.01em, rest 0.</span>
+      <span class="k">Numbers</span><span class="v">Tabular figures for times, counts, scrubber (fontFeatureSettings "tnum").</span>
+      <span class="k">Colour</span><span class="v">Primary #EDEDE8 · secondary #B9B9B3 · tertiary #8E8E88 · disabled #55555A. Light: #141413 / #4A4A46 / #6E6E68 / #A8A8A2.</span>
+      <span class="k">Font scale</span><span class="v">Everything in sp, must survive 1.3× system font (the fs13 screenshots): rows grow taller, nothing clips, no fixed heights on text containers.</span>
+      <span class="k">Code</span><span class="v">ReelogType.display / title / headline / body / label / caption in ui/theme/Type.kt. Lint: no raw fontSize outside Type.kt.</span>
+    </div>
+  </div>
+
+  <!-- GLASS -->
+  <div class="sec">2 · Glass material</div>
+  <div class="sub">Real backdrop blur, not a grey fill. Built with Haze (dev.chrisbanes.haze, Compose Multiplatform): hazeSource on the content, hazeEffect on the glass. Android 12+ blurs for real; below API 31 it falls back to the solid fill in the table.</div>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px">
+    <div><div class="scene" style="height: 220px"><div class="gl" style="position: absolute; left: 40px; right: 40px; top: 60px; height: 100px; border-radius: 28px; display: flex; align-items: center; justify-content: center" ><span class="lab">Glass · regular</span></div></div><div class="tl">Regular</div><div class="td">Icon buttons, chips and controls over video. Blur 24 dp, tint white 8 %.</div></div>
+    <div><div class="scene" style="height: 220px"><div class="gls" style="position: absolute; left: 40px; right: 40px; top: 60px; height: 100px; border-radius: 28px; display: flex; align-items: center; justify-content: center"><span class="lab">Glass · strong</span></div></div><div class="tl">Strong</div><div class="td">Record button ring, dock, sheets. Blur 32 dp, tint white 12 %, deeper shadow.</div></div>
+    <div><div class="scene" style="height: 220px; filter: none"><div style="position: absolute; inset: 0; background: rgba(246,244,239,.55)"></div><div class="glL" style="position: absolute; left: 40px; right: 40px; top: 60px; height: 100px; border-radius: 28px; display: flex; align-items: center; justify-content: center; color: #141413"><span class="lab">Glass · light theme</span></div></div><div class="tl">Light theme</div><div class="td">Tint white 62 %, white hairline, soft shadow. Text stays #141413.</div></div>
+  </div>
+  <div style="display: grid; grid-template-columns: 220px 1fr; margin-top: 24px; border-top: 1px solid #26262A">
+    <span class="k">Blur</span><span class="v">Regular 24 dp · strong 32 dp. Saturation 1.6–1.8 so colours behind stay alive instead of going muddy.</span>
+    <span class="k">Tint</span><span class="v">Dark: white 8 % / 12 %. Light: white 62 %. Noise 0.08 (Haze noiseFactor) — kills banding on the blur.</span>
+    <span class="k">Edge</span><span class="v">1 dp border, vertical gradient white 30 % → 6 % (lit from the top). That top highlight is what makes it read as glass, don't skip it.</span>
+    <span class="k">Shadow</span><span class="v">Regular 0/10/30 black 35 % · strong 0/16/40 black 45 %. None in light theme beyond 0/8/24 at 12 %.</span>
+    <span class="k">Fallback</span><span class="v">API &lt; 31 or battery saver: solid #1C1C1F at 92 % (light: #FFFFFF at 92 %), same border. No blur, nothing breaks.</span>
+    <span class="k">Where</span><span class="v">Camera (record ring, top icons, mode switch), film player &amp; builder controls over video, day screen icons, the dock on the project screen, undo bar, bottom sheets. NOT on settings rows, lists, empty backgrounds.</span>
+    <span class="k">Perf</span><span class="v">Static glass costs nothing until content behind it moves. No infinite animations on idle screens — the "Record today" glow that eats 60 % CPU on the emulator goes away completely.</span>
+  </div>
+
+  <!-- RECORD -->
+  <div class="sec">3 · Record button · liquid glass</div>
+  <div class="sub">The liquid glow from v1.5 stays, but now it lives inside a glass lens: a strong-glass ring 88 dp around a 66 dp red core. The drifting blobs sit under the ring, so the ring catches coloured light from them and from the viewfinder. Camera only.</div>
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px">
+    <sc-for list="{{recs}}" as="r" hint-placeholder-count="4">
+      <div>
+        <div class="vf" style="height: 260px">
+          <div style="position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px; transform: scale({{r.sc}})">
+            <sc-for list="{{r.blobs}}" as="b" hint-placeholder-count="3"><span class="blob" style="background: {{b.bg}}; transform: translate({{b.x}}px, {{b.y}}px)"></span></sc-for>
+            <div class="rec gls"><span class="core {{r.core}}"></span><span class="spec"></span></div>
+          </div>
+        </div>
+        <div class="tl">{{r.n}}</div><div class="td">{{r.d}}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display: grid; grid-template-columns: 220px 1fr; margin-top: 24px; border-top: 1px solid #26262A">
+    <span class="k">Build</span><span class="v">Box(88 dp): liquidGlow (existing Modifier, unchanged) → hazeEffect strong glass in CircleShape → red core 66 dp with radialGradient #FF6F63 → #FF3B30 → #D9281F, centre at (38 %, 30 %) → specular: radialGradient white 50 % → 0 at the top 6 %, 60 × 38 % ellipse.</span>
+    <span class="k">Recording</span><span class="v">Core morphs to a 32 dp rounded square, corner 9 dp, spring (dampingRatio 0.7, stiffness 400). Glow strength 1.0.</span>
+    <span class="k">Press</span><span class="v">Whole button scales to 0.94 for the press, 120 ms; haptic CONTEXT_CLICK on start, CONFIRM on save.</span>
+    <span class="k">Photo</span><span class="v">White core (#FFFFFF → #CFCFC8), white glow palette from v1.5.</span>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="sec">4 · Buttons</div>
+  <div class="sub">Pills only. 56 dp for main actions, 44 dp for small ones. One primary per screen. Pressed = scale 0.97 + 6 % lighter, 100 ms. No ripples on glass.</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+    <div style="border: 1px solid #1F1F22; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px">
+      <span class="cap">On plain background</span>
+      <div class="btn p">Make film · 0:16</div>
+      <div class="btn s" style="background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12)">Save to Photos</div>
+      <div style="display: flex; gap: 12px"><div class="btn t" style="flex: 1">Not now</div><div class="btn d" style="flex: 1">Remove</div></div>
+      <div style="display: flex; gap: 10px"><div class="btn sm" style="background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Make film</div><div class="btn sm p" style="font-weight: 600">Set reminder</div></div>
+    </div>
+    <div class="scene" style="padding: 24px; display: flex; flex-direction: column; gap: 12px">
+      <span class="cap" style="position: relative; color: #EDEDE8">Over video</span>
+      <div class="btn p" style="position: relative"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share film…</div>
+      <div class="btn s gl">Save to Photos</div>
+      <div style="display: flex; gap: 12px"><div class="btn s gl" style="flex: 1">Edit film</div><div class="btn d gl" style="flex: 1">Remove</div></div>
+      <div style="display: flex; gap: 10px"><div class="btn sm gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Make film</div></div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 220px 1fr; margin-top: 24px; border-top: 1px solid #26262A">
+    <span class="k">Primary</span><span class="v">Fill #EDEDE8, text #0A0A0B 17/600. Light theme: #141413 / #F6F4EF. Replaces the orange "Share film…" and the off-white "Make film" — same component now.</span>
+    <span class="k">Secondary</span><span class="v">White 8 % + 1 dp white 12 % on plain screens; regular glass over media. Text 17/500.</span>
+    <span class="k">Tertiary / destructive</span><span class="v">Text only, #B9B9B3 / #E5675F, 17/500, same 56 dp hit area.</span>
+    <span class="k">Small</span><span class="v">44 dp, 15/500, optional leading icon 20 dp with 8 dp gap, horizontal padding 18.</span>
+  </div>
+
+  <!-- CHIPS / SEG / SWITCH -->
+  <div class="sec">5 · Chips, segmented, day toggles, switch</div>
+  <div class="sub">Old: 32 dp chips with 12 sp text, Material switch with an orange track, three different segmented styles. New: one of each, bigger, mono.</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+    <div style="border: 1px solid #1F1F22; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+      <span class="cap">Chips · 40 dp</span>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip on">Project start</span><span class="chip">This year</span><span class="chip">Last 30 days</span><span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20H4v-4z"/></svg>Pick date</span></div>
+      <span class="cap">Segmented · 44 dp</span>
+      <div class="seg"><span class="on">Original</span><span>Music</span><span>Mix</span></div>
+      <div class="seg" style="width: 220px"><span class="on">Month</span><span>Year</span></div>
+      <span class="cap">Day toggles · 44 dp circles</span>
+      <div style="display: flex; gap: 6px"><sc-for list="{{days}}" as="d" hint-placeholder-count="7"><span style="width: 44px; height: 44px; border-radius: 22px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font: 500 15px Geist; background: {{d.bg}}; color: {{d.c}}; border: {{d.b}}">{{d.l}}</span></sc-for></div>
+    </div>
+    <div style="border: 1px solid #1F1F22; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 0">
+      <span class="cap" style="margin-bottom: 8px">Switch · 52 × 32</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; border-bottom: 1px solid #1F1F22"><span class="body">Date stamp</span><span class="sw on"></span></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; min-height: 64px; border-bottom: 1px solid #1F1F22; gap: 16px"><span style="display: flex; flex-direction: column; gap: 2px"><span class="body">Show golden hour</span><span class="cap">A line on the camera when the light is about to turn.</span></span><span class="sw"></span></div>
+      <div style="display: flex; gap: 16px; margin-top: 20px; align-items: center">
+        <div style="flex: 1; border-radius: 16px; background: #F6F4EF; padding: 16px; display: flex; justify-content: space-around"><span class="sw on" style="background: #141413"></span><span class="sw" style="background: #DCDAD3; box-shadow: none"></span></div>
+        <span class="cap" style="flex: 1">Light theme: on #141413 + knob #F6F4EF, off #DCDAD3 + knob white with 1 dp shadow.</span>
+      </div>
+      <span class="cap" style="margin-top: 16px">Knob slides 200 ms spring, track colour cross-fades. The whole row is the touch target, not just the switch.</span>
+    </div>
+  </div>
+
+  <!-- ICONS -->
+  <div class="sec">6 · Toolbar &amp; icon buttons</div>
+  <div class="sub">One set: Lucide (com.composables:icons-lucide, KMP), 24 dp, stroke 1.75, round caps — the old mix of filled Material icons and thin outlines goes. 48 dp hit area always.</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+    <div style="border: 1px solid #1F1F22; border-radius: 20px; padding: 24px">
+      <span class="cap">Plain screens: no circle, just the icon</span>
+      <div style="display: flex; gap: 8px; margin-top: 14px"><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l4 4L8 20H4v-4z"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="9" r="4"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="ib"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></svg></span></div>
+    </div>
+    <div class="scene" style="padding: 24px">
+      <span class="cap" style="position: relative; color: #EDEDE8">Over video / camera: 44 dp regular glass circle</span>
+      <div style="display: flex; gap: 10px; margin-top: 14px; position: relative"><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg></span><span class="ib gl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></span></div>
+    </div>
+  </div>
+
+  <!-- DOCK -->
+  <div class="sec">7 · Record today dock</div>
+  <div class="sub">Replaces the orange disc that sat on top of the film posters. A strong-glass capsule pinned 16 dp above the nav bar; the calendar and films scroll under it and blur. Plain red core, no glow, no animation.</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+    <sc-for list="{{docks}}" as="k" hint-placeholder-count="2">
+      <div>
+        <div class="scene" style="height: 150px">
+          <div class="gls" style="position: absolute; left: 24px; right: 24px; bottom: 36px; height: 72px; border-radius: 36px; display: flex; align-items: center; gap: 14px; padding: 0 22px 0 12px">
+            <span style="width: 48px; height: 48px; border-radius: 24px; flex: 0 0 48px; background: {{k.core}}; box-shadow: inset 0 1px 1px rgba(255,255,255,.5); display: flex; align-items: center; justify-content: center; color: #fff">{{k.icon}}</span>
+            <span style="display: flex; flex-direction: column; gap: 1px; flex: 1"><span style="font: 600 17px/22px Geist">{{k.t}}</span><span class="cap" style="color: #B9B9B3">{{k.s}}</span></span>
+            <span class="ib" style="color: #B9B9B3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span>
+          </div>
+        </div>
+        <div class="tl">{{k.n}}</div><div class="td">{{k.d}}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div class="sec">8 · What goes</div>
+  <div style="display: grid; grid-template-columns: 220px 1fr; border-top: 1px solid #26262A">
+    <span class="k">Orange</span><span class="v">Switch tracks, today ring, "Share film…", Record today disc, "Change" link — all orange goes. Today = 2 dp #EDEDE8 ring; links = #EDEDE8 underlined 15/500.</span>
+    <span class="k">Material defaults</span><span class="v">No M3 Switch, FilterChip, SegmentedButton, TopAppBar. Own composables in ui/kit/: ReelogSwitch, ReelogChip, ReelogSegmented, ReelogButton, ReelogIconButton, Glass, RecordButton, RecordDock.</span>
+    <span class="k">Idle animation</span><span class="v">Nothing animates forever on the project screen. Glow only runs while the camera is open.</span>
+    <span class="k">Old names</span><span class="v">"What SLIVER stores", "Sliver 0.1.0", "kept in SLIVER", "SLIVER · 15:55" in the reminder preview → Reelog (T-rename-reelog).</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":4200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const a = (x) => Math.round(x * 255).toString(16).padStart(2, '0').toUpperCase();
+    const pos = [[9, 0], [-4, 8], [0, -8]];
+    const blobs = (cols, s) => cols.map((c, i) => ({ x: pos[i][0], y: pos[i][1], bg: 'radial-gradient(circle, ' + c + a(0.5 * s) + ' 0%, ' + c + a(0.2 * s) + ' 45%, ' + c + '00 70%)' }));
+    const RED = ['#FF3B30', '#FF7A45', '#FF2D7A'], WH = ['#FFFFFF', '#BFD4FF', '#FFE9D6'];
+    const sel = [1, 1, 1, 1, 1, 0, 0];
+    return {
+      recs: [
+        { n: 'Video · ready', d: 'Glow 0.6 under a strong-glass ring.', blobs: blobs(RED, 0.6), core: '', sc: 1 },
+        { n: 'Video · recording', d: 'Core → rounded square, glow 1.0.', blobs: blobs(RED, 1), core: 'sq', sc: 1 },
+        { n: 'Photo · ready', d: 'White core, white / cool / warm glow.', blobs: blobs(WH, 0.6), core: 'wh', sc: 1 },
+        { n: 'Pressed', d: 'Scale 0.94, 120 ms, haptic.', blobs: blobs(RED, 0.8), core: '', sc: 0.94 }
+      ],
+      days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((l, i) => ({ l, bg: sel[i] ? '#EDEDE8' : 'transparent', c: sel[i] ? '#0A0A0B' : '#B9B9B3', b: sel[i] ? '0' : '1px solid #3A3A40' })),
+      docks: [
+        { n: 'Today empty', d: 'Tap → camera. Caption counts down the day.', t: 'Record today', s: 'Friday 13 Nov · 6 h left', core: 'radial-gradient(circle at 38% 30%, #FF6F63, #FF3B30 55%, #D9281F)', icon: '' },
+        { n: 'Today done', d: 'Same capsule, thumbnail of today, tap → the day screen.', t: 'Today is in', s: '0:01 · tap to watch or replace', core: 'linear-gradient(160deg, #F2A65A, #3B2A3A)', icon: '' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
