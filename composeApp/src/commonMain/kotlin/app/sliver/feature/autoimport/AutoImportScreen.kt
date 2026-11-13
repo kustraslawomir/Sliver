@@ -1,5 +1,7 @@
 package app.sliver.feature.autoimport
 
+import androidx.compose.foundation.layout.FlowRow
+import app.sliver.core.ui.Chip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -137,26 +139,22 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
 
         SliverText(
-            "Fill empty days with a draft from your gallery: the longest video of the day, or a photo if there is no video. " +
-                "Drafts don't count until you review and keep them.",
+            "Fill empty days with a draft from your gallery. Drafts count only after you review and keep them.",
             SliverType.Body, color = SliverColors.TextSecondary,
         )
 
-        Row(
-            Modifier.fillMaxWidth().clip(SliverShapes.R12).background(SliverColors.Surface1)
-                .border(1.dp, SliverColors.LineHairline, SliverShapes.R12)
-                .clickable(role = Role.Button) { pickerOpen = true }
-                .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S3),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Column {
-                SliverText("From", SliverType.Caption, color = SliverColors.TextTertiary)
-                SliverText(formatDay(from), SliverType.Num, color = SliverColors.TextPrimary)
+        SliverText("From", SliverType.Caption, color = SliverColors.TextTertiary)
+        val presets = remember(start, today) { fromPresets(start, today) }
+        val custom = presets.none { it.second == from }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+            presets.forEach { (preset, date) ->
+                Chip(presetLabel(preset), from == date, { fromRaw = date.toString() })
             }
-            SliverIcon(SliverIcons.Calendar, SliverColors.TextSecondary)
+            // DECISION (owner: "custom date is missing, simplify"): quick presets + one chip that opens the calendar and shows the picked date.
+            Chip(if (custom) formatDay(from) else presetLabel(FromPreset.CUSTOM), custom, { pickerOpen = true })
         }
-        SliverText(emptyDaysLabel(empty, from), SliverType.Meta, color = SliverColors.TextSecondary)
+        SliverText(fillLabel(empty), SliverType.Headline, color = SliverColors.TextPrimary)
+        SliverText("Since ${formatDay(from)} · filled days are never touched", SliverType.Meta, color = SliverColors.TextSecondary)
 
         if (status == PermissionStatus.Partial) {
             Column(

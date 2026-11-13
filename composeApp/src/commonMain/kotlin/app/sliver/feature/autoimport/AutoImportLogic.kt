@@ -70,6 +70,28 @@ data class ImportRun(
 
 fun emptyDaysLabel(count: Int, from: LocalDate) = "$count empty ${if (count == 1) "day" else "days"} since ${formatDay(from)}"
 
+/** Big count on the Auto-import page. */
+fun fillLabel(count: Int) = if (count == 0) "No empty days to fill" else "$count empty ${if (count == 1) "day" else "days"} to fill"
+
+enum class FromPreset { PROJECT_START, THIS_YEAR, LAST_30, CUSTOM }
+
+/** Quick "from" dates; a preset equal to an earlier one is dropped so the chips never repeat a date. */
+fun fromPresets(projectStart: LocalDate, today: LocalDate): List<Pair<FromPreset, LocalDate>> {
+    val list = listOf(
+        FromPreset.PROJECT_START to projectStart,
+        FromPreset.THIS_YEAR to LocalDate(today.year, 1, 1),
+        FromPreset.LAST_30 to LocalDate.fromEpochDays(today.toEpochDays() - 30),
+    )
+    return list.filter { (_, d) -> d <= today }.distinctBy { it.second }
+}
+
+fun presetLabel(p: FromPreset) = when (p) {
+    FromPreset.PROJECT_START -> "Project start"
+    FromPreset.THIS_YEAR -> "This year"
+    FromPreset.LAST_30 -> "Last 30 days"
+    FromPreset.CUSTOM -> "Pick date…"
+}
+
 fun draftsChipLabel(count: Int) = "$count ${if (count == 1) "draft" else "drafts"} to review"
 
 fun draftPositionLabel(index: Int, total: Int) = "Draft · ${index + 1} of $total"

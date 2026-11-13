@@ -65,3 +65,24 @@ private fun tenths(v: Long, unit: Long): String {
     val t = v * 10 / unit
     return "${t / 10}.${t % 10}"
 }
+
+private fun clips(n: Int) = if (n == 1) "1 clip" else "$n clips"
+
+/** Clips row on Backup & sync: "No clips yet", "12 clips in Drive", "3 of 12 clips in Drive". */
+fun clipsLine(backedUp: Int, total: Int): String = when {
+    total == 0 -> "No clips yet"
+    backedUp >= total -> "${clips(total)} in Drive"
+    else -> "$backedUp of ${clips(total)} in Drive"
+}
+
+/** Drive row: free space, flagged when under 1 GB so the screen can warn with an icon, not colour alone. */
+data class DriveLine(val text: String, val low: Boolean)
+
+const val DRIVE_LOW_BYTES = 1L shl 30
+
+fun driveLine(used: Long, limit: Long?): DriveLine {
+    if (limit == null) return DriveLine("${formatBytes(used)} used", false)
+    val free = (limit - used).coerceAtLeast(0)
+    val low = free < DRIVE_LOW_BYTES
+    return DriveLine(if (low) "Almost full · ${formatBytes(free)} free" else "${formatBytes(free)} free", low)
+}

@@ -32,6 +32,9 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.IconButton44
+import app.sliver.data.backup.clipsLine
+import app.sliver.data.backup.driveLine
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SecondaryButton
 import app.sliver.core.ui.SliverBottomSheet
@@ -128,34 +131,35 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
             Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()
                 .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
         ) {
-            GhostButton("Back", onClick = onBack)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
+                SliverText("Backup & sync", SliverType.Title)
+            }
             when {
                 account == null -> {}
                 account.signedIn -> {
                     val ui = backupUi(BackupSnapshot(pending, progress != null, account.backupError, account.wifiOnly, network))
-                    val copy = statusCopy(ui, progress)
+                    val base = statusCopy(ui, progress)
+                    // One status, not two: the sync line becomes the body of the "Synced" card.
+                    val copy = if (ui == BackupUi.UP_TO_DATE) {
+                        base.copy(title = "Synced", body = syncStatusLine(account.lastSyncAt, nowMillis, account.phones).removePrefix("Synced · ").replaceFirstChar { it.uppercase() })
+                    } else base
                     Column(
                         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = SliverSpace.S6),
                         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
                     ) {
-                        SliverText("Backup & sync", SliverType.DisplayM)
-                        SliverText(syncStatusLine(account.lastSyncAt, nowMillis, account.phones), SliverType.BodySmall)
                         StatusCard(ui, copy, onAction = {
                             if (ui == BackupUi.REVOKED) scope.launch { manager.signIn() }
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
                         })
-                        InfoRow("Folder", "Fragments in your Google Drive")
-                        InfoRow("Backed up", "$backedUp of ${statuses.size} clips")
-                        InfoRow(
-                            "Drive space",
-                            quota?.let { q ->
-                                q.limit?.let { "${formatBytes(q.used)} of ${formatBytes(it)} used" } ?: "${formatBytes(q.used)} used"
-                            } ?: "Unavailable",
-                        )
+                        InfoRow("Folder", "Fragments")
+                        InfoRow("Clips", clipsLine(backedUp, statuses.size))
+                        val driveText = quota?.let { driveLine(it.used, it.limit) }
+                        InfoRow("Drive", driveText?.text ?: "Unavailable", warn = driveText?.low == true)
                         SwitchRow(
-                            "Auto-backup", account.autoBackup,
+                            "Sync automatically", account.autoBackup,
                             { on -> scope.launch { repo.update { it.copy(account = it.account.copy(autoBackup = on)) } } },
-                            caption = "Upload new clips as you save them",
+                            caption = "New clips go up as you save them",
                         )
                         SwitchRow(
                             "Wi-Fi only", account.wifiOnly,
@@ -166,15 +170,15 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                             "Sync now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
                             Modifier.fillMaxWidth(), enabled = progress == null,
                         )
-                        SecondaryButton("Restore from Drive", onRestore, Modifier.fillMaxWidth())
-                        SecondaryButton("Export everything (.zip)", { pickZip("sliver-archive.zip") }, Modifier.fillMaxWidth())
+                        // Restore is the first sync now, so there is no separate "Restore from Drive" button.
+                        SecondaryButton("Export everything (.zip)", { pickZip("fragments-archive.zip") }, Modifier.fillMaxWidth())
                         exportNote?.let { SliverText(it, SliverType.BodySmall) }
-                        SliverText(
-                            "Signed in with Google as ${account.email.orEmpty()}.",
-                            SliverType.Caption,
-                        )
-                        InfoRow("What we keep", "Your email. Your videos: never.")
-                        GhostButton("Sign out", { confirmDisconnect = true })
+                        SliverText("Account", SliverType.Caption, Modifier.padding(top = SliverSpace.S4))
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            SliverText(account.email.orEmpty(), SliverType.Body, Modifier.weight(1f), maxLines = 1)
+                            GhostButton("Sign out", { confirmDisconnect = true })
+                        }
+                        SliverText("We keep only your email. Your videos stay in your own Drive.", SliverType.Caption)
                         GhostButton("Delete account", { showDelete = true; deleteError = false }, destructive = true)
                     }
                 }
@@ -261,12 +265,14 @@ private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
 }
 
 @Composable
-private fun InfoRow(label: String, value: String) {
+private fun InfoRow(label: String, value: String, warn: Boolean = false) {
     Row(
         Modifier.fillMaxWidth().padding(vertical = SliverSpace.S1),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        SliverText(label, SliverType.BodySmall)
-        SliverText(value, SliverType.Body)
+        SliverText(label, SliverType.BodySmall, Modifier.weight(1f))
+        if (warn) SliverIcon(SliverIcons.AlertTriangle, SliverColors.Warning, size = 16.dp)
+        SliverText(value, SliverType.Body, color = if (warn) SliverColors.Warning else SliverColors.TextPrimary)
     }
 }
