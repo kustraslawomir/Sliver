@@ -56,10 +56,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
-import app.sliver.data.backup.BackupScheduler
 import app.sliver.data.backup.SyncEngine
 import app.sliver.data.backup.changedOnAnotherPhone
 import androidx.compose.runtime.mutableStateOf
@@ -168,11 +164,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val all by remember { days.observeAll() }.collectAsState(emptyList())
     val app by remember { settings.settings }.collectAsState(null)
     val byDate = remember(all) { all.associateBy { it.date } }
-    val scheduler = remember { koin.get<BackupScheduler>() }
     val syncing by remember { koin.get<SyncEngine>().progress }.collectAsState()
-    val signedIn by rememberUpdatedState(app?.account?.signedIn == true)
-    val wifiOnly by rememberUpdatedState(app?.account?.wifiOnly ?: true)
-    val pull = rememberPullToSync(with(LocalDensity.current) { 72.dp.toPx() }, { signedIn }) { scheduler.schedule(wifiOnly, anyNetwork = true) }
     val drafts by remember { days.observeDrafts() }.collectAsState(emptyList())
     val calendar = remember(byDate, drafts) { drafts.associateBy { it.date } + byDate }
     val waiting = remember(drafts, all) { toCheck(drafts, all) }
@@ -266,10 +258,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                     { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true },
                 )
                 Column(
-                    Modifier.weight(1f).nestedScroll(pull.connection).verticalScroll(rememberScrollState()).padding(bottom = RecordDockHeight),
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = RecordDockHeight),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    SyncStrip(pull.armed, pull.pull > 0f, syncing != null)
+                    SyncStrip(syncing != null)
                     Column(
                         Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
