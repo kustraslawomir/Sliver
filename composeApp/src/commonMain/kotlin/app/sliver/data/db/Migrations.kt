@@ -111,3 +111,13 @@ val Migration10To11 = object : Migration(10, 11) {
         connection.execSQL("ALTER TABLE day ADD COLUMN originalStartMs INTEGER")
     }
 }
+
+/** Owner 13 Nov: a project starts at its earliest clip (older builds kept the creation day even after earlier days were filled). */
+val Migration11To12 = object : Migration(11, 12) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "UPDATE project SET startDate = (SELECT MIN(date) FROM day WHERE day.projectId = project.id AND day.draft = 0) " +
+                "WHERE (SELECT MIN(date) FROM day WHERE day.projectId = project.id AND day.draft = 0) < startDate",
+        )
+    }
+}

@@ -56,8 +56,22 @@ class OriginalRescue(private val days: DayRepository, private val files: FileSto
     }
 }
 
-/** A kept original that is no longer used by [now] (replaced or removed day) is deleted. */
-fun dropOriginal(files: FileStore, before: Day?, now: Day?) {
+/** Puts a full camera recording into the phone's gallery (Movies/<app>); one copy per recording. */
+interface RecordingSaver {
+    /** True when the gallery holds the recording (saved now or already there). */
+    suspend fun save(path: String, stampMillis: Long): Boolean
+}
+
+/** Start time of a kept recording from its name (orig_<start>.mp4 or rec_<start>.mp4). */
+fun originalStamp(path: String): Long =
+    path.substringAfterLast('/').substringAfter('_').removeSuffix(".mp4").toLongOrNull() ?: 0L
+
+/**
+ * Owner 13 Nov: removing or replacing a day never loses its recording. A kept original that [now] no longer uses goes to
+ * the gallery first; the app's copy is deleted only once the gallery has it.
+ */
+suspend fun dropOriginal(files: FileStore, saver: RecordingSaver, before: Day?, now: Day?) {
     val old = before?.original ?: return
-    if (old != now?.original) files.delete(old)
+    if (old == now?.original || !files.exists(old)) return
+    if (saver.save(old, originalStamp(old))) files.delete(old)
 }

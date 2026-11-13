@@ -143,10 +143,10 @@ class DayRepositoryImpl(
                 else -> null
             }
             var stamped = stampDay(dao.getByDate(projectId, date), day.copy(original = original, originalStartMs = startMs.takeIf { original != null }), nowMillis())
-            dao.upsert(stamped)
+            put(stamped)
             if (keepFrom != null && original != null && !files.move(source, original)) {
                 stamped = stamped.copy(original = null, originalStartMs = null)
-                dao.upsert(stamped)
+                put(stamped)
             }
             stamped
         } finally {
@@ -169,7 +169,7 @@ class DayRepositoryImpl(
     override suspend fun deleteRow(projectId: String, date: LocalDate) = dao.delete(projectId, date)
     override suspend fun save(day: Day) {
         val projectId = day.projectId.ifEmpty { projects.activeId() }
-        dao.upsert(stampDay(dao.getByDate(projectId, day.date), day.copy(projectId = projectId), nowMillis()))
+        put(stampDay(dao.getByDate(projectId, day.date), day.copy(projectId = projectId), nowMillis()))
     }
 
     override suspend fun delete(date: LocalDate) {
@@ -180,7 +180,12 @@ class DayRepositoryImpl(
         if (existing != null && !existing.draft) tombstones.record(TombstoneKind.DAY, projectId, date.toString(), nowMillis())
     }
 
-    override suspend fun applyRemote(day: Day) = dao.upsert(day)
+    override suspend fun applyRemote(day: Day) = put(day)
+
+    private suspend fun put(day: Day) {
+        dao.upsert(day)
+        if (!day.draft && day.projectId.isNotEmpty()) dao.pullProjectStart(day.projectId, day.date, nowMillis())
+    }
     override suspend fun removeRemote(projectId: String, date: LocalDate) = dao.delete(projectId, date)
 }
 

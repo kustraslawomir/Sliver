@@ -23,6 +23,7 @@ import app.sliver.feature.camera.CaptureSession
 import app.sliver.data.files.TmpRecording
 import app.sliver.feature.trim.OriginalRescue
 import app.sliver.feature.trim.SaveUndo
+import app.sliver.feature.trim.RecordingSaver
 import app.sliver.feature.trim.isOriginal
 import kotlin.test.assertNull
 import java.io.File
@@ -125,11 +126,29 @@ class OriginalsKeptTest {
     }
 
     @Test
-    fun removingADayDeletesItsOriginal() = runTest {
+    fun removingADayMovesItsRecordingToTheGalleryNeverLosesIt() = runTest {
         val day = days.saveClip(request(record(1_000).path, 0, 5_000))
-        val undo = SaveUndo(days, files, FilmRepositoryImpl(db.filmDao(), projects))
-        undo.remove(day)
-        assertFalse(File(assertNotNull(day.original)).exists())
+        val kept = assertNotNull(day.original)
+        val gallery = mutableListOf<Pair<String, Long>>()
+        var galleryWorks = false
+        val saver = object : RecordingSaver {
+            override suspend fun save(path: String, stampMillis: Long) = galleryWorks.also { if (it) gallery += path to stampMillis }
+        }
+        val settings = DataStoreSettingsRepository(
+            PreferenceDataStoreFactory.create(scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)) {
+                File.createTempFile("prefs", ".preferences_pb").apply { delete() }
+            },
+        )
+        val undo = SaveUndo(days, files, FilmRepositoryImpl(db.filmDao(), projects), saver, settings)
+
+        undo.remove(day) // gallery refuses: the app keeps its copy
+        assertTrue(File(kept).exists())
+
+        val again = days.saveClip(request(kept, 0, 6_000))
+        galleryWorks = true
+        undo.remove(again)
+        assertEquals(listOf(kept to 1_000L), gallery)
+        assertFalse(File(kept).exists())
     }
 
     @Test
@@ -149,4 +168,14 @@ class OriginalsKeptTest {
         assertTrue(parked.exists())
         assertEquals(0, OriginalRescue(days, files).run())
     }
+
+    @Test
+    fun aClipEarlierThanTheProjectStartMovesTheStartBack() = runTest {
+        val lena = projects.create("Lena", FilmFormat.STORY, LocalDate(2026, 11, 13))
+        days.saveClip(request(record(1_000).path, 0, 5_000).copy(date = LocalDate(2026, 4, 1), projectId = lena.id, daySource = DaySource.GALLERY))
+        assertEquals(LocalDate(2026, 4, 1), projects.projects.first().first { it.id == lena.id }.startDate)
+        days.saveClip(request(record(2_000).path, 0, 6_000).copy(date = LocalDate(2026, 6, 1), projectId = lena.id, daySource = DaySource.GALLERY))
+        assertEquals(LocalDate(2026, 4, 1), projects.projects.first().first { it.id == lena.id }.startDate)
+    }
+
 }

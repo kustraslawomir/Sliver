@@ -106,7 +106,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val navigator = LocalNavigator.current
     var sawRunning by rememberSaveable { mutableStateOf(false) }
 
-    val start = project?.startDate ?: today
+    val start = listOfNotNull(project?.startDate, rows.minOrNull()).minOrNull() ?: today
     var fromRaw by rememberSaveable { mutableStateOf<String?>(null) }
     val from = fromRaw?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: start
     var pickerOpen by remember { mutableStateOf(false) }

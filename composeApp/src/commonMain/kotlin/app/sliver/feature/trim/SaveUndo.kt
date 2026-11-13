@@ -7,6 +7,7 @@ import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.SaveClipRequest
+import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.films.ensureDefaultFilm
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,7 +17,13 @@ import kotlinx.coroutines.launch
 const val UNDO_WINDOW_MS = 6000L
 
 /** Outlives the Trim screen: saves a clip (parking the replaced one in tmp) and cleans tmp once the window closes. */
-class SaveUndo(private val days: DayRepository, private val files: FileStore, private val films: FilmRepository) {
+class SaveUndo(
+    private val days: DayRepository,
+    private val files: FileStore,
+    private val films: FilmRepository,
+    private val saver: RecordingSaver,
+    private val settings: SettingsRepository,
+) {
     private val scope = AppScope
 
     private class Backup(val video: String, val thumb: String)
@@ -24,14 +31,14 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
     private inner class Pending(val request: SaveClipRequest, val previous: Day?, val backup: Backup?, val saved: Day) {
         var timer: Job? = null
 
-        fun cleanup() {
+        suspend fun cleanup() {
             timer?.cancel()
             if (isTmp(request.source)) files.delete(request.source)
             backup?.let {
                 files.delete(it.video)
                 files.delete(it.thumb)
             }
-            dropOriginal(files, previous, saved)
+            dropOriginal(files, saver, previous, saved)
         }
     }
 
@@ -50,6 +57,9 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             throw e
         }
         FirstClipTimer.clipSaved()
+        // "Also save full recordings to Photos": a new in-app recording also goes to the gallery.
+        val fresh = day.original?.takeIf { it != previous?.original }
+        if (fresh != null && settings.settings.first().saveFullRecordings) scope.launch { saver.save(fresh, originalStamp(fresh)) }
         if (previous == null && days.observeAll().first().size == 1) {
             runCatching { films.ensureDefaultFilm(request.date, request.format) }
         }
@@ -79,7 +89,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             files.delete(day.file)
             files.delete(day.thumb)
         }
-        dropOriginal(files, day, null)
+        dropOriginal(files, saver, day, null)
     }
 
     private fun park(day: Day, stamp: Long): Backup? {

@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** Mirrors sync (restore is its first pull) and auto-import progress into notifications; each posts at most once a second. */
+
+const val FILL_NOTIFICATION_ID = 9203
+
 class ProgressCoordinator(
     private val context: Context,
     private val backup: SyncEngine,
@@ -20,7 +23,7 @@ class ProgressCoordinator(
     fun start(scope: CoroutineScope) {
         mirror(scope, backup.progress, ProgressNotifier(context, 9201, DeepLinkTarget.Backup), "Syncing with Drive") { "${it.done} of ${it.total} clips" }
         val fill = autoImport.run.map { r -> r?.takeIf { !it.finished }?.let { BackupProgress(it.done, it.total) } }
-        mirror(scope, fill, ProgressNotifier(context, 9203, DeepLinkTarget.FillThePast), "Importing drafts") { "${it.done} of ${it.total} days" }
+        mirror(scope, fill, ProgressNotifier(context, FILL_NOTIFICATION_ID, DeepLinkTarget.FillThePast), "Importing drafts") { "${it.done} of ${it.total} days" }
     }
 
     private fun mirror(

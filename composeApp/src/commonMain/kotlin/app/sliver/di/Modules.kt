@@ -45,7 +45,7 @@ val commonModule: Module = module {
     single { SyncEngine(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     single { BackupCoordinator(get(), get(), get()) }
     single { RestoreEngine(get(), get(), get()) }
-    single { SaveUndo(get(), get(), get()) }
+    single { SaveUndo(get(), get(), get(), get(), get()) }
     single { app.sliver.feature.trim.OriginalRescue(get(), get()) }
     single { FilmDeleter(get(), get(), get()) }
     single { AutoImportStore(get()) }

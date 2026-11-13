@@ -45,6 +45,10 @@ data class ProjectStats(val projectId: String, val clips: Int, val since: LocalD
 
 @Dao
 interface DayDao {
+    /** Owner 13 Nov: a clip earlier than the project's start moves the start back to that day. */
+    @Query("UPDATE project SET startDate = :date, updatedAt = :now, updatedBy = '' WHERE id = :projectId AND startDate > :date")
+    suspend fun pullProjectStart(projectId: String, date: LocalDate, now: Long)
+
     @Query("SELECT * FROM day WHERE projectId = :projectId AND date BETWEEN :from AND :to ORDER BY date")
     fun observeRange(projectId: String, from: LocalDate, to: LocalDate): Flow<List<Day>>
 

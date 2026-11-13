@@ -72,3 +72,9 @@
 - Verified on emulator tracker13: record → original kept after undo window; Change moment → start 0 → 2580 ms, same original file; Cancel; leftover rec_ in tmp rescued on launch. QA: qa/v1.7/day-change-moment.png
 - Old builds delete the recording 6 s after Save, so a day saved with an old build has a recording to rescue only if the app was killed inside that window.
 - Pull-to-sync removed from the calendar (owner).
+
+## 13 Nov evening (owner on Samsung)
+- Recordings never lost: removing/replacing a day moves its kept recording to Movies/Reelog first (app copy deleted only after the gallery has it). "Also save full recordings to Photos" now works (was never implemented). RecordingSaver (Android MediaStore).
+- Project start = earliest clip: DB 11→12 pulls existing projects back (Lena 13 Nov → 1 Apr), and any saved clip earlier than the start moves it (DayDao.pullProjectStart). Fill the calendar counts from the earliest clip.
+- Fill the calendar runs as a foreground job (notification 9203): Samsung killed the background scan for "excessive binder traffic during cached".
+- Samsung: "Lena iOS" folder (8710 iPhone files) had no metadata in MediaStore; rescanned. Recovered 13 Nov recording to Movies/Reelog/Reelog_2026-11-13_1459.mp4.

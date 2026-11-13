@@ -20,6 +20,7 @@ import app.sliver.data.db.Migration7To8
 import app.sliver.data.db.Migration8To9
 import app.sliver.data.db.Migration9To10
 import app.sliver.data.db.Migration10To11
+import app.sliver.data.db.Migration11To12
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.FileStore
@@ -51,7 +52,7 @@ actual val platformModule: Module = module {
         Room.databaseBuilder<SliverDatabase>(name = "${documentsDir()}/sliver.db")
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
-            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8, Migration8To9, Migration9To10, Migration10To11)
+            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8, Migration8To9, Migration9To10, Migration10To11, Migration11To12)
             .build()
     }
     single<FileStore> { IosFileStore() }
@@ -75,6 +76,7 @@ actual val platformModule: Module = module {
     single<NetworkMonitor> { IosNetworkMonitor }
     single<ArchiveExporter> { IosArchiveExporter }
     single<FilmShare> { IosFilmShare }
+    single<app.sliver.feature.trim.RecordingSaver> { object : app.sliver.feature.trim.RecordingSaver { override suspend fun save(path: String, stampMillis: Long): Boolean = TODO("iOS later") } }
     single<HttpClientEngine> { Darwin.create() }
     single<GalleryProvider> { IosGalleryProvider }
     single { PreferenceDataStoreFactory.createWithPath { "${documentsDir()}/settings.preferences_pb".toPath() } }

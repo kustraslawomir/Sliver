@@ -13,6 +13,7 @@ import app.sliver.data.db.Migration7To8
 import app.sliver.data.db.Migration8To9
 import app.sliver.data.db.Migration9To10
 import app.sliver.data.db.Migration10To11
+import app.sliver.data.db.Migration11To12
 import app.sliver.BuildConfig
 import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
@@ -69,7 +70,7 @@ actual val platformModule: Module = module {
     single {
         val ctx = get<Context>()
         Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath)
-            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8, Migration8To9, Migration9To10, Migration10To11).build()
+            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8, Migration8To9, Migration9To10, Migration10To11, Migration11To12).build()
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }
@@ -93,6 +94,7 @@ actual val platformModule: Module = module {
     single<NetworkMonitor> { AndroidNetworkMonitor(get<Context>()) }
     single<ArchiveExporter> { AndroidArchiveExporter(get<Context>(), get(), get(), get(), get()) }
     single<FilmShare> { AndroidFilmShare(get<Context>()) }
+    single<app.sliver.feature.trim.RecordingSaver> { app.sliver.feature.trim.AndroidRecordingSaver(get<Context>()) }
     single<HttpClientEngine> { OkHttp.create() }
     single<GalleryProvider> { AndroidGalleryProvider(get<Context>(), get()) }
     single {

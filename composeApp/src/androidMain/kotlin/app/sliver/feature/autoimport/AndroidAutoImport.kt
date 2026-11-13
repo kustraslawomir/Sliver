@@ -4,7 +4,13 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import app.sliver.feature.notifications.DeepLinkTarget
+import app.sliver.feature.notifications.FILL_NOTIFICATION_ID
+import app.sliver.feature.notifications.ProgressNotifier
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -32,7 +38,18 @@ class AndroidAutoImportRunner(private val context: Context) : AutoImportRunner {
 
 /** Progress lives in [AutoImportStore], so an interrupted run picks up where it stopped. */
 class AutoImportWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        // Same id as ProgressCoordinator's "Importing drafts", so the progress updates land in this notification.
+        val n = ProgressNotifier(applicationContext, FILL_NOTIFICATION_ID, DeepLinkTarget.FillThePast)
+            .build("Importing drafts", "Looking through your gallery", 0, 0)
+        val type = if (Build.VERSION.SDK_INT >= 29) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0
+        return ForegroundInfo(FILL_NOTIFICATION_ID, n, type)
+    }
+
     override suspend fun doWork(): Result {
+        // Owner 13 Nov (Samsung): a background scan of thousands of gallery items got the app killed for "excessive
+        // binder traffic during cached". As a foreground job it keeps running after leaving the screen.
+        runCatching { setForeground(getForegroundInfo()) }
         KoinPlatform.getKoin().get<AutoImportExecutor>().run()
         return Result.success()
     }
