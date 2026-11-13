@@ -49,8 +49,9 @@ class RestDriveClient(
                 if (body["trashed"]?.jsonPrimitive?.booleanOrNull != true) return storedId
             }
         }
-        val q = "name = '$DRIVE_FOLDER_NAME' and mimeType = '$FOLDER_MIME' and trashed = false"
-        val found = query(q).firstOrNull()
+        val names = (listOf(DRIVE_FOLDER_NAME) + LEGACY_DRIVE_FOLDER_NAMES)
+        val q = names.joinToString(" or ", "(", ")") { "name = '$it'" } + " and mimeType = '$FOLDER_MIME' and trashed = false"
+        val found = query(q).sortedBy { f -> names.indexOf(f.name) }.firstOrNull()
         if (found != null) return found.id
         val created = call(HttpMethod.Post, "/drive/v3/files") {
             jsonBody(buildJsonObject { put("name", DRIVE_FOLDER_NAME); put("mimeType", FOLDER_MIME) })

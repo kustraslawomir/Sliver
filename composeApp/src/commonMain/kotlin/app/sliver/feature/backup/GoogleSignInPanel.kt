@@ -1,5 +1,7 @@
 package app.sliver.feature.backup
 
+import app.sliver.core.APP_NAME
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,7 +56,7 @@ fun GoogleSignInPanel(
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
     ) {
         SliverText("Back up your clips", SliverType.DisplayM)
-        SliverText("Your clips go to a Fragments folder in your own Google Drive. Nothing else in your Drive is touched.", SliverType.Body, color = SliverColors.TextSecondary)
+        SliverText("Your clips go to a $APP_NAME folder in your own Google Drive. Nothing else in your Drive is touched.", SliverType.Body, color = SliverColors.TextSecondary)
         if (manager.isFake) SliverText("Demo mode: no Google account is used.", SliverType.BodySmall)
         error?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.Error) }
         Column(Modifier.padding(top = SliverSpace.S6), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {

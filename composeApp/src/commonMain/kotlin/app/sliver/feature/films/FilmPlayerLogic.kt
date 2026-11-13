@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.APP_NAME
+
 import kotlin.math.pow
 
 const val PREMIERE_SLIT_MS = 1000L
@@ -47,5 +49,5 @@ interface FilmShare {
 /** One-line file info under the player actions (design/src/FilmPlayer.dc.html). Both formats render at 1080p. */
 fun filmInfoLine(sizeBytes: Long): String {
     val mb = ((sizeBytes + 500_000) / 1_000_000).coerceAtLeast(1)
-    return "MP4 · 1080p · 30 fps · $mb MB · kept in Fragments"
+    return "MP4 · 1080p · 30 fps · $mb MB · kept in $APP_NAME"
 }

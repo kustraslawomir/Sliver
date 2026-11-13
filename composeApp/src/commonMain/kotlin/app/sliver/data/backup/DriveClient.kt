@@ -8,7 +8,7 @@ class DriveException(val error: BackupError, message: String? = null, cause: Thr
 data class DriveFile(val id: String, val name: String, val appProperties: Map<String, String> = emptyMap())
 
 interface DriveClient {
-    /** Returns [storedId] if that folder still exists, otherwise finds or creates the 'SLIVER' folder. */
+    /** Returns [storedId] if that folder still exists, otherwise finds the app folder (also under an older app name) or creates it. */
     suspend fun ensureFolder(storedId: String? = null): String
 
     /** Finds or creates the folder [name] directly under [parentId]. */
@@ -43,7 +43,12 @@ interface DriveClient {
 
 data class DriveQuota(val used: Long, val limit: Long?)
 
-const val DRIVE_FOLDER_NAME = "Fragments"
+const val DRIVE_FOLDER_NAME = app.sliver.core.APP_NAME
+
+/** Folder names used by earlier builds; an existing one is reused, never renamed. */
+val LEGACY_DRIVE_FOLDER_NAMES = listOf("Fragments", "SLIVER")
+
+private val ALL_FOLDER_NAMES = listOf(DRIVE_FOLDER_NAME) + LEGACY_DRIVE_FOLDER_NAMES
 
 class InMemoryDriveClient : DriveClient {
     private class Entry(var file: DriveFile, val parent: String?, var bytes: ByteArray, var trashed: Boolean = false, val folder: Boolean = false)
@@ -63,7 +68,7 @@ class InMemoryDriveClient : DriveClient {
 
     override suspend fun ensureFolder(storedId: String?): String {
         entries[storedId]?.takeIf { !it.trashed }?.let { return it.file.id }
-        entries.values.firstOrNull { it.file.name == DRIVE_FOLDER_NAME && it.parent == null && !it.trashed }
+        ALL_FOLDER_NAMES.firstNotNullOfOrNull { n -> entries.values.firstOrNull { it.file.name == n && it.parent == null && !it.trashed } }
             ?.let { return it.file.id }
         return add(DRIVE_FOLDER_NAME, null, emptyMap(), ByteArray(0), folder = true).id
     }

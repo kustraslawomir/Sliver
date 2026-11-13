@@ -1,5 +1,7 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.core.APP_NAME
+
 import app.sliver.core.ui.SwitchRow
 import androidx.compose.foundation.layout.FlowRow
 import app.sliver.core.ui.Chip
@@ -189,7 +191,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             ) {
                 SliverText("Limited access", SliverType.Headline, color = SliverColors.TextPrimary)
                 SliverText(
-                    "Fragments can only see the photos and videos you selected, so most days may stay empty.",
+                    "$APP_NAME can only see the photos and videos you selected, so most days may stay empty.",
                     SliverType.BodySmall, color = SliverColors.TextSecondary,
                 )
                 SecondaryButton("Allow all", { controller.request(PermissionKind.MediaLibrary) })
@@ -197,7 +199,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
         if (status == PermissionStatus.Denied) {
             SliverText(
-                "Photo access is off. Turn it on in Settings so Fragments can find a photo or video for each empty day.",
+                "Photo access is off. Turn it on in Settings so $APP_NAME can find a photo or video for each empty day.",
                 SliverType.BodySmall, color = SliverColors.TextSecondary,
             )
             SecondaryButton("Open Settings", controller::openSettings)

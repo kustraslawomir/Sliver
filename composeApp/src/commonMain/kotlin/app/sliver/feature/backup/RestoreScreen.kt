@@ -1,5 +1,7 @@
 package app.sliver.feature.backup
 
+import app.sliver.core.APP_NAME
+
 import app.sliver.core.ui.SlitLoader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -132,7 +134,7 @@ fun RestoreScreen(onDone: () -> Unit) {
             }
             RestoreStage.NONE -> {
                 SliverText("Nothing to restore", SliverType.DisplayM)
-                SliverText("We didn't find any clips in your Fragments folder.", SliverType.Body, color = SliverColors.TextSecondary)
+                SliverText("We didn't find any clips in your $APP_NAME folder.", SliverType.Body, color = SliverColors.TextSecondary)
                 GhostButton("Continue", onClick = onDone)
             }
             RestoreStage.FAILED -> {

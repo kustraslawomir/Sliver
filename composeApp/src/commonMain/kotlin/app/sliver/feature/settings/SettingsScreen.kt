@@ -1,5 +1,7 @@
 package app.sliver.feature.settings
 
+import app.sliver.core.APP_NAME
+
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
@@ -112,17 +114,17 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
         Group("More")
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
         NavRow("Fill the calendar", null) { onGo(Route.FillThePast) }
-        NavRow("What Fragments stores", null) { showStores = !showStores }
+        NavRow("What $APP_NAME stores", null) { showStores = !showStores }
         if (showStores) {
             SliverText(
                 "Your clips, photos and films stay on this phone. If you turn on backup, copies go to a private folder in your own Google Drive. Nothing is shared with us.",
                 SliverType.BodySmall, Modifier.padding(bottom = SliverSpace.S3), color = SliverColors.TextSecondary,
             )
         }
-        NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "Fragments feedback") }
+        NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "$APP_NAME feedback") }
 
         SliverText(
-            "Fragments ${platform.versionName}", SliverType.Meta,
+            "$APP_NAME ${platform.versionName}", SliverType.Meta,
             Modifier.padding(top = SliverSpace.S6).combinedClickable(onClick = {}, onLongClick = { platform.seedDebugData() }),
             color = SliverColors.TextTertiary,
         )

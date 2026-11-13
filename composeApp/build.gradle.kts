@@ -84,6 +84,7 @@ abstract class GenerateDesignTokens : DefaultTask() {
             appendLine("class TokenText(val size: Int, val line: Int, val weight: Int, val tracking: Float)")
             appendLine()
             appendLine("object Tokens {")
+            appendLine("    const val AppName = \"${s(root, "appName")}\"")
             append(palette("DarkColors", dark))
             append(palette("LightColors", light))
             appendLine("    val RecordRed = Color(${argb(s(a, "record"))})")
@@ -190,6 +191,8 @@ dependencies {
     add("kspIosSimulatorArm64", libs.room.compiler)
 }
 
+val appName: String = (groovy.json.JsonSlurper().parse(rootProject.file("design/tokens.json")) as Map<*, *>)["appName"] as String
+
 android {
     namespace = "app.sliver"
     compileSdk = 37
@@ -201,8 +204,10 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
+        resValue("string", "app_name", appName)
     }
     buildFeatures.buildConfig = true
+    buildFeatures.resValues = true
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

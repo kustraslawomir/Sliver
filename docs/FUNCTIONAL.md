@@ -1,12 +1,13 @@
-# Fragments — functional overview (current behaviour, 2026-11-13)
+# Reelog — functional overview (current behaviour, 2026-11-13)
 
 Snapshot of what the app does today on `auto/build` (HEAD 976c3d6). Where `docs/SPEC.md` disagrees
 (it still describes camera-as-home, a Looks editor, a Year view, 7-step onboarding), **this file wins**;
 owner decisions are also listed in `design/INDEX.md` ("v1.4.1 owner decisions").
 
 ## Identity and platform
-- App name **Fragments** (was SLIVER/Sliver). Android applicationId / iOS bundle id `skustra.fragments`;
-  Kotlin namespace and classes stay `app.sliver.*`. KMP + Compose Multiplatform; Android only is built;
+- App name **Reelog** (was Fragments, before that SLIVER), one value `appName` in `design/tokens.json` →
+  `APP_NAME` (Kotlin) and `@string/app_name` (Android). Android applicationId / iOS bundle id stay `skustra.fragments`
+  (OAuth client + existing backups depend on it); Kotlin namespace and classes stay `app.sliver.*`. KMP + Compose Multiplatform; Android only is built;
   iOS is a stub shell.
 - One clip per day, organised in **projects** (e.g. "My 2026", "Lena"). Each day is a 1.000 s, 1080p
   H.264 clip stored in app storage (`days/<project>/<date>.mp4` + thumbnail). Originals in the gallery are
@@ -98,13 +99,13 @@ Full-bleed loop of the day, prev/next day, sound; **Replace** (same as Adding me
   thumbnails from the film, Intensity and Grain sliders. 40-candidate pool exists in `looks/candidates.json`.
 - Export renders 1080p (16 Mbps) in the background → Premiere → Play / Save to Photos / Share / Done.
 - Film player: icon-only controls (mute, play/pause, fullscreen), scrubber with times, file info line
-  "MP4 · 1080p · 30 fps · N MB · kept in Fragments", Save to Photos, Edit film, Delete film (red text, undo).
+  "MP4 · 1080p · 30 fps · N MB · kept in Reelog", Save to Photos, Edit film, Delete film (red text, undo).
 
 ## Backup & sync (Google Drive, optional)
 - Sign in: "Continue with Google" goes straight to Google (Credential Manager + `drive.file` consent; no
   explainer page). OAuth project `fragments-514519`, consent screen in Testing (owner is a test user).
 - Backup & sync screen: chevron header, one status card (Synced · just now · N phones / Syncing / waiting for
-  Wi-Fi / failed / Drive full / access removed / offline), Folder "Fragments", Clips line, Drive free space
+  Wi-Fi / failed / Drive full / access removed / offline), Folder "Reelog" (an existing "Fragments" folder keeps being used), Clips line, Drive free space
   with ⚠ "Almost full" under 1 GB, Sync automatically, Wi-Fi only, Sync now, Export everything (.zip),
   account row (email · Sign out), Delete account.
 - Two-way sync between phones on one account: one Drive file per record (project, day, film definition),
@@ -122,7 +123,7 @@ Full-bleed loop of the day, prev/next day, sound; **Replace** (same as Adding me
 ## Settings
 Account · Backup & sync · Default film format · Appearance (System / Light / Dark) · Date stamp · Also save
 full recordings to Photos · Volume key records · Show golden hour · Daily reminder · Fill the calendar ·
-What Fragments stores · Send feedback · version.
+What Reelog stores · Send feedback · version.
 
 ## Other
 - Playback pauses everywhere when the screen locks or the app goes to the background.

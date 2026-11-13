@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.APP_NAME
+
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -27,9 +29,9 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
     override suspend fun saveToPhotos(path: String, name: String): Boolean = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, "Fragments - $name.mp4")
+            put(MediaStore.Video.Media.DISPLAY_NAME, "$APP_NAME - $name.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/Fragments")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/$APP_NAME")
             put(MediaStore.Video.Media.IS_PENDING, 1)
         }
         val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values) ?: return@withContext false

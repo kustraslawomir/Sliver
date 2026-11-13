@@ -1,5 +1,7 @@
 package app.sliver.feature.backup
 
+import app.sliver.core.APP_NAME
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -153,7 +155,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                             if (ui == BackupUi.REVOKED) scope.launch { manager.signIn() }
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
                         })
-                        InfoRow("Folder", "Fragments")
+                        InfoRow("Folder", APP_NAME)
                         InfoRow("Clips", clipsLine(backedUp, statuses.size))
                         val driveText = quota?.let { driveLine(it.used, it.limit) }
                         InfoRow("Drive", driveText?.text ?: "Unavailable", warn = driveText?.low == true)
@@ -202,11 +204,11 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
             Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverText("Delete account?", SliverType.Title)
                 SliverText(
-                    "We revoke Fragments' access to your Google account and carry on as a guest.",
+                    "We revoke $APP_NAME's access to your Google account and carry on as a guest.",
                     SliverType.BodySmall,
                 )
                 SwitchRow(
-                    "Delete the Fragments folder in Drive", deleteDrive, { deleteDrive = it },
+                    "Delete the $APP_NAME folder in Drive", deleteDrive, { deleteDrive = it },
                     caption = "Your backed-up clips are removed from Drive",
                 )
                 SwitchRow(

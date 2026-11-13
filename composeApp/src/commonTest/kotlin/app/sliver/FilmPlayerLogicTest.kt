@@ -35,7 +35,7 @@ class FilmPlayerLogicTest {
 
     @Test
     fun infoLineRoundsMegabytes() {
-        assertEquals("MP4 · 1080p · 30 fps · 9 MB · kept in Fragments", filmInfoLine(9_400_000))
-        assertEquals("MP4 · 1080p · 30 fps · 1 MB · kept in Fragments", filmInfoLine(0))
+        assertEquals("MP4 · 1080p · 30 fps · 9 MB · kept in Reelog", filmInfoLine(9_400_000))
+        assertEquals("MP4 · 1080p · 30 fps · 1 MB · kept in Reelog", filmInfoLine(0))
     }
 }

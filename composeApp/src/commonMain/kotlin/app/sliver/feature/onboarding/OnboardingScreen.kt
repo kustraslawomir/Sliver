@@ -1,5 +1,7 @@
 package app.sliver.feature.onboarding
 
+import app.sliver.core.APP_NAME
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -120,7 +122,7 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
                     Box(Modifier.align(Alignment.CenterHorizontally).width(12.dp).height(120.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary))
                     SliverText("One clip a day. One film a year.", SliverType.DisplayM)
                     SliverText(
-                        "Catch a moment, keep the best part. Fragments turns your clips into a film.",
+                        "Catch a moment, keep the best part. $APP_NAME turns your clips into a film.",
                         SliverType.Body, color = SliverColors.TextSecondary,
                     )
                     PrimaryButton("Start", { index++ }, Modifier.fillMaxWidth().padding(top = SliverSpace.S6))
@@ -167,7 +169,7 @@ private fun CameraStep(controller: app.sliver.core.permissions.PermissionControl
     ) {
         SliverText("Camera, please.", SliverType.DisplayM)
         SliverText(
-            "Fragments only records while you tap or hold. Nothing leaves your phone.",
+            "$APP_NAME only records while you tap or hold. Nothing leaves your phone.",
             SliverType.Body, color = SliverColors.TextSecondary,
         )
         PrimaryButton(

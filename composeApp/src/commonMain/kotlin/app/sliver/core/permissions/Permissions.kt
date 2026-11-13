@@ -1,5 +1,7 @@
 package app.sliver.core.permissions
 
+import app.sliver.core.APP_NAME
+
 import androidx.compose.runtime.Composable
 
 enum class PermissionKind { CameraMic, Notifications, CoarseLocation, MediaLibrary }
@@ -24,17 +26,17 @@ data class PermissionCopy(val title: String, val body: String, val allow: String
 
 fun PermissionKind.copy() = when (this) {
     PermissionKind.CameraMic -> PermissionCopy(
-        "Let Fragments see and hear your day",
+        "Let $APP_NAME see and hear your day",
         "One clip a day. Camera and microphone stay on your phone.",
         "Allow camera & mic",
     )
     PermissionKind.Notifications -> PermissionCopy(
         "A gentle nudge each day",
-        "Fragments reminds you once a day to capture your clip.",
+        "$APP_NAME reminds you once a day to capture your clip.",
         "Allow notifications",
     )
     PermissionKind.MediaLibrary -> PermissionCopy(
-        "Let Fragments read your gallery",
+        "Let $APP_NAME read your gallery",
         "Used only when you start an import, to find a photo or video for each empty day. Nothing leaves your phone.",
         "Allow photos & videos",
     )

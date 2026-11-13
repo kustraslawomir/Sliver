@@ -37,6 +37,9 @@ ALLOW_EXTRA='' ; report "shadow( as colour light is forbidden; add '// lint-ok: 
 ALLOW_EXTRA='' ; report "FontFamily.Default / SansSerif are forbidden; use SliverTheme.typography" < <(search 'FontFamily\.Default|SansSerif' 'kt')
 ALLOW_EXTRA='core/(designsystem|theme)/' ; report "Color(0x literals only allowed in core/designsystem or core/theme (token files); use tokens" < <(search 'Color\(0x' 'kt')
 ALLOW_EXTRA='' ; report "wordmark must be a drawable, not Text(\"SLIVER\")" < <(search 'Text\([^)]*"SLIVER"' 'kt')
+# The app name comes from design/tokens.json (APP_NAME / @string/app_name); old names must not reach the UI.
+ALLOW_EXTRA='LEGACY_DRIVE_FOLDER_NAMES|/(commonTest|androidUnitTest|debug)/' ; report "old app name in a user-visible string; use APP_NAME" < <(search '"[^"]*(Fragments|SLIVER)[^"]*"' 'kt')
+ALLOW_EXTRA='' ; report "old app name in a resource; use @string/app_name" < <(search '>[^<]*(Fragments|SLIVER)[^<]*<|label="(Fragments|SLIVER)' 'xml')
 
 # strings.xml copy rules
 STR=$(find $SRC -name strings.xml -path '*values/*' 2>/dev/null)

@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.APP_NAME
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +36,7 @@ const val SPLASH_FADE_MS = 240
 fun isStorageLow(freeBytes: Long): Boolean = freeBytes < MIN_FREE_BYTES
 
 const val STORAGE_FULL_TITLE = "Phone storage is full"
-const val STORAGE_FULL_BODY = "Fragments needs about 200 MB free. Free up some space, then try again."
+const val STORAGE_FULL_BODY = "$APP_NAME needs about 200 MB free. Free up some space, then try again."
 
 /** Centered message with an optional single action. */
 @Composable
