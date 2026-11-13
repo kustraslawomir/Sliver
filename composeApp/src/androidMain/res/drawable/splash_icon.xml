@@ -1,0 +1,4 @@
+<!-- Android 12+ SplashScreen icon: 72dp red disc centred in the 240dp/160dp-safe icon area = the record button -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="240dp" android:height="240dp" android:viewportWidth="240" android:viewportHeight="240">
+  <path android:fillColor="#FF3B30" android:pathData="M84,120a36,36 0 1,0 72,0a36,36 0 1,0 -72,0z"/>
+</vector>

@@ -213,6 +213,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     testOptions.unitTests.isIncludeAndroidResources = true
+    // Roborazzi shots need the debug-only ui-test-manifest; goldens are recorded and verified on debug.
+    testOptions.unitTests.all { if (it.name.contains("Release")) it.exclude("**/shots/**") }
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
 }
 

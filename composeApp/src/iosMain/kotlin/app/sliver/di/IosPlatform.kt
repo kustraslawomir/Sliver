@@ -96,6 +96,7 @@ internal object IosArchiveExporter : ArchiveExporter {
 internal object IosFilmShare : FilmShare {
     override fun share(path: String, name: String) = Unit
     override suspend fun saveToPhotos(path: String, name: String) = false
+    override fun sizeBytes(path: String) = 0L
 }
 
 internal object IosGalleryProvider : GalleryProvider {

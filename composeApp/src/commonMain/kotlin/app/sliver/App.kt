@@ -13,6 +13,7 @@ import org.koin.mp.KoinPlatform
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import app.sliver.core.navigation.SliverNavHost
 import app.sliver.core.theme.SliverTheme
@@ -35,12 +36,13 @@ fun App() {
     SliverTheme(reducedMotion = rememberReducedMotion(), light = light) {
         if (SHOW_GALLERY) ComponentGallery()
         else {
-            var splash by remember { mutableStateOf(true) }
+            var splash by rememberSaveable { mutableStateOf(true) }
+            val toProject by remember { repo.settings.map<_, Boolean?> { it.onboardingDone } }.collectAsState(null)
             Box {
                 SliverNavHost()
                 NoticeHost()
                 UndoToastHost()
-                if (splash) SplashOverlay { splash = false }
+                if (splash) SplashOverlay(toProject) { splash = false }
             }
         }
     }

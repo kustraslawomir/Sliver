@@ -30,8 +30,6 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 
 const val MIN_FREE_BYTES = 200L * 1024 * 1024
-const val SPLASH_MS = 1400
-const val SPLASH_FADE_MS = 240
 
 fun isStorageLow(freeBytes: Long): Boolean = freeBytes < MIN_FREE_BYTES
 
@@ -56,22 +54,5 @@ fun EdgeState(title: String, body: String, modifier: Modifier = Modifier, action
 fun StorageFullOverlay(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize().background(SliverColors.BgBase).clickable(enabled = false) {}) {
         EdgeState(STORAGE_FULL_TITLE, STORAGE_FULL_BODY, Modifier.align(Alignment.Center), "OK", onDismiss)
-    }
-}
-
-/** Black launch screen: a slit widens, the wordmark fades in, then the whole layer cross-fades away. */
-@Composable
-fun SplashOverlay(onFinished: () -> Unit) {
-    val reduced = LocalReducedMotion.current
-    val progress = remember { Animatable(if (reduced) 1f else 0f) }
-    val fade = remember { Animatable(1f) }
-    LaunchedEffect(Unit) {
-        if (!reduced) progress.animateTo(1f, SliverMotion.emphasized(SPLASH_MS))
-        fade.animateTo(0f, SliverMotion.standard(SPLASH_FADE_MS))
-        onFinished()
-    }
-    Box(Modifier.fillMaxSize().alpha(fade.value).background(SliverColors.BgVoid), contentAlignment = Alignment.Center) {
-        val p = progress.value
-        Box(Modifier.width(2.dp).height((220 * p).dp).background(SliverColors.Accent, SliverShapes.Pill))
     }
 }

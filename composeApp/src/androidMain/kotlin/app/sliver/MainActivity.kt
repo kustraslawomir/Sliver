@@ -16,7 +16,8 @@ import androidx.activity.enableEdgeToEdge
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // The Compose SplashOverlay draws the same disc in the same place and runs the rest of the sequence.
+        installSplashScreen().setOnExitAnimationListener { it.remove() }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
