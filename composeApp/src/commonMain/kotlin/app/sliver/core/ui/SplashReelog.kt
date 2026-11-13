@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -100,7 +102,7 @@ fun SplashOverlay(toProject: Boolean?, onFinished: () -> Unit) {
         Box(Modifier.fillMaxWidth().offset(y = (centerY + SPLASH_TAGLINE_GAP_DP).dp).graphicsLayer { alpha = f.tagline }) {
             SliverText(
                 "One clip a day",
-                SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp, textAlign = TextAlign.Center),
+                SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), textAlign = TextAlign.Center),
                 color = Tokens.DarkColors.textTertiary,
                 modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
             )

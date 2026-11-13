@@ -44,6 +44,10 @@ ALLOW_EXTRA='' ; report "old app name in a resource; use @string/app_name" < <(s
 ALLOW_EXTRA='replaceFirstChar|stampText|Stamp' ; report "uppercase() on UI text is forbidden (sentence case, Geist)" < <(search '\.uppercase\(\)' 'kt')
 ALLOW_EXTRA='LEGACY_DRIVE_FOLDER_NAMES|const val|@Suppress|"(MP4|HDR|HEIC|JPEG|UTC|GET|POST|PUT|PATCH|DELETE)"|/(commonTest|androidUnitTest|debug)/|/data/' ; report "ALL CAPS text in UI code; use sentence case" < <(search '"[A-Z][A-Z ·]{2,}[A-Z]"' 'kt')
 
+# v1.7 type scale: sizes live only in core/theme/Type.kt (ReelogType); nothing under 13 sp.
+ALLOW_EXTRA='core/theme/Type\.kt|/(commonTest|androidUnitTest|debug)/' ; report "raw fontSize/lineHeight literal; use ReelogType" < <(search '(fontSize|lineHeight) *= *[0-9.]+\.sp' 'kt')
+ALLOW_EXTRA='core/theme/Type\.kt|letterSpacing|/(commonTest|androidUnitTest|debug)/' ; report "text size under 13 sp" < <(search '[^0-9.a-zA-Z_](1[0-2]|[0-9])(\.[0-9]+)?\.sp' 'kt')
+
 # strings.xml copy rules
 STR=$(find $SRC -name strings.xml -path '*values/*' 2>/dev/null)
 if [ -n "$STR" ]; then

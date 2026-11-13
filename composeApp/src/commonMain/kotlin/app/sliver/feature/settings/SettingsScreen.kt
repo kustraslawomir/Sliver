@@ -1,5 +1,7 @@
 package app.sliver.feature.settings
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.core.APP_NAME
 
 import app.sliver.core.icons.SliverIcon
@@ -139,7 +141,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 @Composable
 private fun Group(title: String) {
     SliverText(
-        title, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp),
+        title, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
         Modifier.padding(top = SliverSpace.S6, bottom = SliverSpace.S3), color = SliverColors.TextTertiary,
     )
 }
@@ -153,7 +155,7 @@ private fun LinedSwitch(title: String, checked: Boolean, onChange: (Boolean) -> 
     SwitchRow(title, checked, onChange, caption = caption)
 }
 
-private val ValueStyle @Composable get() = SliverType.Caption.copy(fontSize = 13.sp, lineHeight = 18.sp)
+private val ValueStyle @Composable get() = SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption))
 
 @Composable
 private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {

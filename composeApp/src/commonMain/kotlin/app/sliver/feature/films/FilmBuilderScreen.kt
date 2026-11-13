@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.core.ui.SliverBottomSheet
 import androidx.compose.foundation.layout.heightIn
 import app.sliver.core.ui.Chip
@@ -133,10 +135,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         ) {
             IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                SliverText(editing?.name ?: project?.name ?: "New film", SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp), maxLines = 1)
+                SliverText(editing?.name ?: project?.name ?: "New film", SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), maxLines = 1)
                 SliverText(
                     if (format == FilmFormat.CINEMA) "Cinema 16:9" else "Story 9:16",
-                    SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary,
+                    SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
                 )
             }
             Spacer(Modifier.size(44.dp))
@@ -186,8 +188,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             SliverSlider(fraction, { seek = FilmSeek(it) })
             Row(Modifier.fillMaxWidth()) {
                 val at = (fraction * plan.clips).toInt()
-                SliverText("${clockTime(at)} / ${clockTime(plan.clips)}", SliverType.Meta.copy(fontSize = 12.sp), Modifier.weight(1f), SliverColors.TextTertiary)
-                SliverText("${clipsText(plan.clips)} \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = 12.sp), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText("${clockTime(at)} / ${clockTime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), Modifier.weight(1f), SliverColors.TextTertiary)
+                SliverText("${clipsText(plan.clips)} \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
             }
         }
 
@@ -307,7 +309,7 @@ private fun clockTime(seconds: Int) = "${(seconds / 60).toString().padStart(2, '
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText(title, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary)
+        SliverText(title, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextTertiary)
         content()
     }
 }

@@ -1,5 +1,7 @@
 package app.sliver.feature.camera
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
@@ -57,7 +59,7 @@ fun GoldenHourLine(enabled: Boolean, modifier: Modifier = Modifier) {
     ) {
         SliverIcon(SliverIcons.Sun, color, size = 16.dp)
         SliverText(
-            goldenText(s), SliverType.Caption.copy(fontSize = 13.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+            goldenText(s), SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
             color = color, maxLines = 1, softWrap = false,
         )
     }

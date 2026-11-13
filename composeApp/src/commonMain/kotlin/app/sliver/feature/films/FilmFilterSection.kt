@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.data.pickerLabel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -81,7 +83,7 @@ fun FilmFilterSection(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText(
             if (onAdjust != null) "Filter \u00B7 hold to adjust" else "Filter \u00B7 whole film",
-            SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 16.sp), color = SliverColors.TextTertiary,
+            SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
         )
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             Tile("None", frame, selected == null, onClick = { onSelect(null) })

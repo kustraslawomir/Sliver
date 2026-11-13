@@ -1,5 +1,7 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -182,13 +184,13 @@ fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier:
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 SliverText(
                     if (!ctx.day.draft && ctx.day.importRunId == null) "Change clip" else draftHeaderTitle(ctx.day.draft, index, total),
-                    SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp),
+                    SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)),
                     color = SliverColors.TextPrimary, maxLines = 1,
                 )
                 if (nav.busy) SlitLoader(width = 24.dp)
             }
             SliverText(
-                "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
                 color = SliverColors.TextTertiary, maxLines = 1,
             )
             if (ctx.candidates.firstOrNull { it.uri == ctx.selectedUri }?.fileTime == true) {
@@ -217,7 +219,7 @@ private val strip get() = StripScroll
 fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
     if (ctx.candidates.size < 2) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText("Other items from this day", SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextSecondary)
+        SliverText("Other items from this day", SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
         val listState = rememberLazyListState(
             initialFirstVisibleItemIndex = if (strip.day == ctx.day.date) strip.index else ctx.candidates.indexOfFirst { it.uri == ctx.selectedUri }.coerceAtLeast(0),
             initialFirstVisibleItemScrollOffset = if (strip.day == ctx.day.date) strip.offset else 0,
@@ -251,14 +253,14 @@ internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modif
         if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         if (c.video && !c.motion && !c.live) {
             SliverText(
-                durationLabel(c.durationMs), SliverType.Meta.copy(fontSize = 10.sp, lineHeight = 12.sp),
+                durationLabel(c.durationMs), SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
                 Modifier.align(Alignment.BottomEnd).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )
         }
         if (c.motion || c.live) {
             SliverText(
-                "Motion", SliverType.Caption.copy(fontSize = 10.sp, lineHeight = 12.sp),
+                "Motion", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
                 Modifier.align(Alignment.BottomStart).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )

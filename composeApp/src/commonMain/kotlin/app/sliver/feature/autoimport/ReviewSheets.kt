@@ -1,5 +1,7 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -79,7 +81,7 @@ private fun DayThumb(day: Day) {
         if (thumb != null) Image(thumb, null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
         Box(Modifier.matchParentSize().dashedOutline(if (day.draft) SliverColors.TextDisabled else SliverColors.OnMedia))
         SliverText(
-            "${day.date.day} ${MonthNames[day.date.month.ordinal]}", SliverType.Caption.copy(fontSize = 11.sp, color = SliverColors.OnMedia).overMedia(),
+            "${day.date.day} ${MonthNames[day.date.month.ordinal]}", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, color = SliverColors.OnMedia).overMedia(),
             Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 4.dp),
         )
     }

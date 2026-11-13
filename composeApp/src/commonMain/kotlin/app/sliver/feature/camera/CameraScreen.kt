@@ -1,5 +1,7 @@
 package app.sliver.feature.camera
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.feature.gallery.rememberAddMedia
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -392,7 +394,7 @@ private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         SliverText(
-            text, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp).overMedia(),
+            text, SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium, lineHeight = ReelogType.lineFor(ReelogType.Size.label)).overMedia(),
             color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.8f), maxLines = 1,
         )
         Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) SliverColors.OnMedia else Color.Transparent, CircleShape))
@@ -411,7 +413,7 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
         Box(Modifier.size(52.dp).clip(CircleShape).background(SliverColors.OnMedia.copy(alpha = 0.1f)), Alignment.Center) {
             SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
-        SliverText(label, SliverType.Caption.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, lineHeight = 16.sp).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
+        SliverText(label, SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.Medium, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
     }
 }
 
@@ -436,7 +438,7 @@ private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifi
                     Alignment.Center,
                 ) {
                     SliverText(
-                        label, SliverType.Meta.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold).overMedia(),
+                        label, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.SemiBold).overMedia(),
                         color = SliverColors.OnMedia.copy(alpha = if (on) 1f else 0.85f), maxLines = 1,
                     )
                 }
@@ -486,7 +488,7 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Box(Modifier.size(8.dp).alpha(dotAlpha).background(SliverColors.Record, CircleShape))
-        val style = SliverType.Body.copy(fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
+        val style = SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
         SliverText(if (clipOk) "$time \u00B7 Clip OK" else time, style, color = color, maxLines = 1)
     }
 }

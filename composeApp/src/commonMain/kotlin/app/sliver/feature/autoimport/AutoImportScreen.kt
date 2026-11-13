@@ -1,5 +1,7 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
@@ -276,7 +278,7 @@ private fun BigCount(number: String, tail: String?, caption: String) {
             },
             SliverType.DisplayXL, color = SliverColors.TextPrimary, maxLines = 1,
         )
-        SliverText(caption, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextTertiary)
+        SliverText(caption, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextTertiary)
     }
 }
 
@@ -394,7 +396,7 @@ private fun Mosaic(days: List<Day>) {
 private fun StatRow(label: String, value: String) {
     Hairline()
     Row(Modifier.fillMaxWidth().height(46.dp), verticalAlignment = Alignment.CenterVertically) {
-        SliverText(label, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f), color = SliverColors.TextSecondary)
-        SliverText(value, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp, fontFeatureSettings = "tnum"), color = SliverColors.TextPrimary)
+        SliverText(label, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f), color = SliverColors.TextSecondary)
+        SliverText(value, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), fontFeatureSettings = "tnum"), color = SliverColors.TextPrimary)
     }
 }

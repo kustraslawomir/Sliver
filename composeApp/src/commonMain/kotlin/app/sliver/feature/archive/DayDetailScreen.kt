@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.feature.gallery.rememberAddMedia
 import app.sliver.core.ui.DateStamp
 import app.sliver.data.export.stampText
@@ -154,13 +156,13 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     SliverText(
                         "${weekdayName(current)} ${current.day} ${MonthLong[current.month.ordinal]}",
-                        SliverType.Title.copy(fontSize = 22.sp, lineHeight = 28.sp), color = SliverColors.OnMedia, maxLines = 1,
+                        SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline)), color = SliverColors.OnMedia, maxLines = 1,
                     )
                     val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
                     val whenText = if (current == today) "Today" else "Day ${dayNumber(current, first)}"
                     SliverText(
                         whenText + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                        SliverType.Meta.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f),
+                        SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.OnMedia.copy(alpha = 0.7f),
                     )
                 }
                 IconButton44({ next?.let { show(it) } }, "Next day") {
@@ -169,7 +171,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             }
             if (day != null && others.isNotEmpty()) {
                 // Owner: files added later (e.g. from an iPhone) can replace a saved day's clip.
-                SliverText("Other items from this day", SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.OnMedia)
+                SliverText("Other items from this day", SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnMedia)
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                     items(others.size) { i ->
                         val c = others[i]

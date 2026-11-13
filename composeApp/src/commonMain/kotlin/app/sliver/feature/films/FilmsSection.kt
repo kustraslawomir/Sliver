@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.theme.ReelogType
+
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.toLocalDateTime
 import androidx.compose.foundation.Image
@@ -82,7 +84,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
-            SliverText("Films", SliverType.Title.copy(letterSpacing = (-0.02).em, lineHeight = 22.sp), Modifier.weight(1f))
+            SliverText("Films", SliverType.Title, Modifier.weight(1f))
             val tap = rememberTapGate { onNavigate(Route.FilmBuilder) }
             Row(
                 Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
@@ -91,7 +93,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 SliverIcon(HubIcons.Plus, SliverColors.TextPrimary, size = 16.dp)
-                SliverText("Make film", SliverType.Headline.copy(fontSize = 14.sp, lineHeight = 18.sp), maxLines = 1, softWrap = false)
+                SliverText("Make film", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), maxLines = 1, softWrap = false)
             }
         }
         if (list.isNotEmpty()) {
@@ -133,8 +135,8 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> U
             }
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    SliverText("A film by you", SliverType.tnum(9.sp, 0.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f))
-                    SliverText(film.name, SliverType.Title.copy(fontSize = 21.sp, lineHeight = 22.sp, letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
+                    SliverText("A film by you", SliverType.tnum(), color = SliverColors.OnMedia.copy(alpha = 0.7f))
+                    SliverText(film.name, SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline), letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
                 }
                 when (val s = state) {
                     is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
@@ -144,10 +146,10 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> U
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            SliverText(plan.spanText(), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary, maxLines = 1)
-            SliverText("${clipsText(plan.clips)} · ${formatRuntime(plan.clips)}", SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextPrimary)
+            SliverText(plan.spanText(), SliverType.tnum(), color = SliverColors.TextTertiary, maxLines = 1)
+            SliverText("${clipsText(plan.clips)} · ${formatRuntime(plan.clips)}", SliverType.tnum(), color = SliverColors.TextPrimary)
             // Owner: two films of the same project look identical; when it was made tells them apart.
-            film.renderedAt?.let { SliverText(madeLabel(it), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary, maxLines = 1) }
+            film.renderedAt?.let { SliverText(madeLabel(it), SliverType.tnum(), color = SliverColors.TextTertiary, maxLines = 1) }
         }
     }
 }

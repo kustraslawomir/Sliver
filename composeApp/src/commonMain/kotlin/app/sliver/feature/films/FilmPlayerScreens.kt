@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.layout.BoxScope
 import app.sliver.core.APP_NAME
 import app.sliver.core.ui.OnAppHidden
@@ -284,10 +286,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
             IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                SliverText(f.name, SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp), maxLines = 1)
+                SliverText(f.name, SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), maxLines = 1)
                 SliverText(
                     "${plan.spanText()} \u00B7 ${clipsText(plan.clips)} \u00B7 ${formatRuntime(plan.clips)}",
-                    SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary, maxLines = 1,
+                    SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary, maxLines = 1,
                 )
             }
             // Owner: share / edit / delete are icons, not buttons.
@@ -321,7 +323,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             }
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(
-                info, SliverType.Meta.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center),
+                info, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), textAlign = androidx.compose.ui.text.style.TextAlign.Center),
                 Modifier.fillMaxWidth(), color = SliverColors.TextTertiary,
             )
         }

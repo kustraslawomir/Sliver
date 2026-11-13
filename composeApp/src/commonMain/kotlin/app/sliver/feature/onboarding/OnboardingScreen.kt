@@ -1,5 +1,7 @@
 package app.sliver.feature.onboarding
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.core.APP_NAME
 
 import androidx.compose.foundation.background
@@ -122,10 +124,10 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
                     Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
                         Box(Modifier.size(22.dp).clip(CircleShape).background(SliverColors.Record))
                     }
-                    SliverText("One clip a day.\nOne film a year.", SliverType.DisplayXL.copy(fontSize = 44.sp, lineHeight = 46.sp))
+                    SliverText("One clip a day.\nOne film a year.", SliverType.DisplayXL.copy(fontSize = ReelogType.Size.display, lineHeight = ReelogType.lineFor(ReelogType.Size.display)))
                     SliverText(
                         "Catch a moment, keep the best part. $APP_NAME turns your clips into a film.",
-                        SliverType.Body.copy(fontSize = 17.sp, lineHeight = 26.sp), Modifier.padding(top = SliverSpace.S5),
+                        SliverType.Body.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), Modifier.padding(top = SliverSpace.S5),
                         color = SliverColors.TextSecondary,
                     )
                     PrimaryButton("Start", { index++ }, Modifier.fillMaxWidth().padding(top = SliverSpace.S8))

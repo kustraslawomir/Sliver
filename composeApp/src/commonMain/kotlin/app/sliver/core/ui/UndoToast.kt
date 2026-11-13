@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -88,11 +90,11 @@ fun UndoBar(message: String, onUndo: () -> Unit, modifier: Modifier = Modifier) 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SliverText(
-            message, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f),
+            message, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f),
             color = SliverColors.OnInverse, maxLines = 1,
         )
         Box(Modifier.height(48.dp).clickable(role = Role.Button, onClick = onUndo).padding(horizontal = 16.dp), Alignment.Center) {
-            SliverText("Undo", SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.OnInverse)
+            SliverText("Undo", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnInverse)
         }
     }
 }

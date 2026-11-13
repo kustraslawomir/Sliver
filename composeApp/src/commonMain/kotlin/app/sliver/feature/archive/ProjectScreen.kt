@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.feature.camera.liquidGlow
 import androidx.compose.animation.core.animateFloat
 import app.sliver.core.ui.SecondaryButton
@@ -356,7 +358,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     }
 }
 
-private val hubTitle get() = SliverType.DisplayM.copy(lineHeight = 24.sp)
+private val hubTitle get() = SliverType.DisplayM
 
 @Composable
 private fun Header(
@@ -381,7 +383,7 @@ private fun Header(
             HubButton(SliverIcons.Pencil, "Edit project", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
             HubButton(HubIcons.User, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
         }
-        SliverText(line, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp, color = SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 4.dp), maxLines = 1)
+        SliverText(line, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), color = SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 4.dp), maxLines = 1)
         Box(Modifier.height(20.dp))
     }
 }
@@ -415,8 +417,8 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             SliverIcon(HubIcons.Bell, SliverColors.AccentText)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                SliverText("Want a daily nudge?", SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp))
-                SliverText("One quiet reminder at a time you choose.", SliverType.Caption.copy(lineHeight = 17.sp), color = SliverColors.TextTertiary)
+                SliverText("Want a daily nudge?", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
+                SliverText("One quiet reminder at a time you choose.", SliverType.Caption, color = SliverColors.TextTertiary)
             }
         }
         Row(Modifier.padding(start = 34.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -425,12 +427,12 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
                 Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary)
                     .clickable(role = Role.Button, onClick = set).padding(horizontal = 14.dp),
                 Alignment.Center,
-            ) { SliverText("Set reminder", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.OnInverse) }
+            ) { SliverText("Set reminder", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnInverse) }
             Box(
                 Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
                     .clickable(role = Role.Button, onClick = onDismiss).padding(horizontal = 14.dp),
                 Alignment.Center,
-            ) { SliverText("No thanks", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp), color = SliverColors.TextSecondary) }
+            ) { SliverText("No thanks", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary) }
         }
     }
 }
@@ -440,8 +442,8 @@ private const val SwipePx = 80f
 @Composable
 private fun MonthHeading(left: String, right: String, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        SliverText(left, SliverType.DisplayM.copy(fontSize = 27.sp, lineHeight = 27.sp), maxLines = 1, softWrap = false)
-        SliverText(right, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.weight(1f), maxLines = 1, softWrap = false)
+        SliverText(left, SliverType.DisplayM.copy(fontSize = ReelogType.Size.title, lineHeight = ReelogType.lineFor(ReelogType.Size.title)), maxLines = 1, softWrap = false)
+        SliverText(right, SliverType.tnum(0.06.em, SliverColors.TextTertiary), Modifier.weight(1f), maxLines = 1, softWrap = false)
         NavArrow(HubIcons.Prev, "Previous month", canPrev, onPrev)
         NavArrow(HubIcons.Next, "Next month", canNext, onNext)
     }
@@ -457,7 +459,7 @@ private fun MonthGrid(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             WeekDays.forEach {
-                SliverText(it, SliverType.tnum(10.sp, 0.sp, SliverColors.TextTertiary).copy(textAlign = TextAlign.Center), Modifier.weight(1f))
+                SliverText(it, SliverType.tnum(color = SliverColors.TextTertiary).copy(textAlign = TextAlign.Center), Modifier.weight(1f))
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -520,11 +522,11 @@ private fun DayCell(
         Alignment.Center,
     ) {
         when (state) {
-            CellState.FUTURE -> SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, SliverColors.TextDisabled))
+            CellState.FUTURE -> SliverText(date.day.toString(), SliverType.tnum(color = SliverColors.TextDisabled))
             CellState.EMPTY, CellState.TODAY -> {
                 val today = state == CellState.TODAY
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, if (today) SliverColors.TextPrimary else SliverColors.TextTertiary))
+                    SliverText(date.day.toString(), SliverType.tnum(color = if (today) SliverColors.TextPrimary else SliverColors.TextTertiary))
                     // Owner request: a past empty day shows "+" so it reads as "tap to fill"; today shows the red record dot.
                     if (!today) SliverIcon(SliverIcons.Plus, SliverColors.TextDisabled, size = 14.dp)
                     else Box(Modifier.size(6.dp).clip(CircleShape).background(SliverColors.Record))
@@ -540,19 +542,19 @@ private fun DayCell(
                 if (draft || state == CellState.AUTO) {
                     Box(Modifier.fillMaxSize().dashedOutline(if (draft) SliverColors.TextDisabled else SliverColors.OnMedia))
                     if (draft) SliverText(
-                        "Draft", SliverType.Caption.copy(fontSize = 10.sp, lineHeight = 12.sp, color = SliverColors.OnMedia).overMedia(),
+                        "Draft", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), color = SliverColors.OnMedia).overMedia(),
                         Modifier.align(Alignment.TopStart).padding(top = 4.dp, start = 6.dp),
                     )
                 }
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
-                    date.day.toString(), SliverType.tnum(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
+                    date.day.toString(), SliverType.tnum(color = SliverColors.OnMedia).overMedia(),
                     Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp),
                 )
                 // Owner: a saved day with other items from an import shows it ("+3"), tap → Day detail → pick another.
                 if (others > 0 && state != CellState.DRAFT && state != CellState.AUTO) {
                     SliverText(
-                        "+$others", SliverType.tnum(9.sp, 0.sp, SliverColors.OnMedia),
+                        "+$others", SliverType.tnum(color = SliverColors.OnMedia),
                         Modifier.align(Alignment.TopEnd).padding(3.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim)
                             .padding(horizontal = 4.dp, vertical = 1.dp),
                     )
@@ -575,7 +577,7 @@ private fun ReviewRow(label: String, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.size(20.dp).dashedOutline(SliverColors.TextSecondary, 5.dp))
-        SliverText(label, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f), color = SliverColors.TextPrimary)
+        SliverText(label, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f), color = SliverColors.TextPrimary)
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
     }
 }
@@ -621,7 +623,7 @@ private fun MenuItem(icon: ImageVector, label: String, color: Color, onClick: ()
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         SliverIcon(icon, c, size = 18.dp)
-        SliverText(label, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = c)
+        SliverText(label, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = c)
     }
 }
 
@@ -630,9 +632,9 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SliverText(
             "${Weekdays3[date.dayOfWeek.ordinal]} · ${date.day} ${MonthNames[date.month.ordinal]} ${date.year}",
-            SliverType.tnum(11.sp, 0.08.em, SliverColors.TextTertiary),
+            SliverType.tnum(0.08.em, SliverColors.TextTertiary),
         )
-        SliverText("Add a clip for this day", SliverType.DisplayM.copy(lineHeight = 25.sp), Modifier.padding(bottom = 8.dp))
+        SliverText("Add a clip for this day", SliverType.DisplayM, Modifier.padding(bottom = 8.dp))
         val pick = rememberTapGate(onPick)
         Row(
             Modifier.fillMaxWidth().height(56.dp).clip(SliverShapes.Pill)
@@ -641,10 +643,10 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         ) {
             SliverIcon(HubIcons.Photos, SliverColors.OnAccent, size = 18.dp)
-            SliverText("Choose from Photos", SliverType.Headline.copy(fontSize = 16.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp), color = SliverColors.OnAccent)
+            SliverText("Choose from Photos", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnAccent)
         }
         Box(Modifier.fillMaxWidth().height(48.dp).clickable(role = Role.Button, onClick = onClose), Alignment.Center) {
-            SliverText("Leave it empty", SliverType.BodySmall.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextSecondary)
+            SliverText("Leave it empty", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
         }
     }
 }

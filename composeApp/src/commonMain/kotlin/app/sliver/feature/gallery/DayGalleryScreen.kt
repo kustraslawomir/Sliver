@@ -1,5 +1,7 @@
 package app.sliver.feature.gallery
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -101,7 +103,7 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     showAll -> "${shown.size} from this day"
                     else -> "${shown.size} from your camera"
                 },
-                SliverType.BodySmall.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S4),
+                SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S4),
                 color = SliverColors.TextTertiary,
             )
         }
@@ -113,7 +115,7 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    SliverText("Nothing from this day", SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp))
+                    SliverText("Nothing from this day", SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)))
                     SliverText(
                         "Your camera roll has no photos or videos from ${date.day} ${MonthLong[date.month.ordinal]}.",
                         SliverType.BodySmall.copy(textAlign = TextAlign.Center), color = SliverColors.TextTertiary,
@@ -159,7 +161,7 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 SliverIcon(SliverIcons.ImageIcon, SliverColors.TextPrimary, size = 18.dp)
-                SliverText("Browse all photos", SliverType.Body.copy(fontSize = 16.sp), color = SliverColors.TextPrimary)
+                SliverText("Browse all photos", SliverType.Body.copy(fontSize = ReelogType.Size.label), color = SliverColors.TextPrimary)
             }
         }
     }
@@ -188,7 +190,7 @@ private fun DayTile(e: MediaEntry, modifier: Modifier, onClick: () -> Unit) {
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(36.dp)
                 .background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))),
         )
-        val label = SliverType.Meta.copy(fontSize = 11.sp, lineHeight = 14.sp, color = SliverColors.OnMedia).overMedia()
+        val label = SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), color = SliverColors.OnMedia).overMedia()
         SliverText(clock, label, Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp))
         if (e.video && !e.motion && !e.live) {
             SliverText(

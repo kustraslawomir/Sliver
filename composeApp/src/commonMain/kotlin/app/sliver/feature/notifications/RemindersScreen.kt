@@ -1,5 +1,7 @@
 package app.sliver.feature.notifications
 
+import app.sliver.core.theme.ReelogType
+
 import app.sliver.core.APP_NAME
 
 import androidx.compose.foundation.background
@@ -139,7 +141,7 @@ fun RemindersScreen(onBack: () -> Unit) {
         ) {
             Row(Modifier.padding(top = SliverSpace.S2), verticalAlignment = Alignment.CenterVertically) {
                 IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
-                SliverText("Daily reminder", SliverType.DisplayM.copy(fontSize = 26.sp), Modifier.padding(start = SliverSpace.S1))
+                SliverText("Daily reminder", SliverType.DisplayM.copy(fontSize = ReelogType.Size.title), Modifier.padding(start = SliverSpace.S1))
             }
 
             if (permOff) PermOffRow(platform::openNotificationSettings, Modifier.padding(top = SliverSpace.S4))
@@ -156,9 +158,9 @@ fun RemindersScreen(onBack: () -> Unit) {
                 ) {
                     SliverText(
                         (if (todaySun != null) "≈" else "") + shownTime.label(),
-                        SliverType.DisplayXL.copy(fontSize = 64.sp, lineHeight = 64.sp, fontFeatureSettings = "tnum"),
+                        ReelogType.clock,
                     )
-                    SliverText("Change", SliverType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), Modifier.padding(bottom = 8.dp), color = SliverColors.AccentText)
+                    SliverText("Change", SliverType.Body.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium), Modifier.padding(bottom = 8.dp), color = SliverColors.AccentText)
                 }
                 if (r.followGoldenHour) {
                     SliverText(
@@ -199,10 +201,10 @@ fun RemindersScreen(onBack: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        SliverText("Projects", SliverType.Headline.copy(fontSize = 16.sp))
+                        SliverText("Projects", SliverType.Headline.copy(fontSize = ReelogType.Size.label))
                         SliverText("Only the ones still open", SliverType.Caption)
                     }
-                    SliverText(projectsValue, SliverType.BodySmall.copy(fontSize = 14.sp), maxLines = 1, color = SliverColors.TextTertiary)
+                    SliverText(projectsValue, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label), maxLines = 1, color = SliverColors.TextTertiary)
                     SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 16.dp)
                 }
                 Hairline()
@@ -211,14 +213,14 @@ fun RemindersScreen(onBack: () -> Unit) {
                 NotifPreview(shownTime.label(), reminderCopy(NotifKind.REMINDER, today).body)
                 SliverText(
                     "The picture is yesterday's clip. \"Tomorrow\" just dismisses it, nothing is counted.",
-                    SliverType.Caption.copy(fontSize = 12.sp), Modifier.padding(top = 8.dp), color = SliverColors.TextTertiary,
+                    SliverType.Caption.copy(fontSize = ReelogType.Size.caption), Modifier.padding(top = 8.dp), color = SliverColors.TextTertiary,
                 )
             }
         }
 
         SliverBottomSheet(timeSheet, { timeSheet = false }) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                SliverText("When should we remind you?", SliverType.Title.copy(fontSize = 20.sp))
+                SliverText("When should we remind you?", SliverType.Title.copy(fontSize = ReelogType.Size.headline))
                 Presets.chunked(3).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { (t, name) ->
@@ -233,7 +235,7 @@ fun RemindersScreen(onBack: () -> Unit) {
                     Modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
                         .clickable(role = Role.Button) { picker = true },
                     Alignment.Center,
-                ) { SliverText("Other time…", SliverType.Body.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium)) }
+                ) { SliverText("Other time…", SliverType.Body.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium)) }
             }
         }
         ProjectsPicker(projectsSheet, { projectsSheet = false }, open, watched.map { it.id }.toSet()) { picked ->
@@ -255,7 +257,7 @@ private fun Hairline() = Box(Modifier.fillMaxWidth().height(1.dp).background(Sli
 
 @Composable
 private fun Label(text: String, modifier: Modifier = Modifier) {
-    SliverText(text, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 20.sp), modifier, color = SliverColors.TextTertiary)
+    SliverText(text, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), modifier, color = SliverColors.TextTertiary)
 }
 
 @Composable
@@ -268,8 +270,8 @@ private fun SwitchLine(title: String, caption: String, checked: Boolean, onChang
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            SliverText(title, SliverType.Headline.copy(fontSize = 16.sp))
-            SliverText(caption, SliverType.Caption.copy(lineHeight = 17.sp))
+            SliverText(title, SliverType.Headline.copy(fontSize = ReelogType.Size.label))
+            SliverText(caption, SliverType.Caption)
         }
         SliverSwitch(checked)
     }
@@ -285,7 +287,7 @@ private fun DayDot(letter: String, name: String, on: Boolean, onClick: () -> Uni
             .clickable(role = Role.Checkbox, onClick = onClick),
         Alignment.Center,
     ) {
-        SliverText(letter, SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold), color = if (on) SliverColors.OnInverse else SliverColors.TextTertiary)
+        SliverText(letter, SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold), color = if (on) SliverColors.OnInverse else SliverColors.TextTertiary)
     }
 }
 
@@ -300,8 +302,8 @@ private fun PresetTile(t: LocalTime, name: String, selected: Boolean, modifier: 
         verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        SliverText(t.label(), SliverType.Headline.copy(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"))
-        SliverText(name, SliverType.Caption.copy(fontSize = 12.sp, lineHeight = 16.sp))
+        SliverText(t.label(), SliverType.Headline.copy(fontSize = ReelogType.Size.body, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"))
+        SliverText(name, SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)))
     }
 }
 
@@ -315,14 +317,14 @@ private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         SliverIcon(SliverIcons.Bell, SliverColors.PermBannerIcon, size = 18.dp)
         SliverText(
-            "Notifications are off for $APP_NAME in Android settings.", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp),
+            "Notifications are off for $APP_NAME in Android settings.", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
             Modifier.weight(1f), color = SliverColors.PermBannerText,
         )
         Box(
             Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.PermBannerText)
                 .clickable(role = Role.Button, onClick = onTurnOn).padding(horizontal = 14.dp),
             Alignment.Center,
-        ) { SliverText("Turn on", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.PermBannerButtonText) }
+        ) { SliverText("Turn on", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.PermBannerButtonText) }
     }
 }
 
@@ -338,12 +340,12 @@ private fun NotifPreview(time: String, body: String) {
             Box(Modifier.size(2.dp, 13.dp).clip(SliverShapes.Pill).background(SliverColors.AccentText))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            SliverText("$APP_NAME · $time", SliverType.Caption.copy(fontSize = 12.sp, lineHeight = 16.sp))
-            SliverText("Today's clip", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp))
-            SliverText(body, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 19.sp))
+            SliverText("$APP_NAME · $time", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)))
+            SliverText("Today's clip", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
+            SliverText(body, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                SliverText("Record", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.AccentText)
-                SliverText("Tomorrow", SliverType.Headline.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 18.sp), color = SliverColors.TextSecondary)
+                SliverText("Record", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.AccentText)
+                SliverText("Tomorrow", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
             }
         }
         Box(Modifier.size(52.dp).clip(SliverShapes.S).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(SliverColors.NotifThumbFrom, SliverColors.NotifThumbTo))))
@@ -360,7 +362,7 @@ private fun ProjectsPicker(
 ) {
     SliverBottomSheet(visible, onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
-            SliverText("Which projects count?", SliverType.Title.copy(fontSize = 20.sp), Modifier.padding(bottom = SliverSpace.S2))
+            SliverText("Which projects count?", SliverType.Title.copy(fontSize = ReelogType.Size.headline), Modifier.padding(bottom = SliverSpace.S2))
             open.forEach { p ->
                 val on = p.id in picked
                 Row(

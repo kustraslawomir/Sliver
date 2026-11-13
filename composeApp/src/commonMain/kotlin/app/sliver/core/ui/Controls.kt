@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import app.sliver.core.theme.ReelogType
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -125,7 +127,7 @@ fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit
                 contentAlignment = Alignment.Center,
             ) {
                 SliverText(
-                    label, if (compact) SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 16.sp) else SliverType.BodySmall,
+                    label, if (compact) SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)) else SliverType.BodySmall,
                     color = if (on) SliverColors.OnInverse else SliverColors.TextSecondary, maxLines = 1,
                 )
             }
