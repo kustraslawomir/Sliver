@@ -66,6 +66,7 @@ class DraftActions(
             request.copy(projectId = draft.day.projectId, draft = false, draftCandidates = null, importRunId = null),
         )
         if (isTmp(request.source)) files.delete(request.source)
+        store?.clearAlternatives(draft.day.projectId, draft.day.date)
         FirstClipTimer.clipSaved()
         if (days.observeAll().first().size == 1) runCatching { films.ensureDefaultFilm(day.date, request.format) }
         return day

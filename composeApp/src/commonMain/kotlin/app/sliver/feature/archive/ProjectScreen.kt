@@ -161,6 +161,12 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val autoCount = remember(all) { autoDays(all).size }
     val draftNav = rememberDraftNav()
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
+    val altMap by remember { koin.get<app.sliver.feature.autoimport.AutoImportStore>().alternatives }.collectAsState(emptyMap())
+    val alts = remember(altMap, project) {
+        val prefix = "${project?.id}|"
+        altMap.filter { it.key.startsWith(prefix) && it.value.isNotEmpty() }.mapNotNull { runCatching { LocalDate.parse(it.key.removePrefix(prefix)) }.getOrNull() to it.value.size }
+            .mapNotNull { (d, n) -> d?.let { it to n } }.toMap()
+    }
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
     // Auto-import can fill days before the project was created: the calendar (and "since") must reach them.
     val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull { it.date }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
@@ -287,7 +293,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                                     onDragCancel = { dx = 0f },
                                 ) { _, delta -> dx += delta }
                             },
-                        ) { MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay) }
+                        ) { MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay, alts) }
                     }
                     if (!wide) FilmsSection(onNavigate, { filmMenu = it })
                 }
@@ -443,6 +449,7 @@ private fun MonthHeading(left: String, right: String, canPrev: Boolean, canNext:
 private fun MonthGrid(
     shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, start: LocalDate,
     onCell: (LocalDate) -> Unit, onReplace: (LocalDate) -> Unit, onRemove: (LocalDate) -> Unit,
+    alts: Map<LocalDate, Int> = emptyMap(),
 ) {
     val weeks = remember(shown) { monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } } }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -456,7 +463,7 @@ private fun MonthGrid(
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     week.forEach { date ->
                         Box(Modifier.weight(1f).height(58.dp)) {
-                            if (date != null) DayCell(date, today, start, byDate[date], { onReplace(date) }, { onRemove(date) }) { onCell(date) }
+                            if (date != null) DayCell(date, today, start, byDate[date], { onReplace(date) }, { onRemove(date) }, alts[date] ?: 0) { onCell(date) }
                         }
                     }
                 }
@@ -466,7 +473,10 @@ private fun MonthGrid(
 }
 
 @Composable
-private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Day?, onReplace: () -> Unit, onRemove: () -> Unit, onClick: () -> Unit) {
+private fun DayCell(
+    date: LocalDate, today: LocalDate, start: LocalDate, day: Day?, onReplace: () -> Unit, onRemove: () -> Unit, others: Int = 0,
+    onClick: () -> Unit,
+) {
     val scale = remember { Animatable(1f) }
     val reduced = LocalReducedMotion.current
     LaunchedEffect(day?.takenAt) {
@@ -537,6 +547,14 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                     date.day.toString(), SliverType.tnum(10.sp, 0.sp, SliverColors.OnMedia).overMedia(),
                     Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp),
                 )
+                // Owner: a saved day with other items from an import shows it ("+3"), tap → Day detail → pick another.
+                if (others > 0 && state != CellState.DRAFT && state != CellState.AUTO) {
+                    SliverText(
+                        "+$others", SliverType.tnum(9.sp, 0.sp, SliverColors.OnMedia),
+                        Modifier.align(Alignment.TopEnd).padding(3.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim)
+                            .padding(horizontal = 4.dp, vertical = 1.dp),
+                    )
+                }
             }
         }
     }

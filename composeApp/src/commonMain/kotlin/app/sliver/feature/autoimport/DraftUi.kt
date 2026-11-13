@@ -181,7 +181,8 @@ fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier:
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 SliverText(
-                    draftHeaderTitle(ctx.day.draft, index, total), SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp),
+                    if (!ctx.day.draft && ctx.day.importRunId == null) "Change clip" else draftHeaderTitle(ctx.day.draft, index, total),
+                    SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp),
                     color = SliverColors.TextPrimary, maxLines = 1,
                 )
                 if (nav.busy) SlitLoader(width = 24.dp)

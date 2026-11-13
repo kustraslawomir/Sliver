@@ -91,6 +91,31 @@ class AutoImportStore(private val store: DataStore<Preferences>) {
         }
     }
 
+    private val altKey = stringPreferencesKey("autoImportAlternatives")
+    private val altSer = MapSerializer(String.serializer(), ListSerializer(DraftCandidate.serializer()))
+
+    /**
+     * Owner: after adding files (e.g. from an iPhone folder), days that already have a clip show that there are other
+     * items to pick. Kept here, not on the day row, so sync does not re-upload every clip. Key "projectId|date".
+     */
+    val alternatives: Flow<Map<String, List<DraftCandidate>>> =
+        store.data.map { p -> p[altKey]?.let { runCatching { Json.decodeFromString(altSer, it) }.getOrNull() }.orEmpty() }
+
+    suspend fun addAlternatives(projectId: String, date: LocalDate, items: List<DraftCandidate>) = editAlt { m ->
+        val k = dismissKey(projectId, date)
+        m[k] = (m[k].orEmpty() + items).distinctBy { it.uri }.take(MAX_CANDIDATES)
+    }
+
+    suspend fun clearAlternatives(projectId: String, date: LocalDate) = editAlt { it.remove(dismissKey(projectId, date)) }
+
+    private suspend fun editAlt(change: (MutableMap<String, List<DraftCandidate>>) -> Unit) {
+        store.edit { prefs ->
+            val m = prefs[altKey]?.let { runCatching { Json.decodeFromString(altSer, it) }.getOrNull() }.orEmpty().toMutableMap()
+            change(m)
+            prefs[altKey] = Json.encodeToString(altSer, m)
+        }
+    }
+
     suspend fun clear() {
         store.edit { it.remove(key) }
     }
@@ -132,6 +157,14 @@ class AutoImportExecutor(
             val fresh = entries.filter { it.uri !in seen }
             if (fresh.isEmpty()) null else date to (fresh to entries.filter { it.uri in seen })
         }.toMap()
+        // Days that already have a clip: remember the new items as alternatives (badge in the calendar), never replace.
+        val gapSet = gaps.toSet()
+        groupByDate(found, zone(), from, to).forEach { (date, entries) ->
+            if (date in gapSet) return@forEach
+            val day = days.getDay(run.projectId, date) ?: return@forEach
+            if (day.draft || day.isAuto()) return@forEach
+            store.addAlternatives(run.projectId, date, candidatesOf(entries))
+        }
         val work = gaps.filter { it in byDate }
         val total = known + work.size
         store.update(run.id) { it.copy(done = known, total = total, scanned = found.size) }

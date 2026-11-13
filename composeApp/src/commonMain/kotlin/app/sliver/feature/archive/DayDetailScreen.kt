@@ -38,6 +38,13 @@ import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.ConfirmSheet
 import app.sliver.core.ui.SwitchRow
+import app.sliver.feature.autoimport.AutoImportStore
+import app.sliver.feature.autoimport.CandidateTile
+import app.sliver.feature.autoimport.DraftActions
+import app.sliver.feature.autoimport.dismissKey
+import app.sliver.feature.autoimport.encodeCandidates
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
 import app.sliver.data.DaySource
 import app.sliver.core.ui.UndoBarAbove
 import androidx.compose.ui.unit.sp
@@ -100,6 +107,10 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     var notice by remember { mutableStateOf<String?>(null) }
     var confirmRemove by remember { mutableStateOf(false) }
+    val importStore = remember { koin.get<AutoImportStore>() }
+    val draftActions = remember { koin.get<DraftActions>() }
+    val altMap by remember { importStore.alternatives }.collectAsState(emptyMap())
+    val others = day?.let { altMap[dismissKey(it.projectId, it.date)] }.orEmpty()
 
     fun remove(d: app.sliver.data.db.Day) {
         val next = nextDay(d.date, filled) ?: prevDay(d.date, filled)
@@ -154,6 +165,22 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 }
                 IconButton44({ next?.let { show(it) } }, "Next day") {
                     SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (next != null) 1f else 0.4f))
+                }
+            }
+            if (day != null && others.isNotEmpty()) {
+                // Owner: files added later (e.g. from an iPhone) can replace a saved day's clip.
+                SliverText("Other items from this day", SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.OnMedia)
+                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                    items(others.size) { i ->
+                        val c = others[i]
+                        CandidateTile(c, false, Modifier.size(64.dp)) {
+                            scope.launch {
+                                val target = day.copy(draftCandidates = encodeCandidates(others))
+                                val route = draftActions.open(target, c.uri, chain = false)
+                                if (route == null) notice = "Couldn't read that item. Pick another." else onNavigate(route)
+                            }
+                        }
+                    }
                 }
             }
             if (day != null && day.source != DaySource.PHOTO) {
