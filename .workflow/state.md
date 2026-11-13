@@ -54,3 +54,4 @@
 - T-sync-two-devices: DONE in code/tests; device check TODO (see HANDOFF.md section T-sync-two-devices)
 - T-media-any-source: DONE except on-device HDR tone-map check (emulator lacks Main10 decoder); see HANDOFF.md section T-media-any-source
 - T-auto-7: DONE (builder workflow, gated by BUILDER_AUTORUN, inert until enabled; see HANDOFF.md section T-auto-7)
+- T-autofill-review: DONE (see HANDOFF.md section T-autofill-review)
