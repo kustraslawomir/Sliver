@@ -1,5 +1,8 @@
 package app.sliver.feature.films
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.foundation.layout.BoxScope
@@ -310,17 +313,9 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
             // Owner: one compact "Save" with a download icon (a copy gets the next free name, "Lena 2").
-            Row(
-                Modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary)
-                    .clickable(role = Role.Button) {
+            ReelogButton("Save", {
                         scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos \u00B7 Movies/$APP_NAME" else "Could not save" }
-                    },
-                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                SliverIcon(SliverIcons.Download, SliverColors.OnInverse, size = 20.dp)
-                SliverText("Save", SliverType.Headline, color = SliverColors.OnInverse)
-            }
+            }, leading = SliverIcons.Download)
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(
                 info, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), textAlign = androidx.compose.ui.text.style.TextAlign.Center),

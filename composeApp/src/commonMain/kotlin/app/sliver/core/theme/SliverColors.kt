@@ -48,16 +48,16 @@ object SliverColors {
     val Scrim = Tokens.Scrim
     val CellEmpty get() = if (this.light) Color(0xFFECE8E0) else Color(0xFF1C1C20)
     val CellEmptyLine get() = if (this.light) Color(0xFFE2DED6) else Color(0xFF1F1F22)
-    val GoldenNow = Color(0xFFFFC58A)
+    /** v1.7: no orange; "now" differs from idle by brightness and its label. */
+    val GoldenNow = Color.White
     val GoldenIdle = Color(0xD9FFFFFF)
     /** Record button liquid glow (red while idle, white while recording). */
     val RecordGlowRed = listOf(Color(0xFFFF3B30), Color(0xFFFF7A45), Color(0xFFFF2D7A))
     val RecordGlowWhite = listOf(Color(0xFFFFFFFF), Color(0xFFBFD4FF), Color(0xFFFFE9D6))
-    val PermBannerBg = Color(0xFF1A1710)
-    val PermBannerBorder = Color(0x55E8C27A)
-    val PermBannerIcon = Color(0xFFE8C27A)
-    val PermBannerText = Color(0xFFEDEDE8)
-    val PermBannerButtonText = Color(0xFF0A0A0B)
+    val PermBannerBg get() = Surface1
+    val PermBannerBorder get() = LineStrong
+    val PermBannerIcon get() = TextPrimary
+    val PermBannerText get() = TextPrimary
     val NotifPreviewDark = Color(0xFF1C1C1F)
     val NotifThumbFrom = Color(0xFF8A6A48)
     val NotifThumbTo = Color(0xFF1A120B)

@@ -61,28 +61,7 @@ fun Chip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailing: ImageVector? = null,
-) {
-    Box(
-        modifier.heightIn(min = 48.dp)
-            .semantics { this.selected = selected }
-            .clickable(role = Role.Button, onClick = rememberTapGate(onClick)),
-        contentAlignment = Alignment.Center,
-    ) {
-        val color = if (selected) SliverColors.AccentText else SliverColors.TextSecondary
-        Row(
-            Modifier.heightIn(min = 36.dp).clip(SliverShapes.Pill)
-                .background(if (selected) SliverColors.AccentTint else Color.Transparent)
-                .border(1.dp, if (selected) SliverColors.AccentLine else SliverColors.LineStrong, SliverShapes.Pill)
-                .padding(horizontal = SliverSpace.S4),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1),
-        ) {
-            if (selected) SliverIcon(SliverIcons.Check, color, size = 16.dp)
-            SliverText(text, SliverType.BodySmall, Modifier.weight(1f, fill = false), maxLines = 1, softWrap = false, color = color)
-            if (trailing != null) SliverIcon(trailing, color, size = 16.dp)
-        }
-    }
-}
+) = app.sliver.core.kit.ReelogChip(text, selected, onClick, modifier, trailing = trailing)
 
 @Composable
 fun SliverTextField(
@@ -110,42 +89,11 @@ fun SliverTextField(
 }
 
 @Composable
-fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier, compact: Boolean = false) {
-    Row(
-        modifier.fillMaxWidth().heightIn(min = if (compact) 36.dp else 48.dp).clip(SliverShapes.Pill)
-            .background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.LineHairline, SliverShapes.Pill)
-            .padding(if (compact) 3.dp else 4.dp),
-    ) {
-        options.forEachIndexed { i, label ->
-            val on = i == selectedIndex
-            val bg by animateColorAsState(if (on) SliverColors.TextPrimary else Color.Transparent, SliverMotion.standard(SliverMotion.Quick))
-            Box(
-                Modifier.weight(1f).heightIn(min = if (compact) 30.dp else 40.dp).clip(SliverShapes.Pill).background(bg)
-                    .semantics { selected = on }
-                    .clickable(role = Role.Tab) { onSelect(i) },
-                contentAlignment = Alignment.Center,
-            ) {
-                SliverText(
-                    label, if (compact) SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)) else SliverType.BodySmall,
-                    color = if (on) SliverColors.OnInverse else SliverColors.TextSecondary, maxLines = 1,
-                )
-            }
-        }
-    }
-}
+fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier, compact: Boolean = false) =
+    app.sliver.core.kit.ReelogSegmented(options, selectedIndex, onSelect, modifier)
 
 @Composable
-fun SliverSwitch(checked: Boolean, modifier: Modifier = Modifier) {
-    val track by animateColorAsState(if (checked) SliverColors.Accent else SliverColors.LineStrong, SliverMotion.standard(SliverMotion.Quick))
-    val x by animateDpAsState(if (checked) 20.dp else 2.dp, SliverMotion.standard(SliverMotion.Quick))
-    Box(modifier.size(width = 44.dp, height = 26.dp).clip(CircleShape).background(track)) {
-        Box(
-            Modifier.offset(x, 2.dp).size(22.dp).clip(CircleShape)
-                .background(SliverColors.TextPrimary).border(2.dp, SliverColors.BgBase, CircleShape),
-        )
-    }
-}
+fun SliverSwitch(checked: Boolean, modifier: Modifier = Modifier) = app.sliver.core.kit.ReelogSwitch(checked, modifier)
 
 @Composable
 fun SwitchRow(

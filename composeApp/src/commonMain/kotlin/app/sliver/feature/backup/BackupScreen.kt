@@ -242,7 +242,7 @@ private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
     val dot: Color = when (ui) {
         BackupUi.UP_TO_DATE -> SliverColors.Success
         BackupUi.BACKING_UP -> SliverColors.AccentText
-        BackupUi.PAUSED_WIFI, BackupUi.OFFLINE -> SliverColors.Warning
+        BackupUi.PAUSED_WIFI, BackupUi.OFFLINE -> SliverColors.TextPrimary
         BackupUi.FAILED, BackupUi.DRIVE_FULL, BackupUi.REVOKED -> SliverColors.Error
     }
     Column(
@@ -275,7 +275,7 @@ private fun InfoRow(label: String, value: String, warn: Boolean = false) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SliverText(label, SliverType.BodySmall, Modifier.weight(1f))
-        if (warn) SliverIcon(SliverIcons.AlertTriangle, SliverColors.Warning, size = 16.dp)
-        SliverText(value, SliverType.Body, color = if (warn) SliverColors.Warning else SliverColors.TextPrimary)
+        if (warn) SliverIcon(SliverIcons.AlertTriangle, SliverColors.TextPrimary, size = 16.dp)
+        SliverText(value, SliverType.Body, color = if (warn) SliverColors.TextPrimary else SliverColors.TextPrimary)
     }
 }

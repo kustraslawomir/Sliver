@@ -1,5 +1,8 @@
 package app.sliver.feature.gallery
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.foundation.Image
@@ -154,15 +157,7 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 "Show saved and received too", showAll, { showAll = it },
                 caption = "WhatsApp, downloads, other apps. Screenshots never.",
             )
-            Row(
-                Modifier.fillMaxWidth().height(52.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-                    .clickable(role = Role.Button) { picker(date) },
-                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                SliverIcon(SliverIcons.ImageIcon, SliverColors.TextPrimary, size = 18.dp)
-                SliverText("Browse all photos", SliverType.Body.copy(fontSize = ReelogType.Size.label), color = SliverColors.TextPrimary)
-            }
+            ReelogButton("Browse all photos", { picker(date) }, kind = ButtonKind.Secondary, leading = SliverIcons.ImageIcon)
         }
     }
 }

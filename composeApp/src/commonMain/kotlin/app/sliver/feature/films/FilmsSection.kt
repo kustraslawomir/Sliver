@@ -1,5 +1,8 @@
 package app.sliver.feature.films
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import kotlinx.coroutines.flow.map
@@ -85,16 +88,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
             SliverText("Films", SliverType.Title, Modifier.weight(1f))
-            val tap = rememberTapGate { onNavigate(Route.FilmBuilder) }
-            Row(
-                Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-                    .clickable(role = Role.Button, onClick = tap).padding(start = 10.dp, end = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                SliverIcon(HubIcons.Plus, SliverColors.TextPrimary, size = 16.dp)
-                SliverText("Make film", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), maxLines = 1, softWrap = false)
-            }
+            ReelogButton("Make film", { onNavigate(Route.FilmBuilder) }, kind = ButtonKind.Secondary, small = true, fullWidth = false, leading = HubIcons.Plus)
         }
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

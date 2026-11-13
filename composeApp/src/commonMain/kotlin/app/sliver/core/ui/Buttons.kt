@@ -1,5 +1,9 @@
 package app.sliver.core.ui
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+import app.sliver.core.kit.ReelogIconBox
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,37 +37,14 @@ private fun Modifier.press(enabled: Boolean, onClick: () -> Unit) = composed {
 }
 
 @Composable
-fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true) {
-    Box(
-        modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier).height(48.dp)
-            .clip(SliverShapes.Pill)
-            .background(if (enabled) SliverColors.Accent else SliverColors.Surface3)
-            .press(enabled, onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.OnAccent else SliverColors.TextTertiary, maxLines = 1, softWrap = false)
-    }
-}
+fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true) =
+    ReelogButton(text, onClick, modifier, ButtonKind.Primary, enabled, fullWidth)
 
 @Composable
 fun SecondaryButton(
     text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true,
     destructive: Boolean = false,
-) {
-    Box(
-        modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier).height(48.dp)
-            .clip(SliverShapes.Pill)
-            .border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-            .press(enabled, onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = when {
-            !enabled -> SliverColors.TextDisabled
-            destructive -> SliverColors.Error
-            else -> SliverColors.TextPrimary
-        }, maxLines = 1, softWrap = false)
-    }
-}
+) = ReelogButton(text, onClick, modifier, if (destructive) ButtonKind.Destructive else ButtonKind.Secondary, enabled, fullWidth)
 
 @Composable
 fun GhostButton(
@@ -72,21 +53,9 @@ fun GhostButton(
     modifier: Modifier = Modifier,
     destructive: Boolean = false,
     enabled: Boolean = true,
-) {
-    Box(
-        modifier.heightIn(min = 48.dp).clip(SliverShapes.Pill).press(enabled, onClick).padding(horizontal = SliverSpace.S4),
-        contentAlignment = Alignment.Center,
-    ) {
-        val color = when {
-            !enabled -> SliverColors.TextDisabled
-            destructive -> SliverColors.Error
-            else -> SliverColors.TextSecondary
-        }
-        SliverText(text, SliverType.Headline, color = color, maxLines = 1, softWrap = false)
-    }
-}
+) = ReelogButton(text, onClick, modifier, if (destructive) ButtonKind.Destructive else ButtonKind.Tertiary, enabled, fullWidth = false)
 
-/** 48x48 hit area; [overCamera] adds the void scrim behind the icon. */
+/** 48 dp hit area; [overCamera] puts the icon in a 44 dp glass circle. */
 @Composable
 fun IconButton44(
     onClick: () -> Unit,
@@ -94,16 +63,7 @@ fun IconButton44(
     modifier: Modifier = Modifier,
     overCamera: Boolean = false,
     content: @Composable () -> Unit,
-) {
-    val source = remember { MutableInteractionSource() }
-    Box(
-        modifier.size(48.dp).clip(CircleShape)
-            .then(if (overCamera) Modifier.background(SliverColors.BgVoid.copy(alpha = 0.5f)) else Modifier)
-            .semantics { this.contentDescription = contentDescription }
-            .clickable(source, null, role = Role.Button, onClick = rememberTapGate(onClick)),
-        contentAlignment = Alignment.Center,
-    ) { content() }
-}
+) = ReelogIconBox(contentDescription, onClick, modifier, overCamera, content = content)
 
 @Composable
 fun Badge(text: String, modifier: Modifier = Modifier, color: Color = SliverColors.AccentText) {

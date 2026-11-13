@@ -1,5 +1,8 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.feature.camera.liquidGlow
@@ -422,17 +425,8 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
             }
         }
         Row(Modifier.padding(start = 34.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val set = rememberTapGate(onSet)
-            Box(
-                Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary)
-                    .clickable(role = Role.Button, onClick = set).padding(horizontal = 14.dp),
-                Alignment.Center,
-            ) { SliverText("Set reminder", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnInverse) }
-            Box(
-                Modifier.height(36.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-                    .clickable(role = Role.Button, onClick = onDismiss).padding(horizontal = 14.dp),
-                Alignment.Center,
-            ) { SliverText("No thanks", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary) }
+            ReelogButton("Set reminder", onSet, small = true, fullWidth = false)
+            ReelogButton("No thanks", onDismiss, kind = ButtonKind.Secondary, small = true, fullWidth = false)
         }
     }
 }
@@ -635,19 +629,8 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
             SliverType.tnum(0.08.em, SliverColors.TextTertiary),
         )
         SliverText("Add a clip for this day", SliverType.DisplayM, Modifier.padding(bottom = 8.dp))
-        val pick = rememberTapGate(onPick)
-        Row(
-            Modifier.fillMaxWidth().height(56.dp).clip(SliverShapes.Pill)
-                .background(SliverColors.Accent).clickable(role = Role.Button, onClick = pick),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        ) {
-            SliverIcon(HubIcons.Photos, SliverColors.OnAccent, size = 18.dp)
-            SliverText("Choose from Photos", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnAccent)
-        }
-        Box(Modifier.fillMaxWidth().height(48.dp).clickable(role = Role.Button, onClick = onClose), Alignment.Center) {
-            SliverText("Leave it empty", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
-        }
+        ReelogButton("Choose from Photos", onPick, leading = HubIcons.Photos)
+        ReelogButton("Leave it empty", onClose, kind = ButtonKind.Tertiary)
     }
 }
 

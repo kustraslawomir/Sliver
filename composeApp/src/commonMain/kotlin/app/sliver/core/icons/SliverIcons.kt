@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-private fun lucide(name: String, vararg paths: String): ImageVector = designIcon(name, 1.5f, false, *paths)
+private fun lucide(name: String, vararg paths: String): ImageVector = designIcon(name, 1.75f, false, *paths)
 
 /** Icon from the design's own SVG path data (24 viewBox); [stroke] is the SVG stroke-width, [filled] fills instead. */
 private fun designIcon(name: String, stroke: Float, filled: Boolean, vararg paths: String): ImageVector =

@@ -1,5 +1,8 @@
 package app.sliver.feature.notifications
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.core.APP_NAME
@@ -231,11 +234,7 @@ fun RemindersScreen(onBack: () -> Unit) {
                         }
                     }
                 }
-                Box(
-                    Modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.Pill).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-                        .clickable(role = Role.Button) { picker = true },
-                    Alignment.Center,
-                ) { SliverText("Other time…", SliverType.Body.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium)) }
+                ReelogButton("Other time…", { picker = true }, kind = ButtonKind.Secondary)
             }
         }
         ProjectsPicker(projectsSheet, { projectsSheet = false }, open, watched.map { it.id }.toSet()) { picked ->
@@ -280,15 +279,7 @@ private fun SwitchLine(title: String, caption: String, checked: Boolean, onChang
 
 @Composable
 private fun DayDot(letter: String, name: String, on: Boolean, onClick: () -> Unit) {
-    Box(
-        Modifier.size(42.dp).clip(SliverShapes.Pill)
-            .then(if (on) Modifier.background(SliverColors.TextPrimary) else Modifier.border(1.dp, SliverColors.LineStrong, SliverShapes.Pill))
-            .semantics { selected = on; contentDescription = name }
-            .clickable(role = Role.Checkbox, onClick = onClick),
-        Alignment.Center,
-    ) {
-        SliverText(letter, SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold), color = if (on) SliverColors.OnInverse else SliverColors.TextTertiary)
-    }
+    app.sliver.core.kit.DayToggle(letter, on, onClick, description = name)
 }
 
 @Composable
@@ -320,11 +311,7 @@ private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
             "Notifications are off for $APP_NAME in Android settings.", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
             Modifier.weight(1f), color = SliverColors.PermBannerText,
         )
-        Box(
-            Modifier.height(36.dp).clip(SliverShapes.Pill).background(SliverColors.PermBannerText)
-                .clickable(role = Role.Button, onClick = onTurnOn).padding(horizontal = 14.dp),
-            Alignment.Center,
-        ) { SliverText("Turn on", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.PermBannerButtonText) }
+        ReelogButton("Turn on", onTurnOn, small = true, fullWidth = false)
     }
 }
 
