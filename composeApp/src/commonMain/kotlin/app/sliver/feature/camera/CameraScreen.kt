@@ -292,14 +292,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, SliverColors.OnMedia) }
                 }
             }
-            if (saved?.coachRecordSeen == false && !recording) {
-                SliverText(
-                    "Tap to record. Any length \u2014 you'll pick the best part next.", SliverType.BodySmall,
-                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
-                        .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
-                    SliverColors.TextPrimary,
-                )
-            }
             if (failed && !recording) {
                 SliverText(
                     "That recording didn't work. Try again.", SliverType.BodySmall,
