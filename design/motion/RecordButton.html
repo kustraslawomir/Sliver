@@ -1,0 +1,80 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Record button</title>
+<style>
+@font-face{font-family:Geist;src:local("Geist Medium");font-weight:500}
+html,body{margin:0;background:#000}
+#st{position:relative;width:360px;height:360px;overflow:hidden;font-family:Geist,sans-serif}
+.bg{position:absolute;inset:0;background:linear-gradient(180deg,#E9935A 0%,#B85A48 34%,#40283A 62%,#141218 100%)}
+.bk{position:absolute;border-radius:50%;filter:blur(6px)}
+.btn{position:absolute;left:134px;top:150px;width:92px;height:92px}
+.blob{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;mix-blend-mode:plus-lighter}
+.glass{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.10);-webkit-backdrop-filter:blur(20px) saturate(1.8);backdrop-filter:blur(20px) saturate(1.8);box-shadow:0 14px 34px rgba(0,0,0,.45),inset 0 0 0 .5px rgba(255,255,255,.25)}
+.rim{position:absolute;inset:0;border-radius:50%;-webkit-mask:radial-gradient(circle,transparent 44.6px,#000 45.2px);mask:radial-gradient(circle,transparent 44.6px,#000 45.2px)}
+.rimIn{position:absolute;left:10px;top:10px;width:72px;height:72px;border-radius:50%;-webkit-mask:radial-gradient(circle,transparent 35px,#000 35.6px);mask:radial-gradient(circle,transparent 35px,#000 35.6px)}
+.gap{position:absolute;left:10px;top:10px;width:72px;height:72px;border-radius:50%;background:rgba(8,6,8,.55);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+.core{position:absolute;overflow:hidden;background:#E3261C;box-shadow:inset 0 -3px 7px rgba(110,0,0,.55),inset 0 1.5px 1.5px rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.35)}
+.liq{position:absolute;left:-30%;top:-30%;width:160%;height:160%;filter:blur(7px)}
+.sub{position:absolute;inset:0;background:radial-gradient(70% 45% at 50% 105%,rgba(255,150,95,.9),rgba(255,120,80,0) 70%)}
+.hl{position:absolute;left:16%;top:5%;width:68%;height:44%;border-radius:50%;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.8) 0%,rgba(255,255,255,.18) 55%,rgba(255,255,255,0) 100%)}
+.flash{position:absolute;inset:-6px;border-radius:50%;pointer-events:none}
+.pill{position:absolute;left:0;right:0;top:96px;display:flex;justify-content:center}
+.pill span{height:30px;padding:0 12px;border-radius:15px;display:flex;align-items:center;gap:7px;font:500 14px Geist;color:#fff;background:rgba(0,0,0,.25);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.18);font-variant-numeric:tabular-nums}
+.pill i{width:7px;height:7px;border-radius:4px;background:#FF3B30}
+</style></head>
+<body><div id="st">
+ <div class="bg"></div>
+ <div class="bk" style="left:40px;top:60px;width:46px;height:46px;background:#FFD9A0;opacity:.55"></div>
+ <div class="bk" style="left:250px;top:40px;width:70px;height:70px;background:#FFE7B8;opacity:.7"></div>
+ <div class="bk" style="left:200px;top:120px;width:30px;height:30px;background:#FFC08A;opacity:.5"></div>
+ <div class="bk" style="left:80px;top:230px;width:60px;height:60px;background:#5A3A6A;opacity:.6"></div>
+ <div class="bk" style="left:260px;top:250px;width:44px;height:44px;background:#2E5A5A;opacity:.6"></div>
+ <div class="pill" id="pill"><span><i></i><b id="tm" style="font-weight:500">0.0 s</b></span></div>
+ <div class="btn" id="btn">
+  <span class="blob" id="b1"></span><span class="blob" id="b2"></span><span class="blob" id="b3"></span>
+  <div class="glass"></div>
+  <div class="rim" id="rim"></div>
+  <div class="gap"></div>
+  <div class="rimIn" style="background:conic-gradient(from 180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 30%,rgba(255,255,255,0) 70%,rgba(255,255,255,.45))"></div>
+  <svg width="92" height="92" style="position:absolute;inset:0;transform:rotate(-90deg);overflow:visible"><circle id="arc" cx="46" cy="46" r="41" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="257.6" stroke-dashoffset="257.6" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.8))"/></svg>
+  <div class="core" id="core"><div class="liq" id="liq"></div><div class="sub"></div><div class="hl" id="hl"></div></div>
+  <div class="flash" id="flash"></div>
+ </div>
+</div>
+<script>
+const C=(x)=>x<0?0:x>1?1:x, ease=(x)=>1-Math.pow(1-C(x),3), io=(x)=>{x=C(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const spring=(x)=>{x=C(x);return 1-Math.exp(-6*x)*Math.cos(9*x)}; // overshoot
+const lerp=(a,b,k)=>a+(b-a)*k, hx=(v)=>Math.round(C(v)*255).toString(16).padStart(2,'0');
+const RED=['#FF3B30','#FF7A45','#FF2D7A'];
+function frame(t){
+  // timeline (ms): 0-900 idle · 900-1020 press · 1020-1320 morph to stop · 1020-2020 1 s progress
+  // 2020-2140 release/saved flash · 2140-2600 morph back · 2600-3600 idle
+  const press=C((t-900)/120)*(1-C((t-1020)/160)) + C((t-2020)/80)*(1-C((t-2100)/160))*.6;
+  const rec=t<2140?spring((t-1020)/420):1-io((t-2140)/460);
+  const prog=C((t-1020)/1000);
+  const glow=lerp(.6,1,C(rec));
+  // blobs
+  const ph=t/12000*2*Math.PI;
+  const pos=[[9*Math.cos(ph),9*Math.sin(ph)],[6*Math.cos(2*ph+1),7*Math.sin(2*ph+1)],[8*Math.cos(3*ph+2),8*Math.sin(3*ph+2)]];
+  ['b1','b2','b3'].forEach((id,i)=>{const e=document.getElementById(id),s=glow;e.style.background='radial-gradient(circle,'+RED[i]+hx(.5*s)+' 0%,'+RED[i]+hx(.2*s)+' 45%,'+RED[i]+'00 70%)';e.style.transform='translate('+pos[i][0]+'px,'+pos[i][1]+'px) scale('+(0.9+0.15*s)+')'});
+  // core
+  const sz=lerp(64,30,rec), r=lerp(32,9,rec), sc=1-0.08*press;
+  const core=document.getElementById('core');
+  Object.assign(core.style,{width:sz+'px',height:sz+'px',left:(46-sz/2)+'px',top:(46-sz/2)+'px',borderRadius:r+'px',transform:'scale('+sc+')'});
+  const a=(t/5000)*360;
+  document.getElementById('liq').style.background='conic-gradient(from '+a+'deg,#FF2D55,#FF3B30 25%,#FF6A3D 45%,#E8261C 65%,#FF4A6A 85%,#FF2D55)';
+  // rim highlight rotates very slowly with the glow phase
+  document.getElementById('rim').style.background='conic-gradient(from '+(-20+6*Math.sin(ph))+'deg,rgba(255,255,255,.95),rgba(255,255,255,.15) 18%,rgba(255,140,110,.25) 45%,rgba(255,90,70,.55) 50%,rgba(255,140,110,.25) 55%,rgba(255,255,255,.15) 82%,rgba(255,255,255,.95))';
+  document.getElementById('btn').style.transform='scale('+(1-0.04*press)+')';
+  // progress arc
+  const arc=document.getElementById('arc');arc.setAttribute('stroke-dashoffset',257.6*(1-prog));arc.style.opacity=t<1020?0:t<2140?1:1-C((t-2140)/250);
+  // saved flash
+  const f=C((t-2020)/60)*(1-C((t-2080)/420));
+  document.getElementById('flash').style.boxShadow='0 0 0 '+(2+8*(1-f))+'px rgba(255,255,255,'+(.55*f)+')';
+  // timer pill
+  const p=document.getElementById('pill');p.style.opacity=t<1020?0:t<2140?C((t-1020)/150):1-C((t-2140)/250);
+  document.getElementById('tm').textContent=(t<1020?0:Math.min(1,(Math.min(t,2020)-1020)/1000)).toFixed(1)+' s';
+}
+window.frame=frame;
+const q=new URLSearchParams(location.search);
+if(q.has('t'))frame(+q.get('t'));else{let s=null;const L=(n)=>{if(s===null)s=n;frame((n-s)%3600);requestAnimationFrame(L)};requestAnimationFrame(L)}
+</script></body></html>
