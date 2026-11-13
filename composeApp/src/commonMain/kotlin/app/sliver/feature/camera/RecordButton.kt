@@ -100,7 +100,7 @@ fun RecordButton(
         val strength = animateFloatAsState(
             when { !enabled -> 0f; state == RecordState.Recording -> 1f; else -> 0.6f }, tween(450), label = "glow",
         )
-        Box(Modifier.size(80.dp).liquidGlow(phase, strength, if (white) WhiteGlow else RedGlow))
+        Box(Modifier.size(80.dp).liquidGlow(phase, strength, if (white) SliverColors.RecordGlowWhite else SliverColors.RecordGlowRed))
         Box(
             Modifier.size(Disc).alpha(alpha).background(base, CircleShape),
             contentAlignment = Alignment.Center,
@@ -113,8 +113,6 @@ fun RecordButton(
 }
 
 private const val LIQUID_MS = 12_000
-private val RedGlow = listOf(Color(0xFFFF3B30), Color(0xFFFF7A45), Color(0xFFFF2D7A))
-private val WhiteGlow = listOf(Color(0xFFFFFFFF), Color(0xFFBFD4FF), Color(0xFFFFE9D6))
 
 /**
  * Soft light that flows around the button: three radial blobs drift on looping orbits and are added to the picture
