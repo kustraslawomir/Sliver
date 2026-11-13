@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -165,13 +168,25 @@ fun DraftBar(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
     }
 }
 
+/** Survives the screen rebuild that swapping the source causes, so the strip stays where the user scrolled. */
+private object StripScroll { var day: Any? = null; var index = 0; var offset = 0 }
+private val strip get() = StripScroll
+
 /** All gallery items of the draft's day; tapping one swaps the source in place. */
 @Composable
 fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
     if (ctx.candidates.size < 2) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText("Other items from this day", SliverType.Caption, color = SliverColors.TextTertiary)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        val listState = rememberLazyListState(
+            initialFirstVisibleItemIndex = if (strip.day == ctx.day.date) strip.index else ctx.candidates.indexOfFirst { it.uri == ctx.selectedUri }.coerceAtLeast(0),
+            initialFirstVisibleItemScrollOffset = if (strip.day == ctx.day.date) strip.offset else 0,
+        )
+        LaunchedEffect(listState, ctx.day.date) {
+            snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+                .collect { (i, o) -> strip.day = ctx.day.date; strip.index = i; strip.offset = o }
+        }
+        LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(64.dp)) { nav.swap(ctx, c.uri) } }
         }
     }

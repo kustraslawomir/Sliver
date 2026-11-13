@@ -61,7 +61,6 @@ import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.CandidateStrip
-import app.sliver.feature.autoimport.DraftBar
 import app.sliver.feature.autoimport.MotionChoice
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
@@ -153,7 +152,6 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             SliverText("For ${dayLabel(day, today).lowercase()}", SliverType.Meta, color = SliverColors.TextSecondary)
             Box(Modifier.padding(SliverSpace.S6))
         }
-        if (draft != null) DraftBar(draft, draftNav, Modifier.padding(horizontal = SliverSpace.S3))
         ClipFrame(
             if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
             Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
@@ -183,7 +181,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 if (draft != null) {
-                    GhostButton("Skip day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), enabled = !saving && !draftNav.busy)
+                    GhostButton("Remove day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
                 } else {
                     GhostButton(
                         if (inApp) "Retake" else "Pick another",

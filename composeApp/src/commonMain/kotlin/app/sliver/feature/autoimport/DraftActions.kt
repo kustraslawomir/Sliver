@@ -79,7 +79,7 @@ class DraftActions(
         return list.size
     }
 
-    suspend fun skip(day: Day) = remove(listOf(day), if (day.draft) "Draft skipped" else "Day removed")
+    suspend fun skip(day: Day) = remove(listOf(day), "Day removed")
 
     /**
      * Deletes the days the way a user delete does (confirmed days leave a tombstone for sync); the files wait in tmp for

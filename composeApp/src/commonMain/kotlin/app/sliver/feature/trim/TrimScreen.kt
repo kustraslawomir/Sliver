@@ -75,7 +75,6 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.Badge
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
@@ -97,7 +96,6 @@ import app.sliver.data.export.stampText
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.autoimport.CandidateStrip
-import app.sliver.feature.autoimport.DraftBar
 import app.sliver.feature.autoimport.MotionChoice
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
@@ -280,8 +278,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 }
             }
 
-            if (draft != null) DraftBar(draft, draftNav, Modifier.padding(horizontal = SliverSpace.S3))
-
             val sideBySide = LocalWindowSize.current.sideBySide
             @Composable
             fun Preview(m: Modifier) {
@@ -299,24 +295,16 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         scrubMs = if (dragging) startMs else null,
                     ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
                     if (saved?.dateStamp == true) DateStamp(stampText(day))
-                    Badge(
-                        if (custom) "Custom" else "Auto-picked",
-                        Modifier.align(Alignment.TopStart).padding(SliverSpace.S3),
-                    )
                 }
             }
             }
 
             @Composable
             fun Controls() {
-            if (duration != null && showMinimap(duration)) {
-                Minimap(startMs, windowMs, duration) { release(minimapJump(it, duration, speed)); custom = true }
-            }
-
             if (duration != null && !short) {
                 Box {
                     Filmstrip(
-                        thumbs, duration, startMs, windowMs,
+                        thumbs, thumbsTotal, duration, startMs, windowMs,
                         frameState = frameState,
                         onDragStart = {
                             dragging = true
@@ -363,7 +351,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                     if (draft != null) {
-                        GhostButton("Skip day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), enabled = !saving && !draftNav.busy)
+                        GhostButton("Remove day", { if (!saving) draftNav.skip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
                     } else {
                         GhostButton(
                             if (inApp) "Retake" else "Pick another",
@@ -392,6 +380,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
 @Composable
 private fun Filmstrip(
     thumbs: List<ImageBitmap>,
+    thumbsTotal: Int,
     durationMs: Long,
     startMs: Long,
     windowMs: Long,
@@ -433,7 +422,7 @@ private fun Filmstrip(
         val frameW = windowMs / 1000f * secPx
         val frameLeft = (constraints.maxWidth - frameW) / 2f
         val stripX = frameLeft - start / 1000f * secPx
-        val tileDp = with(density) { (durationMs.toFloat() / thumbs.size.coerceAtLeast(1) / 1000f * secPx).toDp() }
+        val tileDp = with(density) { (durationMs.toFloat() / thumbsTotal.coerceAtLeast(1) / 1000f * secPx).toDp() }
         Row(
             Modifier.wrapContentWidth(Alignment.Start, unbounded = true).fillMaxHeight()
                 .offset { IntOffset(stripX.roundToInt(), 0) },
@@ -478,23 +467,6 @@ private fun ReframeBand(cropY: Float, onCropY: (Float) -> Unit) {
                         update(cropYFromTop(t, band))
                     }
                 },
-        )
-    }
-}
-
-@Composable
-private fun Minimap(startMs: Long, windowMs: Long, durationMs: Long, onJump: (Float) -> Unit) {
-    BoxWithConstraints(
-        Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2).height(24.dp)
-            .clip(SliverShapes.S).background(SliverColors.Surface2)
-            .pointerInput(Unit) { detectTapGestures { onJump(it.x / size.width) } },
-    ) {
-        val w = maxWidth
-        val left = w * (startMs.toFloat() / durationMs)
-        val width = (w * (windowMs.toFloat() / durationMs)).coerceAtLeast(3.dp)
-        Box(
-            Modifier.offset(left, 0.dp).width(width).fillMaxHeight()
-                .border(1.5.dp, SliverColors.Accent, SliverShapes.S),
         )
     }
 }
