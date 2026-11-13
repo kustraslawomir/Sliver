@@ -179,7 +179,7 @@ class AutoImportExecutor(
         val dismissed = store.dismissed()
         // A day the user removed comes back only with new files; the old ones stay as extra options after them.
         val byDate = groupByDate(found, zone(), from, to).mapNotNull { (date, entries) ->
-            val seen = dismissed[dismissKey(run.projectId, date)]?.toSet().orEmpty()
+            val seen = if (run.includeRejected) emptySet() else dismissed[dismissKey(run.projectId, date)]?.toSet().orEmpty()
             val fresh = entries.filter { !isDismissed(it.uri, it.name, seen) }
             if (fresh.isEmpty()) null else date to (fresh to entries.filter { isDismissed(it.uri, it.name, seen) })
         }.toMap()
@@ -202,6 +202,8 @@ class AutoImportExecutor(
             store.update(run.id) { it.copy(current = date.toString()) }
             val (fresh, old) = byDate.getValue(date)
             val made = create(run, date, fresh, format, old)
+            // A rejected item picked again is no longer rejected, so the launch cleanup keeps its draft.
+            if (made != null && run.includeRejected) store.undismiss(run.projectId, date, dismissed[dismissKey(run.projectId, date)].orEmpty())
             if (made != null) done++ else failed++
             if (!store.update(run.id) {
                     it.copy(

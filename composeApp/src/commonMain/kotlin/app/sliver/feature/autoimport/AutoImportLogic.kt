@@ -133,6 +133,8 @@ data class ImportRun(
     val firstFilled: String? = null,
     /** Default: only camera photos and videos; saved/received media only when the user asks for them. */
     val cameraOnly: Boolean = true,
+    /** Owner 13 Nov: items rejected before may be offered again, only when the user asks (default off). */
+    val includeRejected: Boolean = false,
     val lastFilled: String? = null,
     /** Folder source: tree uri to scan (null = gallery), plus what the scan found. */
     val folder: String? = null,

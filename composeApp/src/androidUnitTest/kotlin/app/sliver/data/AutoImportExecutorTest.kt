@@ -20,6 +20,7 @@ import app.sliver.feature.autoimport.ImportRun
 import app.sliver.feature.autoimport.MediaEntry
 import app.sliver.feature.autoimport.MediaScanner
 import app.sliver.feature.autoimport.decodeCandidates
+import app.sliver.feature.autoimport.dismissTokens
 import app.sliver.feature.gallery.GalleryItem
 import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.gallery.MotionClip
@@ -236,5 +237,26 @@ class AutoImportExecutorTest {
         val again = days.getDay(LocalDate(2026, 11, 5))!!
         assertEquals(listOf("content://image/new", "content://video/old"), decodeCandidates(again.draftCandidates).map { it.uri })
         assertTrue(exporter.calls.last().photo)
+    }
+
+    @Test
+    fun rejectedItemsComeBackOnlyWhenAsked() = runTest {
+        entries = listOf(MediaEntry("content://video/old", true, ms(5), 8_000))
+        store.start(ImportRun("run1", projects.activeId(), "2026-11-01"))
+        executor.run()
+        val day = days.getDay(LocalDate(2026, 11, 5))!!
+        store.dismiss(day.projectId, day.date, decodeCandidates(day.draftCandidates).flatMap(::dismissTokens))
+        days.deleteRow(day.projectId, day.date)
+
+        store.start(ImportRun("run2", projects.activeId(), "2026-11-01"))
+        executor.run()
+        assertEquals(null, days.getDay(LocalDate(2026, 11, 5)))
+
+        store.start(ImportRun("run3", projects.activeId(), "2026-11-01", includeRejected = true))
+        executor.run()
+        assertEquals("run3", days.getDay(LocalDate(2026, 11, 5))?.importRunId)
+        // Picked again, so the launch cleanup keeps it.
+        assertEquals(0, executor.pruneDismissedDrafts())
+        assertTrue(days.getDay(LocalDate(2026, 11, 5)) != null)
     }
 }

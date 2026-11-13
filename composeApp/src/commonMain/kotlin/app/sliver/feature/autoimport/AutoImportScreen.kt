@@ -117,6 +117,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     // Owner 13 Nov: drafts to review are the default; "Keep without review" is opt-in.
     var keepNow by rememberSaveable { mutableStateOf(false) }
     var includeOther by rememberSaveable { mutableStateOf(false) }
+    var includeRejected by rememberSaveable { mutableStateOf(false) }
 
     val folderChoice = rememberFolderChoice()
     val empty = remember(from, rows, yesterday) { gapDays(from, yesterday) { it in rows }.size }
@@ -128,7 +129,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         starting = true
         scope.launch {
             val id = Uuid.random().toString()
-            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow, cameraOnly = !includeOther, folder = folderChoice.tree, folderName = folderChoice.name))
+            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow, cameraOnly = !includeOther, includeRejected = includeRejected, folder = folderChoice.tree, folderName = folderChoice.name))
             runner.start()
             starting = false
         }
@@ -243,6 +244,11 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 SwitchRow(
                     "Include saved and received media", includeOther, { includeOther = it },
                     caption = "Off: only photos and videos taken with your camera.",
+                )
+                Hairline()
+                SwitchRow(
+                    "Include items you rejected", includeRejected, { includeRejected = it },
+                    caption = "Off: photos and videos you removed from drafts are not offered again.",
                 )
             }
         }
