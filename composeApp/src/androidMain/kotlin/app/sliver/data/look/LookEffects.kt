@@ -22,6 +22,12 @@ object LookEffects {
      * Intensity blends the LUT with identity on the CPU and scales the shader amounts.
      */
     fun build(context: Context, params: LookParams, clipId: String, forExport: Boolean, animate: Boolean = true): List<Effect> {
+        val seed = LookRandom.seedOf(clipId)
+        return build(context, params, { seed }, forExport, animate)
+    }
+
+    /** Same as above with a per-frame [seed], for a preview that plays many clips through one effect chain. */
+    fun build(context: Context, params: LookParams, seed: () -> Long, forExport: Boolean, animate: Boolean = true): List<Effect> {
         val info = params.preset.info
         if (params.intensity <= 0 && params.grain <= 0) return emptyList()
         val effects = ArrayList<Effect>()
@@ -30,7 +36,7 @@ object LookEffects {
             val table = tables.getOrPut(lut) { context.assets.open(lut).use { LutCube.parseTable(it) } }
             effects += SingleColorLut.createFromCube(LutCube.toCube(table, params.intensity / 100f))
         }
-        effects += LookShaderEffect(info.model, params.intensity / 100f, params.grain / 100f, LookRandom.seedOf(clipId), forExport || animate)
+        effects += LookShaderEffect(info.model, params.intensity / 100f, params.grain / 100f, seed, forExport || animate)
         return effects
     }
 }

@@ -23,7 +23,8 @@ class LookShaderEffect(
     private val model: LookModel,
     private val intensity: Float,
     private val grain: Float,
-    private val seed: Long,
+    /** Read every frame, so a preview playlist can switch clips without rebuilding the effect chain. */
+    private val seed: () -> Long,
     private val animate: Boolean,
 ) : GlEffect {
     override fun toGlShaderProgram(context: Context, useHdr: Boolean): GlShaderProgram =
@@ -36,7 +37,7 @@ private class LookShaderProgram(
     private val model: LookModel,
     private val intensity: Float,
     private val grain: Float,
-    private val seed: Long,
+    private val seed: () -> Long,
     private val animate: Boolean,
 ) : BaseGlShaderProgram(useHdr, 1) {
     private val program = try {
@@ -59,7 +60,7 @@ private class LookShaderProgram(
 
     override fun drawFrame(inputTexId: Int, presentationTimeUs: Long) {
         try {
-            val f = lookFrame(model, intensity, grain, seed, presentationTimeUs, height, animate)
+            val f = lookFrame(model, intensity, grain, seed(), presentationTimeUs, height, animate)
             program.use()
             program.setSamplerTexIdUniform("uTexSampler", inputTexId, 0)
             program.setFloatsUniform("uRes", floatArrayOf(width.toFloat(), height.toFloat()))

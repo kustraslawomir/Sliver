@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.data.look.LookRandom
 import app.sliver.core.theme.SliverColors
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.foundation.layout.Box
@@ -61,17 +62,23 @@ actual fun FilmPreview(
         video.setMediaItems(clips.map { MediaItem.fromUri(it.path) })
         video.prepare()
     }
-    fun applyLook() {
-        val clip = clips.getOrNull(video.currentMediaItemIndex)
-        video.setVideoEffects(if (look == null || clip == null) emptyList() else LookEffects.build(context, look, clip.path, forExport = false, animate = !paused))
-    }
-    LaunchedEffect(clips, look, paused) { applyLook() }
-    DisposableEffect(video, clips, look, paused) {
+    // Rebuilding the effect chain on every 1 s clip stalled playback; build it once per filter and let the
+    // shader read the current clip's seed each frame (same seed as the export, so preview = export).
+    val seed = remember { java.util.concurrent.atomic.AtomicLong(0L) }
+    DisposableEffect(video, clips) {
+        fun update() { clips.getOrNull(video.currentMediaItemIndex)?.let { seed.set(LookRandom.seedOf(it.path)) } }
+        update()
         val listener = object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = applyLook()
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = update()
         }
         video.addListener(listener)
         onDispose { video.removeListener(listener) }
+    }
+    LaunchedEffect(look, paused) {
+        val effects = if (look == null) emptyList() else withContext(Dispatchers.IO) {
+            LookEffects.build(context, look, seed::get, forExport = false, animate = !paused)
+        }
+        video.setVideoEffects(effects)
     }
     LaunchedEffect(track, audio) {
         if (track != null && audio != FilmAudio.ORIGINAL) {
