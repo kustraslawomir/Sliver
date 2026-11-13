@@ -205,6 +205,10 @@ class AutoImportExecutorTest {
 
         assertEquals(0, days.observeDrafts().first().size)
         assertEquals(listOf(5, 6), days.observeAll().first().map { it.date.day })
+        assertEquals("2026-11-05", store.current()!!.firstFilled)
+        assertEquals("2026-11-06", store.current()!!.lastFilled)
+        assertEquals(1, store.current()!!.videos)
+        assertEquals(1, store.current()!!.photos)
 
         executor.undoAll()
         assertEquals(emptyList(), days.observeAll().first())

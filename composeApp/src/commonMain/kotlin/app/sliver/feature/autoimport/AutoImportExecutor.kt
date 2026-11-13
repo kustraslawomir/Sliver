@@ -110,6 +110,8 @@ class AutoImportExecutor(
                         videos = it.videos + if (made == false) 1 else 0,
                         photos = it.photos + if (made == true) 1 else 0,
                         skipped = it.skipped + if (made == null) 1 else 0,
+                        firstFilled = if (made != null) minOf(it.firstFilled ?: date.toString(), date.toString()) else it.firstFilled,
+                        lastFilled = if (made != null) maxOf(it.lastFilled ?: date.toString(), date.toString()) else it.lastFilled,
                     )
                 }
             ) return

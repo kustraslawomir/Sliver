@@ -251,6 +251,15 @@ private fun RunProgress(run: ImportRun, draftsLeft: Int, autoLeft: Int, onCancel
         StatRow("Found in your gallery", if (run.scanning) "Searching…" else "${groupThousands(run.scanned)} items")
         if (!run.scanning) StatRow("Days with something to use", groupThousands(run.total))
         if (run.videos + run.photos > 0) StatRow("Filled with", "${run.videos} ${if (run.videos == 1) "video" else "videos"} · ${run.photos} ${if (run.photos == 1) "photo" else "photos"}")
+        val first = run.firstFilled?.let(LocalDate::parse)
+        val last = run.lastFilled?.let(LocalDate::parse)
+        if (first != null && last != null) StatRow("Filled days", "${formatDay(first)} – ${formatDay(last)}")
+        if (run.finished && first != null && first > LocalDate.parse(run.from)) {
+            SliverText(
+                "Your gallery has no photos or videos with a date before ${formatDay(first)}, so earlier days stay empty.",
+                SliverType.BodySmall, color = SliverColors.TextSecondary,
+            )
+        }
         if (run.skipped > 0) StatRow("Couldn't read", "${run.skipped} ${if (run.skipped == 1) "day" else "days"}")
         if (!run.finished) run.current?.let { StatRow("Now", formatDay(LocalDate.parse(it))) }
         if (!run.finished) etaLabel(run.done, run.total, run.startedAt, now)?.let { StatRow("Time", it) }

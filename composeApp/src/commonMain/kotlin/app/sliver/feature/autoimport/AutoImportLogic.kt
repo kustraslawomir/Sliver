@@ -77,6 +77,9 @@ data class ImportRun(
     val skipped: Int = 0,
     val current: String? = null,
     val startedAt: Long = 0,
+    /** First and last day that actually got a clip, to show where the gallery had something. */
+    val firstFilled: String? = null,
+    val lastFilled: String? = null,
 ) {
     val progress get() = if (total <= 0) 0f else (done.toFloat() / total).coerceIn(0f, 1f)
     val scanning get() = scanned < 0
