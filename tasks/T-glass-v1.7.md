@@ -63,3 +63,13 @@ Layers, bottom to top, 92 dp box:
 7. Timer pill 30 dp above the button: black 25 % glass, red 7 dp dot, "0.6 s" 14/500 tabular. Shows only while recording.
 Motion: press = core ×0.92 + whole button ×0.96, 120 ms. Recording: core → 30 dp square, corner 9 dp, spring with a little overshoot (~420 ms). Release/saved: white ring flash 8 dp → 2 dp, 480 ms, haptic CONFIRM; core springs back to the disc (460 ms easeInOutCubic).
 Render on a Canvas/DrawScope (no nested Boxes per layer), one `rememberInfiniteTransition` for phase, paused when the camera is not RESUMED. Done = screenrecord on the Xiaomi next to the mp4 in `qa/v1.7/record-button.mp4`.
+
+## 8. Day screen fixes (owner's phone screenshot, 13 Nov) — do this FIRST, it's broken now
+Reference: `design/png/DayDetail.png` + the kit above. Bugs seen on device:
+1. **Date stamp overlaps the title.** The "13 NOV 2026" stamp is drawn as an overlay at the same height as "Friday 13 November" and covers the next-day arrow. On the day screen don't draw the stamp at all (the title already says the date); the stamp belongs only in the rendered film and in the builder/player preview.
+2. **Video isn't full-bleed.** Black bands above and below, top buttons sit on black. Video fills the whole screen edge to edge (crop to fill, behind status and nav bars, `enableEdgeToEdge`), back and mute = 44 dp glass circles over the video.
+3. **Text on bright video is unreadable.** Add the scrims from the board: top 150 dp black 70 % → 0, bottom 300 dp 0 → black 85 %. "Today · 17:46" 15 sp #EDEDE8, not grey.
+4. **"Sound in film" lies.** Switch is ON while the subtitle says "Off: this clip is silent in every film." Subtitle must follow the state: on = "On: this clip's sound plays in films", off = the current text. Use ReelogSwitch, the whole row toggles. Row sits in a regular-glass card (radius 18) so it reads over any video.
+5. **Remove is naked red text** floating on the video. Make it a 56 dp regular-glass pill with #E5675F text, same size as Replace, side by side with a 10 dp gap. Replace stays the primary pill.
+6. Prev/next day: 48 dp hit areas, 24 dp chevrons in 44 dp glass circles, vertically centred on the title block, never covered by anything.
+Done = new screenshot of the day screen on the Xiaomi/emulator with a placeholder clip (bright one, to prove the scrims), in `qa/v1.7/`.
