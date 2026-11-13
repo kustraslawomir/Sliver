@@ -29,7 +29,7 @@ fun DayMediaSheetBody(day: Day, busy: Boolean, onPick: (String) -> Unit, onKeep:
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
         SliverText(dayItemsTitle(day.date, candidates.size.coerceAtLeast(1)), SliverType.Title)
         if (candidates.isNotEmpty()) {
-            SliverText("Tap an item to choose it and cut the clip.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            SliverText("Keep opens the current one so you can pick the second. Tap another to use it instead.", SliverType.BodySmall, color = SliverColors.TextSecondary)
             Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 candidates.chunked(3).forEach { row ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {

@@ -347,7 +347,12 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             DayMediaSheetBody(
                 d, draftNav.busy,
                 onPick = { uri -> reviewRaw = null; walking = false; draftNav.openFirst(onNavigate, d, uri, chain = false) },
-                onKeep = { advance(); draftNav.keepOne(d) },
+                // Owner: "Keep" still means choosing the exact second by hand — open the editor on the current pick.
+                onKeep = {
+                    val current = decodeCandidates(d.draftCandidates).firstOrNull()?.uri
+                    if (current == null) { advance(); draftNav.keepOne(d) }
+                    else { reviewRaw = null; walking = false; draftNav.openFirst(onNavigate, d, current, chain = false) }
+                },
                 onRemove = { advance(); draftNav.removeOne(d) },
             )
         }
