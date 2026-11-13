@@ -53,3 +53,14 @@ fun SliverText(
     BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines)
 }
 
+@Composable
+fun SliverText(
+    text: androidx.compose.ui.text.AnnotatedString,
+    style: TextStyle = SliverType.Body,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), maxLines = maxLines)
+}
+

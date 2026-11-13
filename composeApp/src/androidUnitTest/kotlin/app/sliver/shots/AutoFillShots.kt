@@ -51,4 +51,28 @@ class AutoFillShots : ShotTest() {
             }
         }
     }
+
+    private fun withRun(run: app.sliver.feature.autoimport.ImportRun) = kotlinx.coroutines.runBlocking {
+        org.koin.mp.KoinPlatform.getKoin().get<app.sliver.feature.autoimport.AutoImportStore>().start(run)
+    }
+
+    @Test fun fillProgress() {
+        withRun(
+            app.sliver.feature.autoimport.ImportRun(
+                id = "run", projectId = ShotProjectId, from = "2026-06-21", done = 64, total = 143, keep = true, gapDays = 155,
+                scanned = 1204, videos = 31, photos = 21, skipped = 3, current = "2026-08-22", firstFilled = "2026-06-21", lastFilled = "2026-08-22",
+            ),
+        )
+        shoot("FillCalendarProgress", inspection = true) { app.sliver.feature.autoimport.AutoImportScreen({}, {}) }
+    }
+
+    @Test fun fillDone() {
+        withRun(
+            app.sliver.feature.autoimport.ImportRun(
+                id = "run", projectId = ShotProjectId, from = "2026-06-21", done = 4, total = 4, finished = true, keep = true, gapDays = 6,
+                scanned = 40, videos = 3, photos = 1, firstFilled = "2026-11-03", lastFilled = "2026-11-08",
+            ),
+        )
+        shoot("FillCalendarDone", inspection = true) { app.sliver.feature.autoimport.AutoImportScreen({}, {}) }
+    }
 }

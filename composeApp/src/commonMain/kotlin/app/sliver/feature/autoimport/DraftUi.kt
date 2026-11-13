@@ -172,6 +172,9 @@ fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier:
                 "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
                 color = SliverColors.TextTertiary, maxLines = 1,
             )
+            if (ctx.candidates.firstOrNull { it.uri == ctx.selectedUri }?.fileTime == true) {
+                SliverText(FILE_TIME_NOTE, SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
+            }
         }
         if (ctx.chain) {
             val prev = index > 0

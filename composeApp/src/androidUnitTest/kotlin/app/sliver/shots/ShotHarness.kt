@@ -108,6 +108,12 @@ abstract class ShotTest {
                         }
                     }
                     single { settings }
+                    single<app.sliver.feature.autoimport.AutoImportRunner> {
+                        object : app.sliver.feature.autoimport.AutoImportRunner {
+                            override fun start() {}
+                            override fun cancel() {}
+                        }
+                    }
                     // Goldens never depend on a real OAuth client in local.properties.
                     single<app.sliver.data.auth.GoogleAuth> { app.sliver.data.auth.FakeGoogleAuth() }
                     single<androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences>> {

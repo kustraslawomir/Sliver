@@ -1,5 +1,22 @@
 package app.sliver.feature.autoimport
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
+import app.sliver.data.db.Day
+import app.sliver.feature.archive.MonthLong
+import app.sliver.feature.archive.weekdayName
+import app.sliver.feature.trim.rememberPhoto
 import app.sliver.core.APP_NAME
 
 import app.sliver.core.ui.SwitchRow
@@ -96,6 +113,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var keepNow by rememberSaveable { mutableStateOf(true) }
     var includeOther by rememberSaveable { mutableStateOf(false) }
 
+    val folderChoice = rememberFolderChoice()
     val empty = remember(from, rows, yesterday) { gapDays(from, yesterday) { it in rows }.size }
     val status = controller.status(PermissionKind.MediaLibrary)
     val usable = status == PermissionStatus.Granted || status == PermissionStatus.Partial
@@ -105,7 +123,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         starting = true
         scope.launch {
             val id = Uuid.random().toString()
-            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow, cameraOnly = !includeOther))
+            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow, cameraOnly = !includeOther, folder = folderChoice.tree, folderName = folderChoice.name))
             runner.start()
             starting = false
         }
@@ -134,12 +152,8 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
-            .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
-        verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()) {
+        Row(Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = SliverSpace.S4), verticalAlignment = Alignment.CenterVertically) {
             IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
             SliverText("Fill the calendar", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
         }
@@ -147,7 +161,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         val current = run
         if (current != null) {
             RunProgress(
-                current, waiting.size, autoDays(waiting).size,
+                current, waiting, autoDays(waiting).size,
                 onCancel = {
                     runner.cancel()
                     scope.launch { store.update(current.id) { it.copy(finished = true) } }
@@ -164,131 +178,218 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             return@Column
         }
 
-        SliverText(
-            if (keepNow) "Fill empty days from your gallery: the best video of each day, or a photo if there is none."
-            else "Fill empty days with a draft from your gallery. Drafts count only after you review and keep them.",
-            SliverType.Body, color = SliverColors.TextSecondary,
-        )
-
-        SliverText("From", SliverType.Caption, color = SliverColors.TextTertiary)
-        val presets = remember(start, today) { fromPresets(start, today) }
-        val custom = presets.none { it.second == from }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            presets.forEach { (preset, date) ->
-                Chip(presetLabel(preset), from == date, { fromRaw = date.toString() })
+        Column(
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+        ) {
+            SliverText(
+                if (keepNow) "Picks one clip for every empty day from your camera roll \u2014 the longest video, else a photo. Nothing leaves your phone."
+                else "Fill empty days with a draft from your gallery. Drafts count only after you review and keep them.",
+                SliverType.Body, color = SliverColors.TextSecondary,
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                SliverText("From", SliverType.BodySmall, color = SliverColors.TextTertiary)
+                val presets = remember(start, today) { fromPresets(start, today) }
+                val custom = presets.none { it.second == from }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                    presets.forEach { (preset, date) ->
+                        Chip(presetLabel(preset), from == date, { fromRaw = date.toString() })
+                    }
+                    // DECISION (owner: "custom date is missing, simplify"): quick presets + one chip that opens the calendar and shows the picked date.
+                    Chip(if (custom) formatDay(from) else presetLabel(FromPreset.CUSTOM), custom, { pickerOpen = true })
+                }
             }
-            // DECISION (owner: "custom date is missing, simplify"): quick presets + one chip that opens the calendar and shows the picked date.
-            Chip(if (custom) formatDay(from) else presetLabel(FromPreset.CUSTOM), custom, { pickerOpen = true })
-        }
-        SliverText(fillLabel(empty), SliverType.Headline, color = SliverColors.TextPrimary)
-        SliverText("Since ${formatDay(from)} · filled days are never touched", SliverType.Meta, color = SliverColors.TextSecondary)
+            FolderSourcePicker(folderChoice)
+            BigCount(groupThousands(empty), null, "empty ${if (empty == 1) "day" else "days"} to fill \u00B7 since ${from.day} ${MonthLong[from.month.ordinal]}")
 
-        if (status == PermissionStatus.Partial) {
-            Column(
-                Modifier.fillMaxWidth().clip(SliverShapes.R12).background(SliverColors.Surface1)
-                    .border(1.dp, SliverColors.LineStrong, SliverShapes.R12).padding(SliverSpace.S4),
-                verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-            ) {
-                SliverText("Limited access", SliverType.Headline, color = SliverColors.TextPrimary)
+            if (!folderChoice.useFolder && status == PermissionStatus.Partial) {
+                Column(
+                    Modifier.fillMaxWidth().clip(SliverShapes.R12).background(SliverColors.Surface1)
+                        .border(1.dp, SliverColors.LineStrong, SliverShapes.R12).padding(SliverSpace.S4),
+                    verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                ) {
+                    SliverText("Limited access", SliverType.Headline, color = SliverColors.TextPrimary)
+                    SliverText(
+                        "$APP_NAME can only see the photos and videos you selected, so most days may stay empty.",
+                        SliverType.BodySmall, color = SliverColors.TextSecondary,
+                    )
+                    SecondaryButton("Allow all", { controller.request(PermissionKind.MediaLibrary) })
+                }
+            }
+            if (!folderChoice.useFolder && status == PermissionStatus.Denied) {
                 SliverText(
-                    "$APP_NAME can only see the photos and videos you selected, so most days may stay empty.",
+                    "Photo access is off. Turn it on in Settings so $APP_NAME can find a photo or video for each empty day.",
                     SliverType.BodySmall, color = SliverColors.TextSecondary,
                 )
-                SecondaryButton("Allow all", { controller.request(PermissionKind.MediaLibrary) })
+                SecondaryButton("Open Settings", controller::openSettings)
+            }
+
+            Column {
+                Hairline()
+                SwitchRow(
+                    "Keep without review", keepNow, { keepNow = it },
+                    caption = "Filled days count right away. You can check them later.",
+                )
+                Hairline()
+                SwitchRow(
+                    "Include saved and received media", includeOther, { includeOther = it },
+                    caption = "Off: only photos and videos taken with your camera.",
+                )
             }
         }
-        if (status == PermissionStatus.Denied) {
+        Column(
+            Modifier.padding(horizontal = SliverSpace.Gutter).padding(bottom = SliverSpace.S4),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             SliverText(
-                "Photo access is off. Turn it on in Settings so $APP_NAME can find a photo or video for each empty day.",
-                SliverType.BodySmall, color = SliverColors.TextSecondary,
+                "Screenshots and screen recordings are always skipped. Asks for gallery access once.",
+                SliverType.Caption.copy(textAlign = TextAlign.Center), color = SliverColors.TextTertiary,
             )
-            SecondaryButton("Open Settings", controller::openSettings)
+            PrimaryButton(
+                if (starting) "Starting..." else if (keepNow) "Fill $empty ${if (empty == 1) "day" else "days"}" else "Import drafts",
+                {
+                    if (folderChoice.useFolder || usable) begin() else {
+                        wantStart = true
+                        controller.request(PermissionKind.MediaLibrary)
+                    }
+                },
+                Modifier.fillMaxWidth(), enabled = empty > 0 && !starting && (!folderChoice.useFolder || folderChoice.ready),
+            )
         }
-
-        SwitchRow(
-            "Keep without review", keepNow, { keepNow = it },
-            caption = "Each day gets its best video or photo right away. You can still swap any day later.",
-        )
-        SwitchRow(
-            "Include saved and received media", includeOther, { includeOther = it },
-            caption = "Off: only photos and videos from your camera. Screenshots are always skipped.",
-        )
-        PrimaryButton(
-            if (starting) "Starting..." else if (keepNow) "Fill $empty ${if (empty == 1) "day" else "days"}" else "Import drafts",
-            {
-                if (usable) begin() else {
-                    wantStart = true
-                    controller.request(PermissionKind.MediaLibrary)
-                }
-            },
-            Modifier.fillMaxWidth(), enabled = empty > 0 && !starting,
-        )
     }
 
     DatePickerSheet(pickerOpen, from, LocalDate(today.year - 10, 1, 1), today, { fromRaw = it.toString(); pickerOpen = false }, { pickerOpen = false })
 }
 
+/** Display-size number with an optional dimmer tail ("64 of 143") and a caption under it. */
 @Composable
-private fun RunProgress(run: ImportRun, draftsLeft: Int, autoLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
-    SliverText(
-        when {
-            run.finished -> importSummary(run.done, (run.total - run.done).coerceAtLeast(0), run.keep)
-            run.keep -> "Filling days"
-            else -> "Importing drafts"
-        },
-        SliverType.Title,
-    )
-    if (!run.finished) {
+private fun BigCount(number: String, tail: String?, caption: String) {
+    Column {
         SliverText(
-            when {
-                run.scanning -> "Looking through your gallery"
-                run.total == 0 -> "Nothing to fill"
-                else -> "${run.done} of ${run.total} days"
+            buildAnnotatedString {
+                append(number)
+                if (tail != null) withStyle(SpanStyle(color = SliverColors.TextDisabled)) { append(" $tail") }
             },
-            SliverType.Headline, color = SliverColors.TextPrimary,
+            SliverType.DisplayXL, color = SliverColors.TextPrimary, maxLines = 1,
         )
+        SliverText(caption, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.TextTertiary)
     }
-    Box(Modifier.fillMaxWidth().height(4.dp).clip(SliverShapes.Pill).background(SliverColors.LineStrong)) {
-        Box(Modifier.fillMaxWidth(if (run.finished) 1f else run.progress).height(4.dp).clip(SliverShapes.Pill).background(SliverColors.Accent))
-    }
-    // Owner: "needs some progress stats here".
+}
+
+@Composable
+private fun Hairline() = Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+
+private fun shortDay(d: LocalDate) = "${d.day} ${MonthLong[d.month.ordinal].take(3)}"
+
+@Composable
+private fun ColumnScope.RunProgress(
+    run: ImportRun, waiting: List<Day>, autoLeft: Int,
+    onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit,
+) {
     val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
-    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        if (run.gapDays > 0) StatRow("Empty days since ${formatDay(LocalDate.parse(run.from))}", groupThousands(run.gapDays))
-        StatRow("Found in your gallery", if (run.scanning) "Searching…" else "${groupThousands(run.scanned)} items")
-        if (!run.scanning) StatRow("Days with something to use", groupThousands(run.total))
-        if (run.videos + run.photos > 0) StatRow("Filled with", "${run.videos} ${if (run.videos == 1) "video" else "videos"} · ${run.photos} ${if (run.photos == 1) "photo" else "photos"}")
-        val first = run.firstFilled?.let(LocalDate::parse)
-        val last = run.lastFilled?.let(LocalDate::parse)
-        if (first != null && last != null) StatRow("Filled days", "${formatDay(first)} – ${formatDay(last)}")
-        if (run.finished && first != null && first > LocalDate.parse(run.from)) {
+    val first = run.firstFilled?.let(LocalDate::parse)
+    val last = run.lastFilled?.let(LocalDate::parse)
+    val from = LocalDate.parse(run.from)
+    val nothingBefore = first != null && first > from
+    Column(
+        Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
+        verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+    ) {
+        if (!run.finished) {
+            when {
+                run.scanning -> BigCount("\u2026", null, if (run.folder != null) "Looking through your folder" else "Looking through your gallery")
+                else -> BigCount(
+                    groupThousands(run.done), "of ${groupThousands(run.total)}",
+                    "days filled" + (etaLabel(run.done, run.total, run.startedAt, now)?.let { " \u00B7 ${it.replaceFirstChar(Char::lowercase)}" } ?: ""),
+                )
+            }
+            Box(Modifier.fillMaxWidth().height(4.dp).clip(SliverShapes.Pill).background(SliverColors.LineStrong)) {
+                Box(Modifier.fillMaxWidth(run.progress).height(4.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary))
+            }
+            run.current?.let {
+                val d = LocalDate.parse(it)
+                SliverText("Now: ${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall, color = SliverColors.TextSecondary)
+            }
+            // Owner: "needs some progress stats here".
+            Column {
+                if (!run.scanning) StatRow("Days with media", groupThousands(run.total))
+                StatRow("Items found", if (run.scanning) (if (run.found > 0) "${groupThousands(run.found)} files" else "Searching\u2026") else groupThousands(run.scanned))
+                if (run.videos + run.photos > 0) StatRow("Videos \u00B7 photos", "${run.videos} \u00B7 ${run.photos}")
+                if (!run.scanning && run.gapDays > 0) StatRow("Still empty", groupThousands((run.gapDays - run.total).coerceAtLeast(0)))
+                if (run.skipped > 0) StatRow("Couldn't read", groupThousands(run.skipped))
+                if (first != null && last != null) StatRow("Filled so far", "${shortDay(first)} \u2013 ${shortDay(last)}")
+                Hairline()
+            }
             SliverText(
-                "Your gallery has no photos or videos with a date before ${formatDay(first)}, so earlier days stay empty.",
-                SliverType.BodySmall, color = SliverColors.TextSecondary,
+                "You can leave this screen." + if (nothingBefore) " Your ${if (run.folder != null) "folder" else "gallery"} has nothing before ${formatDay(first!!)}." else "",
+                SliverType.BodySmall, color = SliverColors.TextTertiary,
             )
+            FolderRunNotes(run)
+        } else {
+            BigCount(
+                groupThousands(run.done), null,
+                (if (run.keep) "days filled" else "drafts added") + if (first != null && last != null) " \u00B7 ${shortDay(first)} \u2013 ${shortDay(last)}" else "",
+            )
+            val mine = waiting.filter { it.importRunId == run.id }.take(40)
+            if (mine.isNotEmpty()) Mosaic(mine)
+            val stayEmpty = (run.gapDays - run.done).coerceAtLeast(0)
+            SliverText(
+                buildString {
+                    if (stayEmpty > 0) append("$stayEmpty ${if (stayEmpty == 1) "day" else "days"} had nothing in your ${if (run.folder != null) "folder" else "gallery"} and stay empty. ")
+                    if (run.skipped > 0) append("${run.skipped} couldn't be read. ")
+                    append(if (run.keep) "Filled days are marked until you check them." else "Drafts count only after you keep them.")
+                },
+                SliverType.BodySmall, color = SliverColors.TextTertiary,
+            )
+            FolderRunNotes(run)
         }
-        if (run.skipped > 0) StatRow("Couldn't read", "${run.skipped} ${if (run.skipped == 1) "day" else "days"}")
-        if (!run.finished) run.current?.let { StatRow("Now", formatDay(LocalDate.parse(it))) }
-        if (!run.finished) etaLabel(run.done, run.total, run.startedAt, now)?.let { StatRow("Time", it) }
     }
-    if (!run.finished) {
-        SliverText("Keeps going in the background.", SliverType.BodySmall, color = SliverColors.TextSecondary)
-        GhostButton("Cancel", onCancel, Modifier.fillMaxWidth())
-    } else {
-        if (draftsLeft > 0) {
-            PrimaryButton("Keep all $draftsLeft", onKeepAll, Modifier.fillMaxWidth())
-            SecondaryButton("Review one by one", onReview, Modifier.fillMaxWidth())
-            if (autoLeft > 0) GhostButton("Remove unchecked", onRemoveUnchecked, Modifier.fillMaxWidth(), destructive = true)
+    Column(
+        Modifier.padding(horizontal = SliverSpace.Gutter).padding(bottom = SliverSpace.S4),
+        verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+    ) {
+        if (!run.finished) {
+            SecondaryButton("Stop", onCancel, Modifier.fillMaxWidth())
+        } else {
+            if (waiting.isNotEmpty()) {
+                PrimaryButton("Keep all", onKeepAll, Modifier.fillMaxWidth())
+                SecondaryButton("Review one by one", onReview, Modifier.fillMaxWidth())
+            } else {
+                PrimaryButton("Done", onDone, Modifier.fillMaxWidth())
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                if (autoLeft > 0) GhostButton("Remove unchecked", onRemoveUnchecked, destructive = true) else Spacer(Modifier.size(1.dp))
+                GhostButton("Undo all", onUndo)
+            }
         }
-        SecondaryButton("Done", onDone)
-        GhostButton("Undo all", onUndo, Modifier.fillMaxWidth(), destructive = true)
+    }
+}
+
+/** 8-column grid of the run's filled days (board FillCalendarDone). */
+@Composable
+private fun Mosaic(days: List<Day>) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        days.chunked(8).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                row.forEach { d ->
+                    val thumb = rememberPhoto(d.thumb)
+                    Box(
+                        Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(6.dp))
+                            .background(d.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3),
+                    ) { if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                }
+                repeat(8 - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
     }
 }
 
 @Composable
 private fun StatRow(label: String, value: String) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        SliverText(label, SliverType.BodySmall, Modifier.weight(1f), color = SliverColors.TextSecondary)
-        SliverText(value, SliverType.Num, color = SliverColors.TextPrimary)
+    Hairline()
+    Row(Modifier.fillMaxWidth().height(46.dp), verticalAlignment = Alignment.CenterVertically) {
+        SliverText(label, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f), color = SliverColors.TextSecondary)
+        SliverText(value, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp, fontFeatureSettings = "tnum"), color = SliverColors.TextPrimary)
     }
 }

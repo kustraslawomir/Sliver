@@ -109,6 +109,7 @@ class AutoImportExecutor(
     private val today: () -> LocalDate = ::todayLocal,
     private val zone: () -> TimeZone = { TimeZone.currentSystemDefault() },
     private val nowMillis: () -> Long = { kotlin.time.Clock.System.now().toEpochMilliseconds() },
+    private val folderScanner: FolderScanner? = null,
 ) {
     /** Counts of days skipped because their item could not be read, for the summary. */
     var failed = 0
@@ -123,7 +124,7 @@ class AutoImportExecutor(
         val known = days.draftsOfRun(run.projectId, run.id).size
         val gaps = datesBetween(from, to).filter { days.getDay(run.projectId, it) == null }
         store.update(run.id) { it.copy(gapDays = gaps.size, startedAt = it.startedAt.takeIf { s -> s > 0 } ?: nowMillis()) }
-        val found = scanner.scan(from, to, zone(), gaps.toSet()).filter { !run.cameraOnly || it.camera }
+        val found = if (run.folder != null) scanFolder(run, from, to) else scanner.scan(from, to, zone(), gaps.toSet()).filter { !run.cameraOnly || it.camera }
         val dismissed = store.dismissed()
         // A day the user removed comes back only with new files; the old ones stay as extra options after them.
         val byDate = groupByDate(found, zone(), from, to).mapNotNull { (date, entries) ->
@@ -156,6 +157,14 @@ class AutoImportExecutor(
             ) return
         }
         store.update(run.id) { it.copy(finished = true, done = done, current = null) }
+    }
+
+    private suspend fun scanFolder(run: ImportRun, from: LocalDate, to: LocalDate): List<MediaEntry> {
+        val scanner = checkNotNull(folderScanner) { "No folder scanner" }
+        val result = scanner.scan(checkNotNull(run.folder), from, to, zone()) { n -> store.update(run.id) { it.copy(found = n) } }
+        val entries = cleanFolderEntries(result.entries)
+        store.update(run.id) { it.copy(unreadable = result.unreadable, truncated = result.truncated, fileTimeDates = entries.count(MediaEntry::fileTime)) }
+        return entries
     }
 
     /** Returns true when the day got a photo, false when it got a video, null when it failed. */

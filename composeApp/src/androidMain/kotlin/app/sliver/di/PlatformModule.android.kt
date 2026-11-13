@@ -74,6 +74,8 @@ actual val platformModule: Module = module {
     single { ProgressCoordinator(get<Context>(), get(), get()) }
     single<AutoImportRunner> { AndroidAutoImportRunner(get<Context>()) }
     single<MediaScanner> { AndroidMediaScanner(get<Context>()) }
+    single<app.sliver.feature.autoimport.FolderScanner> { app.sliver.feature.autoimport.AndroidFolderScanner(get<Context>()) }
+    single<app.sliver.feature.autoimport.FolderAccess> { app.sliver.feature.autoimport.AndroidFolderAccess(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }
     single<ReminderLog> { AndroidReminderLog(get<Context>()) }
     single<GoldenHourProvider> { AndroidGoldenHour(get<Context>()) }

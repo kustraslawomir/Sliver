@@ -55,6 +55,19 @@ internal object IosMediaScanner : MediaScanner {
     ) = TODO("iOS later")
 }
 
+internal object IosFolderScanner : app.sliver.feature.autoimport.FolderScanner {
+    override suspend fun scan(
+        tree: String, from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, onFound: suspend (Int) -> Unit,
+    ) = TODO("iOS later")
+}
+
+internal object IosFolderAccess : app.sliver.feature.autoimport.FolderAccess {
+    override fun persist(tree: String) = TODO("iOS later")
+    override fun release(tree: String) = TODO("iOS later")
+    override fun isGranted(tree: String) = TODO("iOS later")
+    override fun displayName(tree: String) = TODO("iOS later")
+}
+
 internal object IosAutoImportRunner : AutoImportRunner {
     override fun start() = Unit
     override fun cancel() = Unit

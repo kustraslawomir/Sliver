@@ -48,8 +48,9 @@ val commonModule: Module = module {
     single { SaveUndo(get(), get(), get()) }
     single { FilmDeleter(get(), get(), get()) }
     single { AutoImportStore(get()) }
+    single { app.sliver.feature.autoimport.FolderSourceStore(get()) }
     single { DraftActions(get(), get(), get(), get(), get()) }
-    single { AutoImportExecutor(get(), get(), get(), get(), get(), get(), get()) }
+    single { AutoImportExecutor(get(), get(), get(), get(), get(), get(), get(), folderScanner = get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get(), get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }
     single { AccountManager(get(), get()) }

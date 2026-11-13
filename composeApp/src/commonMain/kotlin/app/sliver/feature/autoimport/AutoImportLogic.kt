@@ -14,7 +14,10 @@ import kotlinx.serialization.json.Json
 
 /** One photo, video or motion photo from the gallery with a real capture time. */
 /** [camera] = taken with the phone's camera (DCIM/Camera…), not saved, received or downloaded. Screenshots never get here. */
-data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false, val camera: Boolean = true)
+data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false, val camera: Boolean = true,
+    /** Folder items only: file name and size (duplicates), and whether the date is just the file's modified time. */
+    val name: String? = null, val sizeBytes: Long = 0, val fileTime: Boolean = false,
+)
 
 /** Screenshots and screen recordings are never a day's moment. */
 fun isScreenCapture(relativePath: String?, name: String?): Boolean {
@@ -27,7 +30,7 @@ fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowerc
 
 /** A gallery item offered for a draft day; stored as JSON on the day. */
 @Serializable
-data class DraftCandidate(val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false)
+data class DraftCandidate(val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false, val fileTime: Boolean = false)
 
 const val MAX_CANDIDATES = 30
 
@@ -61,7 +64,7 @@ fun rank(entries: List<MediaEntry>): List<MediaEntry> {
 }
 
 fun candidatesOf(entries: List<MediaEntry>): List<DraftCandidate> =
-    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion) }
+    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime) }
 
 /** A video's 1 s window sits in the middle. */
 fun middleWindowStartMs(durationMs: Long): Long = ((durationMs - 1000) / 2).coerceAtLeast(0)
@@ -96,6 +99,13 @@ data class ImportRun(
     /** Default: only camera photos and videos; saved/received media only when the user asks for them. */
     val cameraOnly: Boolean = true,
     val lastFilled: String? = null,
+    /** Folder source: tree uri to scan (null = gallery), plus what the scan found. */
+    val folder: String? = null,
+    val folderName: String? = null,
+    val found: Int = 0,
+    val unreadable: Int = 0,
+    val fileTimeDates: Int = 0,
+    val truncated: Boolean = false,
 ) {
     val progress get() = if (total <= 0) 0f else (done.toFloat() / total).coerceIn(0f, 1f)
     val scanning get() = scanned < 0

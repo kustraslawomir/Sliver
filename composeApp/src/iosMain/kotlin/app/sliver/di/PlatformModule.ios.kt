@@ -56,6 +56,8 @@ actual val platformModule: Module = module {
     single<TrimMedia> { IosTrimMedia }
     single<AutoImportRunner> { IosAutoImportRunner }
     single<MediaScanner> { IosMediaScanner }
+    single<app.sliver.feature.autoimport.FolderScanner> { IosFolderScanner }
+    single<app.sliver.feature.autoimport.FolderAccess> { IosFolderAccess }
     single<FilmRenderer> { IosFilmRenderer }
     single<app.sliver.feature.notifications.ReminderLog> { IosReminderLog }
     single<GoldenHourProvider> { NoGoldenHour }
