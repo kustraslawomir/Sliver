@@ -135,6 +135,9 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             begin()
         }
     }
+    // Owner: the old summary blocked new fills. Opening this page always starts at the setup; the last run's days are
+    // still checked from the project screen's review row.
+    LaunchedEffect(Unit) { if (store.current()?.finished == true) store.clear() }
     LaunchedEffect(run?.finished) {
         val r = run ?: return@LaunchedEffect
         if (!r.finished) {
