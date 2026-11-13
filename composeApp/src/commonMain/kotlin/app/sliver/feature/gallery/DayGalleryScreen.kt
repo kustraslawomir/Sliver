@@ -174,7 +174,7 @@ private fun DayTile(e: MediaEntry, modifier: Modifier, onClick: () -> Unit) {
     val time = Instant.fromEpochMilliseconds(e.takenAtMs).toLocalDateTime(TimeZone.currentSystemDefault()).time
     val clock = "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
     val kind = when {
-        e.motion -> "Motion photo"
+        e.motion || e.live -> "Moving photo"
         e.video -> "Video, ${durationLabel(e.durationMs)}"
         else -> "Photo"
     }
@@ -190,12 +190,12 @@ private fun DayTile(e: MediaEntry, modifier: Modifier, onClick: () -> Unit) {
         )
         val label = SliverType.Meta.copy(fontSize = 11.sp, lineHeight = 14.sp, color = SliverColors.OnMedia).overMedia()
         SliverText(clock, label, Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp))
-        if (e.video && !e.motion) {
+        if (e.video && !e.motion && !e.live) {
             SliverText(
                 durationLabel(e.durationMs), label.copy(fontWeight = FontWeight.SemiBold),
                 Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 5.dp),
             )
         }
-        if (e.motion) SliverIcon(SliverIcons.CircleDot, SliverColors.OnMedia, Modifier.align(Alignment.TopStart).padding(6.dp), size = 16.dp)
+        if (e.motion || e.live) SliverIcon(SliverIcons.CircleDot, SliverColors.OnMedia, Modifier.align(Alignment.TopStart).padding(6.dp), size = 16.dp)
     }
 }

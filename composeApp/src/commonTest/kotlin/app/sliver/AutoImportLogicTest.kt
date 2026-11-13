@@ -73,9 +73,9 @@ class AutoImportLogicTest {
     }
 
     @Test
-    fun aRealVideoLongerThanTheMotionPhotoBeatsIt() {
-        val e = listOf(motion("m", 1), video("v", 2, 8_000), video("tiny", 3, 500))
-        assertEquals(listOf("v", "m", "tiny"), rank(e).map { it.uri })
+    fun videosFirstThenMovingPhotosThenStills() {
+        val e = listOf(photo("p", 0), motion("m", 1), video("v", 2, 8_000), video("tiny", 3, 500))
+        assertEquals(listOf("v", "tiny", "m", "p"), rank(e).map { it.uri })
     }
 
     @Test

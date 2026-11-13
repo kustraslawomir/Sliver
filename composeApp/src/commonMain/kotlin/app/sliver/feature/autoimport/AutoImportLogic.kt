@@ -17,6 +17,8 @@ import kotlinx.serialization.json.Json
 data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false, val camera: Boolean = true,
     /** Folder items only: file name and size (duplicates), and whether the date is just the file's modified time. */
     val name: String? = null, val sizeBytes: Long = 0, val fileTime: Boolean = false,
+    /** The short video half of an iOS Live Photo (the still is dropped); ranks with motion photos. */
+    val live: Boolean = false,
 )
 
 /** Screenshots and screen recordings are never a day's moment. */
@@ -30,7 +32,10 @@ fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowerc
 
 /** A gallery item offered for a draft day; stored as JSON on the day. */
 @Serializable
-data class DraftCandidate(val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false, val fileTime: Boolean = false)
+data class DraftCandidate(
+    val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false, val fileTime: Boolean = false,
+    val live: Boolean = false,
+)
 
 const val MAX_CANDIDATES = 30
 
@@ -52,19 +57,24 @@ fun datesBetween(from: LocalDate, to: LocalDate): List<LocalDate> =
     if (from > to) emptyList() else (from.toEpochDays()..to.toEpochDays()).map(LocalDate::fromEpochDays)
 
 /** Default first: longest video (a motion photo counts as a video), then photos; ties by capture time. */
-fun rank(entries: List<MediaEntry>): List<MediaEntry> {
-    fun len(e: MediaEntry) = if (e.motion) MOTION_NOMINAL_MS else e.durationMs
-    fun ordered(list: List<MediaEntry>): List<MediaEntry> {
-        val movies = list.filter { it.video || it.motion }.sortedWith(compareByDescending<MediaEntry> { len(it) }.thenBy { it.takenAtMs }.thenBy { it.uri })
-        val stills = list.filterNot { it.video || it.motion }.sortedWith(compareBy<MediaEntry> { it.takenAtMs }.thenBy { it.uri })
-        return movies + stills
-    }
-    // Camera originals first, then saved / received media.
-    return ordered(entries.filter { it.camera }) + ordered(entries.filterNot { it.camera })
+fun rank(entries: List<MediaEntry>): List<MediaEntry> =
+    // Owner: videos first (longest first), then moving photos (Motion Photo, iOS Live Photo), then stills (JPEG, HEIC…);
+    // camera originals before saved / received media inside each group.
+    entries.sortedWith(
+        compareBy<MediaEntry> { mediaTier(it) }.thenBy { !it.camera }
+            .thenByDescending { if (mediaTier(it) == 0) it.durationMs else 0L }
+            .thenBy { it.takenAtMs }.thenBy { it.uri },
+    )
+
+/** 0 video, 1 moving photo, 2 still. */
+fun mediaTier(e: MediaEntry): Int = when {
+    e.motion || e.live -> 1
+    e.video -> 0
+    else -> 2
 }
 
 fun candidatesOf(entries: List<MediaEntry>): List<DraftCandidate> =
-    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime) }
+    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime, it.live) }
 
 /** A video's 1 s window sits in the middle. */
 fun middleWindowStartMs(durationMs: Long): Long = ((durationMs - 1000) / 2).coerceAtLeast(0)

@@ -102,7 +102,7 @@ class FolderSourceTest {
         assertEquals(2, cleanFolderEntries(list).size)
     }
 
-    @Test fun livePhotoVideoIsDroppedButLongVideoAndLoneVideoStay() {
+    @Test fun livePhotoKeepsItsMovingPartAndLongVideosStay() {
         val ms = 1_706_700_000_000L
         val still = entry("IMG_0001.HEIC", 5_000, ms)
         val liveMov = entry("IMG_0001.MOV", 2_000, ms, video = true, dur = 2_500)
@@ -110,7 +110,8 @@ class FolderSourceTest {
         val sameBaseButLong = entry("IMG_0003.MOV", 90_000, ms, video = true, dur = 30_000)
         val still3 = entry("IMG_0003.HEIC", 4_000, ms)
         val out = cleanFolderEntries(listOf(still, liveMov, longMov, sameBaseButLong, still3))
-        assertEquals(listOf("IMG_0001.HEIC", "IMG_0002.MOV", "IMG_0003.MOV", "IMG_0003.HEIC").toSet(), out.map { it.name }.toSet())
+        assertEquals(listOf("IMG_0001.MOV", "IMG_0002.MOV", "IMG_0003.MOV", "IMG_0003.HEIC").toSet(), out.map { it.name }.toSet())
+        assertEquals(listOf("IMG_0001.MOV"), out.filter { it.live }.map { it.name })
     }
 
     private fun tree(vararg dirs: Pair<String, List<FolderNode>>): FolderLister {

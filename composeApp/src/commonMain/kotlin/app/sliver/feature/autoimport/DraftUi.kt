@@ -226,7 +226,7 @@ private val CandidateShape = androidx.compose.foundation.shape.RoundedCornerShap
 internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val thumb = rememberMediaThumb(c.uri)
     val kind = when {
-        c.motion -> "Motion photo"
+        c.motion || c.live -> "Moving photo"
         c.video -> "Video, ${durationLabel(c.durationMs)}"
         else -> "Photo"
     }
@@ -237,14 +237,14 @@ internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modif
             .clickable(role = Role.Button, onClick = onClick),
     ) {
         if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        if (c.video && !c.motion) {
+        if (c.video && !c.motion && !c.live) {
             SliverText(
                 durationLabel(c.durationMs), SliverType.Meta.copy(fontSize = 10.sp, lineHeight = 12.sp),
                 Modifier.align(Alignment.BottomEnd).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )
         }
-        if (c.motion) {
+        if (c.motion || c.live) {
             SliverText(
                 "Motion", SliverType.Caption.copy(fontSize = 10.sp, lineHeight = 12.sp),
                 Modifier.align(Alignment.BottomStart).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),

@@ -62,7 +62,6 @@ import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.CandidateStrip
-import app.sliver.feature.autoimport.MotionChoice
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.flow.first
@@ -85,7 +84,6 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val undo = remember { koin.get<SaveUndo>() }
     val draft = remember { CaptureSession.draft }
-    val motionPhoto = remember { CaptureSession.motionPhoto }
     val draftNav = rememberDraftNav()
     val files = remember { koin.get<FileStore>() }
     val projects = remember { koin.get<ProjectRepository>() }
@@ -175,7 +173,6 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
             if (draft != null) CandidateStrip(draft, draftNav)
-            if (motionPhoto) MotionChoice(video = false, draftNav)
             Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
                 Chip("Still", motion == Motion.STILL, { motion = Motion.STILL })
                 Chip("Slow zoom", motion == Motion.ZOOM, { motion = Motion.ZOOM })

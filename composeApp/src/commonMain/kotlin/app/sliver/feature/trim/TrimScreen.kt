@@ -102,7 +102,6 @@ import app.sliver.data.export.stampText
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.autoimport.CandidateStrip
-import app.sliver.feature.autoimport.MotionChoice
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
 import kotlinx.coroutines.delay
@@ -134,7 +133,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val projects = remember { koin.get<ProjectRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
     val draft = remember { CaptureSession.draft }
-    val motionPhoto = remember { CaptureSession.motionPhoto }
     val draftNav = rememberDraftNav()
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -361,7 +359,6 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     }
                 }
                 if (draft != null) CandidateStrip(draft, draftNav)
-                if (motionPhoto) MotionChoice(video = true, draftNav)
                 PrimaryButton(
                     if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again"
                     else if (draft != null) "Keep this clip" else "Save clip",

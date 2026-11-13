@@ -118,9 +118,18 @@ fun dedupeByNameAndSize(entries: List<MediaEntry>): List<MediaEntry> = entries.d
  * so it is dropped when its still is present.
  */
 fun dropLivePhotoVideos(entries: List<MediaEntry>): List<MediaEntry> {
+    // An iOS Live Photo is IMG_1234.HEIC + IMG_1234.MOV: keep the moving part (marked live), drop the still.
     fun base(e: MediaEntry) = e.name?.substringBeforeLast('.')?.lowercase()
     val stills = entries.filter { !it.video }.mapNotNull(::base).toSet()
-    return entries.filterNot { it.video && it.durationMs <= LIVE_VIDEO_MAX_MS && base(it) in stills }
+    fun isLive(e: MediaEntry) = e.video && e.durationMs <= LIVE_VIDEO_MAX_MS && base(e) in stills
+    val liveBases = entries.filter(::isLive).mapNotNull(::base).toSet()
+    return entries.mapNotNull { e ->
+        when {
+            isLive(e) -> e.copy(live = true)
+            !e.video && base(e) in liveBases -> null
+            else -> e
+        }
+    }
 }
 
 class FolderScanResult(val entries: List<MediaEntry>, val unreadable: Int, val truncated: Boolean)
