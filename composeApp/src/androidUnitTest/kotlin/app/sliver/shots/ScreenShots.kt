@@ -43,6 +43,10 @@ class ScreenShots : ShotTest() {
         ArchiveSession.selected = kotlinx.datetime.LocalDate(2026, 11, 9)
         shoot("DayDetail", inspection = true) { DayDetailScreen({}, {}) }
     }
+    @Test fun fromThisDayEmpty() {
+        app.sliver.feature.camera.CaptureSession.forDate = kotlinx.datetime.LocalDate(2026, 11, 3)
+        shoot("FromThisDayEmpty", inspection = true) { app.sliver.feature.gallery.DayGalleryScreen({}, {}) }
+    }
     @Test fun projectUndo() = shoot("ProjectHubUndo") { UndoOver(app.sliver.core.ui.UndoBarBottomDefault, "3 days removed") { ProjectScreen {} } }
     @Test fun dayDetailUndo() {
         ArchiveSession.selected = kotlinx.datetime.LocalDate(2026, 11, 9)
