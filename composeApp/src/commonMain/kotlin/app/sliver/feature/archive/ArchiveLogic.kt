@@ -64,3 +64,10 @@ val MonthLong = listOf(
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
 )
+
+/** Record today dock caption: "Friday 13 Nov · 6 h left" (hours to midnight; minutes in the last hour). */
+fun dockCaption(today: LocalDate, hour: Int, minute: Int): String {
+    val left = (24 * 60) - (hour * 60 + minute)
+    val rest = if (left >= 60) "${left / 60} h left" else "${left.coerceAtLeast(1)} min left"
+    return "${weekdayName(today)} ${today.day} ${MonthNames[today.month.ordinal]} · $rest"
+}

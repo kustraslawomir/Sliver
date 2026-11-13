@@ -1,4 +1,13 @@
 package app.sliver.feature.archive
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.produceState
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlin.time.Clock
+
+import app.sliver.core.kit.GlassStyle
+import app.sliver.core.kit.glass
+import dev.chrisbanes.haze.hazeSource
 
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
@@ -243,8 +252,9 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
         controller.status(PermissionKind.Notifications) != PermissionStatus.Granted
     val showNudge = app != null && !app!!.nudgeDismissed && reminderOff
 
+    val dockBackdrop = dev.chrisbanes.haze.rememberHazeState()
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
+        Row(Modifier.fillMaxSize().hazeSource(dockBackdrop), horizontalArrangement = Arrangement.Center) {
             Column(
                 (if (wide) Modifier.weight(1f) else Modifier.widthIn(max = MaxContentWidth).fillMaxWidth())
                     .fillMaxHeight().navigationBarsPadding(),
@@ -319,11 +329,17 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             }
         }
 
+        val minute by produceState(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time) {
+            // Caption counts hours left; refresh once a minute (no animation, ~0 CPU).
+            while (true) { delay(60_000); value = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time }
+        }
         RecordDock(
-            done = byDate[today] != null,
+            today = byDate[today],
+            caption = dockCaption(today, minute.hour, minute.minute),
+            backdrop = dockBackdrop,
             onRecord = { CaptureSession.forDate = null; onNavigate(Route.Camera) },
             onOpenToday = { openDay(today) },
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth),
         )
         ProjectsSheet(projectsOpen, { projectsOpen = false })
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
@@ -634,42 +650,58 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
     }
 }
 
-private val RecordDockHeight = 104.dp
 private const val DockGlowMs = 14_000
 
-/** Owner: Record today 30 % smaller than the 72dp board size. Splash lands on it ([app.sliver.core.ui.DOCK_DISC_DP]). */
-private val DockDisc = app.sliver.core.ui.DOCK_DISC_DP.dp
-private val DockGlow = (app.sliver.core.ui.DOCK_DISC_DP * 1.22f).dp
+/** v1.7 item 5: strong-glass capsule 72 dp, 16 dp from the sides, 30 dp above the nav bar. Content scrolls under it. */
+private val DockCapsule = 72.dp
+private val RecordDockHeight = DockCapsule + 30.dp + 24.dp
 
-/** Fixed bottom action: red "Record today", or an outlined check once today has a clip. */
+/** Record today dock. No animation on this screen (the old glow burned ~60 % CPU on the idle calendar). */
 @Composable
-private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> Unit, modifier: Modifier = Modifier) {
+private fun RecordDock(
+    today: Day?,
+    caption: String,
+    backdrop: dev.chrisbanes.haze.HazeState,
+    onRecord: () -> Unit,
+    onOpenToday: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val done = today != null
     val tap = rememberTapGate(if (done) onOpenToday else onRecord)
-    val label = if (done) "Done for today" else "Record today"
-    Column(
-        modifier.fillMaxWidth().navigationBarsPadding()
-            .background(Brush.verticalGradient(0f to Color.Transparent, 0.35f to SliverColors.BgBase.copy(alpha = 0.92f), 1f to SliverColors.BgBase))
-            .padding(top = 28.dp, bottom = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    val title = if (done) "Today is in" else "Record today"
+    Row(
+        modifier.fillMaxWidth().navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 30.dp)
+            .height(DockCapsule)
+            .glass(GlassStyle.Strong, SliverShapes.Pill, backdrop = backdrop)
+            .semantics(mergeDescendants = true) { contentDescription = title }
+            .clickable(role = Role.Button, onClick = tap)
+            .padding(start = 12.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        // Owner: Record today "dances" with the liquid glow and is semi-transparent (overrides v1.5 "no glow").
-        val reduced = LocalReducedMotion.current
-        val phase = if (reduced || done) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "dock").animateFloat(
-            0f, 1f, androidx.compose.animation.core.infiniteRepeatable(tween(DockGlowMs, easing = androidx.compose.animation.core.LinearEasing)), label = "dock",
-        )
-        val strength = androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(if (done) 0f else 0.85f) }
-        strength.floatValue = if (done) 0f else 0.85f
-        Box(contentAlignment = Alignment.Center) {
-            Box(Modifier.size(DockGlow).liquidGlow(phase, strength, SliverColors.RecordGlowRed))
-            Box(
-                Modifier.size(DockDisc)
-                    .clip(CircleShape)
-                    .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Record.copy(alpha = 0.82f)))
-                    .semantics { contentDescription = label }
-                    .clickable(role = Role.Button, onClick = tap),
-                Alignment.Center,
-            ) { SliverIcon(if (done) SliverIcons.Check else SliverIcons.VideoCam, SliverColors.TextPrimary, size = 22.dp) }
+        val thumb = today?.let { rememberPhoto(it.thumb) }
+        Box(Modifier.size(48.dp).clip(CircleShape)) {
+            if (thumb != null) {
+                androidx.compose.foundation.Image(thumb, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+            } else if (!done) {
+                Box(Modifier.fillMaxSize().background(RecordCore))
+            } else {
+                Box(Modifier.fillMaxSize().background(SliverColors.Surface3))
+            }
         }
+        Column(Modifier.weight(1f)) {
+            SliverText(title, ReelogType.body.copy(fontWeight = FontWeight.SemiBold), maxLines = 1)
+            SliverText(
+                if (done) "0:01 · tap to watch or replace" else caption,
+                ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1,
+            )
+        }
+        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 22.dp)
     }
 }
+
+/** Plain red record core (GlassKit §3 colours, no glow). */
+private val RecordCore = Brush.radialGradient(
+    0f to SliverColors.RecordLight, 0.55f to SliverColors.Record, 1f to SliverColors.RecordDeep,
+    center = androidx.compose.ui.geometry.Offset(0.38f * 144f, 0.30f * 144f), radius = 110f,
+)

@@ -82,4 +82,11 @@ class ArchiveLogicTest {
         assertEquals("1 clip · since 3 March", clipsHeader(1, LocalDate(2026, 3, 3)))
         assertEquals("42 clips · since 3 March", clipsHeader(42, LocalDate(2026, 3, 3)))
     }
+
+    @Test
+    fun dockCaptionCountsHoursThenMinutesToMidnight() {
+        val d = LocalDate(2026, 11, 13)
+        assertEquals("Friday 13 Nov · 6 h left", app.sliver.feature.archive.dockCaption(d, 17, 30))
+        assertEquals("Friday 13 Nov · 15 min left", app.sliver.feature.archive.dockCaption(d, 23, 45))
+    }
 }

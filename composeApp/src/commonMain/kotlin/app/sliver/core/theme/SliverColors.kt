@@ -37,6 +37,9 @@ object SliverColors {
     val AccentTint get() = p.accentTint
     /** Red is only for recording: record button, "Record today", recording dot, timer after 1 s. */
     val Record = Tokens.RecordRed
+    /** v1.7 record core gradient: light → base → deep. */
+    val RecordLight = Color(0xFFFF6F63)
+    val RecordDeep = Color(0xFFD9281F)
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
     val OnInverse get() = p.onInverse
     val Success get() = p.success
