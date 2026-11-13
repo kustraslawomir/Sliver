@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.layout.BoxScope
 import app.sliver.core.APP_NAME
 import app.sliver.core.ui.OnAppHidden
 import app.sliver.core.icons.SliverIcon
@@ -198,6 +199,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     var seek by remember { mutableStateOf<PlayerSeek?>(null) }
     var position by remember { mutableStateOf(0L to 0L) }
     var status by remember { mutableStateOf<String?>(null) }
+    var confirmDelete by remember { mutableStateOf(false) }
 
     val f = film
     val path = f?.renderPath
@@ -214,9 +216,11 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val ticks = remember(plan, dur) { playerTicks(plan, dur) }
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
+    // Owner: a 9:16 film (Lena) goes full screen upright; only 16:9 films turn sideways (and follow the phone).
+    val cinema = f.format == FilmFormat.CINEMA
     val landscape = rememberDeviceRotation().let { it in 60..120 || it in 240..300 }
-    LaunchedEffect(landscape) { fullscreen = landscape }
-    FullscreenLandscape(fullscreen)
+    LaunchedEffect(landscape) { if (cinema) fullscreen = landscape }
+    FullscreenLandscape(fullscreen, rotate = cinema)
 
     @Composable
     fun Controls(modifier: Modifier) {
@@ -232,17 +236,22 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 SliverText(clock(pos), SliverType.Meta, color = SliverColors.TextTertiary)
                 SliverText("-" + clock((total - pos).coerceAtLeast(0)), SliverType.Meta, color = SliverColors.TextTertiary)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterHorizontally), modifier = Modifier.fillMaxWidth().padding(top = SliverSpace.S4)) {
-                PlayerRoundButton(48.dp, if (muted) "Unmute" else "Mute", { muted = !muted }) {
-                    SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.TextTertiary else SliverColors.TextPrimary, size = 20.dp)
-                }
-                PlayerRoundButton(72.dp, if (playing) "Pause" else "Play", { playing = !playing }, filled = true) {
-                    SliverIcon(if (playing) SliverIcons.Pause else SliverIcons.Play, SliverColors.BgBase, size = 28.dp)
-                }
-                PlayerRoundButton(48.dp, if (fullscreen) "Exit full screen" else "Full screen", { fullscreen = !fullscreen }) {
-                    SliverIcon(SliverIcons.Maximize, SliverColors.TextPrimary, size = 20.dp)
-                }
+        }
+    }
+
+    /** Owner: sound and full screen sit on the video; a tap on the video plays / pauses (big play mark while paused). */
+    @Composable
+    fun BoxScope.VideoOverlay() {
+        if (!playing) {
+            Box(Modifier.align(Alignment.Center).size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.Scrim), Alignment.Center) {
+                SliverIcon(SliverIcons.Play, SliverColors.OnMedia, size = 28.dp)
             }
+        }
+        IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute", Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2), overCamera = true) {
+            SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.OnMedia)
+        }
+        IconButton44({ fullscreen = !fullscreen }, if (fullscreen) "Exit full screen" else "Full screen", Modifier.align(Alignment.BottomEnd).padding(SliverSpace.S2), overCamera = true) {
+            SliverIcon(SliverIcons.Maximize, SliverColors.OnMedia)
         }
     }
 
@@ -257,6 +266,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     if (fullscreen) {
         Box(Modifier.fillMaxSize().background(SliverColors.BgVoid)) {
             Video(Modifier.fillMaxSize().clickable { playing = !playing })
+            VideoOverlay()
             Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
                 Controls(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter))
             }
@@ -278,7 +288,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                     SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary, maxLines = 1,
                 )
             }
-            Spacer(Modifier.size(44.dp))
+            // Owner: share / edit / delete are icons, not buttons.
+            IconButton44({ share.share(path, f.name) }, "Share film") { SliverIcon(SliverIcons.Share, SliverColors.TextPrimary, size = 20.dp) }
+            IconButton44(onEdit, "Edit film") { SliverIcon(SliverIcons.Pencil, SliverColors.TextPrimary, size = 20.dp) }
+            IconButton44({ confirmDelete = true }, "Delete film") { SliverIcon(SliverIcons.Trash2, SliverColors.Error, size = 20.dp) }
         }
         // The video takes the room that is left, so the buttons are always on screen (a 9:16 film pushed them off).
         Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
@@ -287,25 +300,23 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                     .clickable { playing = !playing },
             ) {
                 Video(Modifier.fillMaxSize())
+                VideoOverlay()
             }
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            // A rendered film is saved to the gallery automatically (Movies/<app>), so the primary action here is sharing.
-            PrimaryButton("Share film\u2026", { share.share(path, f.name) }, Modifier.fillMaxWidth())
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
-                GhostButton("Delete film", {
-                    scope.launch {
-                        if (runCatching { koin.get<FilmDeleter>().delete(f) }.isSuccess) onBack()
-                        else status = "Couldn't delete this film. Try again."
-                    }
-                }, Modifier.weight(1f), destructive = true)
+            // Owner: one compact "Save" with a download icon (a copy gets the next free name, "Lena 2").
+            Row(
+                Modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary)
+                    .clickable(role = Role.Button) {
+                        scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos \u00B7 Movies/$APP_NAME" else "Could not save" }
+                    },
+                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SliverIcon(SliverIcons.Download, SliverColors.OnInverse, size = 20.dp)
+                SliverText("Save", SliverType.Headline, color = SliverColors.OnInverse)
             }
-            // Films rendered before auto-save are not in the gallery yet; a copy gets the next free name ("Lena 2").
-            GhostButton("Save a copy to Photos", {
-                scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos \u00B7 Movies/$APP_NAME" else "Could not save" }
-            }, Modifier.fillMaxWidth())
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(
                 info, SliverType.Meta.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center),
@@ -313,6 +324,16 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             )
         }
     }
+    app.sliver.core.ui.ConfirmSheet(
+        confirmDelete, "Delete this film?", "The days stay in the project. The copy in your gallery stays too.", "Delete film",
+        {
+            scope.launch {
+                if (runCatching { koin.get<FilmDeleter>().delete(f) }.isSuccess) onBack()
+                else status = "Couldn't delete this film. Try again."
+            }
+        },
+        { confirmDelete = false },
+    )
 }
 
 private fun clock(ms: Long): String {

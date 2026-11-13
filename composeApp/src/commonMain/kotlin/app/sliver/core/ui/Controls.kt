@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverShapes
@@ -107,23 +108,26 @@ fun SliverTextField(
 }
 
 @Composable
-fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun Segmented(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier, compact: Boolean = false) {
     Row(
-        modifier.fillMaxWidth().heightIn(min = 48.dp).clip(SliverShapes.Pill)
+        modifier.fillMaxWidth().heightIn(min = if (compact) 36.dp else 48.dp).clip(SliverShapes.Pill)
             .background(SliverColors.Surface1)
             .border(1.dp, SliverColors.LineHairline, SliverShapes.Pill)
-            .padding(4.dp),
+            .padding(if (compact) 3.dp else 4.dp),
     ) {
         options.forEachIndexed { i, label ->
             val on = i == selectedIndex
             val bg by animateColorAsState(if (on) SliverColors.TextPrimary else Color.Transparent, SliverMotion.standard(SliverMotion.Quick))
             Box(
-                Modifier.weight(1f).heightIn(min = 40.dp).clip(SliverShapes.Pill).background(bg)
+                Modifier.weight(1f).heightIn(min = if (compact) 30.dp else 40.dp).clip(SliverShapes.Pill).background(bg)
                     .semantics { selected = on }
                     .clickable(role = Role.Tab) { onSelect(i) },
                 contentAlignment = Alignment.Center,
             ) {
-                SliverText(label, SliverType.BodySmall, color = if (on) SliverColors.OnInverse else SliverColors.TextSecondary)
+                SliverText(
+                    label, if (compact) SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 16.sp) else SliverType.BodySmall,
+                    color = if (on) SliverColors.OnInverse else SliverColors.TextSecondary, maxLines = 1,
+                )
             }
         }
     }

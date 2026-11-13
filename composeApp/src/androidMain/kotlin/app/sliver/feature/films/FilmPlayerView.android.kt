@@ -92,12 +92,12 @@ actual fun FilmPlayerView(
 }
 
 @Composable
-actual fun FullscreenLandscape(on: Boolean) {
+actual fun FullscreenLandscape(on: Boolean, rotate: Boolean) {
     val activity = LocalContext.current.activity() ?: return
     DisposableEffect(on) {
         val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
         if (on) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            if (rotate) activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             controller.hide(WindowInsetsCompat.Type.systemBars())
         }

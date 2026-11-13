@@ -74,11 +74,16 @@ actual fun FilmPreview(
         video.addListener(listener)
         onDispose { video.removeListener(listener) }
     }
-    LaunchedEffect(look, paused) {
-        val effects = if (look == null) emptyList() else withContext(Dispatchers.IO) {
-            LookEffects.build(context, look, seed::get, forExport = false, animate = !paused)
+    // Owner: pause → change filter → resume left the video black and the clock stuck. Rebuilding on pause and switching
+    // between "no effects" and "effects" re-created the GL pipeline under a paused player; now the chain is rebuilt only
+    // when the filter changes, it is never empty (identity effect for no filter), and the frame is redrawn after a swap.
+    LaunchedEffect(look) {
+        val effects = withContext(Dispatchers.IO) {
+            look?.let { LookEffects.build(context, it, seed::get, forExport = false, animate = true) }.orEmpty()
+                .ifEmpty { listOf(androidx.media3.effect.Contrast(0f)) }
         }
         video.setVideoEffects(effects)
+        video.seekTo(video.currentMediaItemIndex, video.currentPosition)
     }
     LaunchedEffect(track, audio) {
         if (track != null && audio != FilmAudio.ORIGINAL) {

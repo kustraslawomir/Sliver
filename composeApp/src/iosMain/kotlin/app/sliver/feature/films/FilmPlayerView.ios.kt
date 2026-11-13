@@ -19,4 +19,4 @@ actual fun FilmPlayerView(
 ) = Box(modifier.background(Color.Black))
 
 @Composable
-actual fun FullscreenLandscape(on: Boolean) = Unit
+actual fun FullscreenLandscape(on: Boolean, rotate: Boolean) = Unit

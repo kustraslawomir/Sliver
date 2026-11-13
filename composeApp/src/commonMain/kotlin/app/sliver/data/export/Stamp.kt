@@ -8,11 +8,11 @@ private val ShortMonths = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL"
 /** The default date stamp format, on screen and in exports: "2 NOV 2026". */
 fun stampText(date: LocalDate): String = "${date.day} ${ShortMonths[date.month.ordinal]} ${date.year}"
 
-/** Stamp text for a film filter's [style]: LED "'26 11 02", camcorder "NOV. 2 2026". */
+/** Stamp text for [style], always day first (owner: European order): LED "02 11 '26", camcorder "2 NOV. 2026". */
 fun stampText(date: LocalDate, style: StampStyle): String = when (style) {
     StampStyle.PLAIN -> stampText(date)
-    StampStyle.LED -> "'${(date.year % 100).toString().padStart(2, '0')} ${date.monthNumber.toString().padStart(2, '0')} ${date.day.toString().padStart(2, '0')}"
-    StampStyle.CAMCORDER -> "${ShortMonths[date.month.ordinal]}. ${date.day} ${date.year}"
+    StampStyle.LED -> "${date.day.toString().padStart(2, '0')} ${date.monthNumber.toString().padStart(2, '0')} '${(date.year % 100).toString().padStart(2, '0')}"
+    StampStyle.CAMCORDER -> "${date.day} ${ShortMonths[date.month.ordinal]}. ${date.year}"
 }
 
 /** A filled rectangle in a segmented glyph row, in the row's own units (top-left origin). */

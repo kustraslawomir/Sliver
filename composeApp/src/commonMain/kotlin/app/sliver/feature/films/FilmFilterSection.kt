@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,16 @@ expect suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPres
 private val TileW = 64.dp
 private val TileH = 64.dp
 
+/** Intensity and Grain for [selected], shown in the builder's adjust sheet. */
+@Composable
+fun FilterAmounts(selected: LookPreset, intensity: Int, grain: Int?, onIntensity: (Int) -> Unit, onGrain: (Int) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        SliverText(selected.pickerLabel, SliverType.Title)
+        AmountRow("Intensity", intensity, onIntensity)
+        AmountRow("Grain", grain ?: (selected.info.model.grain * 100).toInt(), onGrain)
+    }
+}
+
 /** The film's filter: a row of thumbnails rendered from a frame of the film, then Intensity and Grain for the chosen one. */
 @Composable
 fun FilmFilterSection(
@@ -61,19 +72,28 @@ fun FilmFilterSection(
     onGrain: (Int) -> Unit,
     modifier: Modifier = Modifier,
     thumbsOverride: Map<LookPreset, ImageBitmap>? = null,
+    /** Owner: sliders live behind a long press (or a tap on the chosen filter); null keeps them inline. */
+    onAdjust: ((LookPreset) -> Unit)? = null,
 ) {
     val thumbs by produceState(thumbsOverride.orEmpty(), frame, thumbsOverride) {
         value = thumbsOverride ?: frame?.let { renderFilterThumbs(it, FilterPresets) }.orEmpty()
     }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText("Filter \u00B7 whole film", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary)
+        SliverText(
+            if (onAdjust != null) "Filter \u00B7 hold to adjust" else "Filter \u00B7 whole film",
+            SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 16.sp), color = SliverColors.TextTertiary,
+        )
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            Tile("None", frame, selected == null) { onSelect(null) }
+            Tile("None", frame, selected == null, onClick = { onSelect(null) })
             FilterPresets.forEach { p ->
-                Tile(p.pickerLabel, thumbs[p], selected == p) { onSelect(p) }
+                Tile(
+                    p.pickerLabel, thumbs[p], selected == p,
+                    onClick = { if (selected == p && onAdjust != null) onAdjust(p) else onSelect(p) },
+                    onLongClick = onAdjust?.let { adjust -> { onSelect(p); adjust(p) } },
+                )
             }
         }
-        if (selected != null) {
+        if (selected != null && onAdjust == null) {
             val grainValue = grain ?: (selected.info.model.grain * 100).toInt()
             AmountRow("Intensity", intensity, onIntensity)
             AmountRow("Grain", grainValue, onGrain)
@@ -82,9 +102,9 @@ fun FilmFilterSection(
 }
 
 @Composable
-private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick: () -> Unit) {
+private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
     Column(
-        Modifier.width(TileW).clickable(role = Role.RadioButton, onClick = onClick)
+        Modifier.width(TileW).combinedClickable(role = Role.RadioButton, onLongClick = onLongClick, onClick = onClick)
             .semantics { this.selected = selected; contentDescription = "$label filter" },
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
     ) {

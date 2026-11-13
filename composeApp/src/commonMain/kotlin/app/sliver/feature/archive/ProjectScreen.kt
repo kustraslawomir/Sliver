@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.feature.camera.liquidGlow
+import androidx.compose.animation.core.animateFloat
 import app.sliver.core.ui.SecondaryButton
 import app.sliver.core.ui.PrimaryButton
 import androidx.compose.animation.core.Animatable
@@ -648,6 +650,7 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
 }
 
 private val RecordDockHeight = 148.dp
+private const val DockGlowMs = 5_000
 
 /** Fixed bottom action: red "Record today", or an outlined check once today has a clip. */
 @Composable
@@ -661,14 +664,24 @@ private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> U
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(
-            Modifier.size(72.dp)
-                .clip(CircleShape)
-                .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Record))
-                .semantics { contentDescription = label }
-                .clickable(role = Role.Button, onClick = tap),
-            Alignment.Center,
-        ) { if (done) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 28.dp) }
+        // Owner: Record today "dances" with the liquid glow and is semi-transparent (overrides v1.5 "no glow").
+        val reduced = LocalReducedMotion.current
+        val phase = if (reduced || done) null else androidx.compose.animation.core.rememberInfiniteTransition(label = "dock").animateFloat(
+            0f, 1f, androidx.compose.animation.core.infiniteRepeatable(tween(DockGlowMs, easing = androidx.compose.animation.core.LinearEasing)), label = "dock",
+        )
+        val strength = androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(if (done) 0f else 0.85f) }
+        strength.floatValue = if (done) 0f else 0.85f
+        Box(contentAlignment = Alignment.Center) {
+            Box(Modifier.size(88.dp).liquidGlow(phase, strength, SliverColors.RecordGlowRed))
+            Box(
+                Modifier.size(72.dp)
+                    .clip(CircleShape)
+                    .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Record.copy(alpha = 0.82f)))
+                    .semantics { contentDescription = label }
+                    .clickable(role = Role.Button, onClick = tap),
+                Alignment.Center,
+            ) { if (done) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 28.dp) }
+        }
         SliverText(label, SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), color = if (done) SliverColors.TextSecondary else SliverColors.TextPrimary)
     }
 }

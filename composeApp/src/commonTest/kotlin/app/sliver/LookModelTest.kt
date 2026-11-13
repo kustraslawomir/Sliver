@@ -224,8 +224,8 @@ class LookModelTest {
 
     @Test
     fun ledStampIsDigitsAndAnApostrophe() {
-        assertEquals("'26 11 02", stampText(LocalDate(2026, 11, 2), StampStyle.LED))
-        assertEquals("NOV. 2 2026", stampText(LocalDate(2026, 11, 2), StampStyle.CAMCORDER))
+        assertEquals("02 11 '26", stampText(LocalDate(2026, 11, 2), StampStyle.LED))
+        assertEquals("2 NOV. 2026", stampText(LocalDate(2026, 11, 2), StampStyle.CAMCORDER))
         assertEquals("2 NOV 2026", stampText(LocalDate(2026, 11, 2), StampStyle.PLAIN))
     }
 

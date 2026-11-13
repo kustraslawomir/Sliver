@@ -119,7 +119,7 @@ private const val LIQUID_MS = 12_000
  * (BlendMode.Plus), so where they overlap the colours mix like liquid light. Whole-number speeds make the loop seamless.
  * [phase] null (reduced motion) = a still glow.
  */
-private fun Modifier.liquidGlow(phase: State<Float>?, strength: State<Float>, colors: List<Color>): Modifier = drawBehind {
+internal fun Modifier.liquidGlow(phase: State<Float>?, strength: State<Float>, colors: List<Color>): Modifier = drawBehind {
     val s = strength.value
     if (s <= 0f) return@drawBehind
     val p = (phase?.value ?: 0.1f) * 2f * PI.toFloat()

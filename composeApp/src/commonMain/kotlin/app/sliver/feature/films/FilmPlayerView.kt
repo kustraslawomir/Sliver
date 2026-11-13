@@ -20,4 +20,4 @@ expect fun FilmPlayerView(
 
 /** Switches the screen to landscape with hidden system bars while [on]; restores portrait afterwards. */
 @Composable
-expect fun FullscreenLandscape(on: Boolean)
+expect fun FullscreenLandscape(on: Boolean, rotate: Boolean)

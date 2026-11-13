@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import kotlinx.datetime.toLocalDateTime
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -143,6 +144,8 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> U
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             SliverText(plan.spanText(), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary, maxLines = 1)
             SliverText("${clipsText(plan.clips)} · ${formatRuntime(plan.clips)}", SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextPrimary)
+            // Owner: two films of the same project look identical; when it was made tells them apart.
+            film.renderedAt?.let { SliverText(madeLabel(it), SliverType.tnum(10.sp, 0.sp), color = SliverColors.TextTertiary, maxLines = 1) }
         }
     }
 }
@@ -163,4 +166,11 @@ fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit) {
             }, Modifier.fillMaxWidth(), destructive = true)
         }
     }
+}
+
+/** "Made 13 Nov, 15:58" in the phone's time zone. */
+private fun madeLabel(at: kotlin.time.Instant): String {
+    val t = at.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    return "Made ${t.day} ${months[t.month.ordinal]}, ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}"
 }
