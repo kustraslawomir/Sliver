@@ -47,6 +47,10 @@ object SliverColors {
     val RecordEdge = Color(0x8C6E0000)
     val RecordRimWarm = Color(0x8CFF5A3C)
     val PhotoCoreLow = Color(0xFFCFCFC8)
+    /** Empty project thumbnail. */
+    val ThumbEmpty = Color(0xFF1C1C1F)
+    /** v1.7 sheet scrim: nothing behind a sheet stays readable. */
+    val SheetScrim get() = Color.Black.copy(alpha = if (light) 0.30f else 0.55f)
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
     val OnInverse get() = p.onInverse
     val Success get() = p.success

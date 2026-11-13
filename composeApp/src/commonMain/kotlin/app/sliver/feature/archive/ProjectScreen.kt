@@ -1,4 +1,5 @@
 package app.sliver.feature.archive
+import app.sliver.core.ui.SheetsOpen
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
 import kotlinx.datetime.toLocalDateTime
@@ -333,7 +334,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             // Caption counts hours left; refresh once a minute (no animation, ~0 CPU).
             while (true) { delay(60_000); value = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time }
         }
-        RecordDock(
+        if (SheetsOpen.count == 0 && !menuOpen) RecordDock(
             today = byDate[today],
             caption = dockCaption(today, minute.hour, minute.minute),
             backdrop = dockBackdrop,
@@ -341,7 +342,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             onOpenToday = { openDay(today) },
             modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth),
         )
-        ProjectsSheet(projectsOpen, { projectsOpen = false })
+        ProjectsSheet(projectsOpen, { projectsOpen = false }, backdrop = dockBackdrop)
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
         NoticeSheet(notice) { notice = null }
         FilmActionsSheet(filmMenu) { filmMenu = null }

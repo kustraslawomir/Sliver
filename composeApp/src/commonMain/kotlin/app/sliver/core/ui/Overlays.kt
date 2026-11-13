@@ -1,5 +1,7 @@
 package app.sliver.core.ui
 
+import androidx.compose.runtime.DisposableEffect
+
 import app.sliver.core.kit.glass
 
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -63,15 +65,20 @@ fun SliverBottomSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    backdrop: dev.chrisbanes.haze.HazeState? = null,
     content: @Composable () -> Unit,
 ) {
     var back by remember { mutableFloatStateOf(0f) }
+    DisposableEffect(visible) {
+        if (visible) SheetsOpen.count++
+        onDispose { if (visible) SheetsOpen.count-- }
+    }
     LaunchedEffect(visible) { if (visible) back = 0f }
     PredictiveBackHandler(visible, { back = it }, onDismiss)
     Box(modifier.fillMaxSize()) {
         AnimatedVisibility(visible, enter = fadeIn(SliverMotion.standard(SliverMotion.Slow)), exit = fadeOut(SliverMotion.exit(SliverMotion.Base))) {
             Box(
-                Modifier.fillMaxSize().background(SliverColors.Scrim)
+                Modifier.fillMaxSize().background(SliverColors.SheetScrim)
                     .clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss),
             )
         }
@@ -90,7 +97,7 @@ fun SliverBottomSheet(
                         translationY = back * 24.dp.toPx()
                         transformOrigin = TransformOrigin(0.5f, 1f)
                     }
-                    .glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.SheetTop)
+                    .glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.SheetTop, backdrop = backdrop)
                     .clickable(remember { MutableInteractionSource() }, null) {}
                     .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
                     .padding(horizontal = SliverSpace.Gutter)
@@ -104,6 +111,11 @@ fun SliverBottomSheet(
             }
         }
     }
+}
+
+/** How many bottom sheets are open; the Record today dock hides while any is (v1.7 item 9). */
+object SheetsOpen {
+    var count by androidx.compose.runtime.mutableIntStateOf(0)
 }
 
 enum class SliverFrameState { Idle, Dragging, Locked }

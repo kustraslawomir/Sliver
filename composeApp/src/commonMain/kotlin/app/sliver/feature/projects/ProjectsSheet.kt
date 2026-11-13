@@ -70,6 +70,7 @@ fun ProjectsSheet(
     onDismiss: () -> Unit,
     initialMenuFor: String? = null,
     action: ProjectAction? = null,
+    backdrop: dev.chrisbanes.haze.HazeState? = null,
 ) {
     val repo = remember { KoinPlatform.getKoin().get<ProjectRepository>() }
     val projects by remember { repo.projects }.collectAsState(emptyList())
@@ -100,7 +101,7 @@ fun ProjectsSheet(
         backToList()
     }
 
-    SliverBottomSheet(visible, onDismiss) {
+    SliverBottomSheet(visible, onDismiss, backdrop = backdrop) {
         when (val m = mode) {
             SheetMode.List -> ProjectList(
                 projects, stats, active?.id,
@@ -184,7 +185,10 @@ private fun ProjectList(
                 archived.forEach { ProjectRow(it, stats[it.id], false, onPick, onMenu) }
             }
         }
-        GhostButton("New project", onNew, Modifier.fillMaxWidth())
+        app.sliver.core.kit.ReelogButton(
+            "New project", onNew, Modifier.padding(top = SliverSpace.S2),
+            kind = app.sliver.core.kit.ButtonKind.Secondary, leading = SliverIcons.Plus,
+        )
     }
 }
 
@@ -198,22 +202,31 @@ private fun ProjectRow(
 ) {
     val cover = stats?.cover?.let { rememberPhoto(it) }
     val pick = rememberTapGate { onPick(project) }
+    // v1.7 item 9: current project = tinted row + check; the pencil is always the rightmost control.
     Row(
-        Modifier.fillMaxWidth().clip(SliverShapes.M).clickable(onClick = pick),
+        Modifier.fillMaxWidth().heightIn(min = 72.dp).clip(RowShape)
+            .then(if (active) Modifier.background(SliverColors.TextPrimary.copy(alpha = 0.06f)) else Modifier)
+            .clickable(onClick = pick).padding(start = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
     ) {
-        Box(Modifier.size(56.dp).clip(SliverShapes.S).background(SliverColors.Surface3)) {
+        Box(Modifier.size(56.dp).clip(ThumbShape).background(SliverColors.ThumbEmpty), Alignment.Center) {
             if (cover != null) Image(cover, null, Modifier.size(56.dp), contentScale = ContentScale.Crop)
+            else SliverIcon(SliverIcons.Film, SliverColors.TextDisabled, size = 24.dp)
         }
         Column(Modifier.weight(1f)) {
-            SliverText(project.name, SliverType.DisplayS, maxLines = 1)
-            SliverText(projectMeta(project, stats), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 2)
+            SliverText(project.name, SliverType.Headline, maxLines = 1)
+            SliverText(projectMeta(project, stats), SliverType.Caption, color = SliverColors.TextTertiary, maxLines = 2)
         }
-        if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary)
-        IconButton44({ onMenu(project) }, "Edit project") { SliverIcon(SliverIcons.Pencil, SliverColors.TextSecondary) }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 20.dp)
+            app.sliver.core.kit.ReelogIconButton(SliverIcons.Pencil, "Edit project", { onMenu(project) }, tint = SliverColors.TextSecondary)
+        }
     }
 }
+
+private val RowShape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+private val ThumbShape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
 
 @Composable
 private fun NewProject(
