@@ -224,7 +224,7 @@ class DataLayerTest {
         assertEquals(FilmFormat.CINEMA, s.newFilmFormat)
         assertEquals(true, s.dateStamp)
         assertEquals(app.sliver.data.settings.Appearance.SYSTEM, s.appearance)
-        assertEquals(false, s.saveFullRecordings)
+        assertEquals(true, s.saveFullRecordings)
         assertEquals(LocalTime(20, 0), s.reminder.time)
         assertEquals(List(7) { true }, s.reminder.days)
         assertEquals(true, s.notif.filmReady)

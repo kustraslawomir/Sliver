@@ -61,7 +61,8 @@ data class AppSettings(
     val newFilmFormat: FilmFormat = FilmFormat.CINEMA,
     val appearance: Appearance = Appearance.SYSTEM,
     val dateStamp: Boolean = true,
-    val saveFullRecordings: Boolean = false,
+    /** Owner 13 Nov: on by default; recordings also land in Movies/<app>. */
+    val saveFullRecordings: Boolean = true,
     val volumeKeyRecords: Boolean = false,
     val showGoldenHour: Boolean = false,
     val reminder: ReminderSettings = ReminderSettings(),

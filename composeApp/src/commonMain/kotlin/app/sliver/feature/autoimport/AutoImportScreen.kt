@@ -114,7 +114,8 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var pickerOpen by remember { mutableStateOf(false) }
     var starting by remember { mutableStateOf(false) }
     var wantStart by rememberSaveable { mutableStateOf(false) }
-    var keepNow by rememberSaveable { mutableStateOf(true) }
+    // Owner 13 Nov: drafts to review are the default; "Keep without review" is opt-in.
+    var keepNow by rememberSaveable { mutableStateOf(false) }
     var includeOther by rememberSaveable { mutableStateOf(false) }
 
     val folderChoice = rememberFolderChoice()
