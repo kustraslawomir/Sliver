@@ -105,7 +105,6 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.DayMediaSheetBody
 import app.sliver.feature.autoimport.ReviewSheetBody
 import app.sliver.feature.autoimport.autoDays
-import app.sliver.feature.autoimport.countBadge
 import app.sliver.feature.autoimport.decodeCandidates
 import app.sliver.feature.autoimport.nextDraft
 import app.sliver.feature.autoimport.reviewChipLabel
@@ -562,17 +561,6 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                         "Draft", SliverType.Caption.copy(fontSize = 9.sp, lineHeight = 11.sp, color = SliverColors.OnMedia).overMedia(),
                         Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 5.dp),
                     )
-                }
-                val badge = autoItems?.let(::countBadge)
-                if (badge != null) {
-                    Row(
-                        Modifier.align(Alignment.BottomEnd).padding(end = 3.dp, bottom = 3.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim)
-                            .padding(horizontal = 3.dp, vertical = 1.dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp),
-                    ) {
-                        SliverIcon(SliverIcons.Layers, SliverColors.OnMedia, size = 9.dp)
-                        SliverText(badge, SliverType.tnum(9.sp, 0.sp, SliverColors.OnMedia).overMedia())
-                    }
                 }
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
