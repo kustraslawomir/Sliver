@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -52,65 +55,68 @@ actual fun FilmPreview(
         return
     }
     val context = LocalContext.current
-    // Effects must be on the player before PlayerView gives it a surface, otherwise frames bypass the effect pipeline
-    // (owner: "filters are not on the video preview"). Start with an identity effect and swap the list later.
-    val video = remember {
-        app.sliver.core.media.newPlayer(context).apply {
-            setVideoEffects(listOf(androidx.media3.effect.Contrast(0f)))
-            repeatMode = Player.REPEAT_MODE_ALL
-        }
-    }
-    val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
-    DisposableEffect(Unit) { onDispose { video.release(); music.release() } }
-    val report = rememberUpdatedState(onPosition)
-    val currentClips = rememberUpdatedState(clips)
-    val currentAudio = rememberUpdatedState(audio)
-
-    LaunchedEffect(clips) {
-        video.setMediaItems(clips.map { MediaItem.fromUri(it.path) })
-        video.prepare()
-    }
-    // Rebuilding the effect chain on every 1 s clip stalled playback; build it once per filter and let the
-    // shader read the current clip's seed each frame (same seed as the export, so preview = export).
+    // Owner (Samsung, 116-clip film): switching filters left the preview black with the clock stuck. Swapping the effect
+    // chain on a live player does not recover on long playlists, while effects set before the surface always work. So
+    // every filter gets a fresh player built with its effects; clip, position and pause state carry over.
+    var effects by remember { mutableStateOf<List<androidx.media3.common.Effect>?>(null) }
     val seed = remember { java.util.concurrent.atomic.AtomicLong(0L) }
-    DisposableEffect(video, clips) {
-        fun update() { clips.getOrNull(video.currentMediaItemIndex)?.let { seed.set(LookRandom.seedOf(it.path)) } }
-        update()
-        val listener = object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = update()
-        }
-        video.addListener(listener)
-        onDispose { video.removeListener(listener) }
-    }
-    // Owner: pause → drag the seekbar → black frame that resume could not fix. With effects on, a paused seek leaves the
-    // video sink without a frame; a short play renders the frame at the new position, then it pauses again.
-    val pausedNow = rememberUpdatedState(paused)
-    val frameShown = remember { kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
-    DisposableEffect(video) {
-        val l = object : Player.Listener {
-            override fun onRenderedFirstFrame() { frameShown.tryEmit(Unit) }
-        }
-        video.addListener(l)
-        onDispose { video.removeListener(l) }
-    }
-    suspend fun showFrameWhilePaused() {
-        if (!pausedNow.value) return
-        video.playWhenReady = true
-        kotlinx.coroutines.withTimeoutOrNull(400) { frameShown.first() }
-        delay(60)
-        if (pausedNow.value) video.playWhenReady = false
-    }
-    // Owner: pause → change filter → resume left the video black and the clock stuck. Rebuilding on pause and switching
-    // between "no effects" and "effects" re-created the GL pipeline under a paused player; now the chain is rebuilt only
-    // when the filter changes, it is never empty (identity effect for no filter), and the frame is redrawn after a swap.
     LaunchedEffect(look) {
-        val effects = withContext(Dispatchers.IO) {
+        effects = withContext(Dispatchers.IO) {
             look?.let { LookEffects.build(context, it, seed::get, forExport = false, animate = true) }.orEmpty()
                 .ifEmpty { listOf(androidx.media3.effect.Contrast(0f)) }
         }
-        video.setVideoEffects(effects)
-        video.seekTo(video.currentMediaItemIndex, video.currentPosition)
-        showFrameWhilePaused()
+    }
+    val resume = remember { longArrayOf(0L, 0L) }
+    val video = effects?.let { fx ->
+        remember(fx) {
+            app.sliver.core.media.newPlayer(context).apply {
+                setVideoEffects(fx)
+                repeatMode = Player.REPEAT_MODE_ALL
+            }
+        }
+    }
+    val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
+    DisposableEffect(Unit) { onDispose { music.release() } }
+    DisposableEffect(video) {
+        onDispose {
+            video?.let {
+                resume[0] = it.currentMediaItemIndex.toLong()
+                resume[1] = it.currentPosition
+                it.release()
+            }
+        }
+    }
+    val report = rememberUpdatedState(onPosition)
+    val currentClips = rememberUpdatedState(clips)
+    val currentAudio = rememberUpdatedState(audio)
+    val currentVideo = rememberUpdatedState(video)
+    val pausedNow = rememberUpdatedState(paused)
+    val frameShown = remember { kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+    // With effects on, a paused player has no frame after prepare or seek; a short play renders it, then it pauses again.
+    suspend fun showFrameWhilePaused(player: ExoPlayer) {
+        if (!pausedNow.value) return
+        player.playWhenReady = true
+        kotlinx.coroutines.withTimeoutOrNull(600) { frameShown.first() }
+        delay(60)
+        if (pausedNow.value) player.playWhenReady = false
+    }
+    DisposableEffect(video, clips) {
+        val player = video ?: return@DisposableEffect onDispose {}
+        fun update() { clips.getOrNull(player.currentMediaItemIndex)?.let { seed.set(LookRandom.seedOf(it.path)) } }
+        val listener = object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = update()
+            override fun onRenderedFirstFrame() { frameShown.tryEmit(Unit) }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
+    LaunchedEffect(video, clips) {
+        val player = video ?: return@LaunchedEffect
+        val index = resume[0].toInt().takeIf { it in clips.indices } ?: 0
+        player.setMediaItems(clips.map { MediaItem.fromUri(it.path) }, index, resume[1])
+        clips.getOrNull(index)?.let { seed.set(LookRandom.seedOf(it.path)) }
+        player.prepare()
+        showFrameWhilePaused(player)
     }
     LaunchedEffect(track, audio) {
         if (track != null && audio != FilmAudio.ORIGINAL) {
@@ -125,10 +131,12 @@ actual fun FilmPreview(
         music.volume = if (FilmPlayback.muted) 0f else audioPlan(audio, track, musicVolume).musicVolume.takeIf { it > 0f } ?: 1f
     }
     val visible = rememberAppVisible()
-    LaunchedEffect(paused, visible) {
+    LaunchedEffect(video, paused, visible) {
         val play = !paused && visible
-        if (play && video.playbackState == Player.STATE_IDLE) video.prepare()
-        video.playWhenReady = play
+        video?.let {
+            if (play && it.playbackState == Player.STATE_IDLE) it.prepare()
+            it.playWhenReady = play
+        }
         music.playWhenReady = play
     }
     LaunchedEffect(seek) {
@@ -137,12 +145,15 @@ actual fun FilmPreview(
         if (n == 0) return@LaunchedEffect
         val index = dayIndexAt(s.fraction, n)
         val clipFraction = s.fraction.coerceIn(0f, 1f) * n - index
-        val duration = video.duration.takeIf { it > 0 } ?: 1000L
-        video.seekTo(index, (clipFraction * duration).toLong())
-        showFrameWhilePaused()
+        val player = video ?: return@LaunchedEffect
+        val duration = player.duration.takeIf { it > 0 } ?: 1000L
+        player.seekTo(index, (clipFraction * duration).toLong())
+        showFrameWhilePaused(player)
     }
     LaunchedEffect(Unit) {
         while (true) {
+            val video = currentVideo.value
+            if (video == null) { delay(33); continue }
             val index = video.currentMediaItemIndex
             val clip = currentClips.value.getOrNull(index)
             video.volume = when {
@@ -164,9 +175,9 @@ actual fun FilmPreview(
             PlayerView(ctx).apply {
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                this.player = video
             }
         },
+        update = { if (it.player !== video) it.player = video },
         modifier = modifier,
     )
 }
