@@ -1,17 +1,6 @@
 package app.sliver.core.ui
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.graphicsLayer
-import org.jetbrains.compose.resources.painterResource
-import sliver.composeapp.generated.resources.Res
-import sliver.composeapp.generated.resources.sliver_wordmark
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -68,46 +57,19 @@ fun StorageFullOverlay(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-/** Black launch screen: a slit widens and the wordmark opens out of it, then the whole layer cross-fades away. */
+/** Black launch screen: a slit widens, the wordmark fades in, then the whole layer cross-fades away. */
 @Composable
 fun SplashOverlay(onFinished: () -> Unit) {
     val reduced = LocalReducedMotion.current
     val progress = remember { Animatable(if (reduced) 1f else 0f) }
-    val word = remember { Animatable(0f) }
     val fade = remember { Animatable(1f) }
     LaunchedEffect(Unit) {
-        coroutineScope {
-            if (reduced) word.animateTo(1f, tween(SPLASH_FADE_MS))
-            else {
-                launch {
-                    delay(WORDMARK_DELAY_MS.toLong())
-                    word.animateTo(1f, tween(WORDMARK_MS, easing = SliverMotion.EaseStandard))
-                }
-                progress.animateTo(1f, SliverMotion.emphasized(SPLASH_MS))
-            }
-        }
+        if (!reduced) progress.animateTo(1f, SliverMotion.emphasized(SPLASH_MS))
         fade.animateTo(0f, SliverMotion.standard(SPLASH_FADE_MS))
         onFinished()
     }
     Box(Modifier.fillMaxSize().alpha(fade.value).background(SliverColors.BgVoid), contentAlignment = Alignment.Center) {
         val p = progress.value
-        val w = word.value
-        Image(
-            painterResource(Res.drawable.sliver_wordmark), null,
-            Modifier.width(220.dp)
-                .graphicsLayer {
-                    val k = if (reduced) 1f else 0.96f + 0.04f * w
-                    scaleX = k; scaleY = k
-                    alpha = if (reduced) w else 1f
-                }
-                .drawWithContent {
-                    val half = if (reduced) size.height else size.height * w
-                    clipRect(top = (size.height - half) / 2f, bottom = (size.height + half) / 2f) { this@drawWithContent.drawContent() }
-                },
-        )
         Box(Modifier.width(2.dp).height((220 * p).dp).background(SliverColors.Accent, SliverShapes.Pill))
     }
 }
-
-private const val WORDMARK_DELAY_MS = 450
-private const val WORDMARK_MS = 650
