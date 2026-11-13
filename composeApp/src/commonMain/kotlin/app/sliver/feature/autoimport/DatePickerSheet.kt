@@ -61,7 +61,9 @@ fun DatePickerSheet(visible: Boolean, selected: LocalDate, min: LocalDate, max: 
                     SliverText(it, SliverType.Caption.copy(textAlign = TextAlign.Center), Modifier.weight(1f), SliverColors.TextTertiary)
                 }
             }
-            monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } }.forEach { week ->
+            // Owner: same height for every month, so the sheet never jumps: always 6 week rows.
+            val weeks = monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } }
+            (weeks + List(6 - weeks.size) { List<LocalDate?>(7) { null } }).forEach { week ->
                 Row(Modifier.fillMaxWidth()) {
                     week.forEach { date ->
                         Box(Modifier.weight(1f).height(44.dp), Alignment.Center) {
