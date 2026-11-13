@@ -289,7 +289,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { GoldenHourLine(saved?.showGoldenHour == true) }
                     LightToggle(light, iconRot) { light = !light }
                     Spacer(Modifier.width(SliverSpace.S2))
-                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreVertical, SliverColors.OnMedia) }
+                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreHorizontal, SliverColors.OnMedia) }
                 }
             }
             if (failed && !recording) {
@@ -301,12 +301,15 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 )
             }
             if (turnHint && bandActive) {
-                SliverText(
-                    "Turn sideways for the full frame", SliverType.BodySmall,
-                    Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                Row(
+                    Modifier.clip(SliverShapes.Pill).background(SliverColors.OnMedia)
                         .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
-                    SliverColors.TextPrimary,
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                ) {
+                    SliverIcon(SliverIcons.Smartphone, SliverColors.Media, size = 16.dp)
+                    SliverText("Turn sideways for the full frame", SliverType.BodySmall, color = SliverColors.Media)
+                }
             }
         }
 
@@ -412,31 +415,28 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
     }
 }
 
-// DECISION: no design for zoom yet; stops follow One UI (small dark circles, the active one larger with the live ratio and ×).
+// Board CameraV2: .6 / 1× / 2 / 3 in 40dp circles; the active one darker with the live ratio and ×.
 @Composable
 private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifier: Modifier, onSelect: (Float) -> Unit) {
     if (presets.size < 2) return
     val active = activeZoomPreset(presets, zoom)
     val turn by animateFloatAsState(rotation, tween(240), label = "zoom-upright")
-    Row(
-        modifier.clip(SliverShapes.Pill).background(SliverColors.Media.copy(alpha = 0.35f)).padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.forEachIndexed { i, preset ->
             val on = i == active
             val label = formatZoom(if (on) zoom else preset, unit = on)
             Box(
-                Modifier.size(44.dp)
+                Modifier.size(44.dp, 48.dp)
                     .semantics { contentDescription = "Zoom ${formatZoom(preset, true)}"; selected = on; role = Role.Button }
                     .clickable { onSelect(preset) },
                 Alignment.Center,
             ) {
                 Box(
-                    Modifier.size(if (on) 38.dp else 30.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = if (on) 0.7f else 0.5f)).rotate(turn),
+                    Modifier.size(40.dp).clip(CircleShape).background(SliverColors.Media.copy(alpha = if (on) 0.7f else 0.35f)).rotate(turn),
                     Alignment.Center,
                 ) {
                     SliverText(
-                        label, SliverType.Meta.copy(fontSize = if (on) 12.sp else 11.sp, fontWeight = FontWeight.SemiBold).overMedia(),
+                        label, SliverType.Meta.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold).overMedia(),
                         color = SliverColors.OnMedia.copy(alpha = if (on) 1f else 0.85f), maxLines = 1,
                     )
                 }
@@ -486,8 +486,8 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Box(Modifier.size(8.dp).alpha(dotAlpha).background(SliverColors.Record, CircleShape))
-        SliverText(time, SliverType.Num, color = color, maxLines = 1)
-        if (clipOk) SliverText("\u00B7 Clip OK", SliverType.Meta, color = color, maxLines = 1)
+        val style = SliverType.Body.copy(fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
+        SliverText(if (clipOk) "$time \u00B7 Clip OK" else time, style, color = color, maxLines = 1)
     }
 }
 

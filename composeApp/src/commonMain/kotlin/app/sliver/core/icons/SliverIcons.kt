@@ -84,6 +84,7 @@ object SliverIcons {
     val More = lucide("ellipsis", "M12 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M19 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M5 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0")
     val Sun = lucide("sun", "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z", "M12 2v2", "M12 20v2", "m4.93 4.93 1.41 1.41", "m17.66 17.66 1.41 1.41", "M2 12h2", "M20 12h2", "m6.34 17.66-1.41 1.41", "m19.07 4.93-1.41 1.41")
     val Pencil = lucide("pencil", "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z", "m15 5 4 4")
+    val MoreHorizontal = lucide("ellipsis", "M12 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M19 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M5 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0")
     val MoreVertical = lucide("ellipsis-vertical", "M12 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M12 5m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0", "M12 19m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0")
     val Maximize = lucide("maximize", "M4 9V4h5", "M20 9V4h-5", "M4 15v5h5", "M20 15v5h-5")
     val Check = lucide("check", "M20 6 9 17l-5-5")

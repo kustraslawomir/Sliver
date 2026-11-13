@@ -200,7 +200,7 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibilit
                 },
             ) {
                 SliverText(
-                    "AE/AF lock", SliverType.Meta.copy(fontSize = TextUnit(10f, TextUnitType.Sp)),
+                    "AE/AF lock", SliverType.Body.copy(fontSize = TextUnit(12f, TextUnitType.Sp), lineHeight = TextUnit(16f, TextUnitType.Sp), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
                     Modifier.background(SliverColors.Accent, CircleShape).padding(horizontal = 10.dp, vertical = 4.dp),
                     SliverColors.OnAccent, maxLines = 1,
                 )
