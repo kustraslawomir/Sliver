@@ -163,7 +163,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
     // Auto-import can fill days before the project was created: the calendar (and "since") must reach them.
     val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull { it.date }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
-    val memory = remember(byDate, today) { pickMemory(today, byDate.keys)?.let { m -> byDate[m.date]?.let { it to m.kind } } }
 
     val controller = rememberPermissionController()
     val scope = rememberCoroutineScope()
@@ -285,7 +284,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                             MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay)
                         }
 
-                        memory?.let { (day, kind) -> MemoryCard(day, kind) { openDay(day.date) } }
                     }
                     if (!wide) FilmsSection(onNavigate, { filmMenu = it })
                 }
@@ -385,8 +383,8 @@ private fun Header(
                 SliverText(name, hubTitle, Modifier.weight(1f, fill = false), maxLines = 1)
                 SliverIcon(HubIcons.Switcher, SliverColors.TextTertiary, size = 16.dp)
             }
-            HubButton(HubIcons.Gear, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
-            HubButton(HubIcons.More, "More", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
+            HubButton(SliverIcons.Pencil, "Edit project", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
+            HubButton(HubIcons.User, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
         }
         SliverText(line, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 2.dp), maxLines = 1)
         Box(Modifier.height(20.dp))
@@ -634,31 +632,6 @@ private fun YearView(
 }
 
 @Composable
-private fun MemoryCard(day: Day, kind: MemoryKind, onClick: () -> Unit) {
-    val thumb = rememberPhoto(day.thumb)
-    val d = day.date
-    Row(
-        Modifier.fillMaxWidth().height(76.dp).clip(SliverShapes.R18).background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.LineHairline, SliverShapes.R18).clickable(role = Role.Button, onClick = onClick)
-            .padding(start = 10.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(Modifier.size(56.dp).clip(CellShape).background(day.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3), Alignment.Center) {
-            if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            SliverIcon(HubIcons.Play, SliverColors.TextPrimary, size = 18.dp)
-        }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            SliverText(
-                "${kind.label} · ${Weekdays3[d.dayOfWeek.ordinal]} ${d.day} ${MonthNames[d.month.ordinal]}",
-                SliverType.tnum(11.sp, 0.06.em, SliverColors.AccentText), maxLines = 1,
-            )
-            SliverText("A clip you might have forgotten", SliverType.Headline.copy(fontSize = 15.sp, fontWeight = FontWeight.Normal, lineHeight = 20.sp))
-        }
-    }
-}
-
-@Composable
 private fun ProjectMenu(
     canLeave: Boolean,
     onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
@@ -677,8 +650,8 @@ private fun ProjectMenu(
                 .semantics { role = Role.DropdownList },
         ) {
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
-            MenuItem(HubIcons.Shape, "Change shape", SliverColors.TextPrimary, onShape)
-            MenuItem(HubIcons.FillDays, "Auto-import from…", SliverColors.TextPrimary, onFill)
+            MenuItem(HubIcons.Shape, "Change orientation", SliverColors.TextPrimary, onShape)
+            MenuItem(HubIcons.FillDays, "Fill the calendar", SliverColors.TextPrimary, onFill)
             MenuItem(HubIcons.Archive, "Archive project", SliverColors.TextPrimary, onArchive, canLeave)
             MenuItem(HubIcons.Trash, "Delete project", SliverColors.Error, onDelete, canLeave)
             if (!canLeave) SliverText(

@@ -111,7 +111,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 
         Group("More")
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
-        NavRow("Auto-import from…", null) { onGo(Route.FillThePast) }
+        NavRow("Fill the calendar", null) { onGo(Route.FillThePast) }
         NavRow("What Fragments stores", null) { showStores = !showStores }
         if (showStores) {
             SliverText(

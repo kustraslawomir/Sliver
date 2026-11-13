@@ -139,7 +139,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
-            SliverText("Auto-import", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
+            SliverText("Fill the calendar", SliverType.DisplayM, Modifier.padding(start = SliverSpace.S2))
         }
 
         val current = run
