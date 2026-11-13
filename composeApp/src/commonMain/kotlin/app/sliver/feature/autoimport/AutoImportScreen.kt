@@ -362,6 +362,8 @@ private fun ColumnScope.RunProgress(
                 if (autoLeft > 0) GhostButton("Remove unchecked", onRemoveUnchecked, destructive = true) else Spacer(Modifier.size(1.dp))
                 GhostButton("Undo all", onUndo)
             }
+            // Owner was stuck on this summary: "Done" must always close it so a new fill (e.g. from a folder) can start.
+            if (waiting.isNotEmpty()) GhostButton("Done \u00B7 check them later", onDone, Modifier.fillMaxWidth())
         }
     }
 }
