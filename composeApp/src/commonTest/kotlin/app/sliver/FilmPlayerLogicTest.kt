@@ -35,7 +35,14 @@ class FilmPlayerLogicTest {
 
     @Test
     fun infoLineRoundsMegabytes() {
-        assertEquals("MP4 · 1080p · 30 fps · 9 MB · kept in Reelog", filmInfoLine(9_400_000))
-        assertEquals("MP4 · 1080p · 30 fps · 1 MB · kept in Reelog", filmInfoLine(0))
+        assertEquals("MP4 · 1080p · 30 fps · 9 MB · in your gallery, Movies/Reelog", filmInfoLine(9_400_000))
+        assertEquals("MP4 · 1080p · 30 fps · 1 MB · in your gallery, Movies/Reelog", filmInfoLine(0))
+    }
+
+    @Test
+    fun renderedAgainGetsANumber() {
+        assertEquals("Lena", app.sliver.feature.films.filmFileName("Lena", emptySet()))
+        assertEquals("Lena 2", app.sliver.feature.films.filmFileName("Lena", setOf("lena")))
+        assertEquals("Lena 4", app.sliver.feature.films.filmFileName("Lena", setOf("lena", "lena 2", "lena 3")))
     }
 }

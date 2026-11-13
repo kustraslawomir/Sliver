@@ -29,7 +29,7 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
     override suspend fun saveToPhotos(path: String, name: String): Boolean = withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, "$APP_NAME - $name.mp4")
+            put(MediaStore.Video.Media.DISPLAY_NAME, "${freeName(name)}.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
             put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/$APP_NAME")
             put(MediaStore.Video.Media.IS_PENDING, 1)
@@ -44,5 +44,18 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
             resolver.delete(uri, null, null)
             false
         }
+    }
+
+    /** Owner: a film rendered again does not overwrite the old one: "Lena", "Lena 2", "Lena 3"… in Movies/<app>. */
+    private fun freeName(name: String): String {
+        val base = name.trim().ifEmpty { "Film" }.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+        val taken = HashSet<String>()
+        runCatching {
+            context.contentResolver.query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media.DISPLAY_NAME),
+                "${MediaStore.Video.Media.RELATIVE_PATH} LIKE ?", arrayOf("${Environment.DIRECTORY_MOVIES}/$APP_NAME%"), null,
+            )?.use { c -> while (c.moveToNext()) c.getString(0)?.let { taken += it.substringBeforeLast('.').lowercase() } }
+        }
+        return filmFileName(base, taken)
     }
 }

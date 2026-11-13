@@ -215,6 +215,8 @@ class FilmComposer(
             files.delete(out)
             check(files.move(tmp.path, out)) { "Could not move film into place" }
             films.save(film.copy(renderPath = out, renderedAt = Clock.System.now()))
+            // Owner: a finished film lands in the gallery right away (Movies/<app>/<name>.mp4, never overwriting an older one).
+            runCatching { AndroidFilmShare(context).saveToPhotos(out, film.name) }
             return true
         } finally {
             card.delete()

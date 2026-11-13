@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.APP_NAME
 import app.sliver.core.ui.OnAppHidden
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -264,7 +265,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     }
 
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()
             .padding(bottom = SliverSpace.S8),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
@@ -279,20 +280,19 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             }
             Spacer(Modifier.size(44.dp))
         }
-        Spacer(Modifier.height(96.dp))
-        Box(
-            Modifier.fillMaxWidth(if (ratio > 1f) 1f else 0.6f)
-                .align(Alignment.CenterHorizontally).aspectRatio(ratio).background(SliverColors.BgVoid)
-                .clickable { playing = !playing },
-        ) {
-            Video(Modifier.fillMaxSize())
+        // The video takes the room that is left, so the buttons are always on screen (a 9:16 film pushed them off).
+        Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
+            Box(
+                Modifier.aspectRatio(ratio, matchHeightConstraintsFirst = ratio < 1f).background(SliverColors.BgVoid)
+                    .clickable { playing = !playing },
+            ) {
+                Video(Modifier.fillMaxSize())
+            }
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            // Board FilmPlayer: Save to Photos is the primary action; sharing lives on the Premiere screen.
-            PrimaryButton("Save to Photos", {
-                scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos" else "Could not save" }
-            }, Modifier.fillMaxWidth())
+            // A rendered film is saved to the gallery automatically (Movies/<app>), so the primary action here is sharing.
+            PrimaryButton("Share film\u2026", { share.share(path, f.name) }, Modifier.fillMaxWidth())
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
                 GhostButton("Delete film", {
@@ -302,6 +302,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                     }
                 }, Modifier.weight(1f), destructive = true)
             }
+            // Films rendered before auto-save are not in the gallery yet; a copy gets the next free name ("Lena 2").
+            GhostButton("Save a copy to Photos", {
+                scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos \u00B7 Movies/$APP_NAME" else "Could not save" }
+            }, Modifier.fillMaxWidth())
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(
                 info, SliverType.Meta.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center),

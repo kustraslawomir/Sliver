@@ -49,5 +49,13 @@ interface FilmShare {
 /** One-line file info under the player actions (design/src/FilmPlayer.dc.html). Both formats render at 1080p. */
 fun filmInfoLine(sizeBytes: Long): String {
     val mb = ((sizeBytes + 500_000) / 1_000_000).coerceAtLeast(1)
-    return "MP4 · 1080p · 30 fps · $mb MB · kept in $APP_NAME"
+    return "MP4 · 1080p · 30 fps · $mb MB · in your gallery, Movies/$APP_NAME"
+}
+
+/** "Lena", then "Lena 2", "Lena 3"… skipping names already in [takenLower] (lower-case, no extension). */
+fun filmFileName(base: String, takenLower: Set<String>): String {
+    if (base.lowercase() !in takenLower) return base
+    var n = 2
+    while ("$base $n".lowercase() in takenLower) n++
+    return "$base $n"
 }
