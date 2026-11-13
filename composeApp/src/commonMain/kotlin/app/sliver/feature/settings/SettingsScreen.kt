@@ -5,6 +5,9 @@ import app.sliver.core.APP_NAME
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,42 +81,44 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             SliverText("Settings", SliverType.DisplayM)
         }
 
-        Group("Backup")
-        NavRow("Account", if (s.account.signedIn) s.account.email ?: "Signed in" else "Not signed in") { onGo(Route.Backup) }
+        Group("Account & backup")
+        NavRow("Account", if (s.account.signedIn) "Google" else "Not signed in") { onGo(Route.Backup) }
         NavRow("Backup & sync", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
 
-        Group("Films")
+        Group("Films & clips")
         ChoiceRow(
             "Default film format", Formats.map { it.label() }, Formats.indexOf(s.newFilmFormat),
         ) { i -> update { it.copy(newFilmFormat = Formats[i]) } }
-
-        Group("Appearance")
-        ChoiceRow(
-            "Theme", Appearances.map { it.second }, Appearances.indexOfFirst { it.first == s.appearance },
-        ) { i -> update { it.copy(appearance = Appearances[i].first) } }
-
-        Group("Capture")
-        SwitchRow("Date stamp", s.dateStamp, { on -> update { it.copy(dateStamp = on) } })
-        SwitchRow(
-            "Also save full recordings to Photos", s.saveFullRecordings,
-            { on -> update { it.copy(saveFullRecordings = on) } },
+        LinedSwitch(
+            "Date stamp", s.dateStamp, { on -> update { it.copy(dateStamp = on) } },
+            "On every clip. You can still turn it off for a film.",
         )
-
+        LinedSwitch(
+            "Also save full recordings to Photos", s.saveFullRecordings, { on -> update { it.copy(saveFullRecordings = on) } },
+            "Off: only the chosen clip is kept, the rest is deleted.",
+        )
         // DECISION: the volume-key option lives in Settings (not on the Camera toolbar) and only acts while Camera is open.
-        SwitchRow("Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } })
-
-        SwitchRow(
+        LinedSwitch(
+            "Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } },
+            "Press a volume key on the camera to start and stop.",
+        )
+        LinedSwitch(
             "Show golden hour", s.showGoldenHour,
             { on ->
                 update { it.copy(showGoldenHour = on) }
                 if (on && location.status(PermissionKind.CoarseLocation) == PermissionStatus.NotAsked) location.request(PermissionKind.CoarseLocation)
             },
-            caption = "A line on the camera when the light is about to turn. Uses approximate location.",
+            "A line on the camera in the 3 hours before sunset. Uses rough location.",
         )
 
-        Group("More")
+        Group("App")
+        ChoiceRow(
+            "Appearance", Appearances.map { it.second }, Appearances.indexOfFirst { it.first == s.appearance },
+        ) { i -> update { it.copy(appearance = Appearances[i].first) } }
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
-        NavRow("Fill the calendar", null) { onGo(Route.FillThePast) }
+        NavRow("Fill the calendar", null, "Put photos and videos from your gallery on empty days") { onGo(Route.FillThePast) }
+
+        Group("About")
         NavRow("What $APP_NAME stores", null) { showStores = !showStores }
         if (showStores) {
             SliverText(
@@ -133,19 +138,34 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 
 @Composable
 private fun Group(title: String) {
-    SliverText(title, SliverType.Caption, Modifier.padding(top = SliverSpace.S6, bottom = SliverSpace.S1), color = SliverColors.TextTertiary)
+    SliverText(
+        title, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp),
+        Modifier.padding(top = SliverSpace.S6, bottom = SliverSpace.S3), color = SliverColors.TextTertiary,
+    )
 }
+
+@Composable
+private fun Hairline() = Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+
+@Composable
+private fun LinedSwitch(title: String, checked: Boolean, onChange: (Boolean) -> Unit, caption: String) {
+    Hairline()
+    SwitchRow(title, checked, onChange, caption = caption)
+}
+
+private val ValueStyle @Composable get() = SliverType.Caption.copy(fontSize = 13.sp, lineHeight = 18.sp)
 
 @Composable
 private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     var open by remember { mutableStateOf(false) }
+    Hairline()
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { open = !open }.padding(vertical = SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
         SliverText(title, SliverType.Body, Modifier.weight(1f))
-        SliverText(options.getOrElse(selected) { "" }, SliverType.BodySmall, color = SliverColors.TextSecondary)
+        SliverText(options.getOrElse(selected) { "" }, ValueStyle, color = SliverColors.TextTertiary)
         SliverIcon(if (open) SliverIcons.ChevronDown else SliverIcons.ChevronRight, SliverColors.TextTertiary)
     }
     if (open) options.forEachIndexed { i, label ->
@@ -160,14 +180,18 @@ private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSel
 }
 
 @Composable
-private fun NavRow(title: String, value: String?, onClick: () -> Unit) {
+private fun NavRow(title: String, value: String?, caption: String? = null, onClick: () -> Unit) {
+    Hairline()
     Row(
         Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClick = onClick).padding(vertical = SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {
-        SliverText(title, SliverType.Body, Modifier.weight(1f))
-        if (value != null) SliverText(value, SliverType.BodySmall, color = SliverColors.TextSecondary)
+        Column(Modifier.weight(1f)) {
+            SliverText(title, SliverType.Body)
+            if (caption != null) SliverText(caption, SliverType.Caption)
+        }
+        if (value != null) SliverText(value, ValueStyle, color = SliverColors.TextTertiary)
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary)
     }
 }
