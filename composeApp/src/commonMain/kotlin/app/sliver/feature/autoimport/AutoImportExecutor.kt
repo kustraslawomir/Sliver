@@ -1,5 +1,8 @@
 package app.sliver.feature.autoimport
 
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -59,6 +62,35 @@ class AutoImportStore(private val store: DataStore<Preferences>) {
         return alive
     }
 
+    private val dismissedKey = stringPreferencesKey("autoImportDismissed")
+    private val mapSer = MapSerializer(String.serializer(), ListSerializer(String.serializer()))
+
+    /**
+     * Gallery items of auto-filled days the user removed, per "projectId|date". Owner: a removed day must not come back
+     * from the same files on the next import, only when the gallery has new items for that day.
+     */
+    suspend fun dismissed(): Map<String, List<String>> =
+        store.data.first()[dismissedKey]?.let { runCatching { Json.decodeFromString(mapSer, it) }.getOrNull() }.orEmpty()
+
+    suspend fun dismiss(projectId: String, date: LocalDate, uris: Collection<String>) = editDismissed { m ->
+        val k = dismissKey(projectId, date)
+        m[k] = (m[k].orEmpty() + uris).distinct()
+    }
+
+    suspend fun undismiss(projectId: String, date: LocalDate, uris: Collection<String>) = editDismissed { m ->
+        val k = dismissKey(projectId, date)
+        val left = m[k].orEmpty() - uris.toSet()
+        if (left.isEmpty()) m.remove(k) else m[k] = left
+    }
+
+    private suspend fun editDismissed(change: (MutableMap<String, List<String>>) -> Unit) {
+        store.edit { prefs ->
+            val m = prefs[dismissedKey]?.let { runCatching { Json.decodeFromString(mapSer, it) }.getOrNull() }.orEmpty().toMutableMap()
+            change(m)
+            prefs[dismissedKey] = Json.encodeToString(mapSer, m)
+        }
+    }
+
     suspend fun clear() {
         store.edit { it.remove(key) }
     }
@@ -92,7 +124,13 @@ class AutoImportExecutor(
         val gaps = datesBetween(from, to).filter { days.getDay(run.projectId, it) == null }
         store.update(run.id) { it.copy(gapDays = gaps.size, startedAt = it.startedAt.takeIf { s -> s > 0 } ?: nowMillis()) }
         val found = scanner.scan(from, to, zone(), gaps.toSet()).filter { !run.cameraOnly || it.camera }
-        val byDate = groupByDate(found, zone(), from, to)
+        val dismissed = store.dismissed()
+        // A day the user removed comes back only with new files; the old ones stay as extra options after them.
+        val byDate = groupByDate(found, zone(), from, to).mapNotNull { (date, entries) ->
+            val seen = dismissed[dismissKey(run.projectId, date)]?.toSet().orEmpty()
+            val fresh = entries.filter { it.uri !in seen }
+            if (fresh.isEmpty()) null else date to (fresh to entries.filter { it.uri in seen })
+        }.toMap()
         val work = gaps.filter { it in byDate }
         val total = known + work.size
         store.update(run.id) { it.copy(done = known, total = total, scanned = found.size) }
@@ -102,7 +140,8 @@ class AutoImportExecutor(
             if (store.current()?.let { it.id == run.id && !it.finished } != true) return
             if (days.getDay(run.projectId, date) != null) continue
             store.update(run.id) { it.copy(current = date.toString()) }
-            val made = create(run, date, byDate.getValue(date), format)
+            val (fresh, old) = byDate.getValue(date)
+            val made = create(run, date, fresh, format, old)
             if (made != null) done++ else failed++
             if (!store.update(run.id) {
                     it.copy(
@@ -120,7 +159,7 @@ class AutoImportExecutor(
     }
 
     /** Returns true when the day got a photo, false when it got a video, null when it failed. */
-    private suspend fun create(run: ImportRun, date: LocalDate, entries: List<MediaEntry>, format: FilmFormat): Boolean? {
+    private suspend fun create(run: ImportRun, date: LocalDate, entries: List<MediaEntry>, format: FilmFormat, seen: List<MediaEntry> = emptyList()): Boolean? {
         val pick = rank(entries).first()
         var tmp: String? = null
         return try {
@@ -147,7 +186,7 @@ class AutoImportExecutor(
                     date = date, source = path, startMs = startMs, speed = 1f, cropY = null, format = format,
                     daySource = if (isPhoto) DaySource.PHOTO else DaySource.GALLERY,
                     takenAt = Instant.fromEpochMilliseconds(pick.takenAtMs), isPhoto = isPhoto,
-                    projectId = run.projectId, draft = !run.keep, draftCandidates = encodeCandidates(candidatesOf(entries)), importRunId = run.id,
+                    projectId = run.projectId, draft = !run.keep, draftCandidates = encodeCandidates(candidatesOf(entries) + candidatesOf(seen)), importRunId = run.id,
                 ),
             )
             isPhoto

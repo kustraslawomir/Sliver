@@ -185,3 +185,5 @@ fun filledToast(count: Int) = "$count ${daysWord(count)} filled · Check them in
 fun removedLabel(count: Int) = "$count ${daysWord(count)} removed"
 
 fun keptLabel(count: Int) = "$count ${daysWord(count)} kept"
+
+fun dismissKey(projectId: String, date: LocalDate) = "$projectId|$date"

@@ -48,7 +48,7 @@ val commonModule: Module = module {
     single { SaveUndo(get(), get(), get()) }
     single { FilmDeleter(get(), get(), get()) }
     single { AutoImportStore(get()) }
-    single { DraftActions(get(), get(), get(), get()) }
+    single { DraftActions(get(), get(), get(), get(), get()) }
     single { AutoImportExecutor(get(), get(), get(), get(), get(), get(), get()) }
     single<FilmRepository> { FilmRepositoryImpl(get(), get(), get()) }
     single<SettingsRepository> { DataStoreSettingsRepository(get()) }

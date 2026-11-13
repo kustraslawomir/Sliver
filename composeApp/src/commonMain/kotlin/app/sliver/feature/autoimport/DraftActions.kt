@@ -31,6 +31,7 @@ class DraftActions(
     private val films: FilmRepository,
     private val files: FileStore,
     private val gallery: GalleryProvider,
+    private val store: AutoImportStore? = null,
 ) {
     /** Drafts and auto-filled days of the active project, by date. */
     val drafts: Flow<List<Day>> get() = combine(days.observeDrafts(), days.observeAll(), ::toCheck)
@@ -95,6 +96,9 @@ class DraftActions(
             if (day.draft) days.deleteRow(day.projectId, day.date) else days.delete(day.date)
             Triple(day, video, thumb) to ok
         }
+        val remembered = list.filter { it.draftCandidates != null || it.importRunId != null }
+            .map { it to decodeCandidates(it.draftCandidates).map { c -> c.uri } }
+        remembered.forEach { (d, uris) -> store?.dismiss(d.projectId, d.date, uris) }
         val timer = AppScope.launch {
             delay(UNDO_WINDOW_MS)
             parked.forEach { (p, _) ->
@@ -105,6 +109,7 @@ class DraftActions(
         UndoToasts.show(message) {
             timer.cancel()
             AppScope.launch {
+                remembered.forEach { (d, uris) -> store?.undismiss(d.projectId, d.date, uris) }
                 parked.forEach { (p, ok) ->
                     val (day, video, thumb) = p
                     if (ok) {

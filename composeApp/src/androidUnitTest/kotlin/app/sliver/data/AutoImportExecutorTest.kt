@@ -213,4 +213,28 @@ class AutoImportExecutorTest {
         executor.undoAll()
         assertEquals(emptyList(), days.observeAll().first())
     }
+
+    @Test
+    fun removedDayComesBackOnlyWithNewFiles() = runTest {
+        entries = listOf(MediaEntry("content://video/old", true, ms(5), 8_000))
+        store.start(ImportRun("run1", projects.activeId(), "2026-11-01", keep = true))
+        executor.run()
+        val day = days.getDay(LocalDate(2026, 11, 5))!!
+
+        // The user removes the day: its files are remembered, the row goes.
+        store.dismiss(day.projectId, day.date, decodeCandidates(day.draftCandidates).map { it.uri })
+        days.deleteRow(day.projectId, day.date)
+
+        store.start(ImportRun("run2", projects.activeId(), "2026-11-01", keep = true))
+        executor.run()
+        assertEquals(null, days.getDay(LocalDate(2026, 11, 5)))
+
+        // A new file for that day appears: the day is filled from it, the old one stays as an extra option.
+        entries = entries + MediaEntry("content://image/new", false, ms(5, 18))
+        store.start(ImportRun("run3", projects.activeId(), "2026-11-01", keep = true))
+        executor.run()
+        val again = days.getDay(LocalDate(2026, 11, 5))!!
+        assertEquals(listOf("content://image/new", "content://video/old"), decodeCandidates(again.draftCandidates).map { it.uri })
+        assertTrue(exporter.calls.last().photo)
+    }
 }
