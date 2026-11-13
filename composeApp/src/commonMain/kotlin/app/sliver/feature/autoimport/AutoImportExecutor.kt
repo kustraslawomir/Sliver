@@ -20,6 +20,10 @@ import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.trim.TrimMedia
 import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -30,7 +34,7 @@ import kotlinx.serialization.json.Json
 /** Reads dated gallery items. Needs the full or partial media permission; with partial access only visible items come back. */
 interface MediaScanner {
     /** Items taken in [from]..[to] (device [zone]); motion photos are only detected on [sniffDays]. */
-    suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>): List<MediaEntry>
+    suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>, onFound: (Int) -> Unit = {}): List<MediaEntry>
 }
 
 /** Runs [AutoImportExecutor.run] in the background, surviving app close. */
@@ -149,7 +153,7 @@ class AutoImportExecutor(
         val known = days.draftsOfRun(run.projectId, run.id).size
         val gaps = datesBetween(from, to).filter { days.getDay(run.projectId, it) == null }
         store.update(run.id) { it.copy(gapDays = gaps.size, startedAt = it.startedAt.takeIf { s -> s > 0 } ?: nowMillis()) }
-        val found = if (run.folder != null) scanFolder(run, from, to) else scanner.scan(from, to, zone(), gaps.toSet()).filter { !run.cameraOnly || it.camera }
+        val found = if (run.folder != null) scanFolder(run, from, to) else scanGallery(run, from, to, gaps.toSet())
         val dismissed = store.dismissed()
         // A day the user removed comes back only with new files; the old ones stay as extra options after them.
         val byDate = groupByDate(found, zone(), from, to).mapNotNull { (date, entries) ->
@@ -190,6 +194,22 @@ class AutoImportExecutor(
             ) return
         }
         store.update(run.id) { it.copy(finished = true, done = done, current = null) }
+    }
+
+    /** Owner: "show count!" — the gallery search reports how many items it has looked at so far (written ~3× a second). */
+    private suspend fun scanGallery(run: ImportRun, from: LocalDate, to: LocalDate, sniff: Set<LocalDate>): List<MediaEntry> = coroutineScope {
+        val counter = MutableStateFlow(0)
+        val writer = launch {
+            counter.collect { n ->
+                if (n > 0) store.update(run.id) { it.copy(found = n) }
+                delay(300)
+            }
+        }
+        try {
+            scanner.scan(from, to, zone(), sniff) { counter.value = it }.filter { !run.cameraOnly || it.camera }
+        } finally {
+            writer.cancel()
+        }
     }
 
     private suspend fun scanFolder(run: ImportRun, from: LocalDate, to: LocalDate): List<MediaEntry> {

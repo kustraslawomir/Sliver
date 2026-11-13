@@ -51,7 +51,7 @@ internal object IosTrimMedia : TrimMedia {
 
 internal object IosMediaScanner : MediaScanner {
     override suspend fun scan(
-        from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, sniffDays: Set<kotlinx.datetime.LocalDate>,
+        from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, sniffDays: Set<kotlinx.datetime.LocalDate>, onFound: (Int) -> Unit,
     ) = TODO("iOS later")
 }
 

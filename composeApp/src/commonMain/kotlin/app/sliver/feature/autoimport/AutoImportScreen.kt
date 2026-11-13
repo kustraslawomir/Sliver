@@ -106,6 +106,8 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val navigator = LocalNavigator.current
     var sawRunning by rememberSaveable { mutableStateOf(false) }
 
+    // An unfinished run whose job is gone (app updated or killed) starts again; KEEP never runs it twice.
+    LaunchedEffect(run?.id, run?.finished) { if (run?.finished == false) runner.start() }
     val start = listOfNotNull(project?.startDate, rows.minOrNull()).minOrNull() ?: today
     var fromRaw by rememberSaveable { mutableStateOf<String?>(null) }
     val from = fromRaw?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: start
@@ -303,7 +305,10 @@ private fun ColumnScope.RunProgress(
     ) {
         if (!run.finished) {
             when {
-                run.scanning -> BigCount("\u2026", null, if (run.folder != null) "Looking through your folder" else "Looking through your gallery")
+                run.scanning -> BigCount(
+                    if (run.found > 0) groupThousands(run.found) else "\u2026", null,
+                    (if (run.folder != null) "Looking through your folder" else "Looking through your gallery") + if (run.found > 0) " \u00B7 items so far" else "",
+                )
                 else -> BigCount(
                     groupThousands(run.done), "of ${groupThousands(run.total)}",
                     "days filled" + (etaLabel(run.done, run.total, run.startedAt, now)?.let { " \u00B7 ${it.replaceFirstChar(Char::lowercase)}" } ?: ""),

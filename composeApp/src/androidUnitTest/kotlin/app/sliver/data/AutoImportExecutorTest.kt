@@ -109,7 +109,7 @@ class AutoImportExecutorTest {
         days = DayRepositoryImpl(db.dayDao(), projects, exporter, files)
         store = AutoImportStore(PreferenceDataStoreFactory.create(scope = scope) { File.createTempFile("run", ".preferences_pb").apply { delete() } })
         val scanner = object : MediaScanner {
-            override suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>) = entries
+            override suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>, onFound: (Int) -> Unit) = entries
         }
         executor = AutoImportExecutor(
             store, days, projects, scanner, FakeGallery(ctx.cacheDir), FakeMedia, files,

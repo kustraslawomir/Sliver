@@ -57,7 +57,7 @@ class AutoImportWorker(context: Context, params: WorkerParameters) : CoroutineWo
 
 /** MediaStore query by DATE_TAKEN; items that only have a modified date are ignored (messengers set that to the day received). */
 class AndroidMediaScanner(private val context: Context) : MediaScanner {
-    override suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>): List<MediaEntry> =
+    override suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>, onFound: (Int) -> Unit): List<MediaEntry> =
         withContext(Dispatchers.IO) {
             val lo = from.atStartOfDayIn(zone).toEpochMilliseconds()
             val hi = LocalDate.fromEpochDays(to.toEpochDays() + 1).atStartOfDayIn(zone).toEpochMilliseconds()
@@ -66,9 +66,11 @@ class AndroidMediaScanner(private val context: Context) : MediaScanner {
                 val day = app.sliver.feature.autoimport.localDateOf(taken, zone)
                 val motion = day in sniffDays && isMotion(uri)
                 out += MediaEntry(uri.toString(), video = false, takenAtMs = taken, durationMs = 0, motion = motion, camera = camera)
+                onFound(out.size)
             }
             query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, lo, hi) { uri, taken, duration, camera ->
                 out += MediaEntry(uri.toString(), video = true, takenAtMs = taken, durationMs = duration, camera = camera)
+                onFound(out.size)
             }
             out
         }
