@@ -4,7 +4,11 @@ import app.sliver.data.BackupState
 import app.sliver.data.DaySource
 import app.sliver.data.FilmFormat
 import app.sliver.data.FilmRangeType
+import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.backup.BackupError
+import app.sliver.data.backup.BackupScheduler
+import app.sliver.data.backup.changedOnAnotherPhone
+import app.sliver.data.backup.syncStatusLine
 import app.sliver.data.backup.DayFileReader
 import app.sliver.data.backup.DriveFile
 import app.sliver.data.backup.InMemoryDriveClient
@@ -41,6 +45,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 
@@ -593,5 +599,83 @@ class SyncRulesTest {
         assertEquals(contentHash(byteArrayOf(1, 2, 3)), contentHash(byteArrayOf(1, 2, 3)))
         assertFalse(contentHash(byteArrayOf(1, 2, 3)) == contentHash(byteArrayOf(1, 2, 4)))
         assertFalse(contentHash(byteArrayOf()) == contentHash(byteArrayOf(0)))
+    }
+}
+
+class SyncUiTest {
+    @Test
+    fun statusLineSaysHowLongAgoAndHowManyPhones() {
+        val now = 10_000_000L
+        assertEquals("Not synced yet", syncStatusLine(null, now, 1))
+        assertEquals("Synced · just now · 1 phone", syncStatusLine(now - 20_000, now, 1))
+        assertEquals("Synced · 2 min ago · 2 phones", syncStatusLine(now - 125_000, now, 2))
+        assertEquals("Synced · 3 h ago · 2 phones", syncStatusLine(now - 3 * 3_600_000L, now, 2))
+        assertEquals("Synced · 2 d ago · 1 phone", syncStatusLine(now - 2 * 86_400_000L - 5, now, 1))
+    }
+
+    @Test
+    fun changedNoticeNamesTheDayOrCountsThem() {
+        assertNull(changedOnAnotherPhone(emptyList()))
+        assertEquals("10 Nov was changed on another phone", changedOnAnotherPhone(listOf(LocalDate(2026, 11, 10))))
+        assertEquals("2 clips were changed on another phone", changedOnAnotherPhone(listOf(LocalDate(2026, 11, 10), LocalDate(2026, 11, 11))))
+    }
+}
+
+private class RecordingScheduler : BackupScheduler {
+    var runs = 0
+    var periodic = 0
+    var cancelled = 0
+    override fun schedule(wifiOnly: Boolean, anyNetwork: Boolean) { runs++ }
+    override fun keepSynced(wifiOnly: Boolean) { periodic++ }
+    override fun cancel() { cancelled++ }
+}
+
+class SyncTriggerTest {
+    @Test
+    fun syncsOnStartThenAgainThirtySecondsAfterASaveOrDelete() = runTest {
+        val phone = Phone("a", InMemoryDriveClient(), Clock(), listOf(project("p1", "Diary")))
+        val scheduler = RecordingScheduler()
+        BackupCoordinator(phone.days, phone.settings, scheduler).start(backgroundScope)
+        runCurrent()
+        assertEquals(1, scheduler.runs)
+        assertEquals(1, scheduler.periodic)
+
+        phone.record("2025-01-01", 1)
+        advanceTimeBy(29_000); runCurrent()
+        assertEquals(1, scheduler.runs)
+        advanceTimeBy(2_000); runCurrent()
+        assertEquals(2, scheduler.runs)
+
+        phone.days.delete(LocalDate.parse("2025-01-01"))
+        advanceTimeBy(31_000); runCurrent()
+        assertEquals(3, scheduler.runs)
+    }
+
+    @Test
+    fun signingOutStopsEverything() = runTest {
+        val phone = Phone("a", InMemoryDriveClient(), Clock(), listOf(project("p1", "Diary")))
+        val scheduler = RecordingScheduler()
+        BackupCoordinator(phone.days, phone.settings, scheduler).start(backgroundScope)
+        runCurrent()
+        phone.settings.update { it.copy(account = it.account.copy(signedIn = false)) }
+        runCurrent()
+        assertEquals(1, scheduler.cancelled)
+        phone.record("2025-01-01", 1)
+        advanceTimeBy(60_000); runCurrent()
+        assertEquals(1, scheduler.runs)
+    }
+
+    @Test
+    fun syncedDaysFromAnotherPhoneDoNotTriggerAnotherSync() = runTest {
+        val phone = Phone("a", InMemoryDriveClient(), Clock(), listOf(project("p1", "Diary")))
+        val scheduler = RecordingScheduler()
+        BackupCoordinator(phone.days, phone.settings, scheduler).start(backgroundScope)
+        runCurrent()
+        phone.days.applyRemote(
+            Day(projectId = "p1", date = LocalDate(2025, 1, 1), file = "f", thumb = "t", source = DaySource.CAMERA,
+                takenAt = Instant.fromEpochMilliseconds(0), createdAt = Instant.fromEpochMilliseconds(0), updatedAt = 5, updatedBy = "b"),
+        )
+        advanceTimeBy(120_000); runCurrent()
+        assertEquals(1, scheduler.runs)
     }
 }

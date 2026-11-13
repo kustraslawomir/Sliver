@@ -10,7 +10,9 @@ import android.net.Uri
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -36,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
 
 private const val WORK_NAME = "backup"
+private const val PERIODIC_WORK_NAME = "sync-hourly"
 private const val RESTORE_WORK_NAME = "restore"
 private const val RESTORE_THUMB_WIDTH = 320
 
@@ -88,8 +91,18 @@ class AndroidBackupScheduler(private val context: Context) : BackupScheduler {
         WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, ExistingWorkPolicy.REPLACE, request)
     }
 
+    override fun keepSynced(wifiOnly: Boolean) {
+        val network = if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val request = PeriodicWorkRequestBuilder<BackupWorker>(1, TimeUnit.HOURS)
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(PERIODIC_WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request)
+    }
+
     override fun cancel() {
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+        WorkManager.getInstance(context).cancelUniqueWork(PERIODIC_WORK_NAME)
     }
 }
 

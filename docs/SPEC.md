@@ -87,9 +87,10 @@ Full-bleed loop (look + date stamp), prev/next day, sound toggle. Weekday, DAY n
 ### Backup & account (optional)
 - "Save your seconds" sheet: Continue with Google / Not now.
 - Before Google consent: plain words (one visible folder "SLIVER", only files SLIVER creates, we never store videos, ~2 MB per second).
-- Backup screen: status card (7 states below), folder, backed up count, Drive space, Auto-backup, Wi-Fi only, Back up now, Export everything (.zip), Disconnect (confirm).
+- Backup & sync screen: status line "Synced · 2 min ago · 2 phones", status card (7 states below), folder, backed up count, Drive space, Auto-backup, Wi-Fi only, Sync now, Export everything (.zip), Disconnect (confirm).
 - States: backing up (progress, resumable) · up to date · paused (waiting for Wi-Fi) · failed (retry) · Drive full · access revoked (reconnect) · offline.
-- Restore (fresh install): Welcome back → Continue with Google → "We found N seconds" → Restore all (progress, mosaic fills) → archive. Camera usable meanwhile.
+- Sync (T-sync-two-devices): one Google account on several phones keeps the same projects. Last writer wins per record (project, day, film definition) by `updatedAt`, ties by device id; a clip that loses is kept in Drive `replaced/` for 30 days and the other phone shows "10 Nov was changed on another phone" once. Deletes travel as tombstones (kept 90 days). Drafts, renders, camera/reminder/appearance settings never sync. Triggers: app start, 30 s after a save or delete, hourly (network), pull down on the project screen, Sync now. No instant push.
+- Restore (fresh install) is the first pull of a sync: Welcome back → Continue with Google → "We found N seconds" → Restore all (progress, mosaic fills) → archive. Camera usable meanwhile.
 - Account: signed in with Google, what we keep (videos: never), Sign out (confirm), Delete account (checkboxes: also delete SLIVER folder in Drive, also delete seconds from this phone).
 
 ### Notifications (all local)

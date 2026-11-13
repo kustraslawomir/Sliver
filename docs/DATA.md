@@ -13,6 +13,9 @@ Day
 - cropY: Float? (0..1, vertical offset of the 16:9 crop for portrait clips; null = center)
 - takenAt: Instant · createdAt: Instant
 - driveFileId: String? · backup: PENDING | DONE | FAILED
+- updatedAt: Long (ms of last content edit) · updatedBy: String (device id of the last writer, empty = this device) — also on Project and Film; bookkeeping saves (backup, driveFileId, light stats, film render) never change them
+
+Tombstone (DB v7): kind DAY|FILM|PROJECT · projectId · key · deletedAt — a local delete waiting to be written to Drive
 
 Film
 - id: String (uuid) · name · format CINEMA | STORY · range: Week/Month/Year/Custom(from,to) · live: Boolean (keeps collecting)
@@ -47,9 +50,11 @@ cache/proxies/                optional later (540p) — not in v1
 
 ## Google Drive (backup, optional)
 - Scope `https://www.googleapis.com/auth/drive.file` only.
-- Folder "SLIVER" in My Drive (visible). Folder id stored in settings.
-- One file per day: name `YYYY-MM-DD.mp4`, `appProperties: {sliverDate, look (json), source, motion}`.
-- `manifest.json` in the folder: settings + films (no media). Overwritten on change.
-- Restore: list files in folder (q = `'<folderId>' in parents and trashed = false`), rebuild Day rows from appProperties, download in background, regenerate thumbs, films re-render lazily.
+- Folder "Fragments" in My Drive. One file per record, no shared manifest, so nothing is overwritten wholesale:
+  - `projects/<projectId>.json` (project; `.deleted.json` = tombstone)
+  - `<projectId>/<date>.mp4`, appProperties: sliverDate, look, source, motion, audio, speed, cropY, taken, luma, tone, upd (updatedAt), dev (deviceId), hash
+  - `<projectId>/films/<filmId>.json` (definition incl. film filter; `<id>.deleted.json`), `<projectId>/deleted/<date>.json`, `<projectId>/replaced/<date>-<deviceId>.mp4` (30 days)
+  - Project folder is named by project id. Older per-project `manifest.json` backups are migrated on the next sync (folder renamed, records written, manifest trashed); a flat root backup restores into the active project.
+- Sync cycle: pull (list, newer `upd` wins, tombstone newer than local deletes) then push (local edits newer than last pushed), then save `lastSyncAt`/`lastPushedAt`. Idempotent; interrupted runs resume. deviceId (UUID) lives in DataStore, never synced.
 - Error mapping: 403 `storageQuotaExceeded` → DRIVE_FULL · 401 / `invalid_grant` → REVOKED · no network → OFFLINE · Wi-Fi only + metered → PAUSED_WIFI · other → FAILED (retry 15 min, exponential).
 - No Firebase, no own server. "Delete account" = revoke token + optional delete of the SLIVER folder + optional local wipe.

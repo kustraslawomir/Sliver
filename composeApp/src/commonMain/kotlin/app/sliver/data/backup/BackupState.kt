@@ -33,6 +33,28 @@ fun shouldNotifyBackupProblem(account: AccountSettings, enabled: Boolean, nowMil
     return enabled && account.backupError != null && !account.problemNotified && nowMillis - since >= PROBLEM_AFTER_MILLIS
 }
 
+/** "Synced · 2 min ago · 2 phones" */
+fun syncStatusLine(lastSyncAt: Long?, nowMillis: Long, phones: Int): String {
+    if (lastSyncAt == null) return "Not synced yet"
+    val minutes = ((nowMillis - lastSyncAt).coerceAtLeast(0) / 60_000).toInt()
+    val ago = when {
+        minutes < 1 -> "just now"
+        minutes < 60 -> "$minutes min ago"
+        minutes < 24 * 60 -> "${minutes / 60} h ago"
+        else -> "${minutes / (24 * 60)} d ago"
+    }
+    return "Synced · $ago · $phones ${if (phones == 1) "phone" else "phones"}"
+}
+
+private val ShortMonths = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** One-time notice after another phone replaced clips here. */
+fun changedOnAnotherPhone(dates: List<kotlinx.datetime.LocalDate>): String? = when (dates.size) {
+    0 -> null
+    1 -> "${dates[0].day} ${ShortMonths[dates[0].month.ordinal]} was changed on another phone"
+    else -> "${dates.size} clips were changed on another phone"
+}
+
 fun formatBytes(bytes: Long): String = when {
     bytes < 1_000_000L -> "${bytes / 1000} KB"
     bytes < 1_000_000_000L -> "${tenths(bytes, 1_000_000L)} MB"

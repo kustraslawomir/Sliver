@@ -78,7 +78,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
 
         Group("Backup")
         NavRow("Account", if (s.account.signedIn) s.account.email ?: "Signed in" else "Not signed in") { onGo(Route.Backup) }
-        NavRow("Backup", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
+        NavRow("Backup & sync", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
 
         Group("Films")
         ChoiceRow(

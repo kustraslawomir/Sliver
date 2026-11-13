@@ -72,7 +72,7 @@ actual val platformModule: Module = module {
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }
     single<TrimMedia> { AndroidTrimMedia() }
-    single { ProgressCoordinator(get<Context>(), get(), get(), get()) }
+    single { ProgressCoordinator(get<Context>(), get(), get()) }
     single<AutoImportRunner> { AndroidAutoImportRunner(get<Context>()) }
     single<MediaScanner> { AndroidMediaScanner(get<Context>()) }
     single<FilmRenderer> { AndroidFilmRenderer(get<Context>()) }

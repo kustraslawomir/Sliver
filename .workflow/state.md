@@ -51,3 +51,4 @@
 - T-auto-5: DONE (tools/design/render.sh + dcrender.mjs + pngdiff.mjs, Chrome headless; 71/79 boards >=95%; see HANDOFF.md section T-auto-5)
 - T-looks-film: DONE (film-level filters, shader pass, 6 presets, 40-candidate pool + sheets; on-device perf TODO, see HANDOFF.md)
 - T-auto-import-drafts: DONE (see HANDOFF.md section T-auto-import-drafts)
+- T-sync-two-devices: DONE in code/tests; device check TODO (see HANDOFF.md section T-sync-two-devices)

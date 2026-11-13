@@ -425,3 +425,10 @@ DONE with deviations (lead decision: no Playwright/pip/npm, nothing installed ou
   via `VideoFrameMetadataListener` on the preview player logging fps with `Log.i`.
 - Seeded data left on the Xiaomi in skustra.fragments ("QA Perf"/"My 2026"); wipe with
   `am broadcast -n skustra.fragments/app.sliver.debug.SeedReceiver -a app.sliver.debug.SEED --es mode wipe`.
+
+## T-sync-two-devices
+Status: DONE in code and tests (two simulated phones sharing one InMemoryDriveClient); NOT checked on devices (OAuth consent screen still in Testing, real Drive gives 403).
+- Engine: `data/backup/SyncEngine.kt` (replaces BackupEngine; RestoreEngine now wraps scan + first sync), records in `SyncRecords.kt`, stamping/tombstones in `SyncStamp.kt`. DB 6->7 (`Migration6To7`, tested): updatedAt/updatedBy on project/day/film, `tombstone` table.
+- Deviations: no `changes.list` + page token; each cycle lists the (few) folders and compares appProperties, metadata only, downloads only what is newer. Reminder/settings in old manifests are no longer re-applied on restore (device-local by spec). Same-name projects created separately on two phones are not merged (shown twice). Pull-to-refresh is a custom nested-scroll strip (no stock Material). Debounce covers day saves/deletes; film/project edits go with the next trigger or the hourly run.
+- Limits: no instant push (up to ~1 h unless the app is opened); tie/conflict rule is last writer by time, clock skew between phones can pick the "wrong" winner (the loser is in `replaced/` for 30 days); `replaced/` copy happens when the overwriting phone pushes.
+- TODO morning (two-device check): add both phones' Google accounts as test users on the OAuth consent screen (or publish it); install the debug build on the Xiaomi and the emulator (never the Samsung); sign in with the same account on both; record or add a clip on A, Settings > Backup & sync > Sync now, then Sync now on B and confirm it appears; delete it on B, sync both, confirm it is gone on A; rename the project on A, sync, confirm B; check Drive folder "Fragments" has projects/, <projectId>/ with films/ and deleted/, and no manifest.json.

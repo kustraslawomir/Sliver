@@ -78,6 +78,7 @@ internal object IosReminderScheduler : ReminderScheduler {
 
 internal object IosJobs : BackupScheduler, RestoreScheduler {
     override fun schedule(wifiOnly: Boolean, anyNetwork: Boolean) = Unit
+    override fun keepSynced(wifiOnly: Boolean) = Unit
     override fun cancel() = Unit
     override fun start() = Unit
 }

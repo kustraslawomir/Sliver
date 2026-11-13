@@ -53,6 +53,7 @@ import app.sliver.data.backup.NetworkKind
 import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.backup.backupUi
 import app.sliver.data.backup.formatBytes
+import app.sliver.data.backup.syncStatusLine
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
 import kotlinx.coroutines.flow.map
@@ -63,7 +64,7 @@ data class StatusCopy(val title: String, val body: String, val action: String? =
 
 fun statusCopy(ui: BackupUi, progress: BackupProgress?): StatusCopy = when (ui) {
     BackupUi.BACKING_UP -> StatusCopy(
-        "Backing up",
+        "Syncing",
         progress?.takeIf { it.total > 0 }?.let { "${it.done} of ${it.total} clips. It picks up where it left off." }
             ?: "Getting ready. It picks up where it left off.",
     )
@@ -115,6 +116,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
         }
     }
 
+    val nowMillis = remember(settings) { kotlin.time.Clock.System.now().toEpochMilliseconds() }
     val backedUp = statuses.count { it == BackupState.DONE }
     val pending = statuses.size - backedUp
     LaunchedEffect(account?.signedIn, backedUp) {
@@ -136,7 +138,8 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = SliverSpace.S6),
                         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
                     ) {
-                        SliverText("Backup & account", SliverType.DisplayM)
+                        SliverText("Backup & sync", SliverType.DisplayM)
+                        SliverText(syncStatusLine(account.lastSyncAt, nowMillis, account.phones), SliverType.BodySmall)
                         StatusCard(ui, copy, onAction = {
                             if (ui == BackupUi.REVOKED) scope.launch { manager.signIn() }
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
@@ -160,7 +163,7 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                             caption = "Roughly 2 MB per clip",
                         )
                         PrimaryButton(
-                            "Back up now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
+                            "Sync now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
                             Modifier.fillMaxWidth(), enabled = progress == null,
                         )
                         SecondaryButton("Restore from Drive", onRestore, Modifier.fillMaxWidth())
