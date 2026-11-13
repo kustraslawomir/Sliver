@@ -1,4 +1,6 @@
 package app.sliver.feature.films
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
@@ -250,8 +252,9 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     @Composable
     fun BoxScope.VideoOverlay() {
         if (!playing) {
-            Box(Modifier.align(Alignment.Center).size(64.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.Scrim), Alignment.Center) {
-                SliverIcon(SliverIcons.Play, SliverColors.OnMedia, size = 28.dp)
+            // PlayerV17: 72 dp primary play disc.
+            Box(Modifier.align(Alignment.Center).size(72.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.Accent), Alignment.Center) {
+                SliverIcon(SliverIcons.Play, SliverColors.OnAccent, size = 30.dp)
             }
         }
         IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute", Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2), overCamera = true) {
@@ -281,8 +284,12 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         return
     }
 
+    // PlayerV17: ambient light in the film's own colour (first clip's dominant colour) behind the whole screen.
+    val ambient = plan.days.firstOrNull()?.color?.takeIf { it != 0 }?.let { Color(it) } ?: SliverColors.Surface3
     Column(
-        Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()
+        Modifier.fillMaxSize().background(SliverColors.BgBase)
+            .background(Brush.radialGradient(0f to ambient.copy(alpha = 0.38f), 1f to Color.Transparent, center = androidx.compose.ui.geometry.Offset(540f, 500f), radius = 1300f))
+            .statusBarsPadding().navigationBarsPadding()
             .padding(bottom = SliverSpace.S8),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
     ) {

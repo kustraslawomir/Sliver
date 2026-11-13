@@ -1,4 +1,5 @@
 package app.sliver.feature.archive
+import app.sliver.feature.camera.label
 import app.sliver.core.ui.SheetsOpen
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
@@ -261,7 +262,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                     .fillMaxHeight().navigationBarsPadding(),
             ) {
                 Header(
-                    project?.name.orEmpty(), clipsHeader(all.size, first), menuOpen,
+                    project?.name.orEmpty(), clipsHeader(all.size, first) + (project?.let { " · " + it.format.label() } ?: ""), menuOpen,
                     { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true },
                 )
                 Column(
@@ -400,8 +401,9 @@ private fun Header(
                 SliverText(name, hubTitle, Modifier.weight(1f, fill = false), maxLines = 1)
                 SliverIcon(HubIcons.Switcher, SliverColors.TextTertiary, size = 16.dp)
             }
-            HubButton(SliverIcons.Pencil, "Edit project", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
-            HubButton(HubIcons.User, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
+            // HubV17: settings gear, then "…" for the project menu; 24 dp Lucide, no backgrounds.
+            HubButton(SliverIcons.Settings, "Settings", onSettings, SliverColors.TextPrimary, 24.dp)
+            HubButton(SliverIcons.MoreHorizontal, "Project menu", onMore, SliverColors.TextPrimary, 24.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
         }
         SliverText(line, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), color = SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 4.dp), maxLines = 1)
         Box(Modifier.height(20.dp))
