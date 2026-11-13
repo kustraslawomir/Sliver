@@ -49,6 +49,8 @@ object SliverColors {
     val PhotoCoreLow = Color(0xFFCFCFC8)
     /** Empty project thumbnail. */
     val ThumbEmpty = Color(0xFF1C1C1F)
+    /** Settings group card (light: white). */
+    val GroupCard get() = if (light) Color.White else Color(0xFF141416)
     /** v1.7 sheet scrim: nothing behind a sheet stays readable. */
     val SheetScrim get() = Color.Black.copy(alpha = if (light) 0.30f else 0.55f)
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */

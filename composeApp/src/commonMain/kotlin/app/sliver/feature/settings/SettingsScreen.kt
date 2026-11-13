@@ -1,4 +1,5 @@
 package app.sliver.feature.settings
+import androidx.compose.ui.draw.clip
 
 import app.sliver.core.theme.ReelogType
 
@@ -83,13 +84,14 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             SliverText("Settings", SliverType.DisplayM)
         }
 
-        Group("Account & backup")
-        NavRow("Account", if (s.account.signedIn) "Google" else "Not signed in") { onGo(Route.Backup) }
+        Group("Account & backup") {
+        NavRow("Account", if (s.account.signedIn) "Google" else "Not signed in", first = true) { onGo(Route.Backup) }
         NavRow("Backup & sync", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
+        }
 
-        Group("Films & clips")
-        ChoiceRow(
-            "Default film format", Formats.map { it.label() }, Formats.indexOf(s.newFilmFormat),
+        Group("Films & clips") {
+        ChoiceRow(first = true, title = 
+            "Default film format", options = Formats.map { it.label() }, selected = Formats.indexOf(s.newFilmFormat),
         ) { i -> update { it.copy(newFilmFormat = Formats[i]) } }
         LinedSwitch(
             "Date stamp", s.dateStamp, { on -> update { it.copy(dateStamp = on) } },
@@ -112,23 +114,26 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             },
             "A line on the camera in the 3 hours before sunset. Uses rough location.",
         )
+        }
 
-        Group("App")
+        Group("App") {
         ChoiceRow(
-            "Appearance", Appearances.map { it.second }, Appearances.indexOfFirst { it.first == s.appearance },
+            first = true, title = "Appearance", options = Appearances.map { it.second }, selected = Appearances.indexOfFirst { it.first == s.appearance },
         ) { i -> update { it.copy(appearance = Appearances[i].first) } }
         NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
         NavRow("Fill the calendar", null, "Put photos and videos from your gallery on empty days") { onGo(Route.FillThePast) }
+        }
 
-        Group("About")
-        NavRow("What $APP_NAME stores", null) { showStores = !showStores }
+        Group("About") {
+        NavRow("What $APP_NAME stores", null, first = true) { showStores = !showStores }
         if (showStores) {
             SliverText(
                 "Your clips, photos and films stay on this phone. If you turn on backup, copies go to a private folder in your own Google Drive. Nothing is shared with us.",
-                SliverType.BodySmall, Modifier.padding(bottom = SliverSpace.S3), color = SliverColors.TextSecondary,
+                SliverType.BodySmall, Modifier.padding(horizontal = RowPad).padding(bottom = SliverSpace.S3), color = SliverColors.TextSecondary,
             )
         }
         NavRow("Send feedback", null) { platform.sendFeedback(FEEDBACK_ADDRESS, "$APP_NAME feedback") }
+        }
 
         SliverText(
             "$APP_NAME ${platform.versionName}", SliverType.Meta,
@@ -138,33 +143,40 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
     }
 }
 
+/** v1.7 SettingsV17: grouped card #141416, radius 18; rows 17 sp, values 15 sp #8E8E88, inset hairlines. */
 @Composable
-private fun Group(title: String) {
+private fun Group(title: String, rows: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
     SliverText(
-        title, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
-        Modifier.padding(top = SliverSpace.S6, bottom = SliverSpace.S3), color = SliverColors.TextTertiary,
+        title, SliverType.Caption.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+        Modifier.padding(start = RowPad, top = SliverSpace.S6, bottom = SliverSpace.S2), color = SliverColors.TextTertiary,
     )
+    Column(Modifier.fillMaxWidth().clip(GroupShape).background(SliverColors.GroupCard), content = rows)
 }
 
+private val RowPad = 16.dp
+private val GroupShape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp)
+
 @Composable
-private fun Hairline() = Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+private fun Hairline(first: Boolean = false) {
+    if (!first) Box(Modifier.padding(start = RowPad).fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+}
 
 @Composable
 private fun LinedSwitch(title: String, checked: Boolean, onChange: (Boolean) -> Unit, caption: String) {
     Hairline()
-    SwitchRow(title, checked, onChange, caption = caption)
+    SwitchRow(title, checked, onChange, Modifier.padding(horizontal = RowPad), caption = caption)
 }
 
-private val ValueStyle @Composable get() = SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption))
+private val ValueStyle @Composable get() = ReelogType.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Normal)
 
 @Composable
-private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
+private fun ChoiceRow(title: String, options: List<String>, selected: Int, first: Boolean = false, onSelect: (Int) -> Unit) {
     var open by remember { mutableStateOf(false) }
-    Hairline()
+    Hairline(first)
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { open = !open }.padding(vertical = SliverSpace.S2),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable { open = !open }.padding(horizontal = RowPad, vertical = SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
     ) {
         SliverText(title, SliverType.Body, Modifier.weight(1f))
         SliverText(options.getOrElse(selected) { "" }, ValueStyle, color = SliverColors.TextTertiary)
@@ -172,22 +184,22 @@ private fun ChoiceRow(title: String, options: List<String>, selected: Int, onSel
     }
     if (open) options.forEachIndexed { i, label ->
         Row(
-            Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(i); open = false }.padding(start = SliverSpace.S4),
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(i); open = false }.padding(start = RowPad * 2, end = RowPad),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SliverText(label, SliverType.Body, Modifier.weight(1f), if (i == selected) SliverColors.AccentText else SliverColors.TextSecondary)
-            if (i == selected) SliverIcon(SliverIcons.Check, SliverColors.AccentText)
+            SliverText(label, SliverType.Body, Modifier.weight(1f), if (i == selected) SliverColors.TextPrimary else SliverColors.TextSecondary)
+            if (i == selected) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary)
         }
     }
 }
 
 @Composable
-private fun NavRow(title: String, value: String?, caption: String? = null, onClick: () -> Unit) {
-    Hairline()
+private fun NavRow(title: String, value: String?, caption: String? = null, first: Boolean = false, onClick: () -> Unit) {
+    Hairline(first)
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClick = onClick).padding(vertical = SliverSpace.S2),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClick = onClick).padding(horizontal = RowPad, vertical = SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S4),
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
     ) {
         Column(Modifier.weight(1f)) {
             SliverText(title, SliverType.Body)

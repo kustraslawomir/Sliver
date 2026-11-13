@@ -50,7 +50,8 @@ import app.sliver.data.info
 expect suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPreset>): Map<LookPreset, ImageBitmap>
 
 private val TileW = 64.dp
-private val TileH = 64.dp
+private val TileH = 84.dp
+private val TileShape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
 
 /** Intensity and Grain for [selected], shown in the builder's adjust sheet. */
 @Composable
@@ -111,8 +112,8 @@ private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick:
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
     ) {
         Box(
-            Modifier.size(TileW, TileH).clip(SliverShapes.S).background(SliverColors.Surface2)
-                .then(if (selected) Modifier.border(2.dp, SliverColors.TextPrimary, SliverShapes.S) else Modifier),
+            Modifier.size(TileW, TileH).clip(TileShape).background(SliverColors.Surface2)
+                .then(if (selected) Modifier.border(2.dp, SliverColors.Accent, TileShape) else Modifier),
         ) {
             if (image != null) Image(image, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         }
