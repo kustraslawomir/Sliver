@@ -47,7 +47,7 @@ class AutoFillShots : ShotTest() {
     @Test fun chipSheet() = shoot("AutoFillChipSheet", inspection = true) {
         Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
             Column(Modifier.background(SliverColors.Surface1).padding(20.dp)) {
-                ReviewSheetBody(drafts = 1, auto = 4, busy = false, onKeepAll = {}, onRemoveUnchecked = {}, onWalk = {})
+                ReviewSheetBody(drafts = 0, auto = 3, busy = false, onKeepAll = {}, onRemoveUnchecked = {}, onWalk = {}, days = listOf(3, 6, 7).map { auto(it, 2) })
             }
         }
     }

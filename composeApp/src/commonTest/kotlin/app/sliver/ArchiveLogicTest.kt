@@ -79,7 +79,7 @@ class ArchiveLogicTest {
 
     @Test
     fun header() {
-        assertEquals("1 clip · since 3 Mar", clipsHeader(1, LocalDate(2026, 3, 3)))
-        assertEquals("42 clips · since 3 Mar", clipsHeader(42, LocalDate(2026, 3, 3)))
+        assertEquals("1 clip · since 3 March", clipsHeader(1, LocalDate(2026, 3, 3)))
+        assertEquals("42 clips · since 3 March", clipsHeader(42, LocalDate(2026, 3, 3)))
     }
 }

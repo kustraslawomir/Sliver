@@ -171,6 +171,18 @@ fun reviewChipLabel(drafts: Int, auto: Int): String = when {
     else -> "${drafts + auto} days to check"
 }
 
+fun reviewSheetTitle(drafts: Int, auto: Int): String = when {
+    auto == 0 -> "$drafts ${if (drafts == 1) "draft" else "drafts"}"
+    drafts == 0 -> "$auto auto-filled ${daysWord(auto)}"
+    else -> "${drafts + auto} days to check"
+}
+
+fun reviewSheetBody(drafts: Int, auto: Int): String = when {
+    drafts == 0 -> "Picked from your camera roll and already in the project. Check them, or keep them as they are."
+    auto == 0 -> "Picked from your camera roll. They don't count until you keep them. Check them, or keep them as they are."
+    else -> "Picked from your camera roll. Drafts don't count until you keep them. Check them, or keep them as they are."
+}
+
 fun itemsLabel(n: Int) = "$n ${if (n == 1) "item" else "items"}"
 
 /** "Tue 10 Nov · 4 items" */

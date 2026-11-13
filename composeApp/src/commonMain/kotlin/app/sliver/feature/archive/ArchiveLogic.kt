@@ -57,7 +57,7 @@ fun pickMemory(today: LocalDate, filled: Set<LocalDate>): Memory? = listOf(
 
 /** Year view: 12 rows of 31 entries; null where the day does not exist, 0 where no second, else ARGB. */
 fun clipsHeader(count: Int, first: LocalDate): String =
-    "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthNames[first.month.ordinal]}"
+    "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthLong[first.month.ordinal]}"
 
 val MonthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 val MonthLong = listOf(

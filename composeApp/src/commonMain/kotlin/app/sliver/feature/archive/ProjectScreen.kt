@@ -103,6 +103,7 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.ReviewSheetBody
+import app.sliver.feature.autoimport.dashedOutline
 import app.sliver.feature.autoimport.autoDays
 import app.sliver.feature.autoimport.decodeCandidates
 import app.sliver.feature.autoimport.nextDraft
@@ -248,7 +249,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
-                        if (waiting.isNotEmpty()) DraftsChip(reviewChipLabel(drafts.size, autoCount)) { draftsSheet = true }
+                        if (waiting.isNotEmpty()) ReviewRow(reviewChipLabel(drafts.size, autoCount)) { draftsSheet = true }
 
                         if (all.isEmpty() && app != null) {
                             EdgeState(
@@ -337,6 +338,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 onRemoveUnchecked = { draftsSheet = false; draftNav.removeUnchecked() },
                 // Owner: no day sheet; the editor walks the days itself (previous / next).
                 onWalk = { draftsSheet = false; waiting.firstOrNull()?.let { draftNav.openFirst(onNavigate, it, chain = true) } },
+                days = waiting,
             )
         }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
@@ -371,7 +373,7 @@ private fun Header(
             HubButton(SliverIcons.Pencil, "Edit project", onMore, SliverColors.TextSecondary, 20.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
             HubButton(HubIcons.User, "Settings", onSettings, SliverColors.TextSecondary, 21.dp)
         }
-        SliverText(line, SliverType.tnum(11.sp, 0.06.em, SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 2.dp), maxLines = 1)
+        SliverText(line, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp, color = SliverColors.TextTertiary), Modifier.padding(start = 20.dp, top = 4.dp), maxLines = 1)
         Box(Modifier.height(20.dp))
     }
 }
@@ -509,12 +511,12 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
         when (state) {
             CellState.FUTURE -> SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, SliverColors.TextDisabled))
             CellState.EMPTY, CellState.TODAY -> {
-                val tint = if (state == CellState.TODAY) SliverColors.AccentText else null
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, tint ?: SliverColors.TextTertiary))
-                    // Owner request: a past empty day shows "+" so it reads as "tap to fill"; today keeps its dot.
-                    if (state == CellState.EMPTY) SliverIcon(SliverIcons.Plus, SliverColors.TextTertiary, size = 12.dp)
-                    else Box(Modifier.size(4.dp).clip(CircleShape).background(tint ?: SliverColors.LineStrong))
+                val today = state == CellState.TODAY
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    SliverText(date.day.toString(), SliverType.tnum(11.sp, 0.sp, if (today) SliverColors.TextPrimary else SliverColors.TextTertiary))
+                    // Owner request: a past empty day shows "+" so it reads as "tap to fill"; today shows the red record dot.
+                    if (!today) SliverIcon(SliverIcons.Plus, SliverColors.TextDisabled, size = 14.dp)
+                    else Box(Modifier.size(6.dp).clip(CircleShape).background(SliverColors.Record))
                 }
             }
             else -> {
@@ -525,19 +527,10 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                     if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 }
                 if (draft || state == CellState.AUTO) {
-                    val line = if (draft) SliverColors.TextSecondary else SliverColors.OnMedia
-                    Box(
-                        Modifier.fillMaxSize().drawBehind {
-                            val w = 1.5.dp.toPx()
-                            drawRoundRect(
-                                line, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(8.dp.toPx()),
-                                style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
-                            )
-                        },
-                    )
+                    Box(Modifier.fillMaxSize().dashedOutline(if (draft) SliverColors.TextDisabled else SliverColors.OnMedia))
                     if (draft) SliverText(
-                        "Draft", SliverType.Caption.copy(fontSize = 9.sp, lineHeight = 11.sp, color = SliverColors.OnMedia).overMedia(),
-                        Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 5.dp),
+                        "Draft", SliverType.Caption.copy(fontSize = 10.sp, lineHeight = 12.sp, color = SliverColors.OnMedia).overMedia(),
+                        Modifier.align(Alignment.TopStart).padding(top = 4.dp, start = 6.dp),
                     )
                 }
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
@@ -550,18 +543,21 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     }
 }
 
-private const val DraftAlpha = 0.55f
+private const val DraftAlpha = 0.4f
 
+/** "3 auto-filled days to check" row above the calendar (52dp) → review sheet. */
 @Composable
-private fun DraftsChip(label: String, onClick: () -> Unit) {
+private fun ReviewRow(label: String, onClick: () -> Unit) {
     Row(
-        Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface1).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-            .clickable(role = Role.Button, onClick = onClick).padding(start = 14.dp, end = 10.dp).height(36.dp),
+        Modifier.fillMaxWidth().height(52.dp).clip(SliverShapes.R14).background(SliverColors.Surface1)
+            .border(1.dp, SliverColors.LineHairline, SliverShapes.R14)
+            .clickable(role = Role.Button, onClick = onClick).padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        SliverText(label, SliverType.BodySmall, color = SliverColors.TextPrimary)
-        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 16.dp)
+        Box(Modifier.size(20.dp).dashedOutline(SliverColors.TextSecondary, 5.dp))
+        SliverText(label, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f), color = SliverColors.TextPrimary)
+        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
     }
 }
 
