@@ -73,3 +73,11 @@ Reference: `design/png/DayDetail.png` + the kit above. Bugs seen on device:
 5. **Remove is naked red text** floating on the video. Make it a 56 dp regular-glass pill with #E5675F text, same size as Replace, side by side with a 10 dp gap. Replace stays the primary pill.
 6. Prev/next day: 48 dp hit areas, 24 dp chevrons in 44 dp glass circles, vertically centred on the title block, never covered by anything.
 Done = new screenshot of the day screen on the Xiaomi/emulator with a placeholder clip (bright one, to prove the scrims), in `qa/v1.7/`.
+
+## 9. Project switcher sheet (owner's emulator screenshot, 13 Nov)
+1. **Sheet is see-through.** The calendar, "Films", "Make film" and the Record button show through it, and the record glow shines through "New project". Use strong glass (blur 32 dp) **plus** a scrim over the screen behind the sheet: black 55 % dark / black 30 % light. Nothing behind may be readable. Hide the Record today dock while any sheet is open.
+2. **"New project" is floating text.** Make it a 56 dp secondary pill with a plus icon, full width, 16 dp above the nav bar inset.
+3. **Thumbnails are empty grey/brown squares.** 56 dp, radius 14: newest clip of the project; empty project = #1C1C1F with a 24 dp Lucide film icon #55555A.
+4. **Check next to the pencil reads as two buttons.** Current project = row background white 6 %, radius 16, plus a 20 dp check at the trailing edge. Edit = the pencil as a 44 dp icon button, shown on every row, always rightmost; check goes left of it with a 4 dp gap only on the current row. Tap row = switch project and close the sheet.
+5. Sizes: sheet title 28/600 (ReelogType.title), name 17/500, caption 13. Row height 72, 20 dp side padding, handle 36×4 #3A3A40.
+6. Captions use the project's real numbers ("0 clips · since 13 Nov" is fine for an empty one, but check My 2026 isn't wrongly reporting 0).
