@@ -52,3 +52,4 @@
 - T-looks-film: DONE (film-level filters, shader pass, 6 presets, 40-candidate pool + sheets; on-device perf TODO, see HANDOFF.md)
 - T-auto-import-drafts: DONE (see HANDOFF.md section T-auto-import-drafts)
 - T-sync-two-devices: DONE in code/tests; device check TODO (see HANDOFF.md section T-sync-two-devices)
+- T-media-any-source: DONE except on-device HDR tone-map check (emulator lacks Main10 decoder); see HANDOFF.md section T-media-any-source

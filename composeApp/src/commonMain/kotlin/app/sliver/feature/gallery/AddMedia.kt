@@ -16,8 +16,9 @@ import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
 
 /**
- * Opens the system Photo Picker straight away for [forDate] (null = today). Media recorded on another day is refused with a notice. A video or Motion Photo goes to Edit clip,
- * a photo to Photo clip. Cancelling leaves the user where they were.
+ * Opens the system Photo Picker (multi-select, so a Live Photo's still and .mov can be picked together) for [forDate] (null = today).
+ * Media with a known capture date on another day is refused; a date from the file name or no date is added to [forDate] with a notice.
+ * A video, Motion Photo or Live Photo goes to Edit clip, a photo to Photo clip. Cancelling leaves the user where they were.
  */
 @Composable
 fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
@@ -27,24 +28,30 @@ fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
     var target by remember { mutableStateOf<LocalDate?>(null) }
     var busy by remember { mutableStateOf(false) }
 
-    val launchPicker = rememberMediaPicker { uri ->
-        if (busy) return@rememberMediaPicker
+    val launchPicker = rememberMultiMediaPicker { uris ->
+        if (busy) return@rememberMultiMediaPicker
         busy = true
         val forDate = target
         scope.launch {
-            val captured = runCatching { provider.describe(listOf(uri)).firstOrNull()?.date }.getOrNull()
-            val check = checkCaptureDate(captured, forDate ?: todayLocal())
+            val group = groupLivePhotos(runCatching { provider.describe(uris) }.getOrDefault(emptyList())).singleOrNull()
+            if (group == null) {
+                busy = false
+                Notices.show("Pick one clip at a time, or a photo with its Live Photo video.")
+                return@launch
+            }
+            val check = checkCaptureDate(group.primary.captured, forDate ?: todayLocal())
             if (check is AddCheck.Blocked) {
                 busy = false
                 Notices.show(check.message)
                 return@launch
             }
-            val route = loadIntoSession(provider, files, uri, forDate)
+            val route = loadIntoSession(provider, files, group.primary.uri, forDate, liveVideo = group.liveVideo?.uri)
             busy = false
             if (route == null) {
                 Notices.show("Couldn't read that item. Pick another.")
                 return@launch
             }
+            if (check is AddCheck.AllowedWithNotice) Notices.show(check.message)
             onNavigate(route)
         }
     }

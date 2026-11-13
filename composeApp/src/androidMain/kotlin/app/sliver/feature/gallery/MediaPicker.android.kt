@@ -9,12 +9,6 @@ import androidx.compose.runtime.Composable
 private val ImageAndVideo = PickVisualMediaRequest(PickVisualMedia.ImageAndVideo)
 
 @Composable
-actual fun rememberMediaPicker(onPicked: (String) -> Unit): () -> Unit {
-    val launcher = rememberLauncherForActivityResult(PickVisualMedia()) { uri -> if (uri != null) onPicked(uri.toString()) }
-    return { launcher.launch(ImageAndVideo) }
-}
-
-@Composable
 actual fun rememberMultiMediaPicker(onPicked: (List<String>) -> Unit): () -> Unit {
     val launcher = rememberLauncherForActivityResult(PickMultipleVisualMedia()) { uris ->
         if (uris.isNotEmpty()) onPicked(uris.map { it.toString() })

@@ -125,7 +125,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             }
             val composition = Composition.Builder(
                 listOf(EditedMediaItemSequence.Builder(items).experimentalSetForceAudioTrack(true).build()),
-            ).build()
+            ).setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL).build() // iPhone HLG / Dolby Vision to SDR; no-op for SDR sources
             return render(composition, videoPath, thumbPath)
         } finally {
             holdFrame?.delete()

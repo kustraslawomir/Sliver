@@ -114,7 +114,7 @@ class DraftNav(
             show(draft.day, draft.selectedUri, asVideo)
         } else {
             val uri = CaptureSession.sourceUri ?: return@run
-            val route = loadIntoSession(gallery, files, uri, CaptureSession.forDate, asVideo)
+            val route = loadIntoSession(gallery, files, uri, CaptureSession.forDate, asVideo, CaptureSession.liveVideoUri)
             if (route == null) {
                 Notices.show("Couldn't read that item. Pick another.")
             } else {

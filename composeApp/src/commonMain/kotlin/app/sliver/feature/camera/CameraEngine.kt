@@ -53,6 +53,7 @@ object CaptureSession {
             field = v
             sourceUri = null
             motionPhoto = false
+            liveVideoUri = null
             draft = null
         }
     var forDate: kotlinx.datetime.LocalDate? = null
@@ -63,6 +64,9 @@ object CaptureSession {
     /** Gallery uri the current path was copied from, and whether it is a Motion Photo (so Video / Photo can be switched). */
     var sourceUri: String? = null
     var motionPhoto: Boolean = false
+
+    /** The video half of a Live Photo pair picked next to [sourceUri]. */
+    var liveVideoUri: String? = null
 
     /** Set while a draft is being reviewed; the editor then shows the draft header and "Keep this clip". */
     var draft: app.sliver.feature.autoimport.DraftContext? = null
