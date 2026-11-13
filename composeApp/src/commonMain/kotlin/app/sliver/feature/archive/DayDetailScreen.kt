@@ -36,6 +36,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.PrimaryButton
+import app.sliver.core.ui.ConfirmSheet
 import app.sliver.core.ui.UndoBarAbove
 import androidx.compose.ui.unit.sp
 import app.sliver.core.ui.GhostButton
@@ -159,7 +160,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             }
         }
 
-        app.sliver.core.ui.ConfirmSheet(
+        ConfirmSheet(
             confirmRemove, "Remove this day?",
             "The clip is deleted from the project. The photo or video stays in your gallery.",
             "Remove day", { day?.let(::remove) }, { confirmRemove = false },
