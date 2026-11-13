@@ -46,3 +46,18 @@ class ImportStatsTest {
         kotlin.test.assertEquals("312", app.sliver.feature.autoimport.groupThousands(312))
     }
 }
+
+class MediaSourceTest {
+    @kotlin.test.Test fun screenshotsAreSkippedAndCameraComesFirst() {
+        kotlin.test.assertTrue(app.sliver.feature.autoimport.isScreenCapture("DCIM/Screenshots/", "Screenshot_20261105.jpg"))
+        kotlin.test.assertTrue(app.sliver.feature.autoimport.isScreenCapture("DCIM/Screen recordings/", "x.mp4"))
+        kotlin.test.assertTrue(app.sliver.feature.autoimport.isScreenCapture("DCIM/ScreenRecorder/", "x.mp4"))
+        kotlin.test.assertFalse(app.sliver.feature.autoimport.isScreenCapture("DCIM/Camera/", "20261105_101010.jpg"))
+        kotlin.test.assertTrue(app.sliver.feature.autoimport.isCameraPath("DCIM/Camera/"))
+        kotlin.test.assertFalse(app.sliver.feature.autoimport.isCameraPath("Pictures/Telegram/"))
+        kotlin.test.assertFalse(app.sliver.feature.autoimport.isCameraPath("Download/"))
+        val tg = app.sliver.feature.autoimport.MediaEntry("tg", video = true, takenAtMs = 1, durationMs = 60_000, camera = false)
+        val cam = app.sliver.feature.autoimport.MediaEntry("cam", video = false, takenAtMs = 2, camera = true)
+        kotlin.test.assertEquals(listOf("cam", "tg"), app.sliver.feature.autoimport.rank(listOf(tg, cam)).map { it.uri })
+    }
+}

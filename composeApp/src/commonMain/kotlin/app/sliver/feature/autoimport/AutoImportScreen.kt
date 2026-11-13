@@ -92,6 +92,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var starting by remember { mutableStateOf(false) }
     var wantStart by rememberSaveable { mutableStateOf(false) }
     var keepNow by rememberSaveable { mutableStateOf(true) }
+    var includeOther by rememberSaveable { mutableStateOf(false) }
 
     val empty = remember(from, rows, yesterday) { gapDays(from, yesterday) { it in rows }.size }
     val status = controller.status(PermissionKind.MediaLibrary)
@@ -102,7 +103,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         starting = true
         scope.launch {
             val id = Uuid.random().toString()
-            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow))
+            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow, cameraOnly = !includeOther))
             runner.start()
             starting = false
         }
@@ -205,6 +206,10 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         SwitchRow(
             "Keep without review", keepNow, { keepNow = it },
             caption = "Each day gets its best video or photo right away. You can still swap any day later.",
+        )
+        SwitchRow(
+            "Include saved and received media", includeOther, { includeOther = it },
+            caption = "Off: only photos and videos from your camera. Screenshots are always skipped.",
         )
         PrimaryButton(
             if (starting) "Starting..." else if (keepNow) "Fill $empty ${if (empty == 1) "day" else "days"}" else "Import drafts",

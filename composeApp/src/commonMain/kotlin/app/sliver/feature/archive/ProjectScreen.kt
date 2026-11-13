@@ -161,7 +161,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val draftNav = rememberDraftNav()
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
-    val first = project?.startDate ?: app?.firstDay ?: all.minOfOrNull { it.date } ?: today
+    // Auto-import can fill days before the project was created: the calendar (and "since") must reach them.
+    val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull { it.date }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
     val memory = remember(byDate, today) { pickMemory(today, byDate.keys)?.let { m -> byDate[m.date]?.let { it to m.kind } } }
 
     val controller = rememberPermissionController()

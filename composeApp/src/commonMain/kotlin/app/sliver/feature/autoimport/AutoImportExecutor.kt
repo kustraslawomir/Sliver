@@ -91,7 +91,7 @@ class AutoImportExecutor(
         val known = days.draftsOfRun(run.projectId, run.id).size
         val gaps = datesBetween(from, to).filter { days.getDay(run.projectId, it) == null }
         store.update(run.id) { it.copy(gapDays = gaps.size, startedAt = it.startedAt.takeIf { s -> s > 0 } ?: nowMillis()) }
-        val found = scanner.scan(from, to, zone(), gaps.toSet())
+        val found = scanner.scan(from, to, zone(), gaps.toSet()).filter { !run.cameraOnly || it.camera }
         val byDate = groupByDate(found, zone(), from, to)
         val work = gaps.filter { it in byDate }
         val total = known + work.size

@@ -13,7 +13,17 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 /** One photo, video or motion photo from the gallery with a real capture time. */
-data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false)
+/** [camera] = taken with the phone's camera (DCIM/Camera…), not saved, received or downloaded. Screenshots never get here. */
+data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false, val camera: Boolean = true)
+
+/** Screenshots and screen recordings are never a day's moment. */
+fun isScreenCapture(relativePath: String?, name: String?): Boolean {
+    val s = "${relativePath.orEmpty()}/${name.orEmpty()}".lowercase()
+    return "screenshot" in s || "screen record" in s || "screenrecord" in s || "screen_record" in s || "screencast" in s
+}
+
+/** Camera originals live under DCIM (e.g. DCIM/Camera/, DCIM/100ANDRO/); messenger and download folders don't. */
+fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowercase().startsWith("dcim/")
 
 /** A gallery item offered for a draft day; stored as JSON on the day. */
 @Serializable
@@ -41,9 +51,13 @@ fun datesBetween(from: LocalDate, to: LocalDate): List<LocalDate> =
 /** Default first: longest video (a motion photo counts as a video), then photos; ties by capture time. */
 fun rank(entries: List<MediaEntry>): List<MediaEntry> {
     fun len(e: MediaEntry) = if (e.motion) MOTION_NOMINAL_MS else e.durationMs
-    val movies = entries.filter { it.video || it.motion }.sortedWith(compareByDescending<MediaEntry> { len(it) }.thenBy { it.takenAtMs }.thenBy { it.uri })
-    val stills = entries.filterNot { it.video || it.motion }.sortedWith(compareBy<MediaEntry> { it.takenAtMs }.thenBy { it.uri })
-    return movies + stills
+    fun ordered(list: List<MediaEntry>): List<MediaEntry> {
+        val movies = list.filter { it.video || it.motion }.sortedWith(compareByDescending<MediaEntry> { len(it) }.thenBy { it.takenAtMs }.thenBy { it.uri })
+        val stills = list.filterNot { it.video || it.motion }.sortedWith(compareBy<MediaEntry> { it.takenAtMs }.thenBy { it.uri })
+        return movies + stills
+    }
+    // Camera originals first, then saved / received media.
+    return ordered(entries.filter { it.camera }) + ordered(entries.filterNot { it.camera })
 }
 
 fun candidatesOf(entries: List<MediaEntry>): List<DraftCandidate> =
@@ -79,6 +93,8 @@ data class ImportRun(
     val startedAt: Long = 0,
     /** First and last day that actually got a clip, to show where the gallery had something. */
     val firstFilled: String? = null,
+    /** Default: only camera photos and videos; saved/received media only when the user asks for them. */
+    val cameraOnly: Boolean = true,
     val lastFilled: String? = null,
 ) {
     val progress get() = if (total <= 0) 0f else (done.toFloat() / total).coerceIn(0f, 1f)
