@@ -17,6 +17,7 @@ import app.sliver.data.db.Migration4To5
 import app.sliver.data.db.Migration5To6
 import app.sliver.data.db.Migration6To7
 import app.sliver.data.db.Migration7To8
+import app.sliver.data.db.Migration8To9
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.FileStore
@@ -48,7 +49,7 @@ actual val platformModule: Module = module {
         Room.databaseBuilder<SliverDatabase>(name = "${documentsDir()}/sliver.db")
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
-            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8)
+            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8, Migration8To9)
             .build()
     }
     single<FileStore> { IosFileStore() }

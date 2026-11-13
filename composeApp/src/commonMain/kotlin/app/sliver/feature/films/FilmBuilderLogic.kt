@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.data.StampStyle
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookPreset
@@ -45,10 +46,12 @@ data class FilmOptions(
     val intensity: Int = 100,
     /** Absolute grain 0..100; null keeps the filter's own grain. */
     val grain: Int? = null,
+    /** Null follows the filter. */
+    val stamp: StampStyle? = null,
 )
 
 fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film = Film(
     id = id, name = name, format = format, audio = audio,
     track = usableTrack(track).takeIf { audio != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
-    lookIntensity = intensity, lookGrain = grain.takeIf { look != null },
+    lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp,
 )

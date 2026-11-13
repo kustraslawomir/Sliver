@@ -115,6 +115,7 @@ fun filmJson(f: Film): String = buildJsonObject {
     put("lookIntensity", f.lookIntensity)
     put("lookGrain", f.lookGrain?.let(::JsonPrimitive) ?: JsonNull)
     put("mismatch", f.mismatch.name)
+    put("stampStyle", f.stampStyle?.name?.let(::JsonPrimitive) ?: JsonNull)
 }.toString()
 
 fun parseFilmJson(text: String, projectId: String, stamp: Stamp): Film? = runCatching {

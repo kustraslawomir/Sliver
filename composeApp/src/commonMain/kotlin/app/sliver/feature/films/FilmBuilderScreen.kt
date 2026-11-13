@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.Chip
 import app.sliver.core.ui.OnAppHidden
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -90,7 +91,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
         options = FilmOptions(
-            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain,
+            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain, f.stampStyle,
         )
         dateTouched = true
     }
@@ -156,7 +157,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 )
                 val index = position.first.coerceIn(0, clips.size - 1)
                 if (dateOn) {
-                    val style = options.look?.info?.stamp ?: StampStyle.PLAIN
+                    val style = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
                     DateStamp(stampText(plan.days[index].date, style), style = style)
                 }
                 if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
@@ -203,6 +204,19 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
             Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
             SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
+            if (dateOn) {
+                // Owner: let the user pick the date style (the film-camera orange one is the favourite).
+                val current = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
+                val sample = plan.days.firstOrNull()?.date ?: kotlinx.datetime.LocalDate(2026, 11, 13)
+                androidx.compose.foundation.layout.FlowRow(
+                    Modifier.padding(bottom = SliverSpace.S3),
+                    horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                ) {
+                    StampChoices.forEach { (style, label) ->
+                        Chip("$label  ${stampText(sample, style)}", current == style, { options = options.copy(stamp = style) })
+                    }
+                }
+            }
             Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
         }
 
@@ -245,6 +259,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         )
     }
 }
+
+private val StampChoices = listOf(StampStyle.LED to "Film", StampStyle.PLAIN to "Plain", StampStyle.CAMCORDER to "Camcorder")
 
 /** "02:09" */
 private fun clockTime(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"

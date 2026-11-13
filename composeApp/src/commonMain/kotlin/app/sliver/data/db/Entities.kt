@@ -84,6 +84,8 @@ data class Film(
     /** Absolute grain 0..100; null keeps the filter's own grain. */
     val lookGrain: Int? = null,
     val mismatch: Mismatch = Mismatch.CENTER,
+    /** Owner-chosen date style; null follows the filter (Kiosk → LED, Tape → camcorder, else plain). */
+    val stampStyle: app.sliver.data.StampStyle? = null,
     val renderPath: String? = null,
     val renderedAt: Instant? = null,
     val projectId: String = "",

@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import app.sliver.data.effectiveStamp
 import app.sliver.data.export.highQualityEncoder
 import android.content.Context
 import android.content.pm.ServiceInfo
@@ -231,7 +232,7 @@ class FilmComposer(
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
         val filmParams = film.lookParams()
 
-        val stampStyle = film.look?.info?.stamp ?: StampStyle.PLAIN
+        val stampStyle = film.effectiveStamp()
 
         fun stamp(date: kotlinx.datetime.LocalDate): List<Effect> {
             if (!film.dateOn) return emptyList()

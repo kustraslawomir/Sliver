@@ -94,5 +94,8 @@ val LookPreset.candidateNumber: Int?
 fun LookPreset.toParams(intensity: Int = 100, grain: Int? = null): LookParams =
     LookParams(preset = this, intensity = intensity, grain = grain ?: (info.model.grain * 100).toInt())
 
+/** Date style of a film: the user's choice, else the filter's own, else plain. */
+fun app.sliver.data.db.Film.effectiveStamp(): StampStyle = stampStyle ?: look?.info?.stamp ?: StampStyle.PLAIN
+
 /** The film-level filter, or null when the film is clean. */
 fun app.sliver.data.db.Film.lookParams(): LookParams? = look?.takeIf { it != LookPreset.NATURAL }?.toParams(lookIntensity, lookGrain)

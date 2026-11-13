@@ -89,3 +89,10 @@ val Migration7To8 = object : Migration(7, 8) {
         connection.execSQL("ALTER TABLE day ADD COLUMN cropX REAL")
     }
 }
+
+/** Film date style chosen by the user (null = follow the filter). */
+val Migration8To9 = object : Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE film ADD COLUMN stampStyle TEXT")
+    }
+}

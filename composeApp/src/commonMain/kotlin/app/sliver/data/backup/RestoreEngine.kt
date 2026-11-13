@@ -115,6 +115,7 @@ fun parseFilmObject(f: JsonObject): Film? = Film(
     lookIntensity = f["lookIntensity"]?.jsonPrimitive?.intOrNull ?: 100,
     lookGrain = f["lookGrain"]?.jsonPrimitive?.intOrNull,
     mismatch = f.enum<Mismatch>("mismatch") ?: Mismatch.CENTER,
+    stampStyle = f.enum<app.sliver.data.StampStyle>("stampStyle"),
 )
 
 /** Applies the manifest's preferences on top of [s]; account and onboarding state are never touched. */
