@@ -23,13 +23,6 @@ import app.sliver.data.auth.AccountManager
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 
-val ConsentPoints = listOf(
-    "Google will ask to let Fragments create one visible folder in your Drive named Fragments.",
-    "Fragments can only see files it creates itself, never the rest of your Drive.",
-    "We never store your videos on our servers. They go straight to your Drive.",
-    "Each clip is about 2 MB.",
-)
-
 /** "Back up your clips" sheet followed by the "Before Google consent" explainer. */
 @Composable
 fun GoogleSignInPanel(
@@ -38,50 +31,36 @@ fun GoogleSignInPanel(
     modifier: Modifier = Modifier,
     onRestore: (() -> Unit)? = null,
 ) {
-    var restoreAfter by remember { mutableStateOf(false) }
     val manager = remember { KoinPlatform.getKoin().get<AccountManager>() }
     val scope = rememberCoroutineScope()
-    var explainer by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+
+    // Owner: no explanation step — "Continue with Google" goes straight to Google's own sheet.
+    fun signIn(restoreAfter: Boolean) {
+        if (busy) return
+        busy = true
+        error = null
+        scope.launch {
+            manager.signIn()
+                .onSuccess { if (restoreAfter && onRestore != null) onRestore() else onFinished() }
+                .onFailure { error = "Sign-in did not finish. Try again." }
+            busy = false
+        }
+    }
 
     Column(
         modifier.fillMaxSize().padding(bottom = SliverSpace.S6),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
     ) {
-        if (!explainer) {
-            SliverText("Back up your clips", SliverType.DisplayM)
-            SliverText("Back up to your own Google Drive, or stay a guest.", SliverType.Body, color = SliverColors.TextSecondary)
-        } else {
-            SliverText("Before Google asks", SliverType.DisplayM)
-            ConsentPoints.forEach { SliverText(it, SliverType.Body, color = SliverColors.TextSecondary) }
-            if (manager.isFake) SliverText("Demo mode: no Google account is used.", SliverType.BodySmall)
-            error?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.Error) }
-        }
+        SliverText("Back up your clips", SliverType.DisplayM)
+        SliverText("Your clips go to a Fragments folder in your own Google Drive. Nothing else in your Drive is touched.", SliverType.Body, color = SliverColors.TextSecondary)
+        if (manager.isFake) SliverText("Demo mode: no Google account is used.", SliverType.BodySmall)
+        error?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.Error) }
         Column(Modifier.padding(top = SliverSpace.S6), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            PrimaryButton(
-                if (explainer) "Continue" else "Continue with Google",
-                {
-                    if (!explainer) explainer = true
-                    else if (!busy) {
-                        busy = true
-                        error = null
-                        scope.launch {
-                            manager.signIn().onSuccess { if (restoreAfter && onRestore != null) onRestore() else onFinished() }.onFailure { error = "Sign-in did not finish. Try again." }
-                            busy = false
-                        }
-                    }
-                },
-                Modifier.fillMaxWidth(),
-                enabled = !busy,
-            )
-            GhostButton(
-                if (explainer) "Back" else skipLabel,
-                onClick = { if (explainer) { explainer = false; restoreAfter = false } else onFinished() },
-            )
-            if (!explainer && onRestore != null) {
-                GhostButton("Welcome back? Restore my clips", onClick = { restoreAfter = true; explainer = true })
-            }
+            PrimaryButton(if (busy) "Signing in…" else "Continue with Google", { signIn(restoreAfter = false) }, Modifier.fillMaxWidth(), enabled = !busy)
+            GhostButton(skipLabel, onClick = onFinished)
+            if (onRestore != null) GhostButton("Welcome back? Restore my clips", onClick = { signIn(restoreAfter = true) })
         }
     }
 }

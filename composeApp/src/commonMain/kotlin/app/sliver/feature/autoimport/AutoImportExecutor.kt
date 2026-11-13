@@ -76,6 +76,7 @@ class AutoImportExecutor(
     private val files: FileStore,
     private val today: () -> LocalDate = ::todayLocal,
     private val zone: () -> TimeZone = { TimeZone.currentSystemDefault() },
+    private val nowMillis: () -> Long = { kotlin.time.Clock.System.now().toEpochMilliseconds() },
 ) {
     /** Counts of days skipped because their item could not be read, for the summary. */
     var failed = 0
@@ -89,22 +90,35 @@ class AutoImportExecutor(
         val to = LocalDate.fromEpochDays(today().toEpochDays() - 1)
         val known = days.draftsOfRun(run.projectId, run.id).size
         val gaps = datesBetween(from, to).filter { days.getDay(run.projectId, it) == null }
-        val byDate = groupByDate(scanner.scan(from, to, zone(), gaps.toSet()), zone(), from, to)
+        store.update(run.id) { it.copy(gapDays = gaps.size, startedAt = it.startedAt.takeIf { s -> s > 0 } ?: nowMillis()) }
+        val found = scanner.scan(from, to, zone(), gaps.toSet())
+        val byDate = groupByDate(found, zone(), from, to)
         val work = gaps.filter { it in byDate }
         val total = known + work.size
-        store.update(run.id) { it.copy(done = known, total = total) }
+        store.update(run.id) { it.copy(done = known, total = total, scanned = found.size) }
         val format = projects.projects.first().firstOrNull { it.id == run.projectId }?.format ?: FilmFormat.CINEMA
         var done = known
         for (date in work) {
             if (store.current()?.let { it.id == run.id && !it.finished } != true) return
             if (days.getDay(run.projectId, date) != null) continue
-            if (create(run, date, byDate.getValue(date), format)) done++ else failed++
-            if (!store.update(run.id) { it.copy(done = done) }) return
+            store.update(run.id) { it.copy(current = date.toString()) }
+            val made = create(run, date, byDate.getValue(date), format)
+            if (made != null) done++ else failed++
+            if (!store.update(run.id) {
+                    it.copy(
+                        done = done,
+                        videos = it.videos + if (made == false) 1 else 0,
+                        photos = it.photos + if (made == true) 1 else 0,
+                        skipped = it.skipped + if (made == null) 1 else 0,
+                    )
+                }
+            ) return
         }
-        store.update(run.id) { it.copy(finished = true, done = done) }
+        store.update(run.id) { it.copy(finished = true, done = done, current = null) }
     }
 
-    private suspend fun create(run: ImportRun, date: LocalDate, entries: List<MediaEntry>, format: FilmFormat): Boolean {
+    /** Returns true when the day got a photo, false when it got a video, null when it failed. */
+    private suspend fun create(run: ImportRun, date: LocalDate, entries: List<MediaEntry>, format: FilmFormat): Boolean? {
         val pick = rank(entries).first()
         var tmp: String? = null
         return try {
@@ -134,12 +148,12 @@ class AutoImportExecutor(
                     projectId = run.projectId, draft = !run.keep, draftCandidates = encodeCandidates(candidatesOf(entries)), importRunId = run.id,
                 ),
             )
-            true
+            isPhoto
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             logDebug("AutoImport", "draft ${date} failed: $e")
-            false
+            null
         } finally {
             tmp?.let(files::delete)
         }

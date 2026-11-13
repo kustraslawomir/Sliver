@@ -224,20 +224,39 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 @Composable
 private fun RunProgress(run: ImportRun, draftsLeft: Int, autoLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
     SliverText(
-        if (run.finished) importSummary(run.done, (run.total - run.done).coerceAtLeast(0), run.keep) else "Importing drafts",
+        when {
+            run.finished -> importSummary(run.done, (run.total - run.done).coerceAtLeast(0), run.keep)
+            run.keep -> "Filling days"
+            else -> "Importing drafts"
+        },
         SliverType.Title,
     )
     if (!run.finished) {
         SliverText(
-            if (run.total == 0) "Looking through your gallery" else "${run.done} of ${run.total} days",
-            SliverType.Meta, color = SliverColors.TextSecondary,
+            when {
+                run.scanning -> "Looking through your gallery"
+                run.total == 0 -> "Nothing to fill"
+                else -> "${run.done} of ${run.total} days"
+            },
+            SliverType.Headline, color = SliverColors.TextPrimary,
         )
     }
-    Box(Modifier.fillMaxWidth().height(2.dp).background(SliverColors.LineStrong)) {
-        Box(Modifier.fillMaxWidth(if (run.finished) 1f else run.progress).height(2.dp).background(SliverColors.Accent))
+    Box(Modifier.fillMaxWidth().height(4.dp).clip(SliverShapes.Pill).background(SliverColors.LineStrong)) {
+        Box(Modifier.fillMaxWidth(if (run.finished) 1f else run.progress).height(4.dp).clip(SliverShapes.Pill).background(SliverColors.Accent))
+    }
+    // Owner: "needs some progress stats here".
+    val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        if (run.gapDays > 0) StatRow("Empty days since ${formatDay(LocalDate.parse(run.from))}", groupThousands(run.gapDays))
+        StatRow("Found in your gallery", if (run.scanning) "Searching…" else "${groupThousands(run.scanned)} items")
+        if (!run.scanning) StatRow("Days with something to use", groupThousands(run.total))
+        if (run.videos + run.photos > 0) StatRow("Filled with", "${run.videos} ${if (run.videos == 1) "video" else "videos"} · ${run.photos} ${if (run.photos == 1) "photo" else "photos"}")
+        if (run.skipped > 0) StatRow("Couldn't read", "${run.skipped} ${if (run.skipped == 1) "day" else "days"}")
+        if (!run.finished) run.current?.let { StatRow("Now", formatDay(LocalDate.parse(it))) }
+        if (!run.finished) etaLabel(run.done, run.total, run.startedAt, now)?.let { StatRow("Time", it) }
     }
     if (!run.finished) {
-        SliverText("This keeps going in the background, even if you close the app.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+        SliverText("Keeps going in the background.", SliverType.BodySmall, color = SliverColors.TextSecondary)
         GhostButton("Cancel", onCancel, Modifier.fillMaxWidth())
     } else {
         if (draftsLeft > 0) {
@@ -247,5 +266,13 @@ private fun RunProgress(run: ImportRun, draftsLeft: Int, autoLeft: Int, onCancel
         }
         SecondaryButton("Done", onDone)
         GhostButton("Undo all", onUndo, Modifier.fillMaxWidth(), destructive = true)
+    }
+}
+
+@Composable
+private fun StatRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        SliverText(label, SliverType.BodySmall, Modifier.weight(1f), color = SliverColors.TextSecondary)
+        SliverText(value, SliverType.Num, color = SliverColors.TextPrimary)
     }
 }

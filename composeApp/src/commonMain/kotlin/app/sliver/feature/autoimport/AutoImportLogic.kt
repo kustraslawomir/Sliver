@@ -69,9 +69,33 @@ data class ImportRun(
     val finished: Boolean = false,
     /** Owner: "it should be automated" — true saves normal days right away instead of drafts. */
     val keep: Boolean = false,
+    /** Progress stats for the run screen (all optional so older stored runs still decode). */
+    val gapDays: Int = 0,
+    val scanned: Int = -1,
+    val videos: Int = 0,
+    val photos: Int = 0,
+    val skipped: Int = 0,
+    val current: String? = null,
+    val startedAt: Long = 0,
 ) {
     val progress get() = if (total <= 0) 0f else (done.toFloat() / total).coerceIn(0f, 1f)
+    val scanning get() = scanned < 0
 }
+
+/** "About 2 min left" from the pace so far; null until a few days are done. */
+fun etaLabel(done: Int, total: Int, startedAt: Long, now: Long, alreadyDone: Int = 0): String? {
+    val made = done - alreadyDone
+    if (made < 3 || total <= done || startedAt <= 0) return null
+    val perDay = (now - startedAt).toDouble() / made
+    val secs = (perDay * (total - done) / 1000).toLong()
+    return when {
+        secs < 60 -> "Less than a minute left"
+        secs < 3600 -> "About ${(secs + 59) / 60} min left"
+        else -> "About ${secs / 3600} h ${(secs % 3600) / 60} min left"
+    }
+}
+
+fun groupThousands(n: Int): String = n.toString().reversed().chunked(3).joinToString(",").reversed()
 
 fun emptyDaysLabel(count: Int, from: LocalDate) = "$count empty ${if (count == 1) "day" else "days"} since ${formatDay(from)}"
 

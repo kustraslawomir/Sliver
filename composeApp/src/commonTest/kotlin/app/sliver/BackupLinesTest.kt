@@ -36,3 +36,13 @@ class AutoImportPresetsTest {
         kotlin.test.assertEquals("1 empty day to fill", app.sliver.feature.autoimport.fillLabel(1))
     }
 }
+
+class ImportStatsTest {
+    @kotlin.test.Test fun etaAndThousands() {
+        kotlin.test.assertEquals(null, app.sliver.feature.autoimport.etaLabel(2, 10, 1_000, 5_000))
+        kotlin.test.assertEquals("About 2 min left", app.sliver.feature.autoimport.etaLabel(10, 20, 0 + 1, 100_001))
+        kotlin.test.assertEquals("Less than a minute left", app.sliver.feature.autoimport.etaLabel(10, 11, 1, 10_001))
+        kotlin.test.assertEquals("3,412", app.sliver.feature.autoimport.groupThousands(3412))
+        kotlin.test.assertEquals("312", app.sliver.feature.autoimport.groupThousands(312))
+    }
+}
