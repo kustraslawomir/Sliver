@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.toLocalDateTime
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -75,7 +76,8 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
-    val list by remember { films.observeAll() }.collectAsState(emptyList())
+    // Owner: newest film on the left.
+    val list by remember { films.observeAll().map { l -> l.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt } } }.collectAsState(emptyList())
     val all by remember { days.observeAll() }.collectAsState(emptyList())
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

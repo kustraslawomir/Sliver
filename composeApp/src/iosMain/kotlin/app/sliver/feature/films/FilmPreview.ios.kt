@@ -20,6 +20,7 @@ actual fun FilmPreview(
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
+    musicVolume: Int?,
 ) = Box(modifier.background(Color.Black))
 
 @Composable
@@ -30,3 +31,6 @@ actual suspend fun renderFilterThumbs(
     frame: androidx.compose.ui.graphics.ImageBitmap,
     presets: List<app.sliver.data.LookPreset>,
 ): Map<app.sliver.data.LookPreset, androidx.compose.ui.graphics.ImageBitmap> = emptyMap()
+
+@Composable
+actual fun rememberMusicLibrary(refresh: Any?): List<String> = emptyList()

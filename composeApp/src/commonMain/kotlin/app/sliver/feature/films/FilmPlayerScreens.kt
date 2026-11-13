@@ -192,9 +192,11 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val share = remember { koin.get<FilmShare>() }
     val scope = rememberCoroutineScope()
 
-    var playing by remember { mutableStateOf(true) }
+    var playing by remember { mutableStateOf(!FilmPlayback.paused) }
+    LaunchedEffect(playing) { FilmPlayback.paused = !playing }
     OnAppHidden { playing = false }
-    var muted by remember { mutableStateOf(false) }
+    var muted by remember { mutableStateOf(FilmPlayback.muted) }
+    LaunchedEffect(muted) { FilmPlayback.muted = muted }
     var fullscreen by remember { mutableStateOf(false) }
     var seek by remember { mutableStateOf<PlayerSeek?>(null) }
     var position by remember { mutableStateOf(0L to 0L) }

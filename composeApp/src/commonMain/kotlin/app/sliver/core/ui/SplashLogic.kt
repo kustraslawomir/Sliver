@@ -14,6 +14,9 @@ const val SPLASH_FADE_MS = 300
 /** Logo size: the HTML lays the word out at 56 px, the disc is half of that. */
 const val SPLASH_FONT_DP = 56f
 const val SPLASH_DISC_DP = 72f
+
+/** Record today disc on the project screen (72 dp − 30 %, owner 2026-11-13); the splash ends at this size. */
+const val DOCK_DISC_DP = 50f
 const val SPLASH_TAGLINE_GAP_DP = 52f
 
 /** dp per wordmark viewport unit at [SPLASH_FONT_DP]. */
@@ -59,7 +62,7 @@ fun splashFrame(t: Float, centerY: Float, dockY: Float): SplashFrame {
     return SplashFrame(
         discDx = if (inWord) lerp(0f, SPLASH_WORD_DISC_DX, m) else lerp(SPLASH_WORD_DISC_DX, 0f, out),
         discY = if (inWord) centerY else lerp(centerY, dockY, out),
-        discSize = if (inWord) lerp(SPLASH_DISC_DP, wordDisc, m) else lerp(wordDisc, SPLASH_DISC_DP, out),
+        discSize = if (inWord) lerp(SPLASH_DISC_DP, wordDisc, m) else lerp(wordDisc, DOCK_DISC_DP, out),
         reelShift = lerp(WORDMARK_DISC_X - ReelogWordmark.REEL_RIGHT, 0f, m),
         gShift = lerp(WORDMARK_DISC_X - ReelogWordmark.G_LEFT, 0f, m),
         letters = m * fadeLetters,

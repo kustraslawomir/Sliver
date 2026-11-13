@@ -228,7 +228,7 @@ class FilmComposer(
 
     private fun compose(film: Film, clips: List<Clip>, card: File, outW: Int, outH: Int): Composition {
         val outAspect = outW.toFloat() / outH
-        val audio = audioPlan(film.audio, usableTrack(film.track)?.takeIf { trackAvailable(it) })
+        val audio = audioPlan(film.audio, usableTrack(film.track)?.takeIf { trackAvailable(it) }, film.musicVolume)
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
         val filmParams = film.lookParams()
 

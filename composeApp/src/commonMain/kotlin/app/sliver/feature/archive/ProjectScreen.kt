@@ -649,8 +649,12 @@ private fun AddSheet(date: LocalDate, onPick: () -> Unit, onClose: () -> Unit) {
     }
 }
 
-private val RecordDockHeight = 148.dp
-private const val DockGlowMs = 5_000
+private val RecordDockHeight = 104.dp
+private const val DockGlowMs = 14_000
+
+/** Owner: Record today 30 % smaller than the 72dp board size. Splash lands on it ([app.sliver.core.ui.DOCK_DISC_DP]). */
+private val DockDisc = app.sliver.core.ui.DOCK_DISC_DP.dp
+private val DockGlow = (app.sliver.core.ui.DOCK_DISC_DP * 1.22f).dp
 
 /** Fixed bottom action: red "Record today", or an outlined check once today has a clip. */
 @Composable
@@ -672,16 +676,15 @@ private fun RecordDock(done: Boolean, onRecord: () -> Unit, onOpenToday: () -> U
         val strength = androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(if (done) 0f else 0.85f) }
         strength.floatValue = if (done) 0f else 0.85f
         Box(contentAlignment = Alignment.Center) {
-            Box(Modifier.size(88.dp).liquidGlow(phase, strength, SliverColors.RecordGlowRed))
+            Box(Modifier.size(DockGlow).liquidGlow(phase, strength, SliverColors.RecordGlowRed))
             Box(
-                Modifier.size(72.dp)
+                Modifier.size(DockDisc)
                     .clip(CircleShape)
                     .then(if (done) Modifier.border(2.dp, SliverColors.LineStrong, CircleShape) else Modifier.background(SliverColors.Record.copy(alpha = 0.82f)))
                     .semantics { contentDescription = label }
                     .clickable(role = Role.Button, onClick = tap),
                 Alignment.Center,
-            ) { if (done) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 28.dp) }
+            ) { SliverIcon(if (done) SliverIcons.Check else SliverIcons.VideoCam, SliverColors.TextPrimary, size = 22.dp) }
         }
-        SliverText(label, SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), color = if (done) SliverColors.TextSecondary else SliverColors.TextPrimary)
     }
 }

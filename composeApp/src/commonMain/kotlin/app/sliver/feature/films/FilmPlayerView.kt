@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -21,3 +23,9 @@ expect fun FilmPlayerView(
 /** Switches the screen to landscape with hidden system bars while [on]; restores portrait afterwards. */
 @Composable
 expect fun FullscreenLandscape(on: Boolean, rotate: Boolean)
+
+/** Owner: mute and pause carry over between the film player and the builder (Edit film). */
+object FilmPlayback {
+    var muted by androidx.compose.runtime.mutableStateOf(false)
+    var paused by androidx.compose.runtime.mutableStateOf(false)
+}

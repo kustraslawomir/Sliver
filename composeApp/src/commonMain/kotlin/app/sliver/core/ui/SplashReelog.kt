@@ -36,8 +36,8 @@ import app.sliver.core.theme.SliverType
 import app.sliver.core.theme.generated.Tokens
 import kotlinx.coroutines.delay
 
-/** Centre of the Record today disc above the navigation bar: 12 bottom padding + 20 label + 8 gap + 36 radius. */
-private const val DOCK_DISC_FROM_BOTTOM_DP = 76f
+/** Centre of the Record today disc above the navigation bar: 12 bottom padding + radius (no label any more). */
+private const val DOCK_DISC_FROM_BOTTOM_DP = 12f + DOCK_DISC_DP / 2
 private const val MAX_STEP_MS = 34f
 
 /**

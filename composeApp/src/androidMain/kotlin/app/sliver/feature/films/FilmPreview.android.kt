@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import kotlinx.coroutines.flow.first
 import app.sliver.data.look.LookRandom
 import app.sliver.core.theme.SliverColors
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -32,7 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val MIX_ORIGINAL = 0.5f
-private const val MIX_MUSIC = 0.7f
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -45,13 +45,21 @@ actual fun FilmPreview(
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
+    musicVolume: Int?,
 ) {
     if (LocalInspectionMode.current) {
         Box(modifier.background(SliverColors.Surface3))
         return
     }
     val context = LocalContext.current
-    val video = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
+    // Effects must be on the player before PlayerView gives it a surface, otherwise frames bypass the effect pipeline
+    // (owner: "filters are not on the video preview"). Start with an identity effect and swap the list later.
+    val video = remember {
+        app.sliver.core.media.newPlayer(context).apply {
+            setVideoEffects(listOf(androidx.media3.effect.Contrast(0f)))
+            repeatMode = Player.REPEAT_MODE_ALL
+        }
+    }
     val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
     DisposableEffect(Unit) { onDispose { video.release(); music.release() } }
     val report = rememberUpdatedState(onPosition)
@@ -74,6 +82,24 @@ actual fun FilmPreview(
         video.addListener(listener)
         onDispose { video.removeListener(listener) }
     }
+    // Owner: pause → drag the seekbar → black frame that resume could not fix. With effects on, a paused seek leaves the
+    // video sink without a frame; a short play renders the frame at the new position, then it pauses again.
+    val pausedNow = rememberUpdatedState(paused)
+    val frameShown = remember { kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+    DisposableEffect(video) {
+        val l = object : Player.Listener {
+            override fun onRenderedFirstFrame() { frameShown.tryEmit(Unit) }
+        }
+        video.addListener(l)
+        onDispose { video.removeListener(l) }
+    }
+    suspend fun showFrameWhilePaused() {
+        if (!pausedNow.value) return
+        video.playWhenReady = true
+        kotlinx.coroutines.withTimeoutOrNull(400) { frameShown.first() }
+        delay(60)
+        if (pausedNow.value) video.playWhenReady = false
+    }
     // Owner: pause → change filter → resume left the video black and the clock stuck. Rebuilding on pause and switching
     // between "no effects" and "effects" re-created the GL pipeline under a paused player; now the chain is rebuilt only
     // when the filter changes, it is never empty (identity effect for no filter), and the frame is redrawn after a swap.
@@ -84,6 +110,7 @@ actual fun FilmPreview(
         }
         video.setVideoEffects(effects)
         video.seekTo(video.currentMediaItemIndex, video.currentPosition)
+        showFrameWhilePaused()
     }
     LaunchedEffect(track, audio) {
         if (track != null && audio != FilmAudio.ORIGINAL) {
@@ -93,11 +120,16 @@ actual fun FilmPreview(
             music.clearMediaItems()
         }
     }
-    LaunchedEffect(audio) { music.volume = if (audio == FilmAudio.MIX) MIX_MUSIC else 1f }
+    // Same music level as the render (owner: adjustable background music volume).
+    LaunchedEffect(audio, FilmPlayback.muted, musicVolume) {
+        music.volume = if (FilmPlayback.muted) 0f else audioPlan(audio, track, musicVolume).musicVolume.takeIf { it > 0f } ?: 1f
+    }
     val visible = rememberAppVisible()
     LaunchedEffect(paused, visible) {
-        video.playWhenReady = !paused && visible
-        music.playWhenReady = !paused && visible
+        val play = !paused && visible
+        if (play && video.playbackState == Player.STATE_IDLE) video.prepare()
+        video.playWhenReady = play
+        music.playWhenReady = play
     }
     LaunchedEffect(seek) {
         val s = seek ?: return@LaunchedEffect
@@ -107,6 +139,7 @@ actual fun FilmPreview(
         val clipFraction = s.fraction.coerceIn(0f, 1f) * n - index
         val duration = video.duration.takeIf { it > 0 } ?: 1000L
         video.seekTo(index, (clipFraction * duration).toLong())
+        showFrameWhilePaused()
     }
     LaunchedEffect(Unit) {
         while (true) {
@@ -114,6 +147,7 @@ actual fun FilmPreview(
             val clip = currentClips.value.getOrNull(index)
             video.volume = when {
                 clip == null -> 0f
+                FilmPlayback.muted -> 0f
                 currentAudio.value == FilmAudio.MUSIC -> 0f
                 !clip.keepAudio -> 0f
                 currentAudio.value == FilmAudio.MIX -> MIX_ORIGINAL
@@ -145,4 +179,13 @@ actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit {
         if (uri != null) scope.launch { onPicked(withContext(Dispatchers.IO) { importAudio(context, uri) }) }
     }
     return { launcher.launch(arrayOf("audio/*")) }
+}
+
+@Composable
+actual fun rememberMusicLibrary(refresh: Any?): List<String> {
+    val context = LocalContext.current
+    return remember(refresh) {
+        java.io.File(context.filesDir, "music").listFiles().orEmpty().filter { it.isFile && it.length() > 0 }
+            .sortedByDescending { it.lastModified() }.map { it.path }
+    }
 }

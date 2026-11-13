@@ -48,10 +48,11 @@ data class FilmOptions(
     val grain: Int? = null,
     /** Null follows the filter. */
     val stamp: StampStyle? = null,
+    val musicVolume: Int? = null,
 )
 
 fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film = Film(
     id = id, name = name, format = format, audio = audio,
     track = usableTrack(track).takeIf { audio != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
-    lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp,
+    lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp, musicVolume = musicVolume,
 )

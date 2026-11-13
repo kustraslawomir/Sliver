@@ -86,6 +86,8 @@ data class Film(
     val mismatch: Mismatch = Mismatch.CENTER,
     /** Owner-chosen date style; null follows the filter (Kiosk → LED, Tape → camcorder, else plain). */
     val stampStyle: app.sliver.data.StampStyle? = null,
+    /** Background music volume 0..100; null = the mode's default (Music 100, Mix 30). */
+    val musicVolume: Int? = null,
     val renderPath: String? = null,
     val renderedAt: Instant? = null,
     val projectId: String = "",

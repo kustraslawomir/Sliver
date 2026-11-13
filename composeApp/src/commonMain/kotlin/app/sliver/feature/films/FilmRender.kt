@@ -23,11 +23,15 @@ const val MIX_MUSIC_VOLUME = 0.3f
 class AudioPlan(val keepClipAudio: Boolean, val music: Boolean, val musicVolume: Float)
 
 /** ORIGINAL = clip audio; MUSIC = clips muted + track; MIX = clips 100% + music 30%. Without a track it falls back to ORIGINAL. */
-fun audioPlan(audio: FilmAudio, track: String?): AudioPlan = when {
+fun audioPlan(audio: FilmAudio, track: String?, musicVolume: Int? = null): AudioPlan = when {
     usableTrack(track) == null || audio == FilmAudio.ORIGINAL -> AudioPlan(true, false, 0f)
-    audio == FilmAudio.MUSIC -> AudioPlan(false, true, 1f)
-    else -> AudioPlan(true, true, MIX_MUSIC_VOLUME)
+    audio == FilmAudio.MUSIC -> AudioPlan(false, true, musicVolume?.div(100f) ?: 1f)
+    else -> AudioPlan(true, true, musicVolume?.div(100f) ?: MIX_MUSIC_VOLUME)
 }
+
+/** Slider value (0..100) for [musicVolume] in [audio] mode. */
+fun musicVolumePercent(audio: FilmAudio, musicVolume: Int?): Int =
+    musicVolume ?: if (audio == FilmAudio.MIX) (MIX_MUSIC_VOLUME * 100).toInt() else 100
 
 /** Width and height fractions (0..1] of the output frame that a clip of [clipAspect] occupies when fitted inside it. */
 fun fitScale(clipAspect: Float, outAspect: Float): Pair<Float, Float> =

@@ -30,7 +30,7 @@ class SplashLogicTest {
 
     @Test fun endsOnTheRecordButton() {
         val f = at(1500f)
-        assertEquals(SPLASH_DISC_DP, f.discSize, 0.01f)
+        assertEquals(app.sliver.core.ui.DOCK_DISC_DP, f.discSize, 0.01f)
         assertEquals(0f, f.discDx, 0.01f)
         assertEquals(760f, f.discY, 0.01f)
         assertEquals(0f, f.letters)

@@ -93,7 +93,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
         options = FilmOptions(
-            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain, f.stampStyle,
+            if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain, f.stampStyle, f.musicVolume,
         )
         dateTouched = true
     }
@@ -105,16 +105,15 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.keepAudio) } }
     val lookParams = options.look?.toParams(options.intensity, options.grain)
 
-    var paused by remember { mutableStateOf(false) }
+    var paused by remember { mutableStateOf(FilmPlayback.paused) }
+    LaunchedEffect(paused) { FilmPlayback.paused = paused }
     OnAppHidden { paused = true }
     var seek by remember { mutableStateOf<FilmSeek?>(null) }
     var position by remember { mutableStateOf(0 to 0f) }
     val fileStore = remember { koin.get<FileStore>() }
     var notice by remember { mutableStateOf<String?>(null) }
-    val fresh = remember { mutableSetOf<String>() }
+    // Owner: imported music is kept in the app (music library), so switching tracks never deletes a file.
     fun setTrack(path: String?) {
-        options.track?.takeIf { it in fresh }?.let { fileStore.delete(it); fresh -= it }
-        if (path != null) fresh += path
         options = options.copy(track = path)
     }
     val pickAudio = rememberAudioPicker {
@@ -126,7 +125,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
     var adjusting by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+    // Owner: the whole screen scrolls (preview, timeline and filters stay first).
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
@@ -158,6 +158,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     FilmPreview(
                         clips, lookParams, options.audio, options.track, paused, seek,
                         onPosition = { i, f -> position = i to f }, modifier = Modifier.fillMaxSize(),
+                        musicVolume = options.musicVolume,
                     )
                     val index = position.first.coerceIn(0, clips.size - 1)
                     if (dateOn) {
@@ -165,6 +166,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                         DateStamp(stampText(plan.days[index].date, style), style = style)
                     }
                     if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
+                    IconButton44(
+                        { FilmPlayback.muted = !FilmPlayback.muted }, if (FilmPlayback.muted) "Unmute" else "Mute",
+                        Modifier.align(Alignment.BottomStart).padding(SliverSpace.S1), overCamera = true,
+                    ) { SliverIcon(if (FilmPlayback.muted) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.OnMedia) }
                 }
             }
         }
@@ -197,7 +202,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         )
 
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(top = SliverSpace.S2, bottom = SliverSpace.S6),
+            Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S6),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
             Section("Sound") {
@@ -209,12 +214,32 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
                 }
                 if (options.audio != FilmAudio.ORIGINAL) {
-                    // Board FilmBuilder: no bundled tracks, only the user's own file.
-                    val picked = trackLabel(options.track)
-                    if (picked != null) SliverText(picked, SliverType.BodySmall, color = SliverColors.TextPrimary, maxLines = 1)
-                    else SliverText(PICK_MUSIC_HINT, SliverType.BodySmall, color = SliverColors.TextTertiary)
-                    GhostButton(if (picked == null) "Pick an audio file\u2026" else "Pick another audio file\u2026", pickAudio)
+                    // Owner: music loaded once stays in the app; pick from the list, add new files only when needed.
+                    val library = rememberMusicLibrary(options.track)
+                    library.forEach { path ->
+                        val on = path == options.track
+                        Row(
+                            Modifier.fillMaxWidth().height(44.dp).clip(SliverShapes.R12)
+                                .background(if (on) SliverColors.Surface2 else androidx.compose.ui.graphics.Color.Transparent)
+                                .clickable { setTrack(path) }.padding(horizontal = SliverSpace.S3),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                        ) {
+                            SliverIcon(if (on) SliverIcons.Check else SliverIcons.Volume2, if (on) SliverColors.TextPrimary else SliverColors.TextTertiary, size = 18.dp)
+                            SliverText(trackLabel(path) ?: path.substringAfterLast('/'), SliverType.BodySmall, Modifier.weight(1f), color = if (on) SliverColors.TextPrimary else SliverColors.TextSecondary, maxLines = 1)
+                        }
+                    }
+                    if (library.isEmpty()) SliverText(PICK_MUSIC_HINT, SliverType.BodySmall, color = SliverColors.TextTertiary)
+                    GhostButton("Add an audio file\u2026", pickAudio)
                     notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
+                    if (options.track != null) {
+                        val vol = musicVolumePercent(options.audio, options.musicVolume)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SliverText("Music volume", SliverType.BodySmall, Modifier.weight(1f), color = SliverColors.TextSecondary)
+                            SliverText("$vol", SliverType.Meta, color = SliverColors.TextSecondary)
+                        }
+                        SliverSlider(vol / 100f, { options = options.copy(musicVolume = (it * 100).toInt().coerceIn(0, 100)) })
+                    }
                 }
             }
 

@@ -96,3 +96,10 @@ val Migration8To9 = object : Migration(8, 9) {
         connection.execSQL("ALTER TABLE film ADD COLUMN stampStyle TEXT")
     }
 }
+
+/** Background music volume per film (null = mode default). */
+val Migration9To10 = object : Migration(9, 10) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE film ADD COLUMN musicVolume INTEGER")
+    }
+}

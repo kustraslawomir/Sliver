@@ -79,6 +79,7 @@ object SliverIcons {
     val SlidersHorizontal = lucide("sliders-horizontal", "M10 5H3", "M12 19H3", "M14 3v4", "M16 17v4", "M21 12h-9", "M21 19h-5", "M21 5h-7", "M8 10v4", "M8 12H3")
     val ImageIcon = lucide("image", "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M9 9m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0", "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21")
     val CircleDot = lucide("circle-dot", "M12 12m-10 0a10 10 0 1 0 20 0 10 10 0 1 0-20 0", "M12 12m-1 0a1 1 0 1 0 2 0 1 1 0 1 0-2 0")
+    val VideoCam = lucide("video", "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5", "M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z")
     val ImagePlus = lucide("image-plus", "M16 5h6", "M19 2v6", "M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5", "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21", "M9 9m-2 0a2 2 0 1 0 4 0 2 2 0 1 0-4 0")
     val Calendar = lucide("calendar", "M8 2v4", "M16 2v4", "M3 6h18a0 0 0 0 1 0 0v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z", "M3 10h18")
     val Film = lucide("film", "M3 3h18v18H3z", "M7 3v18", "M3 7.5h4", "M3 12h18", "M3 16.5h4", "M17 3v18", "M17 7.5h4", "M17 16.5h4")
