@@ -50,7 +50,7 @@ actual fun FilmPlayerView(
         return
     }
     val context = LocalContext.current
-    val player = remember { ExoPlayer.Builder(context).build() }
+    val player = remember { app.sliver.core.media.newPlayer(context) }
     val report = rememberUpdatedState(onPosition)
     val ended = rememberUpdatedState(onEnded)
     DisposableEffect(player) {

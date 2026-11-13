@@ -51,8 +51,8 @@ actual fun FilmPreview(
         return
     }
     val context = LocalContext.current
-    val video = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ALL } }
-    val music = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ALL } }
+    val video = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
+    val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
     DisposableEffect(Unit) { onDispose { video.release(); music.release() } }
     val report = rememberUpdatedState(onPosition)
     val currentClips = rememberUpdatedState(clips)

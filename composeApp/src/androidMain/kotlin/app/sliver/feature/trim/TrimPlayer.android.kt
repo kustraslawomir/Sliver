@@ -47,10 +47,10 @@ actual fun TrimPlayer(
         return
     }
     val context = LocalContext.current
-    val player = remember { ExoPlayer.Builder(context).build().apply { repeatMode = Player.REPEAT_MODE_ONE } }
+    val player = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ONE } }
     // A second player stays prepared on the full file so a drag starts instantly and seeks to key frames (fast).
     val scrubPlayer = remember(path) {
-        ExoPlayer.Builder(context).build().apply {
+        app.sliver.core.media.newPlayer(context).apply {
             setSeekParameters(SeekParameters.CLOSEST_SYNC)
             playWhenReady = false
             volume = 0f
