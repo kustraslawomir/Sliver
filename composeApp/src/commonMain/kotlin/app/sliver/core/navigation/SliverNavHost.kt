@@ -1,5 +1,7 @@
 package app.sliver.core.navigation
 
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -92,8 +94,8 @@ fun SliverNavHost() {
         Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
             NavHost(
                 nav, startDestination = Route.start(done).path,
-                enterTransition = { if (isVertical()) slideInVertically(SliverMotion.emphasized(SliverMotion.Base)) { it } else slideInHorizontally(SliverMotion.emphasized(SliverMotion.Base)) { it } },
-                exitTransition = { if (isVertical()) fadeOut(SliverMotion.exit(SliverMotion.Base)) else slideOutHorizontally(SliverMotion.emphasized(SliverMotion.Base)) { -it / 4 } },
+                enterTransition = { if (isEditorSwap()) EnterTransition.None else if (isVertical()) slideInVertically(SliverMotion.emphasized(SliverMotion.Base)) { it } else slideInHorizontally(SliverMotion.emphasized(SliverMotion.Base)) { it } },
+                exitTransition = { if (isEditorSwap()) ExitTransition.None else if (isVertical()) fadeOut(SliverMotion.exit(SliverMotion.Base)) else slideOutHorizontally(SliverMotion.emphasized(SliverMotion.Base)) { -it / 4 } },
                 popEnterTransition = { if (isVertical()) fadeIn(SliverMotion.standard(SliverMotion.Base)) else slideInHorizontally(SliverMotion.emphasized(SliverMotion.Base)) { -it / 4 } },
                 popExitTransition = { if (isVertical()) slideOutVertically(SliverMotion.exit(SliverMotion.Base)) { it } else slideOutHorizontally(SliverMotion.exit(SliverMotion.Base)) { it } },
             ) {
@@ -172,6 +174,12 @@ private fun CappedWidth(capped: Boolean, content: @Composable () -> Unit) {
         Box(Modifier.widthIn(max = MaxContentWidth).fillMaxSize()) { content() }
     }
 }
+
+private val EditorPaths = setOf(Route.Trim.path, Route.PhotoTrim.path)
+
+/** Swapping a day's item between Edit clip and Photo clip happens in place: no slide (owner: "glitchy animations"). */
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.isEditorSwap(): Boolean =
+    initialState.destination.route in EditorPaths && targetState.destination.route in EditorPaths
 
 /** Camera is a modal over Project: it slides up over home. */
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isVertical(): Boolean {
