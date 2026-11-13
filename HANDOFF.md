@@ -7,6 +7,19 @@
 2. Confirm on the phone: the visual brightness change from the exposure slider and real AF lock (logs show the CameraX calls; only the look of the preview needs eyes).
 3. Light / "Replace clip for today" choice: Replace for today still opens Camera; other days open the Photo Picker.
 
+## Reelog rename + design v1.5 (2026-11-13)
+Name comes from `design/tokens.json` `appName` → `APP_NAME` / `@string/app_name`; applicationId stays `skustra.fragments`.
+Remaining differences, one per line:
+- Splash recorded on the Xiaomi (`docs/qa/reelog/splash.mp4`, side by side `splash-vs-design.mp4`); the static disc holds ~1.7 s on a debug build while the app loads before the 1.24 s sequence starts.
+- Wordmark drawable `reelog_wordmark.xml` not added as a resource (it uses `?attr/colorOnBackground`, undefined in this theme); the logo is drawn from the same outlined paths in `core/icons/ReelogWordmark.kt`. Settings footer is plain text per v1.5, so the wordmark appears only in the splash.
+- No legacy PNG mipmaps: minSdk 29 always uses the adaptive icon. Play icon: `docs/store/icon-512.png`.
+- Check-a-day editor: sound button sits top-right on the preview, not bottom-right (the date stamp is there).
+- Film player: "Share film…" removed per board (sharing stays on Premiere).
+- Chips (From presets, film Sound) keep the app's chip style (outline + check) instead of the board's filled white pill.
+- Goldens are at font scale 1.0; 1.3 not re-recorded.
+- `scripts/qa.sh` on the emulator still fails at onboarding: `uiautomator dump` returns "null root node" there. The app itself goes through onboarding fine (checked by hand on tracker13, 2026-11-13).
+- Samsung OOM (logcat 2026-11-13: OutOfMemoryError in ExoPlayer / Compose) fixed in b9337ed by capping player buffers; not yet installed on the Samsung (owner request needed).
+
 ## v1.2.2 design QA
 Legend: ok = matches, no = does not match / not done.
 - ok Titles Geist 600 with tokens tracking (52/36/24); fallback font until files exist (see above)

@@ -55,3 +55,8 @@
 - T-media-any-source: DONE except on-device HDR tone-map check (emulator lacks Main10 decoder); see HANDOFF.md section T-media-any-source
 - T-auto-7: DONE (builder workflow, gated by BUILDER_AUTORUN, inert until enabled; see HANDOFF.md section T-auto-7)
 - T-autofill-review: DONE (see HANDOFF.md section T-autofill-review)
+
+## 2026-11-13 — T-rename-reelog + T-design-v1.5 done
+- Reelog name (token), icon, splash, store text; v1.5 look pass items 1–12 (settings, project screen, undo bar, camera,
+  From this day, check-a-day editor, Fill the calendar, Day detail, Film builder, Film player, onboarding, no mono caps).
+- OOM fix (player buffers) b9337ed. QA: docs/qa/reelog/, docs/qa/v1.5/. Open items in HANDOFF "Reelog rename + design v1.5".

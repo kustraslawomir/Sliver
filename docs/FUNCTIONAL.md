@@ -1,6 +1,6 @@
 # Reelog — functional overview (current behaviour, 2026-11-13)
 
-Snapshot of what the app does today on `auto/build` (HEAD 976c3d6). Where `docs/SPEC.md` disagrees
+Snapshot of what the app does today on `auto/build` (updated for Reelog + design v1.5). Where `docs/SPEC.md` disagrees
 (it still describes camera-as-home, a Looks editor, a Year view, 7-step onboarding), **this file wins**;
 owner decisions are also listed in `design/INDEX.md` ("v1.4.1 owner decisions").
 
@@ -17,7 +17,7 @@ owner decisions are also listed in `design/INDEX.md` ("v1.4.1 owner decisions").
   "Record today". Light + dark theme (Settings → Appearance); camera, editor, film player stay dark.
 
 ## Launch and onboarding
-- Splash: the original slit splash (the "wordmark opens out of the slit" variant was reverted on owner request).
+- Splash (cold start): system splash = red disc on #0A0A0B, then the disc shrinks into the "o" of "reel●g" with "One clip a day", and lands on the Record today button (plain fade before onboarding; reduced motion holds the word 600 ms).
 - First run, 3 steps: **Welcome** ("One clip a day. One film a year." · Start / Restore from backup) →
   **Project** (name, default "My <year>", format Cinema 16:9 or Story 9:16 · Create project) →
   **Camera** permission pre-prompt. Then the Project screen.
@@ -28,8 +28,8 @@ owner decisions are also listed in `design/INDEX.md` ("v1.4.1 owner decisions").
   "N clips · since <first clip>" ("since" = earliest clip, even if before the project was created).
 - Sync status line while syncing; pull down to sync.
 - Optional daily-reminder nudge card ("Want a daily nudge?" · Set reminder / No thanks).
-- Chip "N auto-filled days to check" / "N drafts to review" when present → sheet: **Keep all**,
-  **Check one by one**, **Remove unchecked** (only unreviewed auto days, one undo toast).
+- Row "N auto-filled days to check" / "N drafts to review" when present → sheet with the days' thumbnails: **Keep all**,
+  **Check one by one**, **Remove unchecked** (only unreviewed auto days, one undo bar).
 - **Month calendar** (Year view and Month/Year tabs were removed): ‹ › reach back to the earliest clip/draft.
   Cells: filled (thumbnail + day number), auto-filled (dashed outline, full opacity, no counter), draft
   (dashed + dimmed + "Draft" label), empty past day ("+", tap → add), today (outlined, tap → camera),
@@ -126,6 +126,7 @@ full recordings to Photos · Volume key records · Show golden hour · Daily rem
 What Reelog stores · Send feedback · version.
 
 ## Other
+- Undo: one bar for every undoable action (48dp, inverted colours, 5 s), above the Record dock; above the buttons on Day detail.
 - Playback pauses everywhere when the screen locks or the app goes to the background.
 - Widget (today waiting / today's thumbnail → camera) and Quick Settings tile → camera.
 - Debug only: data seeder (Settings → long-press version, or adb broadcast to
