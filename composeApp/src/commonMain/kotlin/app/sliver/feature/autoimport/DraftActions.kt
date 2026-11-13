@@ -57,6 +57,19 @@ class DraftActions(
         return day
     }
 
+    /** Keeps every draft of the active project as it is (default pick, default 1 s); one undo restores them as drafts. */
+    suspend fun keepAll(): Int {
+        val all = drafts.first()
+        all.forEach { days.save(it.copy(draft = false, draftCandidates = null, importRunId = null)) }
+        if (all.isNotEmpty()) {
+            FirstClipTimer.clipSaved()
+            UndoToasts.show("${all.size} ${if (all.size == 1) "draft" else "drafts"} kept") {
+                AppScope.launch { all.forEach { days.save(it) } }
+            }
+        }
+        return all.size
+    }
+
     /** Deletes the draft and leaves the day empty; the files wait in tmp for [UNDO_WINDOW_MS]. */
     suspend fun skip(day: Day) {
         val stamp = Clock.System.now().toEpochMilliseconds()

@@ -1,5 +1,6 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.core.ui.SwitchRow
 import androidx.compose.foundation.layout.FlowRow
 import app.sliver.core.ui.Chip
 import androidx.compose.foundation.background
@@ -84,6 +85,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var pickerOpen by remember { mutableStateOf(false) }
     var starting by remember { mutableStateOf(false) }
     var wantStart by rememberSaveable { mutableStateOf(false) }
+    var keepNow by rememberSaveable { mutableStateOf(true) }
 
     val empty = remember(from, rows, yesterday) { gapDays(from, yesterday) { it in rows }.size }
     val status = controller.status(PermissionKind.MediaLibrary)
@@ -94,7 +96,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         starting = true
         scope.launch {
             val id = Uuid.random().toString()
-            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString()))
+            store.start(ImportRun(id = id, projectId = projects.activeId(), from = from.toString(), keep = keepNow))
             runner.start()
             starting = false
         }
@@ -129,6 +131,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     scope.launch { store.update(current.id) { it.copy(finished = true) } }
                 },
                 onReview = { draftNav.openFirst(onNavigate) },
+                onKeepAll = { draftNav.keepAll() },
                 onDone = { scope.launch { store.clear() } },
                 onUndo = {
                     runner.cancel()
@@ -139,7 +142,8 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
 
         SliverText(
-            "Fill empty days with a draft from your gallery. Drafts count only after you review and keep them.",
+            if (keepNow) "Fill empty days from your gallery: the best video of each day, or a photo if there is none."
+            else "Fill empty days with a draft from your gallery. Drafts count only after you review and keep them.",
             SliverType.Body, color = SliverColors.TextSecondary,
         )
 
@@ -178,8 +182,12 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             SecondaryButton("Open Settings", controller::openSettings)
         }
 
+        SwitchRow(
+            "Keep without review", keepNow, { keepNow = it },
+            caption = "Each day gets its best video or photo right away. You can still swap any day later.",
+        )
         PrimaryButton(
-            if (starting) "Starting..." else "Import drafts",
+            if (starting) "Starting..." else if (keepNow) "Fill $empty ${if (empty == 1) "day" else "days"}" else "Import drafts",
             {
                 if (usable) begin() else {
                     wantStart = true
@@ -194,7 +202,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-private fun RunProgress(run: ImportRun, draftsLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
+private fun RunProgress(run: ImportRun, draftsLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
     SliverText(
         if (run.finished) importSummary(run.done, (run.total - run.done).coerceAtLeast(0)) else "Importing drafts",
         SliverType.Title,
@@ -212,7 +220,10 @@ private fun RunProgress(run: ImportRun, draftsLeft: Int, onCancel: () -> Unit, o
         SliverText("This keeps going in the background, even if you close the app.", SliverType.BodySmall, color = SliverColors.TextSecondary)
         GhostButton("Cancel", onCancel, Modifier.fillMaxWidth())
     } else {
-        if (draftsLeft > 0) PrimaryButton("Review drafts", onReview, Modifier.fillMaxWidth())
+        if (draftsLeft > 0) {
+            PrimaryButton("Keep all $draftsLeft", onKeepAll, Modifier.fillMaxWidth())
+            SecondaryButton("Review one by one", onReview, Modifier.fillMaxWidth())
+        }
         SecondaryButton("Done", onDone)
         GhostButton("Undo all", onUndo, Modifier.fillMaxWidth(), destructive = true)
     }

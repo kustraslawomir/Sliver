@@ -131,7 +131,7 @@ class AutoImportExecutor(
                     date = date, source = path, startMs = startMs, speed = 1f, cropY = null, format = format,
                     daySource = if (isPhoto) DaySource.PHOTO else DaySource.GALLERY,
                     takenAt = Instant.fromEpochMilliseconds(pick.takenAtMs), isPhoto = isPhoto,
-                    projectId = run.projectId, draft = true, draftCandidates = encodeCandidates(candidatesOf(entries)), importRunId = run.id,
+                    projectId = run.projectId, draft = !run.keep, draftCandidates = encodeCandidates(candidatesOf(entries)), importRunId = run.id,
                 ),
             )
             true

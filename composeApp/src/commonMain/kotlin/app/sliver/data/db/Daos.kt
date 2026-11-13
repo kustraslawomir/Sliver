@@ -75,7 +75,8 @@ interface DayDao {
     @Query("SELECT * FROM day WHERE projectId = :projectId AND draft = 1 ORDER BY date")
     fun observeDrafts(projectId: String): Flow<List<Day>>
 
-    @Query("SELECT * FROM day WHERE projectId = :projectId AND draft = 1 AND importRunId = :runId")
+    // Days still tied to an import run: unconfirmed drafts, or days of a "keep without review" run (a kept draft clears its run id).
+    @Query("SELECT * FROM day WHERE projectId = :projectId AND importRunId = :runId")
     suspend fun draftsOfRun(projectId: String, runId: String): List<Day>
 
     @Query("DELETE FROM day WHERE projectId = :projectId")

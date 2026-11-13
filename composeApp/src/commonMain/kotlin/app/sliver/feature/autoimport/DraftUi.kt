@@ -67,6 +67,9 @@ class DraftNav(
     var busy by mutableStateOf(false)
         private set
 
+    /** One tap: every draft becomes a normal day (undo toast restores them). */
+    fun keepAll() = run { actions.keepAll() }
+
     private fun run(block: suspend () -> Unit) {
         if (busy) return
         busy = true

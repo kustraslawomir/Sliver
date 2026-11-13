@@ -193,4 +193,20 @@ class AutoImportExecutorTest {
         assertEquals(listOf(5), days.observeAll().first().map { it.date.day })
         assertEquals(null, store.current())
     }
+
+    @Test
+    fun keepWithoutReviewSavesNormalDaysAndUndoAllStillRemovesThem() = runTest {
+        entries = listOf(
+            MediaEntry("content://video/1", true, ms(5), 8_000),
+            MediaEntry("content://image/2", false, ms(6)),
+        )
+        store.start(ImportRun("run1", projects.activeId(), "2026-11-01", keep = true))
+        executor.run()
+
+        assertEquals(0, days.observeDrafts().first().size)
+        assertEquals(listOf(5, 6), days.observeAll().first().map { it.date.day })
+
+        executor.undoAll()
+        assertEquals(emptyList(), days.observeAll().first())
+    }
 }

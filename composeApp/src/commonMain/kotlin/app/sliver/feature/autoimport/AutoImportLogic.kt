@@ -64,6 +64,8 @@ data class ImportRun(
     val done: Int = 0,
     val total: Int = 0,
     val finished: Boolean = false,
+    /** Owner: "it should be automated" — true saves normal days right away instead of drafts. */
+    val keep: Boolean = false,
 ) {
     val progress get() = if (total <= 0) 0f else (done.toFloat() / total).coerceIn(0f, 1f)
 }

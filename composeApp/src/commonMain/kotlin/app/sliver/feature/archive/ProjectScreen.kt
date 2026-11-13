@@ -1,5 +1,7 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.PrimaryButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -160,6 +162,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val shown = YearMonth(shownIndex / 12, shownIndex % 12 + 1)
     fun show(m: YearMonth) { shownIndex = m.year * 12 + m.month - 1 }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
+    var draftsSheet by remember { mutableStateOf(false) }
     var projectsOpen by remember { mutableStateOf(false) }
     var projectAction by remember { mutableStateOf<ProjectAction?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -232,7 +235,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
-                        if (drafts.isNotEmpty()) DraftsChip(drafts.size) { draftNav.openFirst(onNavigate) }
+                        if (drafts.isNotEmpty()) DraftsChip(drafts.size) { draftsSheet = true }
                         ViewRow(yearView, { yearView = it }, canGoPrev(shown, first), canGoNext(shown, today),
                             { show(shown.plusMonths(-1)) }, { show(shown.plusMonths(1)) })
 
@@ -308,6 +311,14 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 },
                 onDelete = { menuOpen = false; projectAction = ProjectAction.Delete },
             )
+        }
+        SliverBottomSheet(draftsSheet && drafts.isNotEmpty(), onDismiss = { draftsSheet = false }) {
+            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                SliverText(draftsChipLabel(drafts.size), SliverType.Title)
+                SliverText("Keep them as they are, or go through them and swap any day.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+                PrimaryButton("Keep all ${drafts.size}", { draftsSheet = false; draftNav.keepAll() }, Modifier.fillMaxWidth(), enabled = !draftNav.busy)
+                SecondaryButton("Review one by one", { draftsSheet = false; draftNav.openFirst(onNavigate) }, Modifier.fillMaxWidth())
+            }
         }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
