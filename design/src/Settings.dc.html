@@ -59,7 +59,7 @@
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { date: true, fullRec: false, vol: true, gold: false, fmt: 'cinema' }; }
   renderVals() {
-    const st = this.state, APP = 'Fragments';
+    const st = this.state, APP = 'Reelog';
     const link = (n, href, v, d, vColor) => ({ isLink: true, isSwitch: false, isSeg: false, n, href, v: v || '', d: d || '', dShow: d ? 'block' : 'none', vColor: vColor || '#8E8E88' });
     const sw = (n, d, on, toggle) => ({ isLink: false, isSwitch: true, isSeg: false, n, d, on: String(on), toggle, track: on ? '#EDEDE8' : '#3A3A40', knob: on ? 20 : 2 });
     const seg = (n, opts) => ({ isLink: false, isSwitch: false, isSeg: true, n, opts });

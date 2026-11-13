@@ -136,7 +136,7 @@ The Year view, the light-of-the-year chart and the Month/Year tabs are removed. 
 
 ## v1.5 — design matches FUNCTIONAL.md (2026-11-13)
 
-`docs/FUNCTIONAL.md` is the behaviour source. These boards are the look for it and supersede every older board for the same screen. **App name is not final:** it appears as one string (`app_name`, currently "Fragments"); never hard-code it in layouts, never draw a wordmark/slit.
+`docs/FUNCTIONAL.md` is the behaviour source. These boards are the look for it and supersede every older board for the same screen. **App name is not final:** it appears as one string (`app_name`, now "Reelog" — see v1.6); never hard-code it in layouts, never draw a wordmark/slit.
 
 | Screen | Board(s) | Notes |
 |---|---|---|
@@ -153,3 +153,13 @@ The Year view, the light-of-the-year chart and the Month/Year tabs are removed. 
 | Renamed copy | `AccountSettings`, `Backup`, `DriveConnect`, `EdgeStates`, `NotifBoard`, `Notifications`, `Reminders`(+`L`), `Restore`, `Widgets` | Only "SLIVER" → app name. Layout unchanged. |
 
 Dead boards (do not build from): `ProjectHubYear*`, `Backfill*`, `PickerV2`, `Looks*`, `Frame`, `DayShare`, `YearInSeconds`, `Archive*`, `Films`, `Splash` slit variants stay as is (owner kept the old splash).
+
+## v1.6 — name: Reelog (owner decision 2026-11-13)
+
+| Item | Files | Notes |
+|---|---|---|
+| Name | all boards | User-facing name is **Reelog** (Play title "Reelog: 1s Video Diary"). Written lowercase only in the logo. In copy: "Reelog". |
+| Logo | `png/LogoReelog.png`, `brand/reelog/reelog-wordmark-{dark,light,mono}.svg`, `brand/reelog/reelog_wordmark.xml` | Variant A: "reel●g", Geist 600, −3 % tracking, the "o" is a #FF3B30 disc of 0.5 em sitting on the x-height. Outlined paths — never re-typeset it with Text(). The disc never glows. |
+| App icon | `brand/reelog/ic_launcher_foreground.xml` (red disc r=15 in 108), `ic_launcher_monochrome.xml`, `reelog-icon.svg` | Background #0A0A0B. Replaces the slit icon in `android-res/`. |
+| Splash | `motion/SplashReelog.mp4` (watch it), `motion/SplashReelog.html` (timings in `frame(t)`), `png/SplashReelog.png` (key frames), `brand/reelog/splash_icon.xml` | System splash (API 31+ SplashScreen): background #0A0A0B, icon = 72dp red disc (`splash_icon.xml`), no icon background. Then the exit animation in Compose: 260–640 ms the disc shrinks into the "o" (easeInOutCubic) while "reel" and "g" slide out from behind it; 640–1100 hold + "One clip a day" 15sp #8E8E88; 1100–1500 letters fade, the disc grows back to 72dp and lands exactly on the Record today button (centre x = screen centre, 44dp + 36dp from the bottom), the splash background fades out over 1200–1500. Reduced motion: show the wordmark 600 ms, then cross-fade. Cold start only; never on resume. The HTML uses local font paths — use it for timings, not for fonts. |
+| Old splash | `Splash.dc.html` | Superseded by the above (the slit only made sense for SLIVER). |

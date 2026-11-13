@@ -1,0 +1,62 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Reelog splash</title>
+<style>
+@font-face{font-family:Geist;src:url(file:///tmp/claude-0/-home-claude/d96d92a4-9711-51cd-babf-b65d124333e0/scratchpad/fontpkg/node_modules/geist/dist/fonts/geist-sans/Geist-SemiBold.ttf);font-weight:600}
+@font-face{font-family:Geist;src:url(file:///tmp/claude-0/-home-claude/d96d92a4-9711-51cd-babf-b65d124333e0/scratchpad/fontpkg/node_modules/geist/dist/fonts/geist-sans/Geist-Regular.ttf);font-weight:400}
+html,body{margin:0;background:#000}
+.phone{position:relative;width:390px;height:844px;overflow:hidden;background:#0A0A0B;font-family:Geist,sans-serif}
+.mark{position:absolute;left:0;right:0;top:0;height:844px;z-index:2}
+.w{position:absolute;top:0;height:56px;font-size:56px;line-height:56px;font-weight:600;letter-spacing:-0.03em;color:#EDEDE8;white-space:nowrap}
+.disc{position:absolute;border-radius:50%;background:#FF3B30}
+.tag{position:absolute;left:0;right:0;text-align:center;font-size:15px;color:#8E8E88}
+.app{position:absolute;inset:0;background:#0A0A0B}
+.app .h{position:absolute;left:20px;top:50px;font-size:24px;font-weight:600;letter-spacing:-0.02em;color:#EDEDE8}
+.app .g{position:absolute;left:20px;right:20px;top:200px;display:grid;grid-template-columns:repeat(7,1fr);gap:5px 4px}
+.app .g span{height:58px;border-radius:10px;background:linear-gradient(160deg,#5A6A50,#0C0B0A)}
+.app .dock{position:absolute;left:159px;bottom:44px;width:72px;height:72px;border-radius:36px;background:#FF3B30}
+</style></head>
+<body>
+<div class="phone" id="ph">
+  <div class="app" id="app"><div class="h">My 2026</div><div class="g" id="grid"></div><div class="dock" id="dock"></div></div>
+  <div class="mark" id="mark" style="background:#0A0A0B">
+    <div class="w" id="reel">reel</div>
+    <div class="disc" id="disc"></div>
+    <div class="w" id="g">g</div>
+    <div class="tag" id="tag">One clip a day</div>
+  </div>
+</div>
+<script>
+for(let i=0;i<28;i++){const s=document.createElement('span');document.getElementById('grid').appendChild(s)}
+// metrics at 56px (Geist 600, -0.03em): reel 97.6, o-slot 31.9, g 32.5
+const F=56, REEL=1.742*F, G=0.58*F, D=0.5*F, GAP=0.075*F, W=REEL+GAP+D+GAP+G, X0=(390-W)/2, CY=410;
+const BASE=CY+0.27*F;              // baseline so the x-height is centred on CY
+const DX=X0+REEL+GAP+D/2;          // disc centre in the final word
+const ease=(x)=>x<0?0:x>1?1:1-Math.pow(1-x,3);
+const easeIO=(x)=>x<0?0:x>1?1:(x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2);
+const lerp=(a,b,k)=>a+(b-a)*k;
+function frame(t){
+  // 0-260   the record button appears (72dp, screen centre)
+  // 260-640 it shrinks into the "o"; "reel" and "g" slide out from behind it
+  // 640-1100 hold + tagline
+  // 1100-1500 letters fade, the "o" grows back to 72dp and drops into the Record today button; the app fades in under it
+  const a=ease(t/260), m=easeIO((t-260)/380), tg=ease((t-640)/300), out=easeIO((t-1100)/400), bgOut=ease((t-1200)/300);
+  let size=lerp(72,D,m)*(t<260?lerp(0.6,1,a):1);
+  let cx=lerp(195,DX,m), cy=lerp(CY,BASE-0.27*F,m);
+  if(t>1100){ size=lerp(D,72,out); cx=lerp(DX,195,out); cy=lerp(BASE-0.27*F,764,out); }
+  const disc=document.getElementById('disc');
+  Object.assign(disc.style,{width:size+'px',height:size+'px',left:(cx-size/2)+'px',top:(cy-size/2)+'px',opacity:t<260?a:1});
+  const reel=document.getElementById('reel'), g=document.getElementById('g');
+  const rx=X0, gx=X0+REEL+GAP+D+GAP;
+  reel.style.left=rx+'px'; g.style.left=gx+'px';
+  reel.style.top=g.style.top=(BASE-0.8*F)+'px';
+  const lo=m*(1-ease((t-1100)/200));
+  reel.style.transform='translateX('+lerp(DX-rx-REEL,0,m)+'px)'; reel.style.opacity=lo;
+  g.style.transform='translateX('+lerp(DX-gx,0,m)+'px)'; g.style.opacity=lo;
+  const tag=document.getElementById('tag'); tag.style.top=(CY+52)+'px'; tag.style.opacity=tg*(1-ease((t-1100)/200));
+  document.getElementById("dock").style.opacity=t>=1495?1:0;document.getElementById("mark").style.background='rgba(10,10,11,'+(1-bgOut)+')';
+}
+window.frame=frame;
+const q=new URLSearchParams(location.search);
+if(q.has('t')){frame(+q.get('t'))}else{let s=null;const loop=(n)=>{if(s===null)s=n;const t=(n-s)%2800;frame(Math.min(t,1500));requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+</script>
+</body></html>

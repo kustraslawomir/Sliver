@@ -82,12 +82,12 @@ class Component extends DCLogic {
   renderVals() {
     const st = this.state;
     const S = {
-      progress: { dot: '#EDEDE8', t: 'Backing up · ' + Math.round(st.pct / 100 * 129) + ' of 129', d: 'You can close Fragments — it keeps going in the background and picks up where it left off.', act: null },
+      progress: { dot: '#EDEDE8', t: 'Backing up · ' + Math.round(st.pct / 100 * 129) + ' of 129', d: 'You can close Reelog — it keeps going in the background and picks up where it left off.', act: null },
       uptodate: { dot: '#8FC7A4', t: 'Up to date', d: 'All 129 clips are in your Drive · 3 min ago', act: null },
       paused: { dot: '#E8C27A', t: 'Paused — waiting for Wi-Fi', d: '3 new clips will upload when you’re on Wi-Fi.', act: 'Use mobile data this time' },
       failed: { dot: '#E5675F', t: 'Backup didn’t finish', d: 'Couldn’t reach Google Drive. We’ll try again in 15 minutes.', act: 'Try again now' },
       full: { dot: '#E8C27A', t: 'Your Drive is full', d: '3 clips are waiting. They’re safe on this phone until there’s space.', act: 'Manage Google storage' },
-      revoked: { dot: '#E5675F', t: 'Drive access was turned off', d: 'Fragments can’t reach its folder any more. Reconnect to keep backing up.', act: 'Reconnect Drive' },
+      revoked: { dot: '#E5675F', t: 'Drive access was turned off', d: 'Reelog can’t reach its folder any more. Reconnect to keep backing up.', act: 'Reconnect Drive' },
       offline: { dot: '#8E8E88', t: 'You’re offline', d: 'Backup carries on when you’re back online. Nothing is lost.', act: null }
     };
     const key = st.over || this.props.state || 'uptodate';
@@ -99,7 +99,7 @@ class Component extends DCLogic {
       doAct: () => this.setState({ over: 'progress', pct: 0 }),
       backupNow: () => this.setState({ over: 'progress', pct: 0 }),
       rows: [
-        { k: 'Folder', v: 'My Drive / Fragments' },
+        { k: 'Folder', v: 'My Drive / Reelog' },
         { k: 'Backed up', v: key === 'progress' ? '84 / 129' : (key === 'uptodate' ? '129 / 129' : '126 / 129') },
         { k: 'Drive space used', v: '214 MB' }
       ],

@@ -91,7 +91,7 @@ class Component extends DCLogic {
   componentDidMount() { this._iv = setInterval(() => { if (this.state.playing && !this.state.share) this.setState({ t: (this.state.t + 100) % 129000 }); }, 100); }
   componentWillUnmount() { clearInterval(this._iv); }
   renderVals() {
-    const APP = 'Fragments';
+    const APP = 'Reelog';
     const st = this.state;
     const days = [];
     for (let d = 1; d <= 143; d++) { const n = 171 + d; if (n % 13 !== 0 && days.length < 129) days.push({ d, n }); }
