@@ -65,5 +65,6 @@ fun Modifier.glass(style: GlassStyle, shape: Shape, overMedia: Boolean = false, 
         light -> Modifier.background(Color.White.copy(alpha = 0.92f), shape)
         else -> Modifier.background(Color(0xFF1C1C1F).copy(alpha = if (strong) 0.97f else 0.92f), shape)
     }
-    then(shadow).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
+    // A shadow under see-through glass shows through as a smudge, so media glass has none.
+    (if (overMedia) this else then(shadow)).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
 }

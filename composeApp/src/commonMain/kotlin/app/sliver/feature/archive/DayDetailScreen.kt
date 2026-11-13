@@ -1,5 +1,8 @@
 package app.sliver.feature.archive
 
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
+
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.feature.gallery.rememberAddMedia
@@ -123,15 +126,13 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     UndoBarAbove(196.dp)
     Box(Modifier.fillMaxSize().background(SliverColors.Media)) {
-        if (day != null) ClipPlayer(day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted)
-        Box(Modifier.fillMaxWidth().height(140.dp).background(Brush.verticalGradient(listOf(SliverColors.Scrim, Color.Transparent))))
+        if (day != null) ClipPlayer(day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, fill = true)
+        // v1.7 item 8: scrims so text reads over bright video; no date stamp here (the title is the date).
+        Box(Modifier.fillMaxWidth().height(150.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.7f), Color.Transparent))))
         Box(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(320.dp)
-                .background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))),
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(300.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))),
         )
-        if (day != null && app?.dateStamp == true) {
-            Box(Modifier.fillMaxSize().navigationBarsPadding().padding(bottom = 180.dp)) { DateStamp(stampText(current)) }
-        }
         Row(
             Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S2),
             verticalAlignment = Alignment.CenterVertically,
@@ -150,7 +151,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val prev = prevDay(current, filled)
                 val next = nextDay(current, filled)
-                IconButton44({ show(prev) }, "Previous day") {
+                IconButton44({ show(prev) }, "Previous day", overCamera = true) {
                     SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia.copy(alpha = if (prev != null) 1f else 0.4f))
                 }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -162,10 +163,10 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     val whenText = if (current == today) "Today" else "Day ${dayNumber(current, first)}"
                     SliverText(
                         whenText + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                        SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.OnMedia.copy(alpha = 0.7f),
+                        ReelogType.label.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextPrimary,
                     )
                 }
-                IconButton44({ next?.let { show(it) } }, "Next day") {
+                IconButton44({ next?.let { show(it) } }, "Next day", overCamera = true) {
                     SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (next != null) 1f else 0.4f))
                 }
             }
@@ -185,17 +186,12 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     }
                 }
             }
-            if (day != null && day.source != DaySource.PHOTO) {
-                // Owner: mute a chosen clip in films without editing it again.
-                SwitchRow(
-                    "Sound in film", day.keepAudio,
-                    { on -> scope.launch { days.save(day.copy(keepAudio = on)) } },
-                    caption = "Off: this clip is silent in every film.",
-                )
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))
-                SecondaryButton("Remove", { confirmRemove = true }, Modifier.weight(1f), destructive = true, enabled = day != null)
+                ReelogButton(
+                    "Remove", { confirmRemove = true }, Modifier.weight(1f), ButtonKind.Destructive,
+                    enabled = day != null, overMedia = true,
+                )
             }
         }
 

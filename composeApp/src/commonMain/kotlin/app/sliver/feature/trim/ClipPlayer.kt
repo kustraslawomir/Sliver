@@ -1,5 +1,8 @@
 package app.sliver.feature.trim
 
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.draw.clipToBounds
+
 import app.sliver.core.theme.SliverColors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxScope
@@ -17,7 +20,15 @@ import androidx.compose.ui.graphics.Color
 
 /** Centers content of the given display [aspect] on black: 16:9 fills the width, 9:16 fills the height. */
 @Composable
-fun ClipFrame(aspect: Float?, modifier: Modifier, content: @Composable BoxScope.() -> Unit) {
+fun ClipFrame(aspect: Float?, modifier: Modifier, fill: Boolean = false, content: @Composable BoxScope.() -> Unit) {
+    if (fill && aspect != null && aspect > 0f) {
+        // Crop to fill: the picture covers the whole frame, overflow is clipped (day screen, edge to edge).
+        androidx.compose.foundation.layout.BoxWithConstraints(modifier.background(SliverColors.Media).clipToBounds(), Alignment.Center) {
+            val w = maxOf(maxWidth, maxHeight * aspect)
+            Box(Modifier.requiredSize(w, w / aspect), content = content)
+        }
+        return
+    }
     Box(modifier.background(SliverColors.Media), Alignment.Center) {
         Box(if (aspect != null && aspect > 0f) Modifier.aspectRatio(aspect) else Modifier.fillMaxSize(), content = content)
     }
@@ -34,10 +45,11 @@ fun ClipPlayer(
     audio: Boolean = false,
     paused: Boolean = false,
     scrubMs: Long? = null,
+    fill: Boolean = false,
     overlay: @Composable BoxScope.() -> Unit = {},
 ) {
     var aspect by remember(path) { mutableStateOf<Float?>(null) }
-    ClipFrame(aspect, modifier) {
+    ClipFrame(aspect, modifier, fill) {
         TrimPlayer(path, startMs, windowMs, speed, audio, paused, Modifier.fillMaxSize(), scrubMs) { aspect = it }
         overlay()
     }

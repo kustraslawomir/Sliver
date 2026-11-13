@@ -85,6 +85,7 @@ fun ReelogButton(
         ButtonKind.Destructive -> Color.Transparent to (if (enabled) SliverColors.Error else SliverColors.TextDisabled)
     }
     val surface = when {
+        kind == ButtonKind.Destructive && overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
         kind != ButtonKind.Secondary -> Modifier.background(fill, Pill)
         overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
         else -> Modifier.background(ink.copy(alpha = 0.06f), Pill).border(1.dp, ink.copy(alpha = 0.12f), Pill)
