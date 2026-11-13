@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import app.sliver.core.ui.SwitchRow
 import app.sliver.core.log.logDebug
 import app.sliver.core.ui.SlitLoader
 import app.sliver.core.icons.SliverIcon
@@ -262,7 +263,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                 IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
                 SliverText(dayLabel(day, today), SliverType.Meta, color = SliverColors.TextSecondary)
                 IconButton44(
-                    { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
+                    { previewSound = !previewSound; soundTouched = true },
                     if (previewSound) "Sound on" else "Sound off",
                 ) {
                     SliverIcon(
@@ -294,7 +295,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     if (saved?.dateStamp == true) DateStamp(stampText(day))
                     if (draft != null) {
                         IconButton44(
-                            { previewSound = !previewSound; keepAudio = previewSound; soundTouched = true },
+                            { previewSound = !previewSound; soundTouched = true },
                             // DECISION: top-right, not bottom-right as on the board, so it never covers the date stamp.
                             if (previewSound) "Sound on" else "Sound off", Modifier.align(Alignment.TopEnd).padding(SliverSpace.S2),
                             overCamera = true,
@@ -346,6 +347,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                             .forEach { (mode, label) -> Chip(label, shortMode == mode, { shortMode = mode }) }
                     }
                 }
+                // Owner: mute this clip in films. Separate from the preview speaker, which is only for listening here.
+                SwitchRow("Sound in film", keepAudio, { keepAudio = it })
                 if (draft != null) CandidateStrip(draft, draftNav)
                 PrimaryButton(
                     if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again"

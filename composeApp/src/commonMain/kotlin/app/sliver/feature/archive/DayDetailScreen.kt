@@ -37,6 +37,8 @@ import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.ConfirmSheet
+import app.sliver.core.ui.SwitchRow
+import app.sliver.data.DaySource
 import app.sliver.core.ui.UndoBarAbove
 import androidx.compose.ui.unit.sp
 import app.sliver.core.ui.GhostButton
@@ -153,6 +155,14 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 IconButton44({ next?.let { show(it) } }, "Next day") {
                     SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (next != null) 1f else 0.4f))
                 }
+            }
+            if (day != null && day.source != DaySource.PHOTO) {
+                // Owner: mute a chosen clip in films without editing it again.
+                SwitchRow(
+                    "Sound in film", day.keepAudio,
+                    { on -> scope.launch { days.save(day.copy(keepAudio = on)) } },
+                    caption = "Off: this clip is silent in every film.",
+                )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))
