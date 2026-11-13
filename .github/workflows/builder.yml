@@ -1,0 +1,92 @@
+name: builder
+
+on:
+  push:
+    branches: [auto/build]
+    paths: ['tasks/*.md']
+  workflow_dispatch:
+    inputs:
+      task_file:
+        description: 'Task file, e.g. tasks/T-foo.md'
+        required: true
+
+concurrency:
+  group: builder
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      vars.BUILDER_AUTORUN == 'true' &&
+      github.ref == 'refs/heads/auto/build' &&
+      !contains(github.event.head_commit.message, '[skip builder]')
+    runs-on: self-hosted
+    timeout-minutes: 180
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect task files
+        id: tasks
+        env:
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          INPUT_TASK: ${{ github.event.inputs.task_file }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_TASK:-}" ]; then
+            files="$INPUT_TASK"
+          elif [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            files="$(git diff-tree --no-commit-id --name-only -r --diff-filter=AM "$SHA" -- 'tasks/*.md')"
+          else
+            files="$(git diff --name-only --diff-filter=AM "$BEFORE" "$SHA" -- 'tasks/*.md')"
+          fi
+          files="$(printf '%s\n' "$files" | grep -E '^tasks/[A-Za-z0-9._-]+\.md$' || true)"
+          if [ -z "$files" ]; then echo "no task files changed"; echo "found=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          { echo 'files<<EOF_TASKS'; echo "$files"; echo 'EOF_TASKS'; } >> "$GITHUB_OUTPUT"
+
+      - name: Design lint
+        if: steps.tasks.outputs.found == 'true'
+        run: bash scripts/design-lint.sh
+
+      - name: Run builder
+        if: steps.tasks.outputs.found == 'true'
+        env:
+          TASK_FILES: ${{ steps.tasks.outputs.files }}
+        run: |
+          set -euo pipefail
+          git config user.name "builder-bot"
+          git config user.email "builder-bot@users.noreply.github.com"
+          prompt="$(awk 'BEGIN{n=0} /^---$/ && n<2 {n++; next} n>=2' .claude/agents/builder.md)"
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            echo "== builder: $f"
+            claude -p "$prompt
+
+          Implement $f" --max-turns 150 --allowedTools "Read Edit Write Glob Grep Bash"
+          done <<< "$TASK_FILES"
+
+      - name: Push
+        if: steps.tasks.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          if git push origin auto/build; then exit 0; fi
+          git pull --rebase origin auto/build
+          git push origin auto/build
+
+      - name: QA on device
+        if: steps.tasks.outputs.found == 'true'
+        run: |
+          set -uo pipefail
+          SAMSUNG='adb-RFCY30SW5QZ-XscZaw._adb-tls-connect._tcp'
+          devs="$(adb devices 2>/dev/null | awk '$2=="device"{print $1}' | grep -vxF "$SAMSUNG" || true)"
+          if echo "$devs" | grep -qx 'b798509a'; then dev=xiaomi
+          elif echo "$devs" | grep -q '^emulator-'; then dev=emulator
+          else echo "no Xiaomi or emulator online, QA skipped"; exit 0; fi
+          bash scripts/qa.sh --skip-build --device "$dev" || echo "qa.sh failed"
+          report="docs/qa/$(date +%F)/REPORT.md"
+          if [ -f "$report" ]; then cat "$report" >> "$GITHUB_STEP_SUMMARY"; fi
