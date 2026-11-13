@@ -1,5 +1,10 @@
 package app.sliver.core.ui
 
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -116,12 +121,26 @@ fun SliverFrame(state: SliverFrameState, modifier: Modifier = Modifier) {
     val color = if (state == SliverFrameState.Dragging) SliverColors.AccentCore else SliverColors.Accent
     Box(
         modifier.scale(scale)
+            // Owner: the frame glows. Soft halo from stacked strokes fading outwards (no blur/shadow API).
+            .drawBehind {
+                val r = 8.dp.toPx()
+                for (i in 1..GlowRings) {
+                    val grow = i * 2.dp.toPx()
+                    drawRoundRect(
+                        color.copy(alpha = 0.22f * (1f - i / (GlowRings + 1f))),
+                        topLeft = Offset(-grow, -grow), size = Size(size.width + 2 * grow, size.height + 2 * grow),
+                        cornerRadius = CornerRadius(r + grow), style = Stroke(2.dp.toPx()),
+                    )
+                }
+            }
             .border(borderWidth.dp, color, SliverShapes.S),
     )
 }
 
+private const val GlowRings = 6
+
 /** Dims everything outside the frame region of a strip to 66%. */
 @Composable
-fun StripDim(modifier: Modifier = Modifier, color: Color = SliverColors.Media) {
-    Box(modifier.background(color.copy(alpha = 0.66f)))
+fun StripDim(modifier: Modifier = Modifier, color: Color = SliverColors.Media, alpha: Float = 0.66f) {
+    Box(modifier.background(color.copy(alpha = alpha)))
 }

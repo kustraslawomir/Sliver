@@ -152,7 +152,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
     val speed = 1f
     var keepAudio by remember { mutableStateOf(true) }
-    var previewSound by remember { mutableStateOf(false) }
+    var previewSound by remember { mutableStateOf(CaptureSession.previewSound) }
+    LaunchedEffect(previewSound) { CaptureSession.previewSound = previewSound }
     var soundTouched by remember { mutableStateOf(false) }
     var info by remember { mutableStateOf("") }
     var ready by remember { mutableStateOf(false) }
@@ -181,20 +182,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         val motion = CaptureSession.motion
         CaptureSession.motion = false
         ready = true
-        if (restoredMs == null) {
-            if (motion) {
-                MotionPhoto.windowStartMs(CaptureSession.motionPresentationUs, d).let { startMs = it; committedMs = it }
-            } else {
-                // Scoring can take a while on slow decoders: the clip is usable at 0 s meanwhile, and the pick applies only if the user has not moved yet.
-                scope.launch {
-                    val pick = media.autoPickMs(path, d)
-                    if (!custom && startMs == committedMs) {
-                        startMs = pick
-                        committedMs = pick
-                    }
-                }
-            }
-        }
+        // Owner: the strip starts at the beginning of the clip; no automatic jump to a "best" moment.
         if (!isShortClip(d)) {
             thumbsTotal = thumbCount(d)
             media.thumbnails(path, d, thumbsTotal) { thumbs = thumbs + it }
@@ -394,6 +382,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
 }
 
+/** Owner: thumbnails outside the frame stay readable, and a drag moves through the clip faster. */
+private const val STRIP_DIM = 0.3f
+private const val STRIP_DRAG_GAIN = 2.5f
+
 @Composable
 private fun Filmstrip(
     thumbs: List<ImageBitmap>,
@@ -430,7 +422,7 @@ private fun Filmstrip(
                 onDragCancel = { dragEnd() },
             ) { change, dx ->
                 change.consume()
-                pos -= dx / secPx * SECOND_MS
+                pos -= dx / secPx * SECOND_MS * STRIP_DRAG_GAIN
                 drag(pos.toLong().coerceIn(0, (durationMs - windowMs).coerceAtLeast(0)))
             }
         },
@@ -448,10 +440,11 @@ private fun Filmstrip(
                 Image(it, null, Modifier.width(tileDp).fillMaxHeight(), contentScale = ContentScale.Crop)
             }
         }
-        StripDim(Modifier.width(with(density) { frameLeft.toDp() }).fillMaxHeight())
+        StripDim(Modifier.width(with(density) { frameLeft.toDp() }).fillMaxHeight(), alpha = STRIP_DIM)
         StripDim(
             Modifier.fillMaxHeight().width(with(density) { (constraints.maxWidth - frameLeft - frameW).coerceAtLeast(0f).toDp() })
                 .offset { IntOffset((frameLeft + frameW).roundToInt(), 0) },
+            alpha = STRIP_DIM,
         )
         SliverFrame(
             frameState,

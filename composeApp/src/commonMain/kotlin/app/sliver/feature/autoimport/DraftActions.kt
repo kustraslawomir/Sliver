@@ -46,10 +46,14 @@ class DraftActions(
                 else -> 2
             }
         }
-        val target = uri ?: candidates.firstOrNull()?.uri ?: return null
-        val route = loadIntoSession(gallery, files, target, day.date, asVideo) ?: return null
-        CaptureSession.draft = DraftContext(day, candidates, target, chain)
-        return route
+        // A picked item must load; otherwise the first readable item of the day is used (no false "couldn't read").
+        val order = if (uri != null) listOf(uri) else candidates.map { it.uri }
+        for (target in order) {
+            val route = loadIntoSession(gallery, files, target, day.date, asVideo) ?: continue
+            CaptureSession.draft = DraftContext(day, candidates, target, chain)
+            return route
+        }
+        return null
     }
 
     suspend fun first(): Day? = drafts.first().firstOrNull()

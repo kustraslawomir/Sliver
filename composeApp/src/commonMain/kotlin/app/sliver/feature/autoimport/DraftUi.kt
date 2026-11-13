@@ -63,6 +63,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
 
+private const val MAX_SKIPPED_ON_ADVANCE = 5
+
 /** Moves between drafts and between the sources of one day, always through the editor screens already on the stack. */
 class DraftNav(
     private val actions: DraftActions,
@@ -111,8 +113,17 @@ class DraftNav(
 
     /** After a keep or skip: the next draft, or back to where the review started. */
     suspend fun afterResolved(date: LocalDate, finished: () -> Unit) {
-        val next = if (CaptureSession.draft?.chain == false) null else actions.next(date)
-        if (next == null || !show(next)) finished()
+        // The day itself was saved; a next day that can't be read is skipped quietly instead of a toast.
+        if (CaptureSession.draft?.chain == false) return finished()
+        var from = date
+        repeat(MAX_SKIPPED_ON_ADVANCE) {
+            val next = actions.next(from) ?: return finished()
+            if (next.date == date) return finished()
+            val route = actions.open(next, chain = true)
+            if (route != null) return navigator.swapEditor(route)
+            from = next.date
+        }
+        finished()
     }
 
     /** Day waiting for the Remove day confirm. */

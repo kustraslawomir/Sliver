@@ -71,6 +71,9 @@ object CaptureSession {
     /** Set while a draft is being reviewed; the editor then shows the draft header and "Keep this clip". */
     var draft: app.sliver.feature.autoimport.DraftContext? = null
 
+    /** Preview sound in the editor; survives moving to another item or day (owner: unmuted stays unmuted). */
+    var previewSound by androidx.compose.runtime.mutableStateOf(false)
+
     /** Bumped to rebuild the editor in place after a swap or a move to another draft. */
     var revision by androidx.compose.runtime.mutableIntStateOf(0)
 }
