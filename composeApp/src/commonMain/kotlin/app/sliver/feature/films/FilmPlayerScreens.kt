@@ -208,6 +208,8 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     var seek by remember { mutableStateOf<PlayerSeek?>(null) }
     var position by remember { mutableStateOf(0L to 0L) }
     var status by remember { mutableStateOf<String?>(null) }
+    var saving by remember { mutableStateOf(false) }
+    var saved by remember(film?.renderPath) { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     val f = film
@@ -320,9 +322,23 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
             // Owner: one compact "Save" with a download icon (a copy gets the next free name, "Lena 2").
-            ReelogButton("Save", {
-                        scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos \u00B7 Movies/$APP_NAME" else "Could not save" }
-            }, leading = SliverIcons.Download)
+            // Owner 13 Nov: tapping Save showed nothing for seconds (a big film copies slowly), so it got saved 3 times.
+            ReelogButton(
+                when { saving -> "Saving..."; saved -> "Saved to Photos"; else -> "Save" },
+                {
+                    if (saving || saved) return@ReelogButton
+                    saving = true
+                    status = null
+                    scope.launch {
+                        val ok = share.saveToPhotos(path, f.name)
+                        saving = false
+                        saved = ok
+                        status = if (ok) "In your gallery: Movies/$APP_NAME" else "Couldn't save the film. Try again."
+                    }
+                },
+                enabled = !saving && !saved,
+                leading = if (saved) SliverIcons.Check else SliverIcons.Download,
+            )
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(
                 info, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), textAlign = androidx.compose.ui.text.style.TextAlign.Center),
