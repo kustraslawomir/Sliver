@@ -100,6 +100,7 @@ class ScreenShots : ShotTest() {
     }
     @Test fun filmPlayer() {
         FilmNav.id = "shot-film"
+        kotlinx.coroutines.runBlocking { db.filmDao().upsert(db.filmDao().getById("shot-film")!!.copy(renderPath = thumbPath(0))) }
         shoot("FilmPlayer", darkOnly = true, inspection = true) { FilmPlayerScreen({}, {}) }
     }
     @Test fun backup() = shoot("Backup") { BackupScreen({}, {}) }

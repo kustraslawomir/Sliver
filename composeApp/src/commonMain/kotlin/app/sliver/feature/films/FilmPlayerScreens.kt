@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.unit.sp
 import app.sliver.core.theme.LocalReducedMotion
 import app.sliver.core.theme.SliverColors
@@ -269,33 +270,43 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
             IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText(f.name, SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                SliverText(f.name, SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp), maxLines = 1)
+                SliverText(
+                    "${plan.spanText()} \u00B7 ${plan.clips} clips \u00B7 ${formatRuntime(plan.clips)}",
+                    SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary, maxLines = 1,
+                )
+            }
+            Spacer(Modifier.size(44.dp))
         }
+        Spacer(Modifier.height(96.dp))
         Box(
-            Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(if (ratio > 1f) 1f else 0.6f)
-                .align(Alignment.CenterHorizontally).aspectRatio(ratio).clip(SliverShapes.M).background(SliverColors.BgVoid)
+            Modifier.fillMaxWidth(if (ratio > 1f) 1f else 0.6f)
+                .align(Alignment.CenterHorizontally).aspectRatio(ratio).background(SliverColors.BgVoid)
                 .clickable { playing = !playing },
         ) {
             Video(Modifier.fillMaxSize())
         }
         Controls(Modifier.padding(horizontal = SliverSpace.Gutter))
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            PrimaryButton("Share film…", { share.share(path, f.name) }, Modifier.fillMaxWidth())
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton("Save to Photos", {
-                    scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos" else "Could not save" }
-                }, Modifier.weight(1f))
+            // Board FilmPlayer: Save to Photos is the primary action; sharing lives on the Premiere screen.
+            PrimaryButton("Save to Photos", {
+                scope.launch { status = if (share.saveToPhotos(path, f.name)) "Saved to Photos" else "Could not save" }
+            }, Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 SecondaryButton("Edit film", onEdit, Modifier.weight(1f))
+                GhostButton("Delete film", {
+                    scope.launch {
+                        if (runCatching { koin.get<FilmDeleter>().delete(f) }.isSuccess) onBack()
+                        else status = "Couldn't delete this film. Try again."
+                    }
+                }, Modifier.weight(1f), destructive = true)
             }
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
-            // DECISION: no overflow menu exists on this screen, so Delete film is a red text button under the actions.
-            GhostButton("Delete film", {
-                scope.launch {
-                    if (runCatching { koin.get<FilmDeleter>().delete(f) }.isSuccess) onBack()
-                    else status = "Couldn't delete this film. Try again."
-                }
-            }, Modifier.fillMaxWidth(), destructive = true)
-            SliverText(info, SliverType.Meta.copy(fontSize = 10.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.fillMaxWidth(), color = SliverColors.TextDisabled)
+            SliverText(
+                info, SliverType.Meta.copy(fontSize = 12.sp, lineHeight = 16.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center),
+                Modifier.fillMaxWidth(), color = SliverColors.TextTertiary,
+            )
         }
     }
 }
