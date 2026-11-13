@@ -15,6 +15,9 @@ interface GalleryProvider {
 
     /** If the picked photo is a Motion Photo, writes its embedded video to tmp; null otherwise. */
     suspend fun extractMotionVideo(uri: String): MotionClip?
+
+    /** File name of a gallery item, or null when it cannot be read. */
+    suspend fun nameOf(uri: String): String? = null
 }
 
 class MotionClip(val path: String, val presentationUs: Long?)

@@ -110,7 +110,7 @@ class DraftActions(
             Triple(day, video, thumb) to ok
         }
         val remembered = list.filter { it.draftCandidates != null || it.importRunId != null }
-            .map { it to decodeCandidates(it.draftCandidates).map { c -> c.uri } }
+            .map { it to decodeCandidates(it.draftCandidates).flatMap(::dismissTokens) }
         remembered.forEach { (d, uris) -> store?.dismiss(d.projectId, d.date, uris) }
         if (message == null) {
             parked.forEach { (p, _) ->

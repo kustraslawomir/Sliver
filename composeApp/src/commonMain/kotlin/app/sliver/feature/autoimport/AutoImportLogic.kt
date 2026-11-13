@@ -27,6 +27,29 @@ fun isScreenCapture(relativePath: String?, name: String?): Boolean {
     return "screenshot" in s || "screen record" in s || "screenrecord" in s || "screen_record" in s || "screencast" in s
 }
 
+/** The app's own demo clips (Movies/SliverDemo, Pictures/SliverDemo) are test media, never a day's moment. */
+fun isDemoMedia(relativePath: String?): Boolean = "sliverdemo" in relativePath.orEmpty().lowercase()
+
+/** File name inside a document (folder) uri, e.g. ".../document/primary%3ALena%2F20260403_211310.jpg" → "20260403_211310.jpg". */
+fun documentName(uri: String): String? {
+    if ("/document/" !in uri) return null
+    val doc = uri.substringAfterLast("/document/").replace("%2F", "/").replace("%2f", "/").replace("%3A", ":").replace("%3a", ":")
+    return doc.substringAfterLast('/').substringAfterLast(':').replace("%20", " ").takeIf { it.isNotEmpty() }
+}
+
+/** How a rejected item is remembered: its uri and, when known, its file name. */
+fun dismissTokens(c: DraftCandidate): List<String> = listOfNotNull(c.uri, (c.name ?: documentName(c.uri))?.let { "name:$it" })
+
+/**
+ * Owner 13 Nov: an item rejected while importing from a folder came back when importing from the gallery (same file,
+ * different uri). Matches by uri or by file name.
+ */
+fun isDismissed(uri: String, name: String?, seen: Collection<String>): Boolean {
+    if (uri in seen) return true
+    val n = name ?: documentName(uri) ?: return false
+    return "name:$n" in seen || seen.any { documentName(it) == n }
+}
+
 /** Camera originals live under DCIM (e.g. DCIM/Camera/, DCIM/100ANDRO/); messenger and download folders don't. */
 fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowercase().startsWith("dcim/")
 
@@ -35,6 +58,8 @@ fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowerc
 data class DraftCandidate(
     val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false, val fileTime: Boolean = false,
     val live: Boolean = false,
+    /** File name, so a rejected item is recognised whichever way it was found (gallery or folder). */
+    val name: String? = null,
 )
 
 const val MAX_CANDIDATES = 30
@@ -74,7 +99,7 @@ fun mediaTier(e: MediaEntry): Int = when {
 }
 
 fun candidatesOf(entries: List<MediaEntry>): List<DraftCandidate> =
-    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime, it.live) }
+    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime, it.live, it.name) }
 
 /** A video's 1 s window sits in the middle. */
 fun middleWindowStartMs(durationMs: Long): Long = ((durationMs - 1000) / 2).coerceAtLeast(0)

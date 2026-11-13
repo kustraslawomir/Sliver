@@ -62,20 +62,20 @@ class AndroidMediaScanner(private val context: Context) : MediaScanner {
             val lo = from.atStartOfDayIn(zone).toEpochMilliseconds()
             val hi = LocalDate.fromEpochDays(to.toEpochDays() + 1).atStartOfDayIn(zone).toEpochMilliseconds()
             val out = mutableListOf<MediaEntry>()
-            query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, lo, hi) { uri, taken, _, camera ->
+            query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, false, lo, hi) { uri, taken, _, camera, name ->
                 val day = app.sliver.feature.autoimport.localDateOf(taken, zone)
                 val motion = day in sniffDays && isMotion(uri)
-                out += MediaEntry(uri.toString(), video = false, takenAtMs = taken, durationMs = 0, motion = motion, camera = camera)
+                out += MediaEntry(uri.toString(), video = false, takenAtMs = taken, durationMs = 0, motion = motion, camera = camera, name = name)
                 onFound(out.size)
             }
-            query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, lo, hi) { uri, taken, duration, camera ->
-                out += MediaEntry(uri.toString(), video = true, takenAtMs = taken, durationMs = duration, camera = camera)
+            query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, lo, hi) { uri, taken, duration, camera, name ->
+                out += MediaEntry(uri.toString(), video = true, takenAtMs = taken, durationMs = duration, camera = camera, name = name)
                 onFound(out.size)
             }
             out
         }
 
-    private fun query(base: Uri, video: Boolean, lo: Long, hi: Long, each: (Uri, Long, Long, Boolean) -> Unit) {
+    private fun query(base: Uri, video: Boolean, lo: Long, hi: Long, each: (Uri, Long, Long, Boolean, String?) -> Unit) {
         val projection = arrayOf(
             MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_TAKEN,
             if (video) MediaStore.Video.Media.DURATION else MediaStore.MediaColumns._ID,
@@ -88,8 +88,8 @@ class AndroidMediaScanner(private val context: Context) : MediaScanner {
             )?.use { c ->
                 while (c.moveToNext()) {
                     val path = c.getString(3)
-                    if (app.sliver.feature.autoimport.isScreenCapture(path, c.getString(4))) continue
-                    each(ContentUris.withAppendedId(base, c.getLong(0)), c.getLong(1), if (video) c.getLong(2) else 0L, app.sliver.feature.autoimport.isCameraPath(path))
+                    if (app.sliver.feature.autoimport.isScreenCapture(path, c.getString(4)) || isDemoMedia(path)) continue
+                    each(ContentUris.withAppendedId(base, c.getLong(0)), c.getLong(1), if (video) c.getLong(2) else 0L, app.sliver.feature.autoimport.isCameraPath(path), c.getString(4))
                 }
             }
         }

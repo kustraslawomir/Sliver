@@ -145,7 +145,29 @@ class AutoImportExecutor(
         private set
 
     /** Makes one draft per gap day that has gallery items. Resumable: days that already have a row are skipped. */
+    /**
+     * Drafts whose picked item the user had already rejected (e.g. rejected from a folder, found again in the gallery)
+     * are removed; the day stays empty. Returns how many.
+     */
+    suspend fun pruneDismissedDrafts(): Int {
+        val dismissed = store.dismissed()
+        if (dismissed.isEmpty()) return 0
+        var n = 0
+        for (day in days.observeDrafts().first()) {
+            val seen = dismissed[dismissKey(day.projectId, day.date)] ?: continue
+            val picked = decodeCandidates(day.draftCandidates).firstOrNull() ?: continue
+            val name = picked.name ?: runCatching { gallery.nameOf(picked.uri) }.getOrNull()
+            if (!isDismissed(picked.uri, name, seen)) continue
+            days.deleteRow(day.projectId, day.date)
+            files.delete(day.file)
+            files.delete(day.thumb)
+            n++
+        }
+        return n
+    }
+
     suspend fun run() {
+        runCatching { pruneDismissedDrafts() }
         val run = store.current()?.takeIf { !it.finished } ?: return
         failed = 0
         val from = LocalDate.parse(run.from)
@@ -158,8 +180,8 @@ class AutoImportExecutor(
         // A day the user removed comes back only with new files; the old ones stay as extra options after them.
         val byDate = groupByDate(found, zone(), from, to).mapNotNull { (date, entries) ->
             val seen = dismissed[dismissKey(run.projectId, date)]?.toSet().orEmpty()
-            val fresh = entries.filter { it.uri !in seen }
-            if (fresh.isEmpty()) null else date to (fresh to entries.filter { it.uri in seen })
+            val fresh = entries.filter { !isDismissed(it.uri, it.name, seen) }
+            if (fresh.isEmpty()) null else date to (fresh to entries.filter { isDismissed(it.uri, it.name, seen) })
         }.toMap()
         // Days that already have a clip: remember the new items as alternatives (badge in the calendar), never replace.
         val gapSet = gaps.toSet()

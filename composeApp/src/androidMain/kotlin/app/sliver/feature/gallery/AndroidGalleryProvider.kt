@@ -104,6 +104,13 @@ class AndroidGalleryProvider(private val context: Context, private val files: Fi
         return buf.copyOf(n)
     }
 
+    override suspend fun nameOf(uri: String): String? = withContext(Dispatchers.IO) {
+        runCatching {
+            context.contentResolver.query(android.net.Uri.parse(uri), arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { c -> if (c.moveToFirst()) c.getString(0) else null }
+        }.getOrNull()
+    }
+
     override suspend fun extractMotionVideo(uri: String): MotionClip? = withContext(Dispatchers.IO) {
         val source = Uri.parse(uri)
         if (resolver.getType(source)?.startsWith("image/") != true) return@withContext null
