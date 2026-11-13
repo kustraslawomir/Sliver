@@ -33,6 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.style.TextAlign
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -126,8 +130,15 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton44(onBack, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText(if (editId != null) "Edit film" else "New film", SliverType.Headline, Modifier.padding(start = SliverSpace.S2))
+            IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
+            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                SliverText(editing?.name ?: project?.name ?: "New film", SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp), maxLines = 1)
+                SliverText(
+                    if (format == FilmFormat.CINEMA) "Cinema 16:9" else "Story 9:16",
+                    SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary,
+                )
+            }
+            Spacer(Modifier.size(44.dp))
         }
 
         val ratio = if (format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
@@ -162,7 +173,37 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 }
             }
             SliverSlider(fraction, { seek = FilmSeek(it) })
-            SliverText("${plan.clips} clips · ${formatRuntime(plan.clips)}", SliverType.Meta, color = SliverColors.TextSecondary)
+            Row(Modifier.fillMaxWidth()) {
+                val at = (fraction * plan.clips).toInt()
+                SliverText("${clockTime(at)} / ${clockTime(plan.clips)}", SliverType.Meta.copy(fontSize = 13.sp), Modifier.weight(1f), SliverColors.TextTertiary)
+                SliverText("${plan.clips} clips \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = 13.sp), color = SliverColors.TextTertiary, maxLines = 1)
+            }
+        }
+
+        Section("Sound") {
+            Segmented(
+                listOf("Original", "Music", "Mix"), Audios.indexOf(options.audio),
+                { options = options.copy(audio = Audios[it]) },
+            )
+            if (options.track == null && isLegacyTrack(editing?.track)) {
+                SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
+            }
+            if (options.audio == FilmAudio.ORIGINAL) {
+                SliverText("Every clip keeps its own sound.", SliverType.BodySmall, color = SliverColors.TextTertiary)
+            } else {
+                // Board FilmBuilder: no bundled tracks, only the user's own file.
+                val picked = trackLabel(options.track)
+                if (picked != null) SliverText(picked, SliverType.BodySmall, color = SliverColors.TextPrimary, maxLines = 1)
+                else SliverText(PICK_MUSIC_HINT, SliverType.BodySmall, color = SliverColors.TextTertiary)
+                GhostButton(if (picked == null) "Pick an audio file\u2026" else "Pick another audio file\u2026", pickAudio)
+                notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
+            }
+        }
+
+        Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
+            Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+            SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
+            Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
         }
 
         val frame = plan.days.getOrNull(plan.days.size / 2)?.let { rememberPhoto(it.thumb) }
@@ -174,31 +215,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             modifier = Modifier.padding(horizontal = SliverSpace.Gutter),
         )
 
-        Section("Sound") {
-            Segmented(
-                listOf("Original", "Music", "Mix"), Audios.indexOf(options.audio),
-                { options = options.copy(audio = Audios[it]) },
-            )
-            if (options.track == null && isLegacyTrack(editing?.track)) {
-                SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
-            }
-            if (options.audio != FilmAudio.ORIGINAL) {
-                val picked = trackLabel(options.track)
-                if (picked != null) {
-                    SliverText(picked, SliverType.BodySmall, color = SliverColors.AccentText, maxLines = 1)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                    GhostButton(if (picked == null) "Pick a file" else "Replace", pickAudio)
-                    if (picked != null) GhostButton("Remove", { setTrack(null) })
-                }
-                notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
-                if (picked == null) SliverText(PICK_MUSIC_HINT, SliverType.Caption, color = SliverColors.TextSecondary)
-            }
-        }
-
-        Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
-            SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
-        }
 
         if (lowStorage) {
             SliverText(
@@ -207,7 +223,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             )
         }
         PrimaryButton(
-            "Save film",
+            "${if (editId != null) "Save film" else "Make film"} \u00B7 ${clockTime(plan.clips)}",
             {
                 lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
                 if (!lowStorage) scope.launch {
@@ -223,13 +239,20 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),
             enabled = clips.isNotEmpty() && canSaveSound(options.audio, options.track),
         )
+        SliverText(
+            "Rendered on your phone, 1080p. Works offline.", SliverType.Caption.copy(textAlign = TextAlign.Center),
+            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), SliverColors.TextTertiary,
+        )
     }
 }
+
+/** "02:09" */
+private fun clockTime(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"
 
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText(title, SliverType.Meta, color = SliverColors.TextSecondary)
+        SliverText(title, SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary)
         content()
     }
 }

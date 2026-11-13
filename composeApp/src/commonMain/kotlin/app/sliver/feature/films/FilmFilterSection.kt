@@ -28,6 +28,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.unit.sp
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import app.sliver.core.theme.SliverColors
@@ -43,8 +45,8 @@ import app.sliver.data.info
 /** Renders [frame] once per filter at thumbnail size (cached by the platform); returns what is ready. */
 expect suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPreset>): Map<LookPreset, ImageBitmap>
 
-private val TileW = 72.dp
-private val TileH = 96.dp
+private val TileW = 64.dp
+private val TileH = 64.dp
 
 /** The film's filter: a row of thumbnails rendered from a frame of the film, then Intensity and Grain for the chosen one. */
 @Composable
@@ -63,7 +65,7 @@ fun FilmFilterSection(
         value = thumbsOverride ?: frame?.let { renderFilterThumbs(it, FilterPresets) }.orEmpty()
     }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText("Filters", SliverType.Meta, color = SliverColors.TextSecondary)
+        SliverText("Filter \u00B7 whole film", SliverType.BodySmall.copy(fontSize = 14.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             Tile("None", frame, selected == null) { onSelect(null) }
             FilterPresets.forEach { p ->
@@ -87,18 +89,14 @@ private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick:
     ) {
         Box(
             Modifier.size(TileW, TileH).clip(SliverShapes.S).background(SliverColors.Surface2)
-                .border(if (selected) 2.dp else 1.dp, if (selected) SliverColors.TextPrimary else SliverColors.LineHairline, SliverShapes.S),
+                .then(if (selected) Modifier.border(2.dp, SliverColors.TextPrimary, SliverShapes.S) else Modifier),
         ) {
             if (image != null) Image(image, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            if (selected) {
-                Box(
-                    Modifier.align(Alignment.TopEnd).padding(SliverSpace.S1).size(20.dp).clip(SliverShapes.Pill)
-                        .background(SliverColors.BgVoid.copy(alpha = 0.7f)),
-                    contentAlignment = Alignment.Center,
-                ) { SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 14.dp) }
-            }
         }
-        SliverText(label, SliverType.Caption, color = if (selected) SliverColors.TextPrimary else SliverColors.TextSecondary, maxLines = 1)
+        SliverText(
+            label, SliverType.Caption.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.fillMaxWidth(),
+            color = if (selected) SliverColors.TextPrimary else SliverColors.TextTertiary, maxLines = 1,
+        )
     }
 }
 
