@@ -178,6 +178,7 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 onKeepAll = { draftNav.keepAll() },
                 onRemoveUnchecked = { draftNav.removeUnchecked() },
                 onDone = { scope.launch { store.clear() } },
+                onContinue = { scope.launch { store.clear(); onBack() } },
                 onUndo = {
                     runner.cancel()
                     scope.launch { executor.undoAll() }
@@ -293,7 +294,7 @@ private fun shortDay(d: LocalDate) = "${d.day} ${MonthLong[d.month.ordinal].take
 @Composable
 private fun ColumnScope.RunProgress(
     run: ImportRun, waiting: List<Day>, autoLeft: Int,
-    onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit,
+    onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onContinue: () -> Unit, onUndo: () -> Unit,
 ) {
     val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
     val first = run.firstFilled?.let(LocalDate::parse)
@@ -349,7 +350,7 @@ private fun ColumnScope.RunProgress(
                 buildString {
                     if (stayEmpty > 0) append("$stayEmpty ${if (stayEmpty == 1) "day" else "days"} had nothing in your ${if (run.folder != null) "folder" else "gallery"} and stay empty. ")
                     if (run.skipped > 0) append("${run.skipped} couldn't be read. ")
-                    append(if (run.keep) "Filled days are marked until you check them." else "Drafts count only after you keep them.")
+                    append(if (run.keep) "Filled days are marked until you check them." else "Drafts wait in the calendar and count only after you keep them.")
                 },
                 SliverType.BodySmall, color = SliverColors.TextTertiary,
             )
@@ -362,6 +363,9 @@ private fun ColumnScope.RunProgress(
     ) {
         if (!run.finished) {
             SecondaryButton("Stop", onCancel, Modifier.fillMaxWidth())
+        } else if (!run.keep) {
+            // Owner 13 Nov: drafts were chosen up front, so the summary only moves on; drafts wait in the calendar.
+            PrimaryButton("Continue", onContinue, Modifier.fillMaxWidth())
         } else {
             if (waiting.isNotEmpty()) {
                 PrimaryButton("Keep all", onKeepAll, Modifier.fillMaxWidth())
