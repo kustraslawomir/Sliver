@@ -36,6 +36,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.HoldToConfirmButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.core.ui.SliverBottomSheet
@@ -210,7 +211,7 @@ private fun ProjectRow(
             SliverText(projectMeta(project, stats), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 2)
         }
         if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary)
-        IconButton44({ onMenu(project) }, "Project options") { SliverIcon(SliverIcons.More, SliverColors.TextSecondary) }
+        IconButton44({ onMenu(project) }, "Edit project") { SliverIcon(SliverIcons.Pencil, SliverColors.TextSecondary) }
     }
 }
 
@@ -285,7 +286,7 @@ private fun ProjectMenu(
     Column {
         SheetHeader(project.name, onBack)
         MenuRow("Rename", onRename)
-        MenuRow("Change format", onFormat)
+        MenuRow("Change orientation", onFormat)
         MenuRow(if (project.archived) "Unarchive" else "Archive", onArchive, enabled = canLeave || project.archived)
         MenuRow("Delete project", onDelete, destructive = true, enabled = canLeave)
         if (!canLeave) SliverText("This is your only open project.", SliverType.Caption)
@@ -306,7 +307,7 @@ private fun RenameProject(project: Project, busy: Boolean, onBack: () -> Unit, o
 @Composable
 private fun FormatProject(project: Project, onBack: () -> Unit, onPick: (FilmFormat) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-        SheetHeader("Format", onBack)
+        SheetHeader("Orientation", onBack)
         FormatCards(project.format, onPick)
         SliverText("Applies to clips you save from now on. Saved clips keep their format.", SliverType.Caption)
     }
@@ -315,12 +316,12 @@ private fun FormatProject(project: Project, onBack: () -> Unit, onPick: (FilmFor
 @Composable
 private fun ConfirmDelete(project: Project, clips: Int, busy: Boolean, onBack: () -> Unit, onConfirm: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-        SheetHeader("Delete ${project.name}?", onBack)
+        SheetHeader("Delete project?", onBack)
         SliverText(
-            "This removes its $clips ${if (clips == 1) "clip" else "clips"} and films from this phone and your Drive backup.",
+            "${project.name}: $clips ${if (clips == 1) "clip" else "clips"} and its films will be removed from this phone and your Drive backup. This can't be undone.",
             SliverType.BodySmall,
         )
-        PrimaryButton(if (busy) "Deleting..." else "Delete project", onConfirm, enabled = !busy)
+        HoldToConfirmButton(if (busy) "Deleting..." else "Hold to delete", onConfirm, Modifier.fillMaxWidth(), enabled = !busy)
         GhostButton("Keep it", onBack, Modifier.fillMaxWidth())
     }
 }

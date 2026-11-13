@@ -32,6 +32,7 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.HoldToConfirmButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.data.backup.clipsLine
 import app.sliver.data.backup.driveLine
@@ -213,8 +214,8 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                     caption = "This can't be undone",
                 )
                 if (deleteError) SliverText("Something went wrong. Nothing more was changed. Try again.", SliverType.Caption)
-                PrimaryButton(
-                    if (deleting) "Deleting" else "Delete account",
+                HoldToConfirmButton(
+                    if (deleting) "Deleting" else "Hold to delete account",
                     {
                         deleting = true
                         deleteError = false
