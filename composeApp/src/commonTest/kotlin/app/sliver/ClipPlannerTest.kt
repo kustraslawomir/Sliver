@@ -36,14 +36,26 @@ class ClipPlannerTest {
     }
 
     @Test fun cropPortraitIntoLandscapeUsesOffset() {
-        val top = ClipPlanner.cropRect(9f / 16, 16f / 9, 0f)
+        val top = ClipPlanner.cropRect(9f / 16, 16f / 9, null, 0f)
         assertEquals(1f, top.top)
-        val center = ClipPlanner.cropRect(9f / 16, 16f / 9, null)
+        val center = ClipPlanner.cropRect(9f / 16, 16f / 9, null, null)
         assertEquals(0f, (center.top + center.bottom), 1e-5f)
     }
 
     @Test fun cropWideIntoNarrowCentersHorizontally() {
-        val r = ClipPlanner.cropRect(16f / 9, 9f / 16, null)
+        val r = ClipPlanner.cropRect(16f / 9, 9f / 16, null, null)
         assertEquals(-r.left, r.right)
+    }
+
+    @Test fun cropWideIntoNarrowUsesHorizontalOffset() {
+        val f = (9f / 16) / (16f / 9)
+        val left = ClipPlanner.cropRect(16f / 9, 9f / 16, 0f, null)
+        assertEquals(-1f, left.left, 1e-5f)
+        assertEquals(-1f + 2f * f, left.right, 1e-5f)
+        val right = ClipPlanner.cropRect(16f / 9, 9f / 16, 1f, null)
+        assertEquals(1f, right.right, 1e-5f)
+        assertEquals(1f - 2f * f, right.left, 1e-5f)
+        assertEquals(-1f, right.bottom)
+        assertEquals(1f, right.top)
     }
 }

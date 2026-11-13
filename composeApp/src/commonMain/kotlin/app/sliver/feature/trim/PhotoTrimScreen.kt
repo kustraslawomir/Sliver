@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,6 +98,9 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val project by remember { projects.active }.collectAsState(null)
     var done by remember { mutableStateOf(false) }
     val photo = rememberPhoto(path)
+    var cropX by rememberSaveable { mutableFloatStateOf(0.5f) }
+    val photoAspect = photo?.let { it.width.toFloat() / it.height }
+    val reframeX = project?.format == FilmFormat.STORY && photoAspect != null && photoAspect > 1f
 
 
     DisposableEffect(Unit) {
@@ -125,7 +129,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         scope.launch {
             val format = project?.format ?: FilmFormat.CINEMA
             val request = SaveClipRequest(
-                date = day, source = path, startMs = 0, speed = 1f, cropY = null, format = format,
+                date = day, source = path, startMs = 0, speed = 1f, cropX = cropX.takeIf { reframeX }, cropY = null, format = format,
                 daySource = DaySource.PHOTO, takenAt = Clock.System.now(), motion = motion,
                 look = LookParams(),
             )
@@ -153,7 +157,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
             Box(Modifier.padding(SliverSpace.S6))
         }
         ClipFrame(
-            if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
+            if (reframeX) photoAspect!! else if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
             Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
                 .clip(SliverShapes.S).clipToBounds(),
         ) {
@@ -163,6 +167,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                     it, null, Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
                     contentScale = ContentScale.Crop,
                 )
+                if (reframeX) ReframeBandX(cropX) { cropX = it }
             }
         }
         Column(

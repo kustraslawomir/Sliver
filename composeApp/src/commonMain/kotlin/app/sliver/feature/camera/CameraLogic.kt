@@ -29,6 +29,17 @@ fun iconRotation(rotation: Int): Float {
 fun cinemaBandFraction(width: Float, height: Float): Float =
     if (width <= 0f || height <= 0f) 1f else (width / CINEMA_ASPECT / height).coerceAtMost(1f)
 
+const val STORY_ASPECT = 9f / 16f
+
+/** Width of the 9:16 band as a fraction of a landscape frame of [width] x [height]. */
+fun storyBandFraction(width: Float, height: Float): Float =
+    if (width <= 0f || height <= 0f) 1f else (height * STORY_ASPECT / width).coerceAtMost(1f)
+
+/** 0..1 crop offset (0 = band at left) for a band of [bandFraction] whose left edge sits at [leftFraction]. */
+fun cropXFromLeft(leftFraction: Float, bandFraction: Float): Float = cropYFromTop(leftFraction, bandFraction)
+
+fun leftFromCropX(cropX: Float, bandFraction: Float): Float = topFromCropY(cropX, bandFraction)
+
 /** 0..1 crop offset (0 = band at top) for a band of [bandFraction] whose top sits at [topFraction]. */
 fun cropYFromTop(topFraction: Float, bandFraction: Float): Float {
     val room = 1f - bandFraction

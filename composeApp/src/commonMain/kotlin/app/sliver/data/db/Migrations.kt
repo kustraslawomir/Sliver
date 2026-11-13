@@ -82,3 +82,10 @@ val Migration6To7 = object : Migration(6, 7) {
         )
     }
 }
+
+/** Landscape source in a vertical project: horizontal crop position; null = centered. */
+val Migration7To8 = object : Migration(7, 8) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE day ADD COLUMN cropX REAL")
+    }
+}

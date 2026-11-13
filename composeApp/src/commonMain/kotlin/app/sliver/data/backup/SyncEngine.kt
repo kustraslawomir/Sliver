@@ -367,6 +367,7 @@ class SyncEngine(
                 speed = props["speed"]?.toFloatOrNull() ?: 1f,
                 color = color,
                 cropY = props["cropY"]?.toFloatOrNull(),
+                cropX = props["cropX"]?.toFloatOrNull(),
                 takenAt = props["taken"]?.toLongOrNull()?.let(Instant::fromEpochMilliseconds) ?: noon,
                 createdAt = Instant.fromEpochMilliseconds(nowMillis()),
                 driveFileId = r.file.id,

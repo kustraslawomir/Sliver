@@ -1,7 +1,10 @@
 package app.sliver
 
 import app.sliver.feature.camera.cinemaBandFraction
+import app.sliver.feature.camera.cropXFromLeft
 import app.sliver.feature.camera.cropYFromTop
+import app.sliver.feature.camera.leftFromCropX
+import app.sliver.feature.camera.storyBandFraction
 import app.sliver.feature.camera.iconRotation
 import app.sliver.feature.camera.isUpright
 import app.sliver.feature.camera.topFromCropY
@@ -29,5 +32,16 @@ class FormatHintsTest {
         assertEquals(0.5f, cropYFromTop(topFromCropY(0.5f, band), band), 0.0001f)
         assertEquals(0f, cropYFromTop(0f, band))
         assertEquals(1f, cropYFromTop(1f - band, band), 0.0001f)
+    }
+
+    @Test
+    fun storyBandAndCropXRoundTrip() {
+        val band = storyBandFraction(1920f, 1080f)
+        assertEquals(0.3164f, band, 0.001f)
+        assertEquals(1f, storyBandFraction(500f, 1600f))
+        assertEquals(0.5f, cropXFromLeft(leftFromCropX(0.5f, band), band), 0.0001f)
+        assertEquals(0f, cropXFromLeft(0f, band))
+        assertEquals(1f, cropXFromLeft(1f - band, band), 0.0001f)
+        assertEquals(0.5f, cropXFromLeft(0.3f, 1f))
     }
 }

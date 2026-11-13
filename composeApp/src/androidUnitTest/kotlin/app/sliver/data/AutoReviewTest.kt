@@ -54,12 +54,12 @@ private class Tombs : TombstoneStore {
 
 private object NoExporter : ClipExporter {
     override suspend fun exportClip(
-        source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat, videoPath: String, thumbPath: String,
+        source: String, startMs: Long, speed: Float, cropX: Float?, cropY: Float?, format: FilmFormat, videoPath: String, thumbPath: String,
         shortMode: ShortMode, look: LookParams,
     ): ExportedClip = error("unused")
 
     override suspend fun photoToClip(
-        source: String, motion: Motion, format: FilmFormat, videoPath: String, thumbPath: String, look: LookParams,
+        source: String, motion: Motion, format: FilmFormat, videoPath: String, thumbPath: String, look: LookParams, cropX: Float?, cropY: Float?
     ): ExportedClip = error("unused")
 }
 

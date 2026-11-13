@@ -63,7 +63,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         source: String,
         startMs: Long,
         speed: Float,
-        cropY: Float?,
+        cropX: Float?, cropY: Float?,
         format: FilmFormat,
         videoPath: String,
         thumbPath: String,
@@ -75,7 +75,7 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         val plan = ClipPlanner.plan(info.durationMs, startMs, speed, shortMode)
         val (outW, outH) = if (format == FilmFormat.STORY) 1080 to 1920 else 1920 to 1080
 
-        val crop = ClipPlanner.cropRect(info.width.toFloat() / info.height, outW.toFloat() / outH, cropY)
+        val crop = ClipPlanner.cropRect(info.width.toFloat() / info.height, outW.toFloat() / outH, cropX, cropY)
         if (BuildConfig.DEBUG) withContext(Dispatchers.IO) { warnIfVariableFrameRate(uri) }
         val videoEffects = buildList<Effect> {
             if (info.fps > TARGET_FPS + 1f) add(FrameDropEffect.createDefaultFrameDropEffect(TARGET_FPS))
@@ -138,11 +138,17 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
         format: FilmFormat,
         videoPath: String,
         thumbPath: String,
-        look: LookParams,
+        look: LookParams, cropX: Float?, cropY: Float?
     ): ExportedClip {
         val uri = if (source.contains("://")) Uri.parse(source) else Uri.fromFile(File(source))
         val (outW, outH) = if (format == FilmFormat.STORY) 1080 to 1920 else 1920 to 1080
         val effects = buildList<Effect> {
+            if (cropX != null || cropY != null) {
+                photoAspect(uri)?.let { aspect ->
+                    val crop = ClipPlanner.cropRect(aspect, outW.toFloat() / outH, cropX, cropY)
+                    add(Crop(crop.left, crop.right, crop.bottom, crop.top))
+                }
+            }
             add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP))
             if (motion == Motion.ZOOM) {
                 add(
@@ -161,6 +167,16 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             listOf(EditedMediaItemSequence.Builder(listOf(item)).experimentalSetForceAudioTrack(true).build()),
         ).build()
         return render(composition, videoPath, thumbPath)
+    }
+
+    /** Display aspect (EXIF applied) of a still, from a heavily downsampled decode. */
+    private suspend fun photoAspect(uri: Uri): Float? = withContext(Dispatchers.IO) {
+        runCatching {
+            val bitmap = android.graphics.ImageDecoder.decodeBitmap(android.graphics.ImageDecoder.createSource(context.contentResolver, uri)) { decoder, _, _ ->
+                decoder.setTargetSampleSize(8)
+            }
+            (bitmap.width.toFloat() / bitmap.height).also { bitmap.recycle() }
+        }.getOrNull()
     }
 
     /** Runs the export, trims to exactly 1 s, writes the thumbnail and checks the result; removes partial output on any failure. */

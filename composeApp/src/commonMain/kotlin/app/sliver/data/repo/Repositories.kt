@@ -77,6 +77,8 @@ data class SaveClipRequest(
     val draft: Boolean = false,
     val draftCandidates: String? = null,
     val importRunId: String? = null,
+    /** Horizontal crop of a landscape source in a vertical project; null = centered. */
+    val cropX: Float? = null,
 )
 
 /** Best-effort place name for a media source that carries a location; null when absent or unresolvable. */
@@ -114,8 +116,8 @@ class DayRepositoryImpl(
         val tmpVideo = files.newTmpPath(stamp)
         val tmpThumb = "$tmpVideo.jpg"
         try {
-            val clip = if (isPhoto) exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look)
-            else exporter.exportClip(source, startMs, speed, cropY, format, tmpVideo, tmpThumb, shortMode, look)
+            val clip = if (isPhoto) exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look, cropX, cropY)
+            else exporter.exportClip(source, startMs, speed, cropX, cropY, format, tmpVideo, tmpThumb, shortMode, look)
             val place = places.resolve(source)
             val projectId = request.projectId ?: projects.activeId()
             val file = files.dayPath(projectId, date)
@@ -123,7 +125,7 @@ class DayRepositoryImpl(
             check(files.move(tmpVideo, file) && files.move(tmpThumb, thumb)) { "Could not move export into place" }
             val day = Day(
                 projectId = projectId, date = date, file = file, thumb = thumb, source = daySource, look = look, motion = motion,
-                keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY,
+                keepAudio = keepAudio, speed = speed, color = clip.color.takeIf { it != 0 } ?: color, cropY = cropY, cropX = cropX,
                 takenAt = takenAt, createdAt = Clock.System.now(), place = place,
                 driveFileId = dao.getByDate(projectId, date)?.driveFileId,
                 draft = draft, draftCandidates = draftCandidates, importRunId = importRunId,

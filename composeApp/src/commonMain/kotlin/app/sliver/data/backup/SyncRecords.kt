@@ -62,6 +62,7 @@ fun dayProps(day: app.sliver.data.db.Day, by: String, hash: String): Map<String,
     put("audio", if (day.keepAudio) "1" else "0")
     put("speed", day.speed.toString())
     day.cropY?.let { put("cropY", it.toString()) }
+    day.cropX?.let { put("cropX", it.toString()) }
     put("taken", day.takenAt.toEpochMilliseconds().toString())
     put("luma", day.luma.toString())
     put("tone", day.tone.toString())

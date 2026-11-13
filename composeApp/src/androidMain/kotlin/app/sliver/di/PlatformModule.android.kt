@@ -9,6 +9,7 @@ import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.Migration4To5
 import app.sliver.data.db.Migration5To6
 import app.sliver.data.db.Migration6To7
+import app.sliver.data.db.Migration7To8
 import app.sliver.BuildConfig
 import app.sliver.data.auth.AndroidGoogleAuth
 import app.sliver.data.auth.FakeGoogleAuth
@@ -65,7 +66,7 @@ actual val platformModule: Module = module {
     single {
         val ctx = get<Context>()
         Room.databaseBuilder<SliverDatabase>(ctx, ctx.getDatabasePath("sliver.db").absolutePath)
-            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7).build()
+            .addMigrations(Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7, Migration7To8).build()
     }
     single<FileStore> { get<Context>().let { AndroidFileStore(it.filesDir, it.cacheDir) } }
     single<ClipExporter> { clipExporter(get<Context>()) }

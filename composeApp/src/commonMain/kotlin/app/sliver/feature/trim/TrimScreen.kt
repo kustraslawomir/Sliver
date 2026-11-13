@@ -14,6 +14,9 @@ import app.sliver.data.FilmFormat
 import app.sliver.data.db.Film
 import app.sliver.data.repo.FilmRepository
 import app.sliver.feature.camera.cinemaBandFraction
+import app.sliver.feature.camera.cropXFromLeft
+import app.sliver.feature.camera.leftFromCropX
+import app.sliver.feature.camera.storyBandFraction
 import app.sliver.feature.camera.cropYFromTop
 import app.sliver.feature.camera.topFromCropY
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -46,12 +49,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
@@ -158,7 +164,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val daySource = remember { CaptureSession.source }
     var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var clipAspect by remember { mutableStateOf(1f) }
-    var cropY by remember { mutableStateOf(0.5f) }
+    var cropY by rememberSaveable { mutableStateOf(0.5f) }
+    var cropX by rememberSaveable { mutableStateOf(0.5f) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
@@ -212,6 +219,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val short = duration != null && isShortClip(duration)
     val windowMs = if (short) duration ?: 0 else (SECOND_MS * speed).toLong()
     val reframe = format == FilmFormat.CINEMA && clipAspect < 1f
+    val reframeX = format == FilmFormat.STORY && clipAspect > 1f
     val coach =saved?.coachTrimSeen == false && duration != null && !short
 
     fun release(to: Long) {
@@ -239,7 +247,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         scope.launch {
             val request = SaveClipRequest(
                 date = day, source = path, startMs = startMs, speed = speed,
-                cropY = cropY.takeIf { reframe }, format = format,
+                cropX = cropX.takeIf { reframeX }, cropY = cropY.takeIf { reframe }, format = format,
                 daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
                 look = LookParams(),
             )
@@ -293,7 +301,10 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                     ClipPlayer(
                         path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging,
                         scrubMs = if (dragging) startMs else null,
-                    ) { if (reframe) ReframeBand(cropY, { cropY = it }) }
+                    ) {
+                        if (reframe) ReframeBand(cropY, { cropY = it })
+                        if (reframeX) ReframeBandX(cropX, { cropX = it })
+                    }
                     if (saved?.dateStamp == true) DateStamp(stampText(day))
                 }
             }
@@ -465,6 +476,41 @@ private fun ReframeBand(cropY: Float, onCropY: (Float) -> Unit) {
                         change.consume()
                         val t = (topFromCropY(current, band) + dy / constraints.maxHeight).coerceIn(0f, 1f - band)
                         update(cropYFromTop(t, band))
+                    }
+                },
+        )
+    }
+}
+
+/** Draggable 9:16 band over a landscape preview; everything outside is dimmed. */
+@Composable
+internal fun ReframeBandX(cropX: Float, onCropX: (Float) -> Unit) {
+    val update by rememberUpdatedState(onCropX)
+    val current by rememberUpdatedState(cropX)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val band = storyBandFraction(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
+        val left = leftFromCropX(cropX, band)
+        val w = maxWidth
+        val bandW = w * band
+        val leftDp = w * left
+        val dim = SliverColors.Media.copy(alpha = 0.55f)
+        StripDim(Modifier.fillMaxHeight().width(leftDp), dim)
+        StripDim(Modifier.fillMaxHeight().width(w - leftDp - bandW).align(Alignment.BottomEnd), dim)
+        Box(
+            Modifier.fillMaxHeight().width(bandW).offset(x = leftDp)
+                .border(1.5.dp, SliverColors.Accent)
+                .semantics {
+                    contentDescription = "Crop area, ${(cropX * 100).roundToInt()} percent from the left"
+                    customActions = listOf(
+                        CustomAccessibilityAction("Move crop left") { update((current - 0.1f).coerceIn(0f, 1f)); true },
+                        CustomAccessibilityAction("Move crop right") { update((current + 0.1f).coerceIn(0f, 1f)); true },
+                    )
+                }
+                .pointerInput(band) {
+                    detectHorizontalDragGestures { change, dx ->
+                        change.consume()
+                        val l = (leftFromCropX(current, band) + dx / constraints.maxWidth).coerceIn(0f, 1f - band)
+                        update(cropXFromLeft(l, band))
                     }
                 },
         )

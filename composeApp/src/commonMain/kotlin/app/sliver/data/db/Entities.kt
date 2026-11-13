@@ -45,6 +45,7 @@ data class Day(
     val speed: Float = 1.0f,
     val color: Int = 0,
     val cropY: Float? = null,
+    val cropX: Float? = null,
     val takenAt: Instant,
     val createdAt: Instant,
     val driveFileId: String? = null,

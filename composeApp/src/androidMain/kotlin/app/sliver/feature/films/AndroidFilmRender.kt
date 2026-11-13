@@ -280,7 +280,7 @@ class FilmComposer(
         val main = clips.map { clip ->
             val effects = buildList<Effect> {
                 if (!blur) {
-                    val crop = ClipPlanner.cropRect(clip.aspect, outAspect, clip.day.cropY)
+                    val crop = ClipPlanner.cropRect(clip.aspect, outAspect, clip.day.cropX, clip.day.cropY)
                     add(Crop(crop.left, crop.right, crop.bottom, crop.top))
                     add(Presentation.createForWidthAndHeight(outW, outH, Presentation.LAYOUT_SCALE_TO_FIT))
                 }

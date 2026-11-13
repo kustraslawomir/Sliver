@@ -20,6 +20,7 @@ interface ClipExporter {
         source: String,
         startMs: Long,
         speed: Float,
+        cropX: Float?,
         cropY: Float?,
         format: FilmFormat,
         videoPath: String,
@@ -36,6 +37,8 @@ interface ClipExporter {
         videoPath: String,
         thumbPath: String,
         look: LookParams = LookParams(),
+        cropX: Float? = null,
+        cropY: Float? = null,
     ): ExportedClip
 }
 
@@ -79,11 +82,12 @@ object ClipPlanner {
         }
     }
 
-    /** Normalized (-1..1) crop rect for fitting a source of [srcAspect] into [targetAspect]; cropY 0..1, null = center. */
-    fun cropRect(srcAspect: Float, targetAspect: Float, cropY: Float?): CropRect {
+    /** Normalized (-1..1) crop rect for fitting a source of [srcAspect] into [targetAspect]; cropX/cropY 0..1, null = center. */
+    fun cropRect(srcAspect: Float, targetAspect: Float, cropX: Float?, cropY: Float?): CropRect {
         if (srcAspect >= targetAspect) {
             val f = targetAspect / srcAspect
-            return CropRect(-f, f, -1f, 1f)
+            val left = -1f + 2f * (cropX ?: 0.5f).coerceIn(0f, 1f) * (1f - f)
+            return CropRect(left, left + 2f * f, -1f, 1f)
         }
         val f = srcAspect / targetAspect
         val top = 1f - 2f * (cropY ?: 0.5f).coerceIn(0f, 1f) * (1f - f)

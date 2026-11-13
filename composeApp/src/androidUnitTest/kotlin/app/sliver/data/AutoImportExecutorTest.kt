@@ -48,7 +48,7 @@ private class Recording : ClipExporter {
     val calls = mutableListOf<Call>()
 
     override suspend fun exportClip(
-        source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat, videoPath: String, thumbPath: String,
+        source: String, startMs: Long, speed: Float, cropX: Float?, cropY: Float?, format: FilmFormat, videoPath: String, thumbPath: String,
         shortMode: ShortMode, look: LookParams,
     ): ExportedClip {
         calls += Call(source, startMs, false)
@@ -58,7 +58,7 @@ private class Recording : ClipExporter {
     }
 
     override suspend fun photoToClip(
-        source: String, motion: Motion, format: FilmFormat, videoPath: String, thumbPath: String, look: LookParams,
+        source: String, motion: Motion, format: FilmFormat, videoPath: String, thumbPath: String, look: LookParams, cropX: Float?, cropY: Float?
     ): ExportedClip {
         calls += Call(source, 0, true)
         File(videoPath).writeText("v")

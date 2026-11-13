@@ -36,7 +36,7 @@ import org.robolectric.annotation.Config
 
 private object FakeExporter : ClipExporter {
     override suspend fun exportClip(
-        source: String, startMs: Long, speed: Float, cropY: Float?, format: FilmFormat,
+        source: String, startMs: Long, speed: Float, cropX: Float?, cropY: Float?, format: FilmFormat,
         videoPath: String, thumbPath: String, shortMode: ShortMode,
         look: LookParams,
     ): ExportedClip {
@@ -47,8 +47,8 @@ private object FakeExporter : ClipExporter {
 
     override suspend fun photoToClip(
         source: String, motion: app.sliver.data.Motion, format: FilmFormat, videoPath: String, thumbPath: String,
-        look: LookParams,
-    ) = exportClip(source, 0, 1f, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
+        look: LookParams, cropX: Float?, cropY: Float?
+    ) = exportClip(source, 0, 1f, null, null, format, videoPath, thumbPath, ShortMode.SLOW_TO_FIT)
 }
 
 @RunWith(RobolectricTestRunner::class)
