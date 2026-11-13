@@ -55,8 +55,12 @@ object CaptureSession {
             motionPhoto = false
             liveVideoUri = null
             draft = null
+            changeMoment = null
         }
     var forDate: kotlinx.datetime.LocalDate? = null
+
+    /** Set when the editor re-cuts a saved day from its kept recording (Change moment); its look, sound and time carry over. */
+    var changeMoment: app.sliver.data.db.Day? = null
     var source: app.sliver.data.DaySource = app.sliver.data.DaySource.CAMERA
     var motionPresentationUs: Long? = null
     var motion: Boolean = false

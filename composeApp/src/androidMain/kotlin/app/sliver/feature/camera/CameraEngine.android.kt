@@ -184,7 +184,7 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
             val uhd = b.lens == Lens.BACK && Quality.UHD in caps.getSupportedQualities(DynamicRange.SDR)
             val top = if (uhd) Quality.UHD else Quality.FHD
             val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(top, FallbackStrategy.lowerQualityOrHigherThan(Quality.HD)))
+                .setQualitySelector(QualitySelector.from(top, FallbackStrategy.lowerQualityThan(top)))
                 .setTargetVideoEncodingBitRate(if (uhd) UHD_BITRATE else FHD_BITRATE)
                 .build()
             val vc = VideoCapture.Builder(recorder)

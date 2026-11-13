@@ -45,6 +45,13 @@ class SliverApp : Application(), KoinComponent {
             days.observeAll().map { list -> list.map { it.date to it.thumb } }.distinctUntilChanged()
                 .collect { refreshTodayWidgets(this@SliverApp) }
         }
-        Thread { store.cleanTmp(System.currentTimeMillis()) }.start()
+        // T-glass-v1.7 10.5: recordings still in tmp are matched to their days first; only then is tmp cleaned.
+        val rescue: app.sliver.feature.trim.OriginalRescue by inject()
+        AppScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            // A failed rescue leaves tmp alone so nothing that could still be matched is deleted.
+            runCatching { rescue.run() }
+                .onSuccess { n -> android.util.Log.i("Originals", "rescued $n recording(s)"); store.cleanTmp(System.currentTimeMillis()) }
+                .onFailure { android.util.Log.w("Originals", "rescue failed, tmp kept", it) }
+        }
     }
 }

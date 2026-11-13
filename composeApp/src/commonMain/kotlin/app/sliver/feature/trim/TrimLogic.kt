@@ -15,6 +15,12 @@ fun clampStart(startMs: Long, durationMs: Long, speed: Float): Long =
 /** Only our own recordings are ever deleted; gallery sources must be left alone. */
 fun isTmp(path: String) = path.substringAfterLast('/').startsWith("rec_")
 
+/** A kept camera recording (files/originals/orig_<start>.mp4). */
+fun isOriginal(path: String) = path.substringAfterLast('/').startsWith("orig_")
+
+/** Start time from a recording's name (rec_<start>.mp4), or null. */
+fun recordingStamp(path: String): Long? = path.substringAfterLast('/').removePrefix("rec_").removeSuffix(".mp4").toLongOrNull()
+
 fun isShortClip(durationMs: Long) = durationMs < SECOND_MS
 
 fun showMinimap(durationMs: Long) = durationMs > MINIMAP_THRESHOLD_MS

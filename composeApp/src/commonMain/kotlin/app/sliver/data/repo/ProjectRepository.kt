@@ -108,6 +108,7 @@ class ProjectRepositoryImpl(
         days.listOf(id).forEach { day ->
             files.delete(day.file)
             files.delete(day.thumb)
+            day.original?.let(files::delete)
             if (local) day.driveFileId?.let { trash.enqueue(it) }
         }
         films.listOf(id).forEach { film -> film.renderPath?.let(files::delete) }

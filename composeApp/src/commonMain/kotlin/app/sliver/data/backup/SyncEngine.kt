@@ -327,6 +327,7 @@ class SyncEngine(
     private suspend fun removeLocalDay(day: Day) {
         files.delete(day.file)
         files.delete(day.thumb)
+        day.original?.let(files::delete)
         days.removeRemote(day.projectId, day.date)
     }
 
@@ -377,6 +378,9 @@ class SyncEngine(
                 tone = props["tone"]?.toIntOrNull() ?: 0,
                 updatedAt = r.stamp.at,
                 updatedBy = r.stamp.by.ifEmpty { LEGACY_DEVICE },
+                // Originals are local only: a synced version keeps this phone's recording for Change moment.
+                original = local?.original,
+                originalStartMs = local?.originalStartMs,
             ),
         )
         if (local != null) {

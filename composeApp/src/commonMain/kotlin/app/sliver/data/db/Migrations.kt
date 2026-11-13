@@ -103,3 +103,11 @@ val Migration9To10 = object : Migration(9, 10) {
         connection.execSQL("ALTER TABLE film ADD COLUMN musicVolume INTEGER")
     }
 }
+
+/** Change moment: the full camera recording behind a clip and where its 1 s starts. */
+val Migration10To11 = object : Migration(10, 11) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE day ADD COLUMN original TEXT")
+        connection.execSQL("ALTER TABLE day ADD COLUMN originalStartMs INTEGER")
+    }
+}

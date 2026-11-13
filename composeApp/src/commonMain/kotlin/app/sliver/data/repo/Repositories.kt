@@ -1,6 +1,9 @@
 package app.sliver.data.repo
 
 import app.sliver.data.DaySource
+import app.sliver.feature.trim.isOriginal
+import app.sliver.feature.trim.isTmp
+import app.sliver.feature.trim.recordingStamp
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
@@ -130,8 +133,21 @@ class DayRepositoryImpl(
                 driveFileId = dao.getByDate(projectId, date)?.driveFileId,
                 draft = draft, draftCandidates = draftCandidates, importRunId = importRunId,
             )
-            val stamped = stampDay(dao.getByDate(projectId, date), day, nowMillis())
+            // T-glass-v1.7 10: an in-app recording is kept (files/originals) so the 1 s can be changed later.
+            val recording = daySource == DaySource.CAMERA && !isPhoto
+            val reused = recording && isOriginal(source)
+            val keepFrom = if (recording && isTmp(source)) recordingStamp(source) else null
+            val original = when {
+                reused -> source
+                keepFrom != null -> files.originalPath(keepFrom)
+                else -> null
+            }
+            var stamped = stampDay(dao.getByDate(projectId, date), day.copy(original = original, originalStartMs = startMs.takeIf { original != null }), nowMillis())
             dao.upsert(stamped)
+            if (keepFrom != null && original != null && !files.move(source, original)) {
+                stamped = stamped.copy(original = null, originalStartMs = null)
+                dao.upsert(stamped)
+            }
             stamped
         } finally {
             files.delete(tmpVideo)

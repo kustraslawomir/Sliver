@@ -63,6 +63,10 @@ data class Day(
     val importRunId: String? = null,
     @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
     @ColumnInfo(defaultValue = "''") val updatedBy: String = "",
+    /** Full in-app camera recording this clip was cut from (files/originals), kept for Change moment. Local only, never synced. */
+    val original: String? = null,
+    /** Where the 1 s starts inside [original]. */
+    val originalStartMs: Long? = null,
 )
 
 @Entity(tableName = "film")

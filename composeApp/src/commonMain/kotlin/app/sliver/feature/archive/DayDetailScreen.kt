@@ -60,6 +60,8 @@ import app.sliver.core.ui.SecondaryButton
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.camera.CaptureSession
+import app.sliver.data.files.FileStore
+import app.sliver.data.db.Day
 import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.trim.ClipPlayer
 import app.sliver.feature.trim.dayLabel
@@ -105,6 +107,18 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 
     val addMedia = rememberAddMedia(onNavigate)
 
+    val files = remember { koin.get<FileStore>() }
+    val original = day?.original?.takeIf { files.exists(it) }
+
+    /** T-glass-v1.7 10: pick a different 1 s from the full in-app recording; the recording itself is never changed. */
+    fun changeMoment(d: Day, path: String) {
+        CaptureSession.path = path
+        CaptureSession.source = DaySource.CAMERA
+        CaptureSession.forDate = d.date
+        CaptureSession.changeMoment = d
+        onNavigate(Route.Trim)
+    }
+
     fun replace(d: LocalDate) {
         CaptureSession.forDate = d
         if (d == today) onNavigate(Route.Camera) else addMedia(d)
@@ -124,7 +138,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    UndoBarAbove(196.dp)
+    UndoBarAbove(if (original != null) 262.dp else 196.dp)
     Box(Modifier.fillMaxSize().background(SliverColors.Media)) {
         if (day != null) ClipPlayer(day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, fill = true)
         // v1.7 item 8: scrims so text reads over bright video; no date stamp here (the title is the date).
@@ -185,6 +199,12 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+            if (day != null && original != null) {
+                ReelogButton(
+                    "Change moment", { changeMoment(day, original) }, kind = ButtonKind.Secondary,
+                    leading = SliverIcons.Scissors, overMedia = true,
+                )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))

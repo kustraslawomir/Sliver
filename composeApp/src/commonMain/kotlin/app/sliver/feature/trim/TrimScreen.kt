@@ -134,6 +134,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val projects = remember { koin.get<ProjectRepository>() }
     val undo = remember { koin.get<SaveUndo>() }
     val draft = remember { CaptureSession.draft }
+    val change = remember { CaptureSession.changeMoment }
     val draftNav = rememberDraftNav()
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -146,13 +147,13 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
 
     var durationMs by remember { mutableStateOf<Long?>(null) }
     var thumbs by remember { mutableStateOf<List<ImageBitmap>>(emptyList()) }
-    var startMs by remember { mutableStateOf(restoredMs ?: 0L) }
-    var committedMs by remember { mutableStateOf(restoredMs ?: 0L) }
+    var startMs by remember { mutableStateOf(restoredMs ?: change?.originalStartMs ?: 0L) }
+    var committedMs by remember { mutableStateOf(restoredMs ?: change?.originalStartMs ?: 0L) }
     var custom by remember { mutableStateOf(false) }
     var dragging by remember { mutableStateOf(false) }
     var frameState by remember { mutableStateOf(SliverFrameState.Idle) }
     val speed = 1f
-    var keepAudio by remember { mutableStateOf(true) }
+    var keepAudio by remember { mutableStateOf(change?.keepAudio ?: true) }
     var previewSound by remember { mutableStateOf(CaptureSession.previewSound) }
     LaunchedEffect(previewSound) { CaptureSession.previewSound = previewSound }
     var soundTouched by remember { mutableStateOf(false) }
@@ -164,8 +165,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val daySource = remember { CaptureSession.source }
     var format by remember { mutableStateOf(FilmFormat.CINEMA) }
     var clipAspect by remember { mutableStateOf(1f) }
-    var cropY by rememberSaveable { mutableStateOf(0.5f) }
-    var cropX by rememberSaveable { mutableStateOf(0.5f) }
+    var cropY by rememberSaveable { mutableStateOf(change?.cropY ?: 0.5f) }
+    var cropX by rememberSaveable { mutableStateOf(change?.cropX ?: 0.5f) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
@@ -218,7 +219,8 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
     }
 
-    val inApp = daySource == DaySource.CAMERA
+    // Change moment re-cuts a kept recording: leaving just goes back, nothing to discard.
+    val inApp = daySource == DaySource.CAMERA && change == null
     var discardOpen by remember { mutableStateOf(false) }
 
     fun close() {
@@ -235,8 +237,9 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
             val request = SaveClipRequest(
                 date = day, source = path, startMs = startMs, speed = speed,
                 cropX = cropX.takeIf { reframeX }, cropY = cropY.takeIf { reframe }, format = format,
-                daySource = daySource, takenAt = Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
-                look = LookParams(),
+                daySource = daySource, takenAt = change?.takenAt ?: Clock.System.now(), shortMode = shortMode, keepAudio = keepAudio,
+                look = change?.look ?: LookParams(), motion = change?.motion ?: app.sliver.data.Motion.STILL, color = change?.color ?: 0,
+                projectId = change?.projectId,
             )
             val result = if (draft != null) draftNav.keep(draft, request) else runCatching { undo.save(request) }
             if (result.isSuccess) {
@@ -361,7 +364,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
                         GhostButton("Remove day", { if (!saving) draftNav.askSkip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
                     } else {
                         GhostButton(
-                            if (inApp) "Retake" else "Pick another",
+                            when { inApp -> "Retake"; change != null -> "Cancel"; else -> "Pick another" },
                             { if (inApp) onNavigate(Route.Camera) else navigator.back() },
                             Modifier.weight(1f),
                         )

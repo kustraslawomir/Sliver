@@ -65,3 +65,10 @@
 - 1 type scale (ReelogType, core/theme/Type.kt, lint) · 2 kit (core/kit/Kit.kt) · 3 glass (Haze 1.6.10, core/kit/Glass.kt; blur only with a sibling source: app root for the undo bar, project screen for dock + project sheet; media glass = tint, SurfaceViews can't be blurred) · 4+7 record button v2 (Canvas) · 5 dock (idle CPU 0 %) · 8 day screen · 9 project sheet · 6 Settings, Hub header, filter tiles, player ambient.
 - Owner overrides: player keeps share/edit/delete icons + Save; "Sound in film" removed from the day screen.
 - Open: Xiaomi screenrecord of the record button and Xiaomi CPU number (Xiaomi not connected); light-theme + 1.3x shots of all 5 boards (only hub 1.3x done); camera/builder board pixel pass.
+
+## T-glass-v1.7 item 10 (13 Nov)
+- Change moment + kept camera originals + launch-time rescue from tmp (before cleanTmp; failed rescue = no clean). DB v11.
+- Camera: video quality fallback any lower than FHD/UHD (emulator crashed with "Unable to find selected quality").
+- Verified on emulator tracker13: record → original kept after undo window; Change moment → start 0 → 2580 ms, same original file; Cancel; leftover rec_ in tmp rescued on launch. QA: qa/v1.7/day-change-moment.png
+- Old builds delete the recording 6 s after Save, so a day saved with an old build has a recording to rescue only if the app was killed inside that window.
+- Pull-to-sync removed from the calendar (owner).

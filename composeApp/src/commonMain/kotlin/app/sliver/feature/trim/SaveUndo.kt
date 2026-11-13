@@ -21,7 +21,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
 
     private class Backup(val video: String, val thumb: String)
 
-    private inner class Pending(val request: SaveClipRequest, val previous: Day?, val backup: Backup?) {
+    private inner class Pending(val request: SaveClipRequest, val previous: Day?, val backup: Backup?, val saved: Day) {
         var timer: Job? = null
 
         fun cleanup() {
@@ -31,6 +31,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
                 files.delete(it.video)
                 files.delete(it.thumb)
             }
+            dropOriginal(files, previous, saved)
         }
     }
 
@@ -52,7 +53,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
         if (previous == null && days.observeAll().first().size == 1) {
             runCatching { films.ensureDefaultFilm(request.date, request.format) }
         }
-        val p = Pending(request, previous, backup)
+        val p = Pending(request, previous, backup, day)
         pending = p
         p.timer = scope.launch {
             delay(UNDO_WINDOW_MS)
@@ -78,6 +79,7 @@ class SaveUndo(private val days: DayRepository, private val files: FileStore, pr
             files.delete(day.file)
             files.delete(day.thumb)
         }
+        dropOriginal(files, day, null)
     }
 
     private fun park(day: Day, stamp: Long): Backup? {

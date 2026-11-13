@@ -81,3 +81,10 @@ Done = new screenshot of the day screen on the Xiaomi/emulator with a placeholde
 4. **Check next to the pencil reads as two buttons.** Current project = row background white 6 %, radius 16, plus a 20 dp check at the trailing edge. Edit = the pencil as a 44 dp icon button, shown on every row, always rightmost; check goes left of it with a 4 dp gap only on the current row. Tap row = switch project and close the sheet.
 5. Sizes: sheet title 28/600 (ReelogType.title), name 17/500, caption 13. Row height 72, 20 dp side padding, handle 36×4 #3A3A40.
 6. Captions use the project's real numbers ("0 clips · since 13 Nov" is fine for an empty one, but check My 2026 isn't wrongly reporting 0).
+
+## 10. Change moment — keep camera originals (owner, 13 Nov; written down by the builder from the owner's message, the original text never reached the repo)
+1. Every clip recorded in the app keeps its full recording in `files/originals/` (never in cache, never cleaned). Day row: `original`, `originalStartMs` (DB 10→11). Local only, not synced to Drive.
+2. Day screen: "Change moment" (glass secondary pill, scissors icon) above Replace/Remove when the day has a kept original. Opens the editor on the original at the current 1 s; Save re-cuts the clip, look/sound/time/crop carry over; Cancel goes back.
+3. The recording itself is never modified. Replacing a day with a different recording or removing the day deletes its original; deleting a project deletes its originals.
+4. Gallery and photo days have no Change moment (the gallery original is read-only and was never kept).
+5. Rescue: on launch, BEFORE the tmp cleanup, recordings still in `cache/tmp` are matched to camera days without an original (latest recording that started ≤ 3 h before the clip was saved and stopped before it) and moved to originals. If the rescue fails, tmp is not cleaned.
