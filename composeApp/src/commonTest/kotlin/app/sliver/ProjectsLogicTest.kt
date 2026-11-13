@@ -35,8 +35,8 @@ class ProjectsLogicTest {
     @Test
     fun metaLine() {
         val stats = ProjectStats("a", 129, LocalDate(2026, 6, 21), null)
-        assertEquals("Cinema 16:9 · 129 clips · since 21 Jun", projectMeta(project("a"), stats))
-        assertEquals("Story 9:16 · 0 clips · since 21 Jun", projectMeta(project("a", format = FilmFormat.STORY), null))
+        assertEquals("129 clips · since 21 Jun", projectMeta(project("a"), stats))
+        assertEquals("0 clips · since 21 Jun", projectMeta(project("a", format = FilmFormat.STORY), null))
     }
 
     @Test

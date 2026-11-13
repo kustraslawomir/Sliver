@@ -83,6 +83,5 @@ class ArchiveLogicTest {
     fun header() {
         assertEquals("1 clip · since 3 Mar", clipsHeader(1, LocalDate(2026, 3, 3)))
         assertEquals("42 clips · since 3 Mar", clipsHeader(42, LocalDate(2026, 3, 3)))
-        assertEquals("2 clips · since 3 Mar · Cinema 16:9", clipsHeader(2, LocalDate(2026, 3, 3), FilmFormat.CINEMA))
     }
 }

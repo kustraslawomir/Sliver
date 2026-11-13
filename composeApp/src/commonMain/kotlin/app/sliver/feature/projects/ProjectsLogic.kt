@@ -20,7 +20,7 @@ fun cleanProjectName(raw: String): String? = raw.trim().take(MAX_PROJECT_NAME).i
 fun projectMeta(project: Project, stats: ProjectStats?): String {
     val clips = stats?.clips ?: 0
     val since = stats?.since ?: project.startDate
-    return "${project.format.label()} · $clips ${if (clips == 1) "clip" else "clips"} · " +
+    return "$clips ${if (clips == 1) "clip" else "clips"} · " +
         "since ${since.day} ${MonthNames[since.month.ordinal]}"
 }
 

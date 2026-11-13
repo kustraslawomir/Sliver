@@ -240,7 +240,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                     .fillMaxHeight().navigationBarsPadding(),
             ) {
                 Header(
-                    project?.name.orEmpty(), clipsHeader(all.size, first, project?.format), menuOpen,
+                    project?.name.orEmpty(), clipsHeader(all.size, first), menuOpen,
                     { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true },
                 )
                 Column(

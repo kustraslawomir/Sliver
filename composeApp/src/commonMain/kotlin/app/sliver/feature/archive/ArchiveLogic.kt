@@ -58,9 +58,8 @@ fun yearColors(year: Int, days: Map<LocalDate, Day>): List<List<Int?>> = List(12
     List(31) { d -> if (d >= length) null else days[LocalDate(year, m + 1, d + 1)]?.color ?: 0 }
 }
 
-fun clipsHeader(count: Int, first: LocalDate, format: FilmFormat? = null): String =
-    "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthNames[first.month.ordinal]}" +
-        (format?.let { " · ${it.label()}" } ?: "")
+fun clipsHeader(count: Int, first: LocalDate): String =
+    "$count ${if (count == 1) "clip" else "clips"} · since ${first.day} ${MonthNames[first.month.ordinal]}"
 
 val MonthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 val MonthLong = listOf(
