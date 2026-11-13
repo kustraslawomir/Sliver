@@ -187,7 +187,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Row(Modifier.fillMaxWidth()) {
                 val at = (fraction * plan.clips).toInt()
                 SliverText("${clockTime(at)} / ${clockTime(plan.clips)}", SliverType.Meta.copy(fontSize = 12.sp), Modifier.weight(1f), SliverColors.TextTertiary)
-                SliverText("${plan.clips} clips \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = 12.sp), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText("${clipsText(plan.clips)} \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = 12.sp), color = SliverColors.TextTertiary, maxLines = 1)
             }
         }
 

@@ -286,7 +286,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 SliverText(f.name, SliverType.Headline.copy(fontSize = 17.sp, lineHeight = 22.sp), maxLines = 1)
                 SliverText(
-                    "${plan.spanText()} \u00B7 ${plan.clips} clips \u00B7 ${formatRuntime(plan.clips)}",
+                    "${plan.spanText()} \u00B7 ${clipsText(plan.clips)} \u00B7 ${formatRuntime(plan.clips)}",
                     SliverType.BodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.TextTertiary, maxLines = 1,
                 )
             }
