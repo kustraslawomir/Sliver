@@ -100,7 +100,14 @@ import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.feature.autoimport.draftsChipLabel
+import app.sliver.feature.autoimport.DayMediaSheetBody
+import app.sliver.feature.autoimport.ReviewSheetBody
+import app.sliver.feature.autoimport.autoDays
+import app.sliver.feature.autoimport.countBadge
+import app.sliver.feature.autoimport.decodeCandidates
+import app.sliver.feature.autoimport.nextDraft
+import app.sliver.feature.autoimport.reviewChipLabel
+import app.sliver.feature.autoimport.toCheck
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
 import androidx.compose.ui.draw.alpha
@@ -124,6 +131,9 @@ import org.koin.mp.KoinPlatform
 /** Date handed to the Day detail screen until it takes a route argument. */
 object ArchiveSession {
     var selected: LocalDate? = null
+
+    /** Month the calendar should show next time it opens (set after an auto-fill run). */
+    var pendingMonth: YearMonth? = null
 }
 
 private val WeekDays = listOf("M", "T", "W", "T", "F", "S", "S")
@@ -146,6 +156,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val pull = rememberPullToSync(with(LocalDensity.current) { 72.dp.toPx() }, { signedIn }) { scheduler.schedule(wifiOnly, anyNetwork = true) }
     val drafts by remember { days.observeDrafts() }.collectAsState(emptyList())
     val calendar = remember(byDate, drafts) { drafts.associateBy { it.date } + byDate }
+    val waiting = remember(drafts, all) { toCheck(drafts, all) }
+    val autoCount = remember(all) { autoDays(all).size }
     val draftNav = rememberDraftNav()
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
@@ -163,6 +175,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     fun show(m: YearMonth) { shownIndex = m.year * 12 + m.month - 1 }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
     var draftsSheet by remember { mutableStateOf(false) }
+    var reviewRaw by rememberSaveable { mutableStateOf<String?>(null) }
+    var walking by rememberSaveable { mutableStateOf(false) }
+    val reviewDay = reviewRaw?.let { raw -> waiting.firstOrNull { it.date.toString() == raw } }
+    LaunchedEffect(Unit) { ArchiveSession.pendingMonth?.let { show(it); ArchiveSession.pendingMonth = null } }
     var projectsOpen by remember { mutableStateOf(false) }
     var projectAction by remember { mutableStateOf<ProjectAction?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -185,7 +201,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             }
             CellState.EMPTY -> addFor = date
             CellState.FILLED, CellState.BACKFILLED -> openDay(date)
-            CellState.DRAFT -> draftNav.openFirst(onNavigate, calendar[date])
+            CellState.DRAFT, CellState.AUTO -> reviewRaw = date.toString()
         }
     }
 
@@ -235,7 +251,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                     ) {
-                        if (drafts.isNotEmpty()) DraftsChip(drafts.size) { draftsSheet = true }
+                        if (waiting.isNotEmpty()) DraftsChip(reviewChipLabel(drafts.size, autoCount)) { draftsSheet = true }
                         ViewRow(yearView, { yearView = it }, canGoPrev(shown, first), canGoNext(shown, today),
                             { show(shown.plusMonths(-1)) }, { show(shown.plusMonths(1)) })
 
@@ -312,13 +328,27 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 onDelete = { menuOpen = false; projectAction = ProjectAction.Delete },
             )
         }
-        SliverBottomSheet(draftsSheet && drafts.isNotEmpty(), onDismiss = { draftsSheet = false }) {
-            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                SliverText(draftsChipLabel(drafts.size), SliverType.Title)
-                SliverText("Keep them as they are, or go through them and swap any day.", SliverType.BodySmall, color = SliverColors.TextSecondary)
-                PrimaryButton("Keep all ${drafts.size}", { draftsSheet = false; draftNav.keepAll() }, Modifier.fillMaxWidth(), enabled = !draftNav.busy)
-                SecondaryButton("Review one by one", { draftsSheet = false; draftNav.openFirst(onNavigate) }, Modifier.fillMaxWidth())
+        SliverBottomSheet(draftsSheet && waiting.isNotEmpty(), onDismiss = { draftsSheet = false }) {
+            ReviewSheetBody(
+                drafts.size, autoCount, draftNav.busy,
+                onKeepAll = { draftsSheet = false; draftNav.keepAll() },
+                onRemoveUnchecked = { draftsSheet = false; draftNav.removeUnchecked() },
+                onWalk = { draftsSheet = false; walking = true; reviewRaw = waiting.firstOrNull()?.date?.toString() },
+            )
+        }
+        SliverBottomSheet(reviewDay != null, onDismiss = { reviewRaw = null; walking = false }) {
+            val d = reviewDay ?: return@SliverBottomSheet
+            fun advance() {
+                val next = if (walking) nextDraft(waiting, d.date) { it.date } else null
+                reviewRaw = next?.date?.toString()
+                if (next == null) walking = false
             }
+            DayMediaSheetBody(
+                d, draftNav.busy,
+                onPick = { uri -> reviewRaw = null; walking = false; draftNav.openFirst(onNavigate, d, uri, chain = false) },
+                onKeep = { advance(); draftNav.keepOne(d) },
+                onRemove = { advance(); draftNav.removeOne(d) },
+            )
         }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
@@ -486,6 +516,7 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
         }
     }
     val state = cellState(date, today, day, start)
+    val autoItems = if (state == CellState.AUTO) remember(day?.draftCandidates) { decodeCandidates(day?.draftCandidates).size.coerceAtLeast(1) } else null
     val base = Modifier.fillMaxSize().graphicsLayer { scaleX = scale.value; scaleY = scale.value }.clip(CellShape)
     val surface = when (state) {
         CellState.FUTURE -> base
@@ -495,13 +526,13 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
     }
     Box(
         surface.semantics(mergeDescendants = true) {
-            contentDescription = cellDescription(date, day != null && !day.draft, day?.draft == true) + when (state) {
+            contentDescription = cellDescription(date, day != null && !day.draft, day?.draft == true, autoItems) + when (state) {
                 CellState.TODAY -> ", today"
                 CellState.EMPTY -> ", add a clip"
                 else -> ""
             }
-            if (day?.draft == true) {
-                customActions = listOf(CustomAccessibilityAction("Review draft") { onClick(); true })
+            if (day?.draft == true || autoItems != null) {
+                customActions = listOf(CustomAccessibilityAction(if (autoItems != null) "Check day" else "Review draft") { onClick(); true })
             } else if (day != null) {
                 customActions = listOf(
                     CustomAccessibilityAction("Open") { onClick(); true },
@@ -530,8 +561,8 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                     Box(Modifier.fillMaxSize().background(day!!.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3))
                     if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 }
-                if (draft) {
-                    val line = SliverColors.TextSecondary
+                if (draft || state == CellState.AUTO) {
+                    val line = if (draft) SliverColors.TextSecondary else SliverColors.OnMedia
                     Box(
                         Modifier.fillMaxSize().drawBehind {
                             val w = 1.5.dp.toPx()
@@ -541,10 +572,21 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
                             )
                         },
                     )
-                    SliverText(
+                    if (draft) SliverText(
                         "Draft", SliverType.Caption.copy(fontSize = 9.sp, lineHeight = 11.sp, color = SliverColors.OnMedia).overMedia(),
                         Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 5.dp),
                     )
+                }
+                val badge = autoItems?.let(::countBadge)
+                if (badge != null) {
+                    Row(
+                        Modifier.align(Alignment.BottomEnd).padding(end = 3.dp, bottom = 3.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim)
+                            .padding(horizontal = 3.dp, vertical = 1.dp),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(1.dp),
+                    ) {
+                        SliverIcon(SliverIcons.Layers, SliverColors.OnMedia, size = 9.dp)
+                        SliverText(badge, SliverType.tnum(9.sp, 0.sp, SliverColors.OnMedia).overMedia())
+                    }
                 }
                 Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
                 SliverText(
@@ -559,14 +601,14 @@ private fun DayCell(date: LocalDate, today: LocalDate, start: LocalDate, day: Da
 private const val DraftAlpha = 0.55f
 
 @Composable
-private fun DraftsChip(count: Int, onClick: () -> Unit) {
+private fun DraftsChip(label: String, onClick: () -> Unit) {
     Row(
         Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface1).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
             .clickable(role = Role.Button, onClick = onClick).padding(start = 14.dp, end = 10.dp).height(36.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        SliverText(draftsChipLabel(count), SliverType.BodySmall, color = SliverColors.TextPrimary)
+        SliverText(label, SliverType.BodySmall, color = SliverColors.TextPrimary)
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 16.dp)
     }
 }

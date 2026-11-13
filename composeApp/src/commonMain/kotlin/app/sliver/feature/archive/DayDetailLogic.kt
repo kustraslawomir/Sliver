@@ -1,5 +1,6 @@
 package app.sliver.feature.archive
 
+import app.sliver.feature.autoimport.itemsLabel
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
@@ -12,9 +13,10 @@ fun dayNumber(date: LocalDate, first: LocalDate): Int = first.daysUntil(date) + 
 
 fun weekdayName(date: LocalDate): String = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
-fun cellDescription(date: LocalDate, hasSecond: Boolean, draft: Boolean = false): String =
+fun cellDescription(date: LocalDate, hasSecond: Boolean, draft: Boolean = false, autoItems: Int? = null): String =
     "${weekdayName(date)} ${date.day} ${MonthLong[date.month.ordinal]}" + when {
         draft -> ", draft, review"
+        autoItems != null -> ", auto-filled, ${itemsLabel(autoItems)}, review"
         hasSecond -> ", has a clip"
         else -> ""
     }

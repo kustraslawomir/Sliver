@@ -124,4 +124,20 @@ class AutoImportLogicTest {
         assertEquals(LocalDate(2026, 11, 9), previousDraft(dates, dates[0]) { it })
         assertEquals(null, nextDraft(listOf(dates[1]), dates[1]) { it })
     }
+
+    @Test
+    fun autoReviewLabels() {
+        assertEquals("3 auto-filled days to check", app.sliver.feature.autoimport.reviewChipLabel(0, 3))
+        assertEquals("1 auto-filled day to check", app.sliver.feature.autoimport.reviewChipLabel(0, 1))
+        assertEquals("2 drafts to review", app.sliver.feature.autoimport.reviewChipLabel(2, 0))
+        assertEquals("5 days to check", app.sliver.feature.autoimport.reviewChipLabel(2, 3))
+        assertEquals("Tue 10 Nov · 4 items", app.sliver.feature.autoimport.dayItemsTitle(LocalDate(2026, 11, 10), 4))
+        assertEquals("Tue 10 Nov · 1 item", app.sliver.feature.autoimport.dayItemsTitle(LocalDate(2026, 11, 10), 1))
+        assertEquals(null, app.sliver.feature.autoimport.countBadge(1))
+        assertEquals("4", app.sliver.feature.autoimport.countBadge(4))
+        assertEquals("7 days filled · Check them in the calendar", app.sliver.feature.autoimport.filledToast(7))
+        assertEquals("2 days removed", app.sliver.feature.autoimport.removedLabel(2))
+        assertEquals("3 days filled", app.sliver.feature.autoimport.importSummary(3, 0, keep = true))
+        assertEquals("3 drafts added, 1 couldn't be read", app.sliver.feature.autoimport.importSummary(3, 1))
+    }
 }

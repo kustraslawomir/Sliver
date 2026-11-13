@@ -34,6 +34,15 @@ class ArchiveLogicTest {
         assertEquals(CellState.FILLED, cellState(today, today, day(today)))
         assertEquals(CellState.BACKFILLED, cellState(today, today, day(today, DaySource.BACKFILL)))
         assertEquals(CellState.DRAFT, cellState(LocalDate(2026, 11, 1), today, day(LocalDate(2026, 11, 1)).copy(draft = true)))
+        assertEquals(CellState.AUTO, cellState(LocalDate(2026, 11, 1), today, day(LocalDate(2026, 11, 1)).copy(importRunId = "r")))
+        assertEquals(CellState.DRAFT, cellState(LocalDate(2026, 11, 1), today, day(LocalDate(2026, 11, 1)).copy(draft = true, importRunId = "r")))
+    }
+
+    @Test
+    fun autoCellIsDescribedWithItemCount() {
+        val d = LocalDate(2026, 11, 10)
+        assertEquals("Tuesday 10 November, auto-filled, 4 items, review", app.sliver.feature.archive.cellDescription(d, true, false, 4))
+        assertEquals("Tuesday 10 November, auto-filled, 1 item, review", app.sliver.feature.archive.cellDescription(d, true, false, 1))
     }
 
     @Test

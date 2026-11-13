@@ -1,5 +1,8 @@
 package app.sliver.feature.autoimport
 
+import app.sliver.data.db.Day
+import app.sliver.feature.archive.MonthLong
+import app.sliver.feature.archive.weekdayName
 import app.sliver.feature.gallery.formatDay
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
@@ -98,8 +101,9 @@ fun draftsChipLabel(count: Int) = "$count ${if (count == 1) "draft" else "drafts
 
 fun draftPositionLabel(index: Int, total: Int) = "Draft · ${index + 1} of $total"
 
-fun importSummary(done: Int, failed: Int): String =
-    "$done ${if (done == 1) "draft" else "drafts"} added" + if (failed > 0) ", $failed couldn't be read" else ""
+fun importSummary(done: Int, failed: Int, keep: Boolean = false): String =
+    "$done ${if (keep) (if (done == 1) "day filled" else "days filled") else (if (done == 1) "draft" else "drafts") + " added"}" +
+        if (failed > 0) ", $failed couldn't be read" else ""
 
 /** Index of the draft after [date] in [drafts] (sorted by date), wrapping; null when no other draft remains. */
 fun <T> nextDraft(drafts: List<T>, date: LocalDate, dateOf: (T) -> LocalDate): T? =
@@ -107,3 +111,34 @@ fun <T> nextDraft(drafts: List<T>, date: LocalDate, dateOf: (T) -> LocalDate): T
 
 fun <T> previousDraft(drafts: List<T>, date: LocalDate, dateOf: (T) -> LocalDate): T? =
     drafts.lastOrNull { dateOf(it) < date } ?: drafts.lastOrNull { dateOf(it) > date }
+
+/** A day saved by a "keep without review" run that the user has not looked at yet. */
+fun Day.isAuto(): Boolean = !draft && importRunId != null
+
+fun autoDays(all: List<Day>): List<Day> = all.filter { it.isAuto() }
+
+/** Everything waiting for a look: drafts and auto-filled days, by date. */
+fun toCheck(drafts: List<Day>, all: List<Day>): List<Day> = (drafts + autoDays(all)).sortedBy { it.date }
+
+private fun daysWord(n: Int) = if (n == 1) "day" else "days"
+
+fun reviewChipLabel(drafts: Int, auto: Int): String = when {
+    auto == 0 -> draftsChipLabel(drafts)
+    drafts == 0 -> "$auto auto-filled ${daysWord(auto)} to check"
+    else -> "${drafts + auto} days to check"
+}
+
+fun itemsLabel(n: Int) = "$n ${if (n == 1) "item" else "items"}"
+
+/** "Tue 10 Nov · 4 items" */
+fun dayItemsTitle(date: LocalDate, items: Int) =
+    "${weekdayName(date).take(3)} ${date.day} ${MonthLong[date.month.ordinal].take(3)} · ${itemsLabel(items)}"
+
+/** Number on the calendar cell; nothing when the day has a single item. */
+fun countBadge(items: Int): String? = if (items > 1) items.toString() else null
+
+fun filledToast(count: Int) = "$count ${daysWord(count)} filled · Check them in the calendar"
+
+fun removedLabel(count: Int) = "$count ${daysWord(count)} removed"
+
+fun keptLabel(count: Int) = "$count ${daysWord(count)} kept"

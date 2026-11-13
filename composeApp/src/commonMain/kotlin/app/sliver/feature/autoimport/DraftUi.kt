@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,8 +68,11 @@ class DraftNav(
     var busy by mutableStateOf(false)
         private set
 
-    /** One tap: every draft becomes a normal day (undo toast restores them). */
+    /** One tap: every draft and auto-filled day counts as reviewed (undo toast restores them). */
     fun keepAll() = run { actions.keepAll() }
+    fun keepOne(day: Day) = run { actions.keepDays(listOf(day)) }
+    fun removeUnchecked() = run { actions.removeUnchecked() }
+    fun removeOne(day: Day) = run { actions.skip(day) }
 
     private fun run(block: suspend () -> Unit) {
         if (busy) return
@@ -83,15 +87,15 @@ class DraftNav(
     }
 
     private suspend fun show(day: Day, uri: String? = null, asVideo: Boolean? = null): Boolean {
-        val route = actions.open(day, uri, asVideo)
+        val route = actions.open(day, uri, asVideo, CaptureSession.draft?.chain ?: true)
         if (route == null) Notices.show("Couldn't read that item. Pick another.") else navigator.swapEditor(route)
         return route != null
     }
 
     /** First entry from the calendar or the header chip: pushes the editor. */
-    fun openFirst(onNavigate: (Route) -> Unit, day: Day? = null) = run {
+    fun openFirst(onNavigate: (Route) -> Unit, day: Day? = null, uri: String? = null, chain: Boolean = true) = run {
         val target = day ?: actions.first() ?: return@run
-        val route = actions.open(target)
+        val route = actions.open(target, uri, chain = chain)
         if (route == null) Notices.show("Couldn't read that item. Pick another.") else onNavigate(route)
     }
 
@@ -101,7 +105,7 @@ class DraftNav(
 
     /** After a keep or skip: the next draft, or back to where the review started. */
     suspend fun afterResolved(date: LocalDate, finished: () -> Unit) {
-        val next = actions.next(date)
+        val next = if (CaptureSession.draft?.chain == false) null else actions.next(date)
         if (next == null || !show(next)) finished()
     }
 
@@ -168,13 +172,13 @@ fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifi
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText("Other items from this day", SliverType.Caption, color = SliverColors.TextTertiary)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri) { nav.swap(ctx, c.uri) } }
+            items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(64.dp)) { nav.swap(ctx, c.uri) } }
         }
     }
 }
 
 @Composable
-private fun CandidateTile(c: DraftCandidate, selected: Boolean, onClick: () -> Unit) {
+internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val thumb = rememberMediaThumb(c.uri)
     val kind = when {
         c.motion -> "Motion photo"
@@ -182,12 +186,12 @@ private fun CandidateTile(c: DraftCandidate, selected: Boolean, onClick: () -> U
         else -> "Photo"
     }
     Box(
-        Modifier.size(64.dp).clip(SliverShapes.S).background(SliverColors.Surface3)
+        modifier.clip(SliverShapes.S).background(SliverColors.Surface3)
             .border(if (selected) 2.dp else 1.dp, if (selected) SliverColors.AccentMark else SliverColors.LineHairline, SliverShapes.S)
             .semantics { this.selected = selected; contentDescription = kind }
             .clickable(role = Role.Button, onClick = onClick),
     ) {
-        if (thumb != null) Image(thumb, null, Modifier.size(64.dp), contentScale = ContentScale.Crop)
+        if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         if (c.video && !c.motion) {
             SliverText(
                 durationLabel(c.durationMs), SliverType.Meta.copy(fontSize = 10.sp, lineHeight = 12.sp),

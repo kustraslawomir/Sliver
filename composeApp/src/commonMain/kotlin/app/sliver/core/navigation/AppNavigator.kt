@@ -56,6 +56,9 @@ class AppNavigator(private val nav: NavController) {
         if (settled) nav.popBackStack()
     }
 
+    /** Back to the Project calendar, whatever is on the stack. */
+    fun goHome() = popToHome()
+
     private fun popToHome() {
         if (!nav.popBackStack(Route.Project.path, inclusive = false)) {
             nav.navigate(Route.Project.path) { popUpTo(nav.graph.id) { inclusive = true } }

@@ -57,6 +57,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import app.sliver.core.navigation.LocalNavigator
+import app.sliver.core.ui.Notices
+import app.sliver.feature.archive.ArchiveSession
+import app.sliver.feature.archive.YearMonth
 import org.koin.mp.KoinPlatform
 
 @OptIn(ExperimentalUuidApi::class)
@@ -77,7 +81,9 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val run by remember { store.run }.collectAsState(null)
     val project by remember { projects.active }.collectAsState(null)
     val rows by remember { combine(days.observeAll(), days.observeDrafts()) { a, d -> (a + d).map { it.date }.toSet() } }.collectAsState(emptySet())
-    val drafts by remember { days.observeDrafts() }.collectAsState(emptyList())
+    val waiting by remember { combine(days.observeDrafts(), days.observeAll(), ::toCheck) }.collectAsState(emptyList())
+    val navigator = LocalNavigator.current
+    var sawRunning by rememberSaveable { mutableStateOf(false) }
 
     val start = project?.startDate ?: today
     var fromRaw by rememberSaveable { mutableStateOf<String?>(null) }
@@ -109,7 +115,20 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
     LaunchedEffect(run?.finished) {
-        if (run?.finished == false) runner.start()
+        val r = run ?: return@LaunchedEffect
+        if (!r.finished) {
+            sawRunning = true
+            runner.start()
+        } else if (sawRunning) {
+            sawRunning = false
+            if (r.keep && r.done > 0) {
+                days.draftsOfRun(r.projectId, r.id).minOfOrNull { it.date }?.let {
+                    ArchiveSession.pendingMonth = YearMonth(it.year, it.month.ordinal + 1)
+                }
+                Notices.show(filledToast(r.done))
+                navigator.goHome()
+            }
+        }
     }
 
     Column(
@@ -125,13 +144,14 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         val current = run
         if (current != null) {
             RunProgress(
-                current, drafts.size,
+                current, waiting.size, autoDays(waiting).size,
                 onCancel = {
                     runner.cancel()
                     scope.launch { store.update(current.id) { it.copy(finished = true) } }
                 },
                 onReview = { draftNav.openFirst(onNavigate) },
                 onKeepAll = { draftNav.keepAll() },
+                onRemoveUnchecked = { draftNav.removeUnchecked() },
                 onDone = { scope.launch { store.clear() } },
                 onUndo = {
                     runner.cancel()
@@ -202,9 +222,9 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-private fun RunProgress(run: ImportRun, draftsLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
+private fun RunProgress(run: ImportRun, draftsLeft: Int, autoLeft: Int, onCancel: () -> Unit, onReview: () -> Unit, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onDone: () -> Unit, onUndo: () -> Unit) {
     SliverText(
-        if (run.finished) importSummary(run.done, (run.total - run.done).coerceAtLeast(0)) else "Importing drafts",
+        if (run.finished) importSummary(run.done, (run.total - run.done).coerceAtLeast(0), run.keep) else "Importing drafts",
         SliverType.Title,
     )
     if (!run.finished) {
@@ -223,6 +243,7 @@ private fun RunProgress(run: ImportRun, draftsLeft: Int, onCancel: () -> Unit, o
         if (draftsLeft > 0) {
             PrimaryButton("Keep all $draftsLeft", onKeepAll, Modifier.fillMaxWidth())
             SecondaryButton("Review one by one", onReview, Modifier.fillMaxWidth())
+            if (autoLeft > 0) GhostButton("Remove unchecked", onRemoveUnchecked, Modifier.fillMaxWidth(), destructive = true)
         }
         SecondaryButton("Done", onDone)
         GhostButton("Undo all", onUndo, Modifier.fillMaxWidth(), destructive = true)

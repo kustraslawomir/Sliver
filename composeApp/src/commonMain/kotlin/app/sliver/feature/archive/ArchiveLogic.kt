@@ -2,6 +2,7 @@ package app.sliver.feature.archive
 
 import app.sliver.data.FilmFormat
 import app.sliver.data.db.Day
+import app.sliver.feature.autoimport.isAuto
 import app.sliver.feature.camera.label
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
@@ -9,7 +10,7 @@ import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
-enum class CellState { FILLED, BACKFILLED, DRAFT, TODAY, EMPTY, FUTURE }
+enum class CellState { FILLED, BACKFILLED, DRAFT, AUTO, TODAY, EMPTY, FUTURE }
 
 /** Months shown in the grid: [first] and [last] bound navigation. */
 data class YearMonth(val year: Int, val month: Int) : Comparable<YearMonth> {
@@ -31,6 +32,7 @@ fun cellState(date: LocalDate, today: LocalDate, day: Day?, start: LocalDate? = 
     date > today -> CellState.FUTURE
     day == null && start != null && date < start -> CellState.FUTURE
     day?.draft == true -> CellState.DRAFT
+    day?.isAuto() == true -> CellState.AUTO
     day != null -> if (day.source == app.sliver.data.DaySource.BACKFILL) CellState.BACKFILLED else CellState.FILLED
     date == today -> CellState.TODAY
     else -> CellState.EMPTY

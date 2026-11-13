@@ -18,27 +18,29 @@ import app.sliver.feature.trim.isTmp
 import kotlin.time.Clock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** The draft shown in the editor with the gallery items of its day; [selectedUri] is the one currently loaded. */
-class DraftContext(val day: Day, val candidates: List<DraftCandidate>, val selectedUri: String?)
+class DraftContext(val day: Day, val candidates: List<DraftCandidate>, val selectedUri: String?, val chain: Boolean = true)
 
-/** Opening, confirming and skipping drafts. Drafts live in the calendar only until the user keeps them. */
+/** Opening, confirming and removing days that wait for a look: drafts and auto-filled days. */
 class DraftActions(
     private val days: DayRepository,
     private val films: FilmRepository,
     private val files: FileStore,
     private val gallery: GalleryProvider,
 ) {
-    val drafts: Flow<List<Day>> get() = days.observeDrafts()
+    /** Drafts and auto-filled days of the active project, by date. */
+    val drafts: Flow<List<Day>> get() = combine(days.observeDrafts(), days.observeAll(), ::toCheck)
 
     /** Loads [day] (or one of its candidates) into the editor session; returns the editor route, null if the item can't be read. */
-    suspend fun open(day: Day, uri: String? = null, asVideo: Boolean? = null): Route? {
+    suspend fun open(day: Day, uri: String? = null, asVideo: Boolean? = null, chain: Boolean = true): Route? {
         val candidates = decodeCandidates(day.draftCandidates)
         val target = uri ?: candidates.firstOrNull()?.uri ?: return null
         val route = loadIntoSession(gallery, files, target, day.date, asVideo) ?: return null
-        CaptureSession.draft = DraftContext(day, candidates, target)
+        CaptureSession.draft = DraftContext(day, candidates, target, chain)
         return route
     }
 
@@ -57,39 +59,60 @@ class DraftActions(
         return day
     }
 
-    /** Keeps every draft of the active project as it is (default pick, default 1 s); one undo restores them as drafts. */
-    suspend fun keepAll(): Int {
-        val all = drafts.first()
-        all.forEach { days.save(it.copy(draft = false, draftCandidates = null, importRunId = null)) }
-        if (all.isNotEmpty()) {
+    /** Keeps every draft and auto-filled day of the active project as it is; one undo restores them. */
+    suspend fun keepAll(): Int = keepDays(drafts.first())
+
+    /** Marks [list] as reviewed (default pick, default 1 s). */
+    suspend fun keepDays(list: List<Day>): Int {
+        list.forEach { days.save(it.copy(draft = false, draftCandidates = null, importRunId = null)) }
+        if (list.isNotEmpty()) {
             FirstClipTimer.clipSaved()
-            UndoToasts.show("${all.size} ${if (all.size == 1) "draft" else "drafts"} kept") {
-                AppScope.launch { all.forEach { days.save(it) } }
-            }
+            UndoToasts.show(keptLabel(list.size)) { AppScope.launch { list.forEach { days.save(it) } } }
         }
-        return all.size
+        return list.size
     }
 
-    /** Deletes the draft and leaves the day empty; the files wait in tmp for [UNDO_WINDOW_MS]. */
-    suspend fun skip(day: Day) {
+    /** Removes every auto-filled day that was not reviewed; drafts and camera days stay. One undo brings them back. */
+    suspend fun removeUnchecked(): Int {
+        val list = autoDays(days.observeAll().first())
+        remove(list, removedLabel(list.size))
+        return list.size
+    }
+
+    suspend fun skip(day: Day) = remove(listOf(day), if (day.draft) "Draft skipped" else "Day removed")
+
+    /**
+     * Deletes the days the way a user delete does (confirmed days leave a tombstone for sync); the files wait in tmp for
+     * [UNDO_WINDOW_MS] so Undo can put everything back.
+     */
+    suspend fun remove(list: List<Day>, message: String) {
+        if (list.isEmpty()) return
         val stamp = Clock.System.now().toEpochMilliseconds()
-        val video = files.newTmpPath(stamp)
-        val thumb = "$video.jpg"
-        val parked = files.move(day.file, video) && files.move(day.thumb, thumb)
-        days.deleteRow(day.projectId, day.date)
+        val parked = list.mapIndexed { i, day ->
+            val video = files.newTmpPath(stamp + i)
+            val thumb = "$video.jpg"
+            val ok = files.move(day.file, video) && files.move(day.thumb, thumb)
+            if (day.draft) days.deleteRow(day.projectId, day.date) else days.delete(day.date)
+            Triple(day, video, thumb) to ok
+        }
         val timer = AppScope.launch {
             delay(UNDO_WINDOW_MS)
-            files.delete(video)
-            files.delete(thumb)
+            parked.forEach { (p, _) ->
+                files.delete(p.second)
+                files.delete(p.third)
+            }
         }
-        UndoToasts.show("Draft skipped") {
+        UndoToasts.show(message) {
             timer.cancel()
             AppScope.launch {
-                if (parked) {
-                    files.move(video, day.file)
-                    files.move(thumb, day.thumb)
+                parked.forEach { (p, ok) ->
+                    val (day, video, thumb) = p
+                    if (ok) {
+                        files.move(video, day.file)
+                        files.move(thumb, day.thumb)
+                    }
+                    days.save(day)
                 }
-                days.save(day)
             }
         }
     }
