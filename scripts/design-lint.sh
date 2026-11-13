@@ -40,6 +40,9 @@ ALLOW_EXTRA='' ; report "wordmark must be a drawable, not Text(\"SLIVER\")" < <(
 # The app name comes from design/tokens.json (APP_NAME / @string/app_name); old names must not reach the UI.
 ALLOW_EXTRA='LEGACY_DRIVE_FOLDER_NAMES|/(commonTest|androidUnitTest|debug)/' ; report "old app name in a user-visible string; use APP_NAME" < <(search '"[^"]*(Fragments|SLIVER)[^"]*"' 'kt')
 ALLOW_EXTRA='' ; report "old app name in a resource; use @string/app_name" < <(search '>[^<]*(Fragments|SLIVER)[^<]*<|label="(Fragments|SLIVER)' 'xml')
+# v1.5: no mono uppercase labels. uppercase() only for the first letter; all-caps literals only for formats (MP4, HDR…).
+ALLOW_EXTRA='replaceFirstChar|stampText|Stamp' ; report "uppercase() on UI text is forbidden (sentence case, Geist)" < <(search '\.uppercase\(\)' 'kt')
+ALLOW_EXTRA='LEGACY_DRIVE_FOLDER_NAMES|const val|@Suppress|"(MP4|HDR|HEIC|JPEG|UTC|GET|POST|PUT|PATCH|DELETE)"|/(commonTest|androidUnitTest|debug)/|/data/' ; report "ALL CAPS text in UI code; use sentence case" < <(search '"[A-Z][A-Z ·]{2,}[A-Z]"' 'kt')
 
 # strings.xml copy rules
 STR=$(find $SRC -name strings.xml -path '*values/*' 2>/dev/null)
