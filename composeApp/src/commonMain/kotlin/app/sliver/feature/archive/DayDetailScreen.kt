@@ -35,7 +35,9 @@ import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.Chip
+import app.sliver.core.ui.PrimaryButton
+import app.sliver.core.ui.UndoBarAbove
+import androidx.compose.ui.unit.sp
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.NoticeSheet
@@ -102,56 +104,57 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-        Column(Modifier.fillMaxSize()) {
-            Box(Modifier.weight(1f).fillMaxWidth().background(SliverColors.Media)) {
-                if (day != null) {
-                    ClipPlayer(
-                        day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted,
+    UndoBarAbove(196.dp)
+    Box(Modifier.fillMaxSize().background(SliverColors.Media)) {
+        if (day != null) ClipPlayer(day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted)
+        Box(Modifier.fillMaxWidth().height(140.dp).background(Brush.verticalGradient(listOf(SliverColors.Scrim, Color.Transparent))))
+        Box(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(320.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))),
+        )
+        if (day != null && app?.dateStamp == true) {
+            Box(Modifier.fillMaxSize().navigationBarsPadding().padding(bottom = 180.dp)) { DateStamp(stampText(current)) }
+        }
+        Row(
+            Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S2),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            IconButton44(onBack, "Back", overCamera = true) { SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia) }
+            IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on", overCamera = true) {
+                SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.OnMedia)
+            }
+        }
+        Column(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding()
+                .padding(horizontal = SliverSpace.Gutter).padding(bottom = SliverSpace.S4),
+            verticalArrangement = Arrangement.spacedBy(SliverSpace.S6),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val prev = prevDay(current, filled)
+                val next = nextDay(current, filled)
+                IconButton44({ show(prev) }, "Previous day") {
+                    SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia.copy(alpha = if (prev != null) 1f else 0.4f))
+                }
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    SliverText(
+                        "${weekdayName(current)} ${current.day} ${MonthLong[current.month.ordinal]}",
+                        SliverType.Title.copy(fontSize = 22.sp, lineHeight = 28.sp), color = SliverColors.OnMedia, maxLines = 1,
+                    )
+                    val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
+                    val whenText = if (current == today) "Today" else "Day ${dayNumber(current, first)}"
+                    SliverText(
+                        whenText + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
+                        SliverType.Meta.copy(fontSize = 13.sp, lineHeight = 18.sp), color = SliverColors.OnMedia.copy(alpha = 0.7f),
                     )
                 }
-                Box(Modifier.fillMaxWidth().height(140.dp).background(Brush.verticalGradient(listOf(SliverColors.Scrim, Color.Transparent))))
-                Row(
-                    Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.S3),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    IconButton44(onBack, "Close", overCamera = true) { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton44({ show(prevDay(current, filled)) }, "Previous day", overCamera = true) {
-                            SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia.copy(alpha = if (prevDay(current, filled) != null) 1f else 0.4f))
-                        }
-                        IconButton44({ nextDay(current, filled)?.let { show(it) } }, "Next day", overCamera = true) {
-                            SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (nextDay(current, filled) != null) 1f else 0.4f))
-                        }
-                        IconButton44({ muted = !muted }, if (muted) "Sound off" else "Sound on", overCamera = true) {
-                            SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (muted) SliverColors.OnMedia.copy(alpha = 0.75f) else SliverColors.OnMedia)
-                        }
-                    }
+                IconButton44({ next?.let { show(it) } }, "Next day") {
+                    SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (next != null) 1f else 0.4f))
                 }
-                if (day != null && app?.dateStamp == true) DateStamp(stampText(current))
             }
-            Column(
-                Modifier.fillMaxWidth().background(SliverColors.BgBase)
-                    .navigationBarsPadding()
-                    .padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S4),
-                verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
-            ) {
-                SliverText(weekdayName(current), SliverType.DisplayL, color = SliverColors.TextPrimary)
-                val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
-                SliverText(
-                    "Day ${dayNumber(current, first)}" + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                    SliverType.Meta, color = SliverColors.TextSecondary,
-                )
-                if (day != null) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        day.place?.let { Chip(it, selected = false, onClick = {}) }
-                    }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                    SecondaryButton("Replace", { replace(current) }, Modifier.weight(1f))
-                    GhostButton("Remove", { day?.let(::remove) }, Modifier.weight(1f), destructive = true, enabled = day != null)
-                }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))
+                SecondaryButton("Remove", { day?.let(::remove) }, Modifier.weight(1f), destructive = true, enabled = day != null)
             }
         }
 

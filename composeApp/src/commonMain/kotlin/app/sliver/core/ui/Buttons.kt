@@ -46,7 +46,10 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
 }
 
 @Composable
-fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true) {
+fun SecondaryButton(
+    text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, fullWidth: Boolean = true,
+    destructive: Boolean = false,
+) {
     Box(
         modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier).height(48.dp)
             .clip(SliverShapes.Pill)
@@ -54,7 +57,11 @@ fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modi
             .press(enabled, onClick),
         contentAlignment = Alignment.Center,
     ) {
-        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = if (enabled) SliverColors.TextPrimary else SliverColors.TextDisabled, maxLines = 1, softWrap = false)
+        SliverText(text, SliverType.Headline, Modifier.padding(horizontal = SliverSpace.S4), color = when {
+            !enabled -> SliverColors.TextDisabled
+            destructive -> SliverColors.Error
+            else -> SliverColors.TextPrimary
+        }, maxLines = 1, softWrap = false)
     }
 }
 

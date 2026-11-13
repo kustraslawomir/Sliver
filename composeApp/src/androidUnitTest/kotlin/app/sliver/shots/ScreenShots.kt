@@ -2,6 +2,7 @@ package app.sliver.shots
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
@@ -41,6 +42,23 @@ class ScreenShots : ShotTest() {
     @Test fun dayDetail() {
         ArchiveSession.selected = kotlinx.datetime.LocalDate(2026, 11, 9)
         shoot("DayDetail", inspection = true) { DayDetailScreen({}, {}) }
+    }
+    @Test fun projectUndo() = shoot("ProjectHubUndo") { UndoOver(app.sliver.core.ui.UndoBarBottomDefault, "3 days removed") { ProjectScreen {} } }
+    @Test fun dayDetailUndo() {
+        ArchiveSession.selected = kotlinx.datetime.LocalDate(2026, 11, 9)
+        shoot("DayDetailUndo", inspection = true) { UndoOver(196.dp, "Clip removed") { DayDetailScreen({}, {}) } }
+    }
+
+    /** The undo bar where [app.sliver.core.ui.UndoToastHost] puts it (the host itself times out under the test clock). */
+    @androidx.compose.runtime.Composable
+    private fun UndoOver(bottom: androidx.compose.ui.unit.Dp, message: String, content: @androidx.compose.runtime.Composable () -> Unit) {
+        androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
+            content()
+            androidx.compose.foundation.layout.Box(
+                Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, bottom = bottom),
+                contentAlignment = androidx.compose.ui.Alignment.BottomCenter,
+            ) { app.sliver.core.ui.UndoBar(message, {}) }
+        }
     }
     @Test fun autoImport() = shoot("AutoImport", inspection = true) { AutoImportScreen({}, {}) }
     @Test fun filmBuilder() = shoot("FilmBuilder", inspection = true) { FilmBuilderScreen({}, {}) }

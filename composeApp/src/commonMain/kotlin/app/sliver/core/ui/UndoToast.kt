@@ -1,7 +1,13 @@
 package app.sliver.core.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,10 +33,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 class UndoToast(val message: String, val onUndo: () -> Unit)
 
-/** App-wide "<message> · Undo" toast; one at a time, gone after [UNDO_WINDOW_MS]. Shown by [UndoToastHost]. */
+/** Default distance of the undo bar from the bottom (above the project screen's Record dock). */
+val UndoBarBottomDefault: Dp = 132.dp
+
+/** App-wide "<message> · Undo" bar; one at a time, gone after [UNDO_WINDOW_MS]. Shown by [UndoToastHost]. */
 object UndoToasts {
     private val state = MutableStateFlow<UndoToast?>(null)
     val current: StateFlow<UndoToast?> = state
+    private val bottomState = MutableStateFlow(UndoBarBottomDefault)
+    val bottom: StateFlow<Dp> = bottomState
 
     fun show(message: String, onUndo: () -> Unit) {
         state.value = UndoToast(message, onUndo)
@@ -39,24 +50,49 @@ object UndoToasts {
     fun dismiss(toast: UndoToast) {
         state.compareAndSet(toast, null)
     }
+
+    fun setBottom(dp: Dp) {
+        bottomState.value = dp
+    }
+}
+
+/** A screen whose buttons sit higher than the Record dock (Day detail) lifts the undo bar above them while shown. */
+@Composable
+fun UndoBarAbove(bottom: Dp) {
+    DisposableEffect(bottom) {
+        UndoToasts.setBottom(bottom)
+        onDispose { UndoToasts.setBottom(UndoBarBottomDefault) }
+    }
 }
 
 @Composable
 fun UndoToastHost() {
     val toast by UndoToasts.current.collectAsState()
+    val bottom by UndoToasts.bottom.collectAsState()
     val t = toast ?: return
     LaunchedEffect(t) {
         delay(UNDO_WINDOW_MS)
         UndoToasts.dismiss(t)
     }
-    Box(Modifier.fillMaxSize().navigationBarsPadding().padding(start = SliverSpace.Gutter, end = SliverSpace.Gutter, bottom = 104.dp), contentAlignment = Alignment.BottomCenter) {
-        Row(
-            Modifier.clip(SliverShapes.Pill).background(SliverColors.Surface2).border(1.dp, SliverColors.LineStrong, SliverShapes.Pill)
-                .padding(start = SliverSpace.S4),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SliverText(t.message, SliverType.BodySmall, color = SliverColors.TextPrimary, maxLines = 1)
-            GhostButton("Undo", { UndoToasts.dismiss(t); t.onUndo() })
+    Box(
+        Modifier.fillMaxSize().navigationBarsPadding().padding(start = SliverSpace.Gutter, end = SliverSpace.Gutter, bottom = bottom),
+        contentAlignment = Alignment.BottomCenter,
+    ) { UndoBar(t.message, { UndoToasts.dismiss(t); t.onUndo() }) }
+}
+
+/** Design v1.5 undo bar: 48dp, radius 14, inverted colours, message left, bold "Undo" right. */
+@Composable
+fun UndoBar(message: String, onUndo: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier.fillMaxWidth().height(48.dp).clip(SliverShapes.R14).background(SliverColors.TextPrimary).padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SliverText(
+            message, SliverType.Body.copy(fontSize = 15.sp, lineHeight = 20.sp), Modifier.weight(1f),
+            color = SliverColors.OnInverse, maxLines = 1,
+        )
+        Box(Modifier.height(48.dp).clickable(role = Role.Button, onClick = onUndo).padding(horizontal = 16.dp), Alignment.Center) {
+            SliverText("Undo", SliverType.Headline.copy(fontSize = 15.sp, lineHeight = 20.sp), color = SliverColors.OnInverse)
         }
     }
 }
