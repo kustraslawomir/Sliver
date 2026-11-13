@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.CircleShape
 import app.sliver.core.permissions.PermissionGate
 import app.sliver.core.permissions.PermissionKind
 import app.sliver.core.permissions.PermissionStatus
@@ -115,18 +117,19 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
 
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when (step) {
-                OnboardingStep.Welcome -> Column(
-                    Modifier.fillMaxSize().padding(bottom = SliverSpace.S6),
-                    verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
-                ) {
-                    Box(Modifier.align(Alignment.CenterHorizontally).width(12.dp).height(120.dp).clip(SliverShapes.Pill).background(SliverColors.TextPrimary))
-                    SliverText("One clip a day. One film a year.", SliverType.DisplayM)
+                // Board OnbV2: the name-neutral red dot (the record button) up top, copy and actions at the bottom.
+                OnboardingStep.Welcome -> Column(Modifier.fillMaxSize().padding(bottom = SliverSpace.S4)) {
+                    Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
+                        Box(Modifier.size(22.dp).clip(CircleShape).background(SliverColors.Record))
+                    }
+                    SliverText("One clip a day.\nOne film a year.", SliverType.DisplayXL.copy(fontSize = 44.sp, lineHeight = 46.sp))
                     SliverText(
                         "Catch a moment, keep the best part. $APP_NAME turns your clips into a film.",
-                        SliverType.Body, color = SliverColors.TextSecondary,
+                        SliverType.Body.copy(fontSize = 17.sp, lineHeight = 26.sp), Modifier.padding(top = SliverSpace.S5),
+                        color = SliverColors.TextSecondary,
                     )
-                    PrimaryButton("Start", { index++ }, Modifier.fillMaxWidth().padding(top = SliverSpace.S6))
-                    GhostButton("Restore from backup", onRestore, Modifier.fillMaxWidth())
+                    PrimaryButton("Start", { index++ }, Modifier.fillMaxWidth().padding(top = SliverSpace.S8))
+                    GhostButton("Restore from backup", onRestore, Modifier.fillMaxWidth().padding(top = SliverSpace.S3))
                 }
                 OnboardingStep.Project -> Column(
                     Modifier.fillMaxSize().padding(bottom = SliverSpace.S6),
@@ -148,10 +151,10 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
 
 @Composable
 private fun SlitProgress(count: Int, index: Int, modifier: Modifier = Modifier) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1, Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), verticalAlignment = Alignment.Top) {
         repeat(count) { i ->
             Box(
-                Modifier.width(if (i == index) 24.dp else 8.dp).height(4.dp).clip(SliverShapes.Pill)
+                Modifier.width(2.dp).height(if (i == index) 22.dp else 14.dp).clip(SliverShapes.Pill)
                     .background(if (i <= index) SliverColors.TextPrimary else SliverColors.LineStrong),
             )
         }
