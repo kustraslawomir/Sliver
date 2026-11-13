@@ -46,3 +46,20 @@ Rebuild with the kit, matching the boards: project screen (HubV17), camera (Came
 - Screenshots of the 5 boarded screens dark + light + font 1.3×, side by side with the boards, in `qa/v1.7/`. Placeholder clips only, never the owner's media.
 - Idle CPU number from item 5 in the commit message.
 - Testing only on the Xiaomi `b798509a` or emulator `tracker13`. Never the Samsung.
+
+## 7. Record button v2 — the app's calling card (overrides item 4 where they differ)
+Watch `design/motion/RecordButton.mp4`; timings and every layer value are in `design/motion/RecordButton.html` (`frame(t)`); states in `design/png/RecordButton.png` (idle · press · recording 0.6 s · saved).
+Layers, bottom to top, 92 dp box:
+1. `liquidGlow` (unchanged), strength 0.6 idle → 1.0 recording.
+2. Strong glass disc 92 dp (blur 20, white 10 %, saturation 1.8), shadow 0/14/34 black 45 %.
+3. Outer rim 0.6 dp: sweepGradient — white 95 % at the top, white 15 % at the sides, warm red 55 % at the bottom (reflected core light). Rotates ±6° with the glow phase.
+4. Gap ring: 72 dp disc, black 55 % with a 1 dp inner shadow — the machined shutter look. Inner rim 0.6 dp, white 45 % at top/bottom fading to 0 at the sides.
+5. Core 64 dp, base #E3261C, clipped:
+   - liquid: sweepGradient #FF2D55 → #FF3B30 → #FF6A3D → #E8261C → #FF4A6A, 160 % size, blur 7 dp, rotating one full turn per 5 s (only while the camera is open);
+   - subsurface: radial at the bottom (50 %, 105 %), #FF965F 90 % → 0;
+   - gloss: ellipse 68 × 44 % at the top (16 %, 5 %), white 80 % → 18 % → 0;
+   - edges: inner shadow 0/−3/7 #6E0000 55 %, inner highlight 0/1.5/1.5 white 45 %.
+6. Progress arc on the glass ring, r = 41 dp, 3 dp white, round caps, 4 dp white glow; 0→100 % over the first 1 s of a press, then stays full while held.
+7. Timer pill 30 dp above the button: black 25 % glass, red 7 dp dot, "0.6 s" 14/500 tabular. Shows only while recording.
+Motion: press = core ×0.92 + whole button ×0.96, 120 ms. Recording: core → 30 dp square, corner 9 dp, spring with a little overshoot (~420 ms). Release/saved: white ring flash 8 dp → 2 dp, 480 ms, haptic CONFIRM; core springs back to the disc (460 ms easeInOutCubic).
+Render on a Canvas/DrawScope (no nested Boxes per layer), one `rememberInfiniteTransition` for phase, paused when the camera is not RESUMED. Done = screenrecord on the Xiaomi next to the mp4 in `qa/v1.7/record-button.mp4`.
