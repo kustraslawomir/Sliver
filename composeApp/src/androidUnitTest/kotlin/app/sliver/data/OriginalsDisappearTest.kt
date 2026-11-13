@@ -6,7 +6,9 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.sliver.core.navigation.Route
-import app.sliver.data.backup.BackupEngine
+import app.sliver.data.backup.DriveTrashQueue
+import app.sliver.data.backup.RestoredDayWriter
+import app.sliver.data.backup.SyncEngine
 import app.sliver.data.backup.DayFileReader
 import app.sliver.data.backup.InMemoryDriveClient
 import app.sliver.data.db.SliverDatabase
@@ -83,7 +85,7 @@ class OriginalsDisappearTest {
                 File.createTempFile("prefs", ".preferences_pb").apply { delete() }
             },
         )
-        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files) {}
+        projects = ProjectRepositoryImpl(db.projectDao(), settings, db.dayDao(), db.filmDao(), files, DriveTrashQueue {})
         days = DayRepositoryImpl(db.dayDao(), projects, exporter, files)
         films = FilmRepositoryImpl(db.filmDao(), projects)
     }
@@ -117,7 +119,10 @@ class OriginalsDisappearTest {
         assertEquals(listOf(tmp), exporter.sources)
 
         val drive = InMemoryDriveClient()
-        val engine = BackupEngine(drive, days, films, settings, DayFileReader { p -> File(p).takeIf { it.exists() }?.readBytes() }, projects)
+        val engine = SyncEngine(
+            drive, days, films, settings, DayFileReader { p -> File(p).takeIf { it.exists() }?.readBytes() }, projects, files,
+            RestoredDayWriter { _, _, _ -> 0 },
+        )
         assertEquals(null, engine.run())
         assertEquals(BackupState.DONE, days.getDay(date)?.backup)
         assertEquals(1, days.observeAll().first().size)
