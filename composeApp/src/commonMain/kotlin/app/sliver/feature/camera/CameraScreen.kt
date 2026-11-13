@@ -213,7 +213,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
 
     fun startRecording() {
         if (!storageOk()) return
-        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
         elapsedMs = 0
         recording = true
         failed = false
@@ -222,7 +222,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     }
 
     fun stopRecording() {
-        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
         engine.stopRecording()
     }
 
@@ -286,8 +286,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (recording) {
                     val long = clipLongEnough(elapsedMs)
+                    // v1.7: the timer lives in the pill above the record button.
                     LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
-                    TimerPill(formatTimer(elapsedMs), long, Modifier.align(Alignment.CenterVertically))
                 } else {
                     CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { GoldenHourLine(saved?.showGoldenHour == true) }
@@ -353,6 +353,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                         }
                     },
                     onHoldEnd = { if (recording) stopRecording() },
+                    elapsedMs = elapsedMs,
                 )
                 if (recording) {
                     Box(Modifier.size(64.dp))

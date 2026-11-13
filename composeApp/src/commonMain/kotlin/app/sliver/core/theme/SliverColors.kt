@@ -40,6 +40,13 @@ object SliverColors {
     /** v1.7 record core gradient: light → base → deep. */
     val RecordLight = Color(0xFFFF6F63)
     val RecordDeep = Color(0xFFD9281F)
+    /** Record button v2 core (design/motion/RecordButton.html). */
+    val RecordCoreBase = Color(0xFFE3261C)
+    val RecordLiquid = listOf(Color(0xFFFF2D55), Color(0xFFFF3B30), Color(0xFFFF6A3D), Color(0xFFE8261C), Color(0xFFFF4A6A), Color(0xFFFF2D55))
+    val RecordSubsurface = Color(0xE6FF965F)
+    val RecordEdge = Color(0x8C6E0000)
+    val RecordRimWarm = Color(0x8CFF5A3C)
+    val PhotoCoreLow = Color(0xFFCFCFC8)
     /** Text on a TextPrimary-filled pill (selected segment, inverted button). */
     val OnInverse get() = p.onInverse
     val Success get() = p.success
