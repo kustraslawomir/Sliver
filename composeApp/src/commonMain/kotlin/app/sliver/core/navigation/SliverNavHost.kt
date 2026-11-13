@@ -117,6 +117,7 @@ fun SliverNavHost() {
                             Route.Project -> ProjectScreen(go)
                             Route.DayDetail -> DayDetailScreen(go, onBack = back)
                             Route.FillThePast -> AutoImportScreen(go, onBack = back)
+                            Route.DayGallery -> app.sliver.feature.gallery.DayGalleryScreen(go, onBack = back)
                             Route.FilmBuilder -> FilmBuilderScreen(
                                 onBack = back,
                                 onSaved = { id ->

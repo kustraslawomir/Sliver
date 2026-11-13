@@ -21,7 +21,11 @@ import org.koin.mp.KoinPlatform
  * A video, Motion Photo or Live Photo goes to Edit clip, a photo to Photo clip. Cancelling leaves the user where they were.
  */
 @Composable
-fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
+fun rememberAddMedia(onNavigate: (Route) -> Unit, preferDayGallery: Boolean = true): (LocalDate?) -> Unit {
+    // Owner: "can we filter the gallery to the chosen date?" The system picker can't filter by date, so when we already
+    // have gallery access (granted for auto-import) a past day opens our own "from this day" grid instead.
+    val galleryStatus = app.sliver.core.permissions.rememberPermissionController().status(app.sliver.core.permissions.PermissionKind.MediaLibrary)
+    val hasGallery = galleryStatus == app.sliver.core.permissions.PermissionStatus.Granted || galleryStatus == app.sliver.core.permissions.PermissionStatus.Partial
     val provider = remember { KoinPlatform.getKoin().get<GalleryProvider>() }
     val files = remember { KoinPlatform.getKoin().get<FileStore>() }
     val scope = rememberCoroutineScope()
@@ -59,7 +63,7 @@ fun rememberAddMedia(onNavigate: (Route) -> Unit): (LocalDate?) -> Unit {
         if (!busy) {
             target = date
             CaptureSession.forDate = date
-            launchPicker()
+            if (preferDayGallery && hasGallery && date != null && date < todayLocal()) onNavigate(Route.DayGallery) else launchPicker()
         }
     }
 }

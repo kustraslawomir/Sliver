@@ -8,6 +8,7 @@ enum class Route(val path: String, val title: String) {
     Project("project", "Project"),
     DayDetail("day", "Clip detail"),
     FillThePast("fill-the-past", "Auto-import"),
+    DayGallery("day-gallery", "From this day"),
     FilmBuilder("film-builder", "Film builder"),
     Export("export", "Export"),
     FilmPlayer("film-player", "Film player"),
