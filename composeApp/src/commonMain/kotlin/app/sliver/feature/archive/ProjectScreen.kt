@@ -102,7 +102,6 @@ import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.feature.autoimport.DayMediaSheetBody
 import app.sliver.feature.autoimport.ReviewSheetBody
 import app.sliver.feature.autoimport.autoDays
 import app.sliver.feature.autoimport.decodeCandidates
@@ -175,9 +174,6 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     fun show(m: YearMonth) { shownIndex = m.year * 12 + m.month - 1 }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
     var draftsSheet by remember { mutableStateOf(false) }
-    var reviewRaw by rememberSaveable { mutableStateOf<String?>(null) }
-    var walking by rememberSaveable { mutableStateOf(false) }
-    val reviewDay = reviewRaw?.let { raw -> waiting.firstOrNull { it.date.toString() == raw } }
     LaunchedEffect(Unit) { ArchiveSession.pendingMonth?.let { show(it); ArchiveSession.pendingMonth = null } }
     var projectsOpen by remember { mutableStateOf(false) }
     var projectAction by remember { mutableStateOf<ProjectAction?>(null) }
@@ -339,26 +335,8 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 drafts.size, autoCount, draftNav.busy,
                 onKeepAll = { draftsSheet = false; draftNav.keepAll() },
                 onRemoveUnchecked = { draftsSheet = false; draftNav.removeUnchecked() },
-                onWalk = { draftsSheet = false; walking = true; reviewRaw = waiting.firstOrNull()?.date?.toString() },
-            )
-        }
-        SliverBottomSheet(reviewDay != null, onDismiss = { reviewRaw = null; walking = false }) {
-            val d = reviewDay ?: return@SliverBottomSheet
-            fun advance() {
-                val next = if (walking) nextDraft(waiting, d.date) { it.date } else null
-                reviewRaw = next?.date?.toString()
-                if (next == null) walking = false
-            }
-            DayMediaSheetBody(
-                d, draftNav.busy,
-                onPick = { uri -> val walk = walking; reviewRaw = null; walking = false; draftNav.openFirst(onNavigate, d, uri, chain = walk) },
-                // Owner: "Keep" still means choosing the exact second by hand — open the editor on the current pick.
-                onKeep = {
-                    val current = decodeCandidates(d.draftCandidates).firstOrNull()?.uri
-                    if (current == null) { advance(); draftNav.keepOne(d) }
-                    else { val walk = walking; reviewRaw = null; walking = false; draftNav.openFirst(onNavigate, d, current, chain = walk) }
-                },
-                onRemove = { advance(); draftNav.removeOne(d) },
+                // Owner: no day sheet; the editor walks the days itself (previous / next).
+                onWalk = { draftsSheet = false; waiting.firstOrNull()?.let { draftNav.openFirst(onNavigate, it, chain = true) } },
             )
         }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {

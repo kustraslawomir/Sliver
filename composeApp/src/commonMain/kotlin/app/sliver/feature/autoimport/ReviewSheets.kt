@@ -23,29 +23,6 @@ import app.sliver.core.ui.SecondaryButton
 import app.sliver.data.db.Day
 
 /** All gallery items of one auto-filled or draft day: pick one to cut, keep the current pick, or remove the day. */
-@Composable
-fun DayMediaSheetBody(day: Day, busy: Boolean, onPick: (String) -> Unit, onKeep: () -> Unit, onRemove: () -> Unit) {
-    val candidates = remember(day.draftCandidates) { decodeCandidates(day.draftCandidates) }
-    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-        SliverText(dayItemsTitle(day.date, candidates.size.coerceAtLeast(1)), SliverType.Title)
-        if (candidates.isNotEmpty()) {
-            SliverText("Keep opens the current one so you can pick the second. Tap another to use it instead.", SliverType.BodySmall, color = SliverColors.TextSecondary)
-            Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                candidates.chunked(3).forEach { row ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        row.forEach { c ->
-                            CandidateTile(c, c.uri == candidates.first().uri, Modifier.weight(1f).aspectRatio(1f)) { onPick(c.uri) }
-                        }
-                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                }
-            }
-        }
-        PrimaryButton("Keep", onKeep, Modifier.fillMaxWidth(), enabled = !busy)
-        GhostButton("Remove day", onRemove, Modifier.fillMaxWidth(), destructive = true, enabled = !busy)
-    }
-}
-
 /** The header chip's sheet: drafts and auto-filled days waiting for a look. */
 @Composable
 fun ReviewSheetBody(drafts: Int, auto: Int, busy: Boolean, onKeepAll: () -> Unit, onRemoveUnchecked: () -> Unit, onWalk: () -> Unit) {

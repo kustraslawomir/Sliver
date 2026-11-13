@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.dp
 import app.sliver.core.theme.SliverColors
 import app.sliver.data.db.Day
 import app.sliver.feature.archive.ProjectScreen
-import app.sliver.feature.autoimport.DayMediaSheetBody
 import app.sliver.feature.autoimport.DraftCandidate
 import app.sliver.feature.autoimport.ReviewSheetBody
 import app.sliver.feature.autoimport.encodeCandidates
@@ -44,14 +43,6 @@ class AutoFillShots : ShotTest() {
     }
 
     @Test fun calendar() = shoot("AutoFillCalendar") { ProjectScreen {} }
-
-    @Test fun daySheet() = shoot("AutoFillDaySheet", inspection = true) {
-        Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-            Column(Modifier.background(SliverColors.Surface1).padding(20.dp)) {
-                DayMediaSheetBody(runBlockingDay(7), busy = false, onPick = {}, onKeep = {}, onRemove = {})
-            }
-        }
-    }
 
     @Test fun chipSheet() = shoot("AutoFillChipSheet", inspection = true) {
         Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
