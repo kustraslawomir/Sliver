@@ -90,6 +90,7 @@ fun RecordButton(
     modifier: Modifier = Modifier,
     elapsedMs: Long = 0L,
 ) {
+    app.sliver.core.log.RecomposeProbe("recordButton")
     val reduced = LocalReducedMotion.current
     val recording = state == RecordState.Recording
     val white = state == RecordState.Photo

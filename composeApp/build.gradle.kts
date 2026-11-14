@@ -186,8 +186,16 @@ kotlin {
     }
 }
 
+// Perf STEP 0: Compose compiler stability reports and metrics (build/compose_compiler).
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
+    // STEP 5.5: leak detection in debug builds only.
+    debugImplementation(libs.leakcanary.android)
     add("kspAndroid", libs.room.compiler)
     add("kspIosArm64", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)

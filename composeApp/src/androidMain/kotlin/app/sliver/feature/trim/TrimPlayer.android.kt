@@ -111,5 +111,6 @@ actual fun TrimPlayer(
             }
         },
         modifier = modifier,
+        onRelease = { it.player = null },
     )
 }

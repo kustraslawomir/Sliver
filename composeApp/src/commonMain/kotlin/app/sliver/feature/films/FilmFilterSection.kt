@@ -86,6 +86,7 @@ fun FilmFilterSection(
     /** Owner: sliders live behind a long press (or a tap on the chosen filter); null keeps them inline. */
     onAdjust: ((LookPreset) -> Unit)? = null,
 ) {
+    app.sliver.core.log.RecomposeProbe("looks")
     val thumbs by produceState(thumbsOverride.orEmpty(), frame, thumbsOverride) {
         value = thumbsOverride ?: frame?.let { renderFilterThumbs(it, FilterPresets) }.orEmpty()
     }

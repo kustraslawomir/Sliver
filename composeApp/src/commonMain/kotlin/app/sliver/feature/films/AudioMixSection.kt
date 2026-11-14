@@ -83,6 +83,7 @@ fun AudioMixSection(
     onMutedClips: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    app.sliver.core.log.RecomposeProbe("soundSheet")
     val preview = rememberTrackPreview()
     DisposableEffect(Unit) { onDispose { preview.stop() } }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {

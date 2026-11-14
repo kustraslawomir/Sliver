@@ -45,6 +45,13 @@ class MainActivity : ComponentActivity() {
         super.onPause()
     }
 
+    override fun onDestroy() {
+        // STEP 5.5: the launcher lambda captures this activity; a singleton must not keep it after destroy.
+        AuthHost.launcher = null
+        if (AuthHost.activity === this) AuthHost.activity = null
+        super.onDestroy()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleDeepLink(intent)

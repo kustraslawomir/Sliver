@@ -79,6 +79,7 @@ import org.koin.mp.KoinPlatform
 
 @Composable
 fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
+    app.sliver.core.log.RecomposeProbe("day")
     val koin = remember { KoinPlatform.getKoin() }
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }

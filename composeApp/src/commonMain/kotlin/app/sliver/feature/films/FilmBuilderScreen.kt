@@ -91,6 +91,7 @@ private val Audios = listOf(FilmAudio.ORIGINAL, FilmAudio.MUSIC, FilmAudio.MIX)
 
 @Composable
 fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
+    app.sliver.core.log.RecomposeProbe("builder")
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }

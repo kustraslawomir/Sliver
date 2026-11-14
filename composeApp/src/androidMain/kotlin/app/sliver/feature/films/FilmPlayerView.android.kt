@@ -88,6 +88,7 @@ actual fun FilmPlayerView(
             }
         },
         modifier = modifier,
+        onRelease = { it.player = null },
     )
 }
 

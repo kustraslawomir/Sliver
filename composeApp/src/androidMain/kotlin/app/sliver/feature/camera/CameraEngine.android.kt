@@ -1,5 +1,6 @@
 package app.sliver.feature.camera
 
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.sliver.core.theme.SliverColors
 import androidx.compose.foundation.layout.Box
@@ -124,6 +125,19 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
     private class UltraWide(val id: String, val ratio: Float)
 
     private var binding: Binding? = null
+
+    /** STEP 5.5: leaving the camera unbinds every use case and drops view/lifecycle references (no detached PreviewView kept). */
+    fun release(provider: ProcessCameraProvider?) {
+        runCatching { recording?.stop() }
+        recording = null
+        runCatching { provider?.unbindAll() }
+        camera = null
+        videoCapture = null
+        imageCapture = null
+        previewView = null
+        binding = null
+        mainInfo = null
+    }
     private var mainInfo: CameraInfo? = null
     private var ultraWide: UltraWide? = null
     private var onUltraWide = false
@@ -302,6 +316,10 @@ actual fun CameraPreview(
         val p = provider ?: return@LaunchedEffect
         (engine as AndroidCameraEngine).bind(p, owner, view, mode, lens, torch)
         onReady()
+    }
+    DisposableEffect(provider) {
+        val p = provider
+        onDispose { (engine as AndroidCameraEngine).release(p) }
     }
     AndroidView({ view }, modifier)
 }

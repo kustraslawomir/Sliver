@@ -26,6 +26,7 @@ import app.sliver.feature.trim.rememberPhoto
 /** Real thumbnails across the film (up to 15) with a white playhead; tap or drag to seek. */
 @Composable
 fun Filmstrip(plan: FilmPlan, fraction: Float, onSeek: (Float) -> Unit) {
+    app.sliver.core.log.RecomposeProbe("filmstrip")
     val picks = remember(plan) {
         val n = plan.days.size
         if (n == 0) emptyList() else List(minOf(15, n)) { i -> plan.days[(i * n / minOf(15, n)).coerceAtMost(n - 1)] }

@@ -83,6 +83,7 @@ import org.koin.mp.KoinPlatform
 /** Films of the active project, shown under the calendar on the Project screen. */
 @Composable
 fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
+    app.sliver.core.log.RecomposeProbe("films")
     val koin = remember { KoinPlatform.getKoin() }
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }

@@ -135,6 +135,7 @@ fun CameraScreen(onNavigate: (Route) -> Unit, onClose: () -> Unit) {
 
 @Composable
 private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.datetime.LocalDate?) -> Unit, onClose: () -> Unit) {
+    app.sliver.core.log.RecomposeProbe("camera")
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val files = remember { koin.get<FileStore>() }

@@ -159,6 +159,7 @@ private val CellShape get() = SliverShapes.S
 
 @Composable
 fun ProjectScreen(onNavigate: (Route) -> Unit) {
+    app.sliver.core.log.RecomposeProbe("hub")
     val koin = remember { KoinPlatform.getKoin() }
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
@@ -512,6 +513,7 @@ private fun MonthGrid(
     shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, start: LocalDate,
     onCell: (LocalDate) -> Unit, onReplace: (LocalDate) -> Unit, onRemove: (LocalDate) -> Unit,
 ) {
+    app.sliver.core.log.RecomposeProbe("month")
     val weeks = remember(shown) { monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } } }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -540,6 +542,7 @@ private fun DayCell(
     date: LocalDate, today: LocalDate, start: LocalDate, day: Day?, onReplace: () -> Unit, onRemove: () -> Unit,
     onClick: () -> Unit,
 ) {
+    app.sliver.core.log.RecomposeProbe("cell")
     val scale = remember { Animatable(1f) }
     val reduced = LocalReducedMotion.current
     LaunchedEffect(day?.takenAt) {

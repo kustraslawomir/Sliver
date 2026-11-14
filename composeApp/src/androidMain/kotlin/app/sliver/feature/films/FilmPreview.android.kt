@@ -210,6 +210,7 @@ actual fun FilmPreview(
         },
         update = { val p = if (comparing) clean else video; if (it.player !== p) it.player = p },
         modifier = modifier,
+        onRelease = { it.player = null },
     )
 }
 
