@@ -121,3 +121,10 @@ val Migration11To12 = object : Migration(11, 12) {
         )
     }
 }
+
+/** Owner 14 Nov: audio layers, clip volume and muted clips per film (JSON AudioMix). */
+val Migration12To13 = object : Migration(12, 13) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE film ADD COLUMN audioMix TEXT")
+    }
+}

@@ -5,27 +5,26 @@ import androidx.compose.ui.Modifier
 import app.sliver.data.FilmAudio
 import app.sliver.data.LookParams
 
-class FilmClip(val path: String, val keepAudio: Boolean)
+/** [date] (ISO) keys the film's per-clip mute. */
+class FilmClip(val path: String, val keepAudio: Boolean, val date: String = "")
 
 /** Jump request; a new instance seeks even when the fraction is unchanged. */
 class FilmSeek(val fraction: Float)
 
 /**
  * Plays [clips] back to back (one second each). [look] is the film's filter (null = clean); clips never carry their own.
- * [track] is a path to a picked music file, played looped according to [audio].
+ * [mix] is the film's sound: clip volume, muted clips and audio layers, kept in step with the film's time.
  * [onPosition] reports the current clip index and progress through it.
  */
 @Composable
 expect fun FilmPreview(
     clips: List<FilmClip>,
     look: LookParams?,
-    audio: FilmAudio,
-    track: String?,
+    mix: AudioMix,
     paused: Boolean,
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
-    musicVolume: Int? = null,
     /** Owner: while held, the preview shows the same moment without the filter (paused) to compare. */
     compare: Boolean = false,
 )
@@ -43,3 +42,6 @@ expect fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit
 /** Owner: music files loaded once stay in the app; newest first. [refresh] re-reads the list after an import. */
 @Composable
 expect fun rememberMusicLibrary(refresh: Any?): List<String>
+
+/** Length of an audio file in ms (0 when unreadable). Blocking; small files only read their header. */
+expect fun audioDurationMs(path: String): Long

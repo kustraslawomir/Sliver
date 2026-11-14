@@ -35,21 +35,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private const val MIX_ORIGINAL = 0.5f
 private const val MUSIC_SYNC_SLACK_MS = 250L
+
+private fun layerKey(i: Int, path: String) = "$i|$path"
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 actual fun FilmPreview(
     clips: List<FilmClip>,
     look: LookParams?,
-    audio: FilmAudio,
-    track: String?,
+    mix: AudioMix,
     paused: Boolean,
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
-    musicVolume: Int?,
     compare: Boolean,
 ) {
     if (LocalInspectionMode.current) {
@@ -77,8 +76,11 @@ actual fun FilmPreview(
             }
         }
     }
-    val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
-    DisposableEffect(Unit) { onDispose { music.release() } }
+    // One player per audio layer; each follows the film's time (see layerPositionAt).
+    val layerPlayers = remember { mutableMapOf<String, ExoPlayer>() }
+    DisposableEffect(Unit) { onDispose { layerPlayers.values.forEach { it.release() }; layerPlayers.clear() } }
+    val currentMix = rememberUpdatedState(mix)
+    val playing = remember { mutableStateOf(false) }
     // Hold to compare: one clip, no filter, at the moment the film is paused on (the filtered player keeps its playlist).
     val clean = remember {
         app.sliver.core.media.newPlayer(context).apply { setVideoEffects(listOf(androidx.media3.effect.Contrast(0f))); volume = 0f }
@@ -96,7 +98,6 @@ actual fun FilmPreview(
     }
     val report = rememberUpdatedState(onPosition)
     val currentClips = rememberUpdatedState(clips)
-    val currentAudio = rememberUpdatedState(audio)
     val currentVideo = rememberUpdatedState(video)
     val pausedNow = rememberUpdatedState(paused)
     val frameShown = remember { kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
@@ -126,17 +127,16 @@ actual fun FilmPreview(
         player.prepare()
         showFrameWhilePaused(player)
     }
-    LaunchedEffect(track, audio) {
-        if (track != null && audio != FilmAudio.ORIGINAL) {
-            music.setMediaItem(MediaItem.fromUri(trackUri(track)))
-            music.prepare()
-        } else {
-            music.clearMediaItems()
+    // The same file can sit on two layers, so players are keyed by lane and file.
+    val layerKeys = mix.layers.mapIndexed { i, l -> layerKey(i, l.path) }.filter { trackExists(it.substringAfter('|')) }
+    LaunchedEffect(layerKeys) {
+        (layerPlayers.keys - layerKeys.toSet()).forEach { layerPlayers.remove(it)?.release() }
+        layerKeys.filter { it !in layerPlayers }.forEach { key ->
+            layerPlayers[key] = app.sliver.core.media.newPlayer(context).apply {
+                setMediaItem(MediaItem.fromUri(trackUri(key.substringAfter('|'))))
+                prepare()
+            }
         }
-    }
-    // Same music level as the render (owner: adjustable background music volume).
-    LaunchedEffect(audio, FilmPlayback.muted, musicVolume) {
-        music.volume = if (FilmPlayback.muted) 0f else audioPlan(audio, track, musicVolume).musicVolume.takeIf { it > 0f } ?: 1f
     }
     val visible = rememberAppVisible()
     LaunchedEffect(comparing) {
@@ -164,7 +164,7 @@ actual fun FilmPreview(
             if (play && it.playbackState == Player.STATE_IDLE) it.prepare()
             it.playWhenReady = play
         }
-        music.playWhenReady = play
+        playing.value = play
     }
     LaunchedEffect(seek) {
         val s = seek ?: return@LaunchedEffect
@@ -183,20 +183,18 @@ actual fun FilmPreview(
             if (video == null) { delay(33); continue }
             val index = video.currentMediaItemIndex
             val clip = currentClips.value.getOrNull(index)
-            video.volume = when {
-                clip == null -> 0f
-                FilmPlayback.muted -> 0f
-                currentAudio.value == FilmAudio.MUSIC -> 0f
-                !clip.keepAudio -> 0f
-                currentAudio.value == FilmAudio.MIX -> MIX_ORIGINAL
-                else -> 1f
-            }
+            val mixNow = currentMix.value
+            video.volume = if (clip == null || FilmPlayback.muted) 0f else mixNow.clipGain(clip.date, clip.keepAudio)
             val duration = video.duration.takeIf { it > 0 } ?: 1000L
-            // Owner: the music must follow the film when seeking (and when the film loops), as it does in the render.
-            val musicMs = music.duration
-            if (music.mediaItemCount > 0 && musicMs > 0) {
-                val want = musicPositionAt(index, video.currentPosition, musicMs)
-                if (musicDrift(music.currentPosition, want, musicMs) > MUSIC_SYNC_SLACK_MS) music.seekTo(want)
+            // Owner: audio must follow the film when seeking (and when the film loops), as it does in the render.
+            val filmMs = index * FILM_FRAME_MS + video.currentPosition
+            mixNow.layers.forEachIndexed { i, layer ->
+                val p = layerPlayers[layerKey(i, layer.path)] ?: return@forEachIndexed
+                val want = layerPositionAt(layer, filmMs)?.takeIf { !layer.muted }
+                if (want == null) { p.playWhenReady = false; return@forEachIndexed }
+                p.volume = if (FilmPlayback.muted) 0f else layer.volume / 100f
+                if (kotlin.math.abs(p.currentPosition - want) > MUSIC_SYNC_SLACK_MS) p.seekTo(want)
+                p.playWhenReady = playing.value
             }
             report.value(index, (video.currentPosition.toFloat() / duration).coerceIn(0f, 1f))
             delay(33)

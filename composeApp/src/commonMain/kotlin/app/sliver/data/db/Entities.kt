@@ -92,6 +92,8 @@ data class Film(
     val stampStyle: app.sliver.data.StampStyle? = null,
     /** Background music volume 0..100; null = the mode's default (Music 100, Mix 30). */
     val musicVolume: Int? = null,
+    /** JSON AudioMix (clip sound, muted clips, audio layers); null = derived from audio/track/musicVolume. */
+    val audioMix: String? = null,
     val renderPath: String? = null,
     val renderedAt: Instant? = null,
     val projectId: String = "",

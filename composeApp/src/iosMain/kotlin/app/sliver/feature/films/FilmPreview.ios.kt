@@ -14,13 +14,11 @@ import app.sliver.data.LookParams
 actual fun FilmPreview(
     clips: List<FilmClip>,
     look: LookParams?,
-    audio: FilmAudio,
-    track: String?,
+    mix: AudioMix,
     paused: Boolean,
     seek: FilmSeek?,
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
-    musicVolume: Int?,
     compare: Boolean,
 ) = Box(modifier.background(Color.Black))
 
@@ -35,3 +33,5 @@ actual suspend fun renderFilterThumbs(
 
 @Composable
 actual fun rememberMusicLibrary(refresh: Any?): List<String> = emptyList()
+
+actual fun audioDurationMs(path: String): Long = 0L

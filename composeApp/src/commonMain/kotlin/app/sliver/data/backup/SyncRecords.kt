@@ -117,6 +117,7 @@ fun filmJson(f: Film): String = buildJsonObject {
     put("mismatch", f.mismatch.name)
     put("stampStyle", f.stampStyle?.name?.let(::JsonPrimitive) ?: JsonNull)
     put("musicVolume", f.musicVolume?.let(::JsonPrimitive) ?: JsonNull)
+    put("audioMix", f.audioMix?.let(::JsonPrimitive) ?: JsonNull)
 }.toString()
 
 fun parseFilmJson(text: String, projectId: String, stamp: Stamp): Film? = runCatching {

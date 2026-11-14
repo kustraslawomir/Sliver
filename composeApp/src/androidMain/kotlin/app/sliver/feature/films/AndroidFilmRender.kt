@@ -228,7 +228,11 @@ class FilmComposer(
 
     private fun compose(film: Film, clips: List<Clip>, card: File, outW: Int, outH: Int): Composition {
         val outAspect = outW.toFloat() / outH
-        val audio = audioPlan(film.audio, usableTrack(film.track)?.takeIf { trackAvailable(it) }, film.musicVolume)
+        val mix = film.audioMix(::audioDurationMs).let { m ->
+            m.copy(layers = m.layers.filter { trackAvailable(it.path) }.map { if (it.durationMs > 0) it else it.copy(durationMs = audioDurationMs(it.path)) })
+        }
+        val filmMs = clips.sumOf { it.durationMs.takeIf { d -> d > 0 } ?: FILM_FRAME_MS } + FILM_TITLE_MS
+        val layers = mix.layers.map { it to layerSegments(it, filmMs) }.filter { it.second.isNotEmpty() }
         val blur = film.mismatch == Mismatch.BLUR && clips.any { !aspectMatches(it.aspect, outAspect) }
         val filmParams = film.lookParams()
 
@@ -258,11 +262,13 @@ class FilmComposer(
             return listOf(OverlayEffect(ImmutableList.of(overlay)))
         }
 
-        fun clipItem(clip: Clip, effects: List<Effect>, withAudio: Boolean): EditedMediaItem =
-            EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(File(clip.day.file))))
-                .setRemoveAudio(!withAudio || !audio.keepClipAudio || !clip.day.keepAudio)
-                .setEffects(Effects(emptyList<AudioProcessor>(), effects))
+        fun clipItem(clip: Clip, effects: List<Effect>, withAudio: Boolean): EditedMediaItem {
+            val gain = if (withAudio) mix.clipGain(clip.day.date.toString(), clip.day.keepAudio) else 0f
+            return EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(File(clip.day.file))))
+                .setRemoveAudio(gain <= 0f)
+                .setEffects(Effects(listOfNotNull(gainProcessor(gain)), effects))
                 .build()
+        }
 
         val cardItem = EditedMediaItem.Builder(
             MediaItem.Builder().setUri(Uri.fromFile(card)).setImageDurationMs(FILM_TITLE_MS).build(),
@@ -294,28 +300,38 @@ class FilmComposer(
             clipItem(clip, effects, withAudio = true)
         } + cardItem
         sequences += EditedMediaItemSequence.Builder(main)
-            .experimentalSetForceAudioTrack(audio.keepClipAudio || !audio.music).build()
+            .experimentalSetForceAudioTrack(layers.isEmpty() || clips.any { mix.clipGain(it.day.date.toString(), it.day.keepAudio) > 0f }).build()
 
-        if (audio.music) {
-            val ref = checkNotNull(film.track)
-            val uri = trackUri(ref)
-            val volume = ChannelMixingAudioProcessor().apply {
-                if (audio.musicVolume != 1f) {
-                    putChannelMixingMatrix(ChannelMixingMatrix.create(1, 1).scaleBy(audio.musicVolume))
-                    putChannelMixingMatrix(ChannelMixingMatrix.create(2, 2).scaleBy(audio.musicVolume))
-                }
+        // Owner 14 Nov: each audio layer is its own sequence: silence until its start, then the trimmed part (repeated).
+        for ((layer, parts) in layers) {
+            val uri = trackUri(layer.path)
+            val seq = EditedMediaItemSequence.Builder(emptyList())
+            if (layer.startMs > 0) seq.addGap(layer.startMs * 1000)
+            parts.forEach { part ->
+                val item = MediaItem.Builder().setUri(uri).setClippingConfiguration(
+                    MediaItem.ClippingConfiguration.Builder().setStartPositionMs(part.first).setEndPositionMs(part.last).build(),
+                ).build()
+                seq.addItem(
+                    EditedMediaItem.Builder(item).setRemoveVideo(true)
+                        .setEffects(Effects(listOfNotNull(gainProcessor(layer.volume / 100f)), emptyList())).build(),
+                )
             }
-            val music = EditedMediaItem.Builder(MediaItem.fromUri(uri))
-                .setRemoveVideo(true)
-                .setEffects(Effects(if (audio.musicVolume != 1f) listOf<AudioProcessor>(volume) else emptyList(), emptyList()))
-                .build()
-            sequences += EditedMediaItemSequence.Builder(music).setIsLooping(true).build()
+            sequences += seq.experimentalSetForceAudioTrack(true).build()
         }
 
         // Owner's render died at once: an HDR (10-bit) clip made Transformer pick the HEVC HDR encoder. Films are SDR H.264.
         val builder = Composition.Builder(sequences).setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL)
         if (blur) builder.setVideoCompositorSettings(fitCompositor(clips, outW, outH))
         return builder.build()
+    }
+
+    /** Volume for one item; null at full volume. */
+    private fun gainProcessor(gain: Float): AudioProcessor? {
+        if (gain >= 1f || gain <= 0f) return null
+        return ChannelMixingAudioProcessor().apply {
+            putChannelMixingMatrix(ChannelMixingMatrix.create(1, 1).scaleBy(gain))
+            putChannelMixingMatrix(ChannelMixingMatrix.create(2, 2).scaleBy(gain))
+        }
     }
 
     private val stampTypeface: Typeface? by lazy {

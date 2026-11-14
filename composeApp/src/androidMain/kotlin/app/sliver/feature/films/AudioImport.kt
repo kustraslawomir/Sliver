@@ -27,6 +27,18 @@ fun importAudio(context: Context, uri: Uri): PickedAudio {
     }
 }
 
+actual fun audioDurationMs(path: String): Long {
+    val r = MediaMetadataRetriever()
+    return try {
+        r.setDataSource(path)
+        r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+    } catch (e: Exception) {
+        0L
+    } finally {
+        r.release()
+    }
+}
+
 private fun decodes(file: File): Boolean {
     val r = MediaMetadataRetriever()
     return try {

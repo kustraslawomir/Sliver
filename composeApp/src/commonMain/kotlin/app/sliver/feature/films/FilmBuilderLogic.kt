@@ -49,10 +49,17 @@ data class FilmOptions(
     /** Null follows the filter. */
     val stamp: StampStyle? = null,
     val musicVolume: Int? = null,
+    /** Owner 14 Nov: clip sound + audio layers; when set it replaces audio/track/musicVolume. */
+    val mix: AudioMix? = null,
 )
 
-fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film = Film(
-    id = id, name = name, format = format, audio = audio,
-    track = usableTrack(track).takeIf { audio != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
-    lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp, musicVolume = musicVolume,
-)
+fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film {
+    val legacy = mix?.legacyAudio()
+    val a = legacy?.first ?: audio
+    return Film(
+        id = id, name = name, format = format, audio = a,
+        track = (if (legacy != null) legacy.second else usableTrack(track)).takeIf { a != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
+        lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp,
+        musicVolume = if (legacy != null) legacy.third else musicVolume, audioMix = mix?.encode(),
+    )
+}

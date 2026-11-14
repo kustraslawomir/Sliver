@@ -3,8 +3,6 @@ package app.sliver
 import app.sliver.data.FilmAudio
 import app.sliver.feature.films.audioPlan
 import app.sliver.feature.films.fitScale
-import app.sliver.feature.films.musicDrift
-import app.sliver.feature.films.musicPositionAt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -32,12 +30,4 @@ class FilmRenderLogicTest {
         assertEquals((9f / 16f) / (16f / 9f), sx, 0.001f)
     }
 
-    @Test
-    fun musicFollowsTheFilm() {
-        assertEquals(0L, musicPositionAt(0, 0, 30_000))
-        assertEquals(12_400L, musicPositionAt(12, 400, 30_000))
-        assertEquals(5_000L, musicPositionAt(35, 0, 30_000))
-        assertEquals(100L, musicDrift(29_950, 50, 30_000))
-        assertEquals(2_000L, musicDrift(1_000, 3_000, 30_000))
-    }
 }

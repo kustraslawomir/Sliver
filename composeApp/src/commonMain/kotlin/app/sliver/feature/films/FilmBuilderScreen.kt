@@ -98,8 +98,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     LaunchedEffect(editId) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
+        val loadedMix = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { f.audioMix(::audioDurationMs) }
         options = FilmOptions(
             if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain, f.stampStyle, f.musicVolume,
+            mix = loadedMix,
         )
         dateTouched = true
     }
@@ -108,7 +110,13 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val format = editing?.format ?: app?.newFilmFormat ?: FilmFormat.CINEMA
 
     val plan = remember(all) { buildFilmPlan(all) }
-    val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.keepAudio) } }
+    val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.keepAudio, it.date.toString()) } }
+    val mixClips = remember(plan) { plan.days.map { MixClip(it.date, it.keepAudio) } }
+    val filmMs = filmLengthMs(clips.size)
+    val mix = options.mix ?: AudioMix()
+    var addingLayer by remember { mutableStateOf(false) }
+    var editingLayer by remember { mutableStateOf<Int?>(null) }
+    var libraryRefresh by remember { mutableStateOf(0) }
     val lookParams = options.look?.toParams(options.intensity, options.grain)
 
     var paused by remember { mutableStateOf(FilmPlayback.paused) }
@@ -119,13 +127,18 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var position by remember { mutableStateOf(0 to 0f) }
     val fileStore = remember { koin.get<FileStore>() }
     var notice by remember { mutableStateOf<String?>(null) }
-    // Owner: imported music is kept in the app (music library), so switching tracks never deletes a file.
-    fun setTrack(path: String?) {
-        options = options.copy(track = path)
+    val playheadMs = ((position.first + position.second) * FILM_FRAME_MS).toLong()
+    // Owner 14 Nov: a new layer starts at the playhead (the first one at the start); imported files stay in the library.
+    fun addLayer(path: String) {
+        val m = options.mix ?: AudioMix()
+        val start = if (m.layers.isEmpty()) 0L else playheadMs
+        options = options.copy(mix = m.copy(layers = m.layers + AudioLayer(path, audioDurationMs(path), startMs = start)))
+        addingLayer = false
+        editingLayer = m.layers.size
     }
     val pickAudio = rememberAudioPicker {
         when (it) {
-            is PickedAudio.Ok -> { notice = null; setTrack(it.path) }
+            is PickedAudio.Ok -> { notice = null; libraryRefresh++; addLayer(it.path) }
             is PickedAudio.Failed -> notice = it.message
         }
     }
@@ -170,9 +183,9 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     SliverText("No clips yet", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.OnMedia.copy(alpha = 0.7f))
                 } else {
                     FilmPreview(
-                        clips, lookParams, options.audio, options.track, paused, seek,
+                        clips, lookParams, mix, paused, seek,
                         onPosition = { i, f -> position = i to f }, modifier = Modifier.fillMaxSize(),
-                        musicVolume = options.musicVolume, compare = comparing,
+                        compare = comparing,
                     )
                     if (comparing && lookParams != null) {
                         SliverText(
@@ -226,42 +239,16 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S6),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
-            Section("Sound") {
-                Segmented(
-                    listOf("Original", "Music", "Mix"), Audios.indexOf(options.audio),
-                    { options = options.copy(audio = Audios[it]) }, compact = true,
-                )
-                if (options.track == null && isLegacyTrack(editing?.track)) {
-                    SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
-                }
-                if (options.audio != FilmAudio.ORIGINAL) {
-                    // Owner: music loaded once stays in the app; pick from the list, add new files only when needed.
-                    val library = rememberMusicLibrary(options.track)
-                    library.forEach { path ->
-                        val on = path == options.track
-                        Row(
-                            Modifier.fillMaxWidth().height(44.dp).clip(SliverShapes.R12)
-                                .background(if (on) SliverColors.Surface2 else androidx.compose.ui.graphics.Color.Transparent)
-                                .clickable { setTrack(path) }.padding(horizontal = SliverSpace.S3),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
-                        ) {
-                            SliverIcon(if (on) SliverIcons.Check else SliverIcons.Volume2, if (on) SliverColors.TextPrimary else SliverColors.TextTertiary, size = 18.dp)
-                            SliverText(trackLabel(path) ?: path.substringAfterLast('/'), SliverType.BodySmall, Modifier.weight(1f), color = if (on) SliverColors.TextPrimary else SliverColors.TextSecondary, maxLines = 1)
-                        }
-                    }
-                    if (library.isEmpty()) SliverText(PICK_MUSIC_HINT, SliverType.BodySmall, color = SliverColors.TextTertiary)
-                    GhostButton("Add an audio file\u2026", pickAudio)
-                    notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
-                    if (options.track != null) {
-                        val vol = musicVolumePercent(options.audio, options.musicVolume)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            SliverText("Music volume", SliverType.BodySmall, Modifier.weight(1f), color = SliverColors.TextSecondary)
-                            SliverText("$vol", SliverType.Meta, color = SliverColors.TextSecondary)
-                        }
-                        SliverSlider(vol / 100f, { options = options.copy(musicVolume = (it * 100).toInt().coerceIn(0, 100)) })
-                    }
-                }
+            AudioMixSection(
+                mix, { options = options.copy(mix = it) },
+                mixClips, filmMs, playheadMs,
+                onSeekMs = { ms -> if (clips.isNotEmpty()) seek = FilmSeek(ms.toFloat() / (clips.size * FILM_FRAME_MS)) },
+                onAddLayer = { addingLayer = true },
+                onEditLayer = { editingLayer = it },
+                modifier = Modifier.padding(horizontal = SliverSpace.Gutter),
+            )
+            if (mix.layers.isEmpty() && isLegacyTrack(editing?.track)) {
+                SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, Modifier.padding(horizontal = SliverSpace.Gutter), SliverColors.TextSecondary)
             }
 
             Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
@@ -297,7 +284,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     }
                 },
                 Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),
-                enabled = clips.isNotEmpty() && canSaveSound(options.audio, options.track),
+                enabled = clips.isNotEmpty(),
             )
             SliverText(
                 "Rendered on your phone, 1080p. Works offline.", SliverType.Caption.copy(textAlign = TextAlign.Center),
@@ -306,6 +293,24 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         }
     }
     val adjustLook = options.look
+    SliverBottomSheet(addingLayer, onDismiss = { addingLayer = false }) {
+        val library = rememberMusicLibrary(libraryRefresh)
+        AudioLibrary(library, ::audioDurationMs, filmMs, notice, onPick = ::addLayer, onImport = pickAudio)
+    }
+    val layerIndex = editingLayer
+    val editedLayer = layerIndex?.let { mix.layers.getOrNull(it) }
+    SliverBottomSheet(editedLayer != null, onDismiss = { editingLayer = null }) {
+        if (editedLayer != null && layerIndex != null) {
+            LayerEditor(
+                editedLayer, filmMs, playheadMs,
+                onChange = { l -> options = options.copy(mix = mix.copy(layers = mix.layers.toMutableList().also { it[layerIndex] = l })) },
+                onRemove = {
+                    options = options.copy(mix = mix.copy(layers = mix.layers.filterIndexed { i, _ -> i != layerIndex }))
+                    editingLayer = null
+                },
+            )
+        }
+    }
     SliverBottomSheet(adjusting && adjustLook != null, onDismiss = { adjusting = false }) {
         if (adjustLook != null) {
             FilterAmounts(
