@@ -89,7 +89,19 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         entries = runCatching { rank(scanner.scan(date, date, TimeZone.currentSystemDefault(), setOf(date))) }.getOrDefault(emptyList())
     }
     val list = entries
-    val shown = list?.let { l -> if (showAll) l else l.filter { it.camera } }
+    val sections = remember(list, showAll) {
+        list?.let { l -> dayPickerSections(l, app.sliver.core.APP_NAME).let { (mine, rest) -> mine to rest.filter { showAll || it.entry.camera } } }
+    }
+    val shown = sections?.second
+    fun open(item: DayItem) {
+        if (busy) return
+        busy = true
+        scope.launch {
+            val route = runCatching { loadIntoSession(gallery, files, item.entry.uri, date, liveVideo = item.liveVideo) }.getOrNull()
+            busy = false
+            if (route == null) Notices.show("Couldn't read that item. Pick another.") else onNavigate(route)
+        }
+    }
 
     Column(Modifier.fillMaxSize().background(SliverColors.BgBase).statusBarsPadding().navigationBarsPadding()) {
         Column(Modifier.padding(horizontal = SliverSpace.Gutter).padding(top = SliverSpace.S4)) {
@@ -100,20 +112,12 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     Modifier.padding(start = SliverSpace.S2), maxLines = 1,
                 )
             }
-            SliverText(
-                when {
-                    shown.isNullOrEmpty() -> "From your camera roll"
-                    showAll -> "${shown.size} from this day"
-                    else -> "${shown.size} from your camera"
-                },
-                SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S4),
-                color = SliverColors.TextTertiary,
-            )
+            Box(Modifier.height(SliverSpace.S4))
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
                 shown == null -> Box(Modifier.fillMaxSize(), Alignment.Center) { SlitLoader() }
-                shown.isEmpty() -> Column(
+                shown.isEmpty() && sections.first.isEmpty() -> Column(
                     Modifier.fillMaxSize().padding(horizontal = SliverSpace.S8).padding(bottom = 120.dp),
                     verticalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -128,21 +132,15 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = SliverSpace.Gutter),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    shown.chunked(3).forEach { row ->
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            row.forEach { e ->
-                                DayTile(e, Modifier.weight(1f).aspectRatio(1f)) {
-                                    if (busy) return@DayTile
-                                    busy = true
-                                    scope.launch {
-                                        val route = runCatching { loadIntoSession(gallery, files, e.uri, date) }.getOrNull()
-                                        busy = false
-                                        if (route == null) Notices.show("Couldn't read that item. Pick another.") else onNavigate(route)
-                                    }
-                                }
-                            }
-                            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-                        }
+                    // Audit v1.8 §6: "Recorded in Reelog" first, then "From your camera · N"; 3 columns of 3:4 tiles.
+                    if (sections.first.isNotEmpty()) {
+                        SectionTitle("Recorded in ${app.sliver.core.APP_NAME}", "full recordings")
+                        TileGrid(sections.first, ::open)
+                        Spacer(Modifier.height(SliverSpace.S3))
+                    }
+                    if (shown.isNotEmpty()) {
+                        SectionTitle(if (showAll) "From this day" else "From your camera", "${shown.size}")
+                        TileGrid(shown, ::open)
                     }
                     Spacer(Modifier.height(SliverSpace.S4))
                 }
@@ -162,16 +160,35 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 }
 
-private val TileShape = RoundedCornerShape(10.dp)
+private val TileShape = RoundedCornerShape(12.dp)
+
+@Composable
+private fun SectionTitle(title: String, note: String) {
+    Row(Modifier.padding(bottom = SliverSpace.S1), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        SliverText(title, SliverType.BodySmall.copy(fontWeight = FontWeight.Medium), color = SliverColors.TextPrimary)
+        SliverText("\u00B7 $note", SliverType.Caption, color = SliverColors.TextTertiary)
+    }
+}
+
+@Composable
+private fun TileGrid(items: List<DayItem>, onOpen: (DayItem) -> Unit) {
+    items.chunked(3).forEach { row ->
+        Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            row.forEach { item -> DayTile(item, Modifier.weight(1f).aspectRatio(3f / 4f)) { onOpen(item) } }
+            repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+        }
+    }
+}
 
 /** Tile with capture time bottom-left, video length bottom-right, motion-photo badge top-left. */
 @Composable
-private fun DayTile(e: MediaEntry, modifier: Modifier, onClick: () -> Unit) {
+private fun DayTile(item: DayItem, modifier: Modifier, onClick: () -> Unit) {
+    val e = item.entry
     val thumb = rememberMediaThumb(e.uri)
     val time = Instant.fromEpochMilliseconds(e.takenAtMs).toLocalDateTime(TimeZone.currentSystemDefault()).time
     val clock = "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
     val kind = when {
-        e.motion || e.live -> "Moving photo"
+        item.live -> "Live photo"
         e.video -> "Video, ${durationLabel(e.durationMs)}"
         else -> "Photo"
     }
@@ -187,12 +204,15 @@ private fun DayTile(e: MediaEntry, modifier: Modifier, onClick: () -> Unit) {
         )
         val label = SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), color = SliverColors.OnMedia).overMedia()
         SliverText(clock, label, Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp))
-        if (e.video && !e.motion && !e.live) {
-            SliverText(
-                durationLabel(e.durationMs), label.copy(fontWeight = FontWeight.SemiBold),
-                Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 5.dp),
-            )
+        // Badge top-right: video length ("0:12") or "Live".
+        val badge = when {
+            item.live -> "Live"
+            e.video -> durationLabel(e.durationMs)
+            else -> null
         }
-        if (e.motion || e.live) SliverIcon(SliverIcons.CircleDot, SliverColors.OnMedia, Modifier.align(Alignment.TopStart).padding(6.dp), size = 16.dp)
+        if (badge != null) SliverText(
+            badge, label.copy(fontWeight = FontWeight.SemiBold),
+            Modifier.align(Alignment.TopEnd).padding(6.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim).padding(horizontal = 6.dp, vertical = 2.dp),
+        )
     }
 }

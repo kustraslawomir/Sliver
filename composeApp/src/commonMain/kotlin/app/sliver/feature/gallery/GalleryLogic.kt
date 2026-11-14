@@ -129,3 +129,36 @@ fun checkCaptureDate(captured: CaptureDate, target: LocalDate): AddCheck = when 
 }
 
 fun isHeif(mime: String?): Boolean = mime == "image/heic" || mime == "image/heif"
+
+/** One tile on the day picker: the item and, for a Live/motion pair, the short video that belongs to it. */
+data class DayItem(val entry: app.sliver.feature.autoimport.MediaEntry, val liveVideo: String? = null) {
+    val live: Boolean get() = liveVideo != null || entry.motion || entry.live
+}
+
+/**
+ * Audit v1.8 §6: the day picker's sections. Full recordings the app saved to Photos (named "<app>_…") come first as
+ * "Recorded in Reelog"; the rest drops exact duplicates (same name and size) and shows a still + its short video as one
+ * Live tile.
+ */
+fun dayPickerSections(list: List<app.sliver.feature.autoimport.MediaEntry>, appName: String): Pair<List<DayItem>, List<DayItem>> {
+    val (reelog, rest) = list.partition { it.video && it.name?.startsWith("${appName}_") == true }
+    val unique = rest.distinctBy { e -> if (e.name != null && e.sizeBytes > 0) "${e.name}|${e.sizeBytes}" else e.uri }
+    val used = mutableSetOf<String>()
+    val items = mutableListOf<DayItem>()
+    for (e in unique.sortedBy { it.video }) {
+        if (e.uri in used) continue
+        if (!e.video) {
+            val pair = unique.firstOrNull { v ->
+                v.video && v.uri !in used && v.durationMs in 1..LIVE_MAX_VIDEO_MS &&
+                    (baseName(v.name) != null && baseName(v.name) == baseName(e.name) || kotlin.math.abs(v.takenAtMs - e.takenAtMs) <= LIVE_PAIR_WINDOW_MS)
+            }
+            pair?.let { used += it.uri }
+            items += DayItem(e, pair?.uri)
+        } else {
+            items += DayItem(e)
+        }
+        used += e.uri
+    }
+    val order = list.map { it.uri }
+    return reelog.sortedByDescending { it.takenAtMs }.map { DayItem(it) } to items.sortedBy { order.indexOf(it.entry.uri) }
+}
