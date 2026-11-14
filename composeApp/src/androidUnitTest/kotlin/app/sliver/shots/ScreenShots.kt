@@ -112,6 +112,24 @@ class ScreenShots : ShotTest() {
     @Test fun reminders() = shoot("Notifications") { RemindersScreen {} }
     @Test fun onboarding() = shoot("OnbV2") { OnboardingScreen({}, {}) }
     @Test fun camera() = shoot("CameraV2", darkOnly = true, inspection = true) { CameraScreen({}, {}) }
+    /** T-record-button-v3: photo, video idle and recording (0.6 s) over a bright and a dark scene. */
+    @Test fun recordButtonV3() = shoot("RecordButtonV3", darkOnly = true) {
+        androidx.compose.foundation.layout.Column {
+            listOf(
+                androidx.compose.ui.graphics.Brush.verticalGradient(listOf(androidx.compose.ui.graphics.Color(0xFFF4EFE6), androidx.compose.ui.graphics.Color(0xFFE9935A))), // lint-ok: test scene
+                androidx.compose.ui.graphics.Brush.verticalGradient(listOf(androidx.compose.ui.graphics.Color(0xFF40283A), androidx.compose.ui.graphics.Color(0xFF141218))), // lint-ok: test scene
+            ).forEach { bg ->
+                androidx.compose.foundation.layout.Row(
+                    Modifier.background(bg).padding(horizontal = 12.dp, vertical = 70.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(28.dp),
+                ) {
+                    app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.Photo, false, true, {}, {}, {})
+                    app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.VideoIdle, false, true, {}, {}, {})
+                    app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.Recording, false, true, {}, {}, {}, elapsedMs = 600)
+                }
+            }
+        }
+    }
     @Test fun trim() {
         CaptureSession.path = thumbPath(0)
         shoot("EditClipV2", darkOnly = true, inspection = true) { TrimScreen({}, SavedStateHandle()) }
