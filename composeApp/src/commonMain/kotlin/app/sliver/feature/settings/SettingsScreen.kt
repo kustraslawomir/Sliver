@@ -4,6 +4,7 @@ import androidx.compose.ui.draw.clip
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.core.APP_NAME
+import app.sliver.data.backup.backupRowValue
 
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -57,6 +58,14 @@ import org.koin.mp.KoinPlatform
 
 internal const val FEEDBACK_ADDRESS = "feedback@sliver.app"
 private val Formats = listOf(FilmFormat.CINEMA, FilmFormat.STORY)
+/** Switch subtitles: they describe what the switch does in either state (audit v1.8 §1). */
+object SettingsCaptions {
+    const val DateStamp = "Burns the date into every new clip. A film can still hide it."
+    const val FullRecordings = "The whole take goes to Photos \u203A Reelog, not just the 1 s clip."
+    const val GoldenHour = "Shows when the evening light starts. Uses rough location."
+    val all = listOf(DateStamp, FullRecordings, GoldenHour)
+}
+
 private val Appearances = listOf(Appearance.SYSTEM to "System", Appearance.LIGHT to "Light", Appearance.DARK to "Dark")
 
 @Composable
@@ -84,44 +93,39 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
             SliverText("Settings", SliverType.DisplayM)
         }
 
+        // v1.8 SettingsV18: Account & backup / Camera / App. Subtitles say what a switch does, never one state (§1).
         Group("Account & backup") {
-        NavRow("Account", if (s.account.signedIn) "Google" else "Not signed in", first = true) { onGo(Route.Backup) }
-        NavRow("Backup & sync", if (s.account.signedIn && s.account.autoBackup) "On" else "Off") { onGo(Route.Backup) }
+        NavRow("Google account", if (s.account.signedIn) s.account.email?.substringBefore('@') ?: "Signed in" else "Not signed in", first = true) { onGo(Route.Backup) }
+        NavRow(
+            "Backup & sync",
+            backupRowValue(s.account.signedIn, s.account.autoBackup, s.account.lastSyncAt, kotlin.time.Clock.System.now().toEpochMilliseconds()),
+        ) { onGo(Route.Backup) }
         }
 
-        Group("Films & clips") {
-        ChoiceRow(first = true, title = 
-            "Default film format", options = Formats.map { it.label() }, selected = Formats.indexOf(s.newFilmFormat),
-        ) { i -> update { it.copy(newFilmFormat = Formats[i]) } }
-        LinedSwitch(
-            "Date stamp", s.dateStamp, { on -> update { it.copy(dateStamp = on) } },
-            "On every clip. You can still turn it off for a film.",
-        )
-        LinedSwitch(
-            "Also save full recordings to Photos", s.saveFullRecordings, { on -> update { it.copy(saveFullRecordings = on) } },
-            "Off: only the chosen clip is kept, the rest is deleted.",
-        )
+        Group("Camera") {
+        Hairline(first = true)
+        SwitchRow("Date stamp on clips", s.dateStamp, { on -> update { it.copy(dateStamp = on) } }, Modifier.padding(horizontal = RowPad), caption = SettingsCaptions.DateStamp)
+        LinedSwitch("Keep full recordings in Photos", s.saveFullRecordings, { on -> update { it.copy(saveFullRecordings = on) } }, SettingsCaptions.FullRecordings)
         // DECISION: the volume-key option lives in Settings (not on the Camera toolbar) and only acts while Camera is open.
+        LinedSwitch("Record with volume keys", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } }, null)
         LinedSwitch(
-            "Volume key records", s.volumeKeyRecords, { on -> update { it.copy(volumeKeyRecords = on) } },
-            "Press a volume key on the camera to start and stop.",
-        )
-        LinedSwitch(
-            "Show golden hour", s.showGoldenHour,
+            "Golden hour line", s.showGoldenHour,
             { on ->
                 update { it.copy(showGoldenHour = on) }
                 if (on && location.status(PermissionKind.CoarseLocation) == PermissionStatus.NotAsked) location.request(PermissionKind.CoarseLocation)
             },
-            "A line on the camera in the 3 hours before sunset. Uses rough location.",
+            SettingsCaptions.GoldenHour,
         )
         }
 
         Group("App") {
+        NavRow("Daily reminder", reminderSummary(s.reminder), first = true) { onGo(Route.Reminders) }
         ChoiceRow(
-            first = true, title = "Appearance", options = Appearances.map { it.second }, selected = Appearances.indexOfFirst { it.first == s.appearance },
+            title = "Appearance", options = Appearances.map { it.second }, selected = Appearances.indexOfFirst { it.first == s.appearance },
         ) { i -> update { it.copy(appearance = Appearances[i].first) } }
-        NavRow("Daily reminder", reminderSummary(s.reminder)) { onGo(Route.Reminders) }
-        NavRow("Fill the calendar", null, "Put photos and videos from your gallery on empty days") { onGo(Route.FillThePast) }
+        ChoiceRow(
+            title = "Default film format", options = Formats.map { it.label() }, selected = Formats.indexOf(s.newFilmFormat),
+        ) { i -> update { it.copy(newFilmFormat = Formats[i]) } }
         }
 
         Group("About") {
@@ -162,7 +166,7 @@ private fun Hairline(first: Boolean = false) {
 }
 
 @Composable
-private fun LinedSwitch(title: String, checked: Boolean, onChange: (Boolean) -> Unit, caption: String) {
+private fun LinedSwitch(title: String, checked: Boolean, onChange: (Boolean) -> Unit, caption: String?) {
     Hairline()
     SwitchRow(title, checked, onChange, Modifier.padding(horizontal = RowPad), caption = caption)
 }

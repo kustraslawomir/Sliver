@@ -243,12 +243,12 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 Hairline()
                 SwitchRow(
                     "Include saved and received media", includeOther, { includeOther = it },
-                    caption = "Off: only photos and videos taken with your camera.",
+                    caption = "Also offers screenshots, downloads and photos from messengers.",
                 )
                 Hairline()
                 SwitchRow(
                     "Include items you rejected", includeRejected, { includeRejected = it },
-                    caption = "Off: photos and videos you removed from drafts are not offered again.",
+                    caption = "Offers photos and videos you removed from drafts again.",
                 )
             }
         }

@@ -33,17 +33,28 @@ fun shouldNotifyBackupProblem(account: AccountSettings, enabled: Boolean, nowMil
     return enabled && account.backupError != null && !account.problemNotified && nowMillis - since >= PROBLEM_AFTER_MILLIS
 }
 
-/** "Synced · 2 min ago · 2 phones" */
-fun syncStatusLine(lastSyncAt: Long?, nowMillis: Long, phones: Int): String {
-    if (lastSyncAt == null) return "Not synced yet"
+/** "just now", "2 min ago", "3 h ago", "4 d ago". */
+fun syncAgo(lastSyncAt: Long, nowMillis: Long): String {
     val minutes = ((nowMillis - lastSyncAt).coerceAtLeast(0) / 60_000).toInt()
-    val ago = when {
+    return when {
         minutes < 1 -> "just now"
         minutes < 60 -> "$minutes min ago"
         minutes < 24 * 60 -> "${minutes / 60} h ago"
         else -> "${minutes / (24 * 60)} d ago"
     }
-    return "Synced · $ago · $phones ${if (phones == 1) "phone" else "phones"}"
+}
+
+/** v1.8 Settings value: "On · 2 min ago", "On", "Off". */
+fun backupRowValue(signedIn: Boolean, autoBackup: Boolean, lastSyncAt: Long?, nowMillis: Long): String = when {
+    !signedIn || !autoBackup -> "Off"
+    lastSyncAt == null -> "On"
+    else -> "On · ${syncAgo(lastSyncAt, nowMillis)}"
+}
+
+/** "Synced · 2 min ago · 2 phones" */
+fun syncStatusLine(lastSyncAt: Long?, nowMillis: Long, phones: Int): String {
+    if (lastSyncAt == null) return "Not synced yet"
+    return "Synced · ${syncAgo(lastSyncAt, nowMillis)} · $phones ${if (phones == 1) "phone" else "phones"}"
 }
 
 private val ShortMonths = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")

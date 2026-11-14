@@ -227,7 +227,7 @@ fun LayerEditor(layer: AudioLayer, filmMs: Long, playheadMs: Long, onChange: (Au
 
         SwitchRow(
             "Repeat to the end of the film", layer.loop, { onChange(layer.copy(loop = it)) },
-            caption = "Off: plays once, then silence.",
+            caption = "Plays the trimmed part again until the film ends.",
         )
         SwitchRow("Mute this layer", layer.muted, { onChange(layer.copy(muted = it)) })
         GhostButton("Remove layer", onRemove, destructive = true)
