@@ -29,6 +29,13 @@ class SliverApp : Application(), KoinComponent {
             androidContext(this@SliverApp)
             modules(commonModule, platformModule)
         }
+        if (BuildConfig.DEBUG) enableStrictMode()
+        // Perf STEP 4: only Koin is on the critical path; channels, location (golden hour), coordinators, the widget,
+        // the import resume and the tmp rescue start off the main thread, in the same order as before.
+        AppScope.launch(kotlinx.coroutines.Dispatchers.IO) { startBackground() }
+    }
+
+    private fun startBackground() {
         val store: FileStore by inject()
         ensureChannels(this)
         val golden: app.sliver.feature.notifications.GoldenHourProvider by inject()
@@ -61,5 +68,15 @@ class SliverApp : Application(), KoinComponent {
                 .onSuccess { n -> android.util.Log.i("Originals", "rescued $n recording(s)"); store.cleanTmp(System.currentTimeMillis()) }
                 .onFailure { android.util.Log.w("Originals", "rescue failed, tmp kept", it) }
         }
+    }
+
+    /** Perf STEP 4 (debug only): log disk/network on the main thread and leaked closables/activities. */
+    private fun enableStrictMode() {
+        android.os.StrictMode.setThreadPolicy(
+            android.os.StrictMode.ThreadPolicy.Builder().detectDiskReads().detectDiskWrites().detectNetwork().penaltyLog().build(),
+        )
+        android.os.StrictMode.setVmPolicy(
+            android.os.StrictMode.VmPolicy.Builder().detectLeakedClosableObjects().detectActivityLeaks().detectLeakedRegistrationObjects().penaltyLog().build(),
+        )
     }
 }
