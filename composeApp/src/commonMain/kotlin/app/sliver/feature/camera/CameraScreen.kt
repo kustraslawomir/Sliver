@@ -147,7 +147,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     val days = remember { koin.get<DayRepository>() }
     val today = remember { todayLocal() }
     val todayDay by remember { days.observeDay(today) }.collectAsState(null)
-    var menuOpen by remember { mutableStateOf(false) }
     var flipTurns by remember { mutableIntStateOf(0) }
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
@@ -291,9 +290,10 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 } else {
                     CameraRoundButton(onClose, "Close camera") { SliverIcon(SliverIcons.X, SliverColors.OnMedia) }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { GoldenHourLine(saved?.showGoldenHour == true) }
-                    LightToggle(light, iconRot) { light = !light }
+                    // Audit v1.8 §3.2: no "⋯" sheet; Grid is a one-tap toggle next to the light (filled = on).
+                    GridToggle(cam.grid, iconRot) { update { it.copy(grid = !cam.grid) } }
                     Spacer(Modifier.width(SliverSpace.S2))
-                    CameraRoundButton({ menuOpen = true }, "More camera options") { SliverIcon(SliverIcons.MoreHorizontal, SliverColors.OnMedia) }
+                    LightToggle(light, iconRot) { light = !light }
                 }
             }
             if (failed && !recording) {
@@ -336,7 +336,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (recording) Box(Modifier.size(64.dp)) else CameraAction(SliverIcons.ImagePlus, "Add", "Add media", iconRot) { addMedia(null) }
+                if (recording) Box(Modifier.size(64.dp)) else CameraAction(SliverIcons.Plus, "Add", "Add media", iconRot) { addMedia(null) }
                 RecordButton(
                     state = when {
                         recording -> RecordState.Recording
@@ -364,11 +364,6 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                         lens = if (lens == Lens.BACK) Lens.FRONT else Lens.BACK
                     }
                 }
-            }
-        }
-        SliverBottomSheet(menuOpen, { menuOpen = false }) {
-            Column {
-                SwitchRow("Grid", cam.grid, { on -> update { it.copy(grid = on) } })
             }
         }
 
@@ -407,16 +402,15 @@ private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
 @Composable
 private fun CameraAction(icon: ImageVector, label: String, description: String, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "action-turn")
-    Column(
-        Modifier.width(64.dp).semantics { contentDescription = description; role = Role.Button }
+    // Audit v1.8 §3.3: 52 dp glass circle, no text label (nothing else in the app labels icon buttons).
+    Box(
+        Modifier.size(64.dp).semantics { contentDescription = description; role = Role.Button }
             .clickable(onClick = rememberTapGate(onClick)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        Alignment.Center,
     ) {
         Box(Modifier.size(52.dp).glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true), Alignment.Center) {
             SliverIcon(icon, SliverColors.OnMedia, Modifier.rotate(turn), size = 22.dp)
         }
-        SliverText(label, SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.Medium, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)).overMedia(), color = SliverColors.OnMedia, maxLines = 1)
     }
 }
 
@@ -429,7 +423,8 @@ private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifi
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.forEachIndexed { i, preset ->
             val on = i == active
-            val label = formatZoom(if (on) zoom else preset, unit = on)
+            // Audit v1.8 §3.4: every stop shows the × (0.6× 1× 2× 3×).
+            val label = formatZoom(if (on) zoom else preset, unit = true)
             Box(
                 Modifier.size(44.dp, 48.dp)
                     .semantics { contentDescription = "Zoom ${formatZoom(preset, true)}"; selected = on; role = Role.Button }
@@ -493,6 +488,18 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         val style = SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
         SliverText(if (clipOk) "$time \u00B7 Clip OK" else time, style, color = color, maxLines = 1)
     }
+}
+
+@Composable
+private fun GridToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
+    val turn by animateFloatAsState(rotation, tween(240), label = "grid-upright")
+    Box(
+        Modifier.size(44.dp)
+            .then(if (on) Modifier.clip(CircleShape).background(SliverColors.OnMedia) else Modifier.glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true))
+            .semantics { contentDescription = "Grid"; role = Role.Switch; selected = on }
+            .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
+        Alignment.Center,
+    ) { SliverIcon(SliverIcons.Hash, if (on) SliverColors.Media else SliverColors.OnMedia, Modifier.rotate(turn), size = 20.dp) }
 }
 
 @Composable
