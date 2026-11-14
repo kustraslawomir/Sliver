@@ -1,5 +1,11 @@
 package app.sliver.feature.archive
 
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.shape.RoundedCornerShape
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
 
@@ -125,7 +131,6 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     }
 
     var notice by remember { mutableStateOf<String?>(null) }
-    var confirmRemove by remember { mutableStateOf(false) }
     val importStore = remember { koin.get<AutoImportStore>() }
     val draftActions = remember { koin.get<DraftActions>() }
     val altMap by remember { importStore.alternatives }.collectAsState(emptyMap())
@@ -138,14 +143,15 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    UndoBarAbove(if (original != null) 262.dp else 196.dp)
+    UndoBarAbove(200.dp)
     Box(Modifier.fillMaxSize().background(SliverColors.Media)) {
         if (day != null) ClipPlayer(day.file, 0, 1000, Modifier.fillMaxSize(), audio = !muted, fill = true)
         // v1.7 item 8: scrims so text reads over bright video; no date stamp here (the title is the date).
         Box(Modifier.fillMaxWidth().height(150.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.7f), Color.Transparent))))
         Box(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(300.dp)
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))),
+            // DayV18: the scrim carries the title, arrows and tiles, so it ends near black.
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(380.dp)
+                .background(Brush.verticalGradient(0f to Color.Transparent, 0.45f to Color.Black.copy(alpha = 0.7f), 1f to Color.Black.copy(alpha = 0.95f))),
         )
         Row(
             Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = SliverSpace.S3, vertical = SliverSpace.S2),
@@ -165,22 +171,23 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val prev = prevDay(current, filled)
                 val next = nextDay(current, filled)
-                IconButton44({ show(prev) }, "Previous day", overCamera = true) {
+                // DayV18: plain arrows, the scrim carries them.
+                IconButton44({ show(prev) }, "Previous day") {
                     SliverIcon(SliverIcons.ChevronLeft, SliverColors.OnMedia.copy(alpha = if (prev != null) 1f else 0.4f))
                 }
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     SliverText(
                         "${weekdayName(current)} ${current.day} ${MonthLong[current.month.ordinal]}",
-                        SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline)), color = SliverColors.OnMedia, maxLines = 1,
+                        ReelogType.title.copy(fontSize = ReelogType.Size.dayTitle, lineHeight = ReelogType.lineFor(ReelogType.Size.dayTitle)), color = SliverColors.OnMedia, maxLines = 1,
                     )
                     val time = day?.takenAt?.toLocalDateTime(TimeZone.currentSystemDefault())?.time
                     val whenText = if (current == today) "Today" else "Day ${dayNumber(current, first)}"
                     SliverText(
                         whenText + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                        ReelogType.label.copy(fontFeatureSettings = "tnum"), color = SliverColors.OnMedia.copy(alpha = 0.85f),
+                        ReelogType.label.copy(fontWeight = FontWeight.Normal, fontFeatureSettings = "tnum"), color = SliverColors.DayMeta,
                     )
                 }
-                IconButton44({ next?.let { show(it) } }, "Next day", overCamera = true) {
+                IconButton44({ next?.let { show(it) } }, "Next day") {
                     SliverIcon(SliverIcons.ChevronRight, SliverColors.OnMedia.copy(alpha = if (next != null) 1f else 0.4f))
                 }
             }
@@ -200,26 +207,31 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     }
                 }
             }
-            if (day != null && original != null) {
-                ReelogButton(
-                    "Change moment", { changeMoment(day, original) }, kind = ButtonKind.Secondary,
-                    leading = SliverIcons.Scissors, overMedia = true,
-                )
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PrimaryButton("Replace", { replace(current) }, Modifier.weight(1f))
-                ReelogButton(
-                    "Remove", { confirmRemove = true }, Modifier.weight(1f), ButtonKind.Destructive,
-                    enabled = day != null, overMedia = true,
-                )
+            // DayV18: three equal tiles — Moment · Replace · Remove (Remove keeps the undo bar, no dialog).
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (day != null && original != null) {
+                    ActionTile(SliverIcons.Scissors, "Moment", SliverColors.OnMedia, Modifier.weight(1f)) { changeMoment(day, original) }
+                }
+                ActionTile(SliverIcons.Swap, "Replace", SliverColors.OnMedia, Modifier.weight(1f)) { replace(current) }
+                ActionTile(SliverIcons.Trash2, "Remove", SliverColors.DestructiveFill, Modifier.weight(1f), enabled = day != null) { day?.let(::remove) }
             }
         }
 
-        ConfirmSheet(
-            confirmRemove, "Remove this day?",
-            "The clip is deleted from the project. The photo or video stays in your gallery.",
-            "Remove day", { day?.let(::remove) }, { confirmRemove = false },
-        )
         NoticeSheet(notice) { notice = null }
+    }
+}
+
+/** DayV18 action tile: 72 dp, radius 20, white 10 % over the scrim, icon 24 + label 14/500. */
+@Composable
+private fun ActionTile(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, tint: Color, modifier: Modifier, enabled: Boolean = true, onClick: () -> Unit) {
+    Column(
+        modifier.height(72.dp).clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.10f))
+            .clickable(enabled = enabled, role = Role.Button, onClick = app.sliver.core.ui.rememberTapGate(onClick))
+            .alpha(if (enabled) 1f else 0.4f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
+    ) {
+        SliverIcon(icon, tint, size = 24.dp)
+        SliverText(label, ReelogType.label.copy(fontSize = ReelogType.Size.tileLabel, fontWeight = FontWeight.Medium), color = tint, maxLines = 1)
     }
 }

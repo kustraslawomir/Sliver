@@ -42,6 +42,10 @@ object ReelogType {
         val display = 40.sp
         val title = 28.sp
         val headline = 22.sp
+        /** DayV18 day title. */
+        val dayTitle = 24.sp
+        /** DayV18 action tile label. */
+        val tileLabel = 14.sp
         val body = 17.sp
         val label = 15.sp
         val caption = 13.sp

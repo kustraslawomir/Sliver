@@ -68,6 +68,8 @@ object SliverColors {
     /** v1.8 dialog: body text, filled destructive button and its label. */
     val DialogBody get() = if (this.light) Color(0xFF5E5E58) else Color(0xFFB9B9B3)
     val DestructiveFill = Color(0xFFE5675F)
+    /** DayV18 "Day 184 · 21:07" over media. */
+    val DayMeta = Color(0xFFEDEDE8)
     /** v1.8 text field. */
     val FieldFill get() = if (this.light) Color(0xFFF2F0EA) else Color(0xFF111113)
     val FieldEdge get() = if (this.light) Color(0xFFD6D3CC) else Color(0xFF3A3A40)
