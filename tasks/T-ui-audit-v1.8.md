@@ -65,3 +65,5 @@ The current list is raw file names ("sub_clair-suspense-628719 _1_.mp3") with a 
 
 ## Done
 Screenshots (placeholder media) of: hub, camera, builder (music on/off, date on/off), music list, media picker, each dialog/picker, settings — dark + light — in `qa/v1.8/`. Commit message lists any item you skipped and why.
+
+- Music: only the user's own files (owner decision 14 Nov). No built-in or online music library. Music list footer: "You're responsible for music you add from your files."
