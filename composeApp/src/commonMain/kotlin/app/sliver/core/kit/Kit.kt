@@ -88,7 +88,8 @@ fun ReelogButton(
         kind == ButtonKind.Destructive && overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
         kind != ButtonKind.Secondary -> Modifier.background(fill, Pill)
         overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
-        else -> Modifier.background(ink.copy(alpha = 0.06f), Pill).border(1.dp, ink.copy(alpha = 0.12f), Pill)
+        // v1.8 §0: filled, no outline.
+        else -> Modifier.background(SliverColors.SecondaryFill, Pill)
     }
     Row(
         modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)

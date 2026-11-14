@@ -66,5 +66,7 @@ fun Modifier.glass(style: GlassStyle, shape: Shape, overMedia: Boolean = false, 
         else -> Modifier.background(Color(0xFF1C1C1F).copy(alpha = if (strong) 0.97f else 0.92f), shape)
     }
     // A shadow under see-through glass shows through as a smudge, so media glass has none.
-    (if (overMedia) this else then(shadow)).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
+    // v1.8 §0: the lit edge made every icon button read as a grey outlined circle; media glass is tint only now.
+    if (overMedia) clip(shape).then(surface)
+    else then(shadow).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
 }

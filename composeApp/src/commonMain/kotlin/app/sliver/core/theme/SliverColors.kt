@@ -47,6 +47,8 @@ object SliverColors {
     val RecordEdge = Color(0x8C6E0000)
     val RecordRimWarm = Color(0x8CFF5A3C)
     val PhotoCoreLow = Color(0xFFCFCFC8)
+    /** v1.8 §0: secondary buttons on plain screens. */
+    val SecondaryFill get() = if (this.light) Color(0xFFE9E7E1) else Color(0xFF1C1C1F)
     /** Photo mode disc of the record button: flat off-white. */
     val PhotoCore = Color(0xFFF2F2EE)
     /** Empty project thumbnail. */
