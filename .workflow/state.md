@@ -78,3 +78,12 @@
 - Project start = earliest clip: DB 11→12 pulls existing projects back (Lena 13 Nov → 1 Apr), and any saved clip earlier than the start moves it (DayDao.pullProjectStart). Fill the calendar counts from the earliest clip.
 - Fill the calendar runs as a foreground job (notification 9203): Samsung killed the background scan for "excessive binder traffic during cached".
 - Samsung: "Lena iOS" folder (8710 iPhone files) had no metadata in MediaStore; rescanned. Recovered 13 Nov recording to Movies/Reelog/Reelog_2026-11-13_1459.mp4.
+
+## 14 Nov (owner requests)
+- Film: music follows seeking/looping; 'None' filter = icon tile; hold preview = original (804f4ed).
+- Audio layers: many files, start/trim/volume/repeat/mute per layer, clip volume + per-clip mute, timeline; DB 13 film.audioMix (4d39861). Emulator: rendered audio verified (tones at expected times).
+- Filters: grain amplitude 0.35→0.14, lower per-filter grain, 14 new looks (41–54), picker groups with tabs, names without numbers (3c6258e).
+- Archive/delete one step deeper; film delete behind More + confirm (525e339).
+- T-record-button-v3: owner's message asked for the simple version (white ring + flat red disc), done instead of the graphite spec in the task file (c34d3fa). QA: qa/v1.7/RecordButtonV3-states.png (rendered off-device; no camera screenshots).
+- T-glass-v1.7 item 10 was already done (8f1f91e).
+- Not installed on the Samsung.
