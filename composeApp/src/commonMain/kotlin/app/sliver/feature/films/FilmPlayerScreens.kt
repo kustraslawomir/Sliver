@@ -225,7 +225,6 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val info = remember(path) { filmInfoLine(share.sizeBytes(path)) }
     val (pos, dur) = position
     val total = dur.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
-    val ticks = remember(plan, dur) { playerTicks(plan, dur) }
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
     // Owner: a 9:16 film (Lena) goes full screen upright; only 16:9 films turn sideways (and follow the phone).
@@ -237,15 +236,14 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     @Composable
     fun Controls(modifier: Modifier) {
         Column(modifier) {
-            Canvas(Modifier.fillMaxWidth().height(8.dp)) {
-                ticks.forEach {
-                    val x = it * size.width
-                    drawLine(SliverColors.LineStrong, Offset(x, 0f), Offset(x, size.height), 2f)
-                }
-            }
-            SliverSlider((pos.toFloat() / total).coerceIn(0f, 1f), { seek = PlayerSeek((it * total).toLong()); playing = true })
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // v1.9 §3.2: the builder's filmstrip scrubber (real thumbnails, white playhead) with the months under it.
+            Filmstrip(plan, (pos.toFloat() / total).coerceIn(0f, 1f)) { seek = PlayerSeek((it * total).toLong()); playing = true }
+            Row(Modifier.fillMaxWidth().padding(top = SliverSpace.S2), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverText(clock(pos), SliverType.Meta, color = SliverColors.TextTertiary)
+                SliverText(
+                    stripMonths(plan), SliverType.Meta.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.weight(1f), SliverColors.TextTertiary,
+                    maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
                 SliverText("-" + clock((total - pos).coerceAtLeast(0)), SliverType.Meta, color = SliverColors.TextTertiary)
             }
         }
@@ -263,7 +261,8 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         IconButton44({ muted = !muted }, if (muted) "Unmute" else "Mute", Modifier.align(Alignment.BottomStart).padding(SliverSpace.S2), overCamera = true) {
             SliverIcon(if (muted) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.OnMedia)
         }
-        IconButton44({ fullscreen = !fullscreen }, if (fullscreen) "Exit full screen" else "Full screen", Modifier.align(Alignment.BottomEnd).padding(SliverSpace.S2), overCamera = true) {
+        // v1.9 §3.1: never in the date-stamp corner (bottom-right); full screen sits top-right.
+        IconButton44({ fullscreen = !fullscreen }, if (fullscreen) "Exit full screen" else "Full screen", Modifier.align(Alignment.TopEnd).padding(SliverSpace.S2), overCamera = true) {
             SliverIcon(SliverIcons.Maximize, SliverColors.OnMedia)
         }
     }
@@ -301,13 +300,12 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 SliverText(f.name, SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), maxLines = 1)
                 SliverText(
-                    dotJoin(plan.spanText(), clipsText(plan.clips), formatRuntime(plan.clips)),
+                    dotJoin(plan.spanText(), clipsText(plan.clips), filmRuntime(plan.clips)),
                     SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary, maxLines = 1,
                     softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
             // Owner: share / edit / delete are icons, not buttons.
-            IconButton44({ share.share(path, f.name) }, "Share film") { SliverIcon(SliverIcons.Share, SliverColors.TextPrimary, size = 20.dp) }
             IconButton44(onEdit, "Edit film") { SliverIcon(SliverIcons.Pencil, SliverColors.TextPrimary, size = 20.dp) }
             // Owner 14 Nov: delete is not a top-bar icon any more; it lives under More.
             IconButton44({ moreOpen = true }, "More") { SliverIcon(SliverIcons.MoreHorizontal, SliverColors.TextPrimary, size = 20.dp) }
@@ -326,8 +324,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
         Column(Modifier.padding(horizontal = SliverSpace.Gutter), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
             // Owner: one compact "Save" with a download icon (a copy gets the next free name, "Lena 2").
             // Owner 13 Nov: tapping Save showed nothing for seconds (a big film copies slowly), so it got saved 3 times.
+            // v1.9 §3.4: sharing is what people do with a finished film — Share is primary, Save to Photos secondary.
+            ReelogButton("Share\u2026", { share.share(path, f.name) }, leading = SliverIcons.Share)
             ReelogButton(
-                when { saving -> "Saving..."; saved -> "Saved to Photos"; else -> "Save" },
+                when { saving -> "Saving..."; saved -> "Saved \u2713 \u00B7 Movies/$APP_NAME"; else -> "Save to Photos" },
                 {
                     if (saving || saved) return@ReelogButton
                     saving = true
@@ -336,11 +336,12 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                         val ok = share.saveToPhotos(path, f.name)
                         saving = false
                         saved = ok
-                        status = if (ok) "In your gallery: Movies/$APP_NAME" else "Couldn't save the film. Try again."
+                        status = if (ok) null else "Couldn't save the film. Try again."
                     }
                 },
+                kind = ButtonKind.Secondary,
                 enabled = !saving && !saved,
-                leading = if (saved) SliverIcons.Check else SliverIcons.Download,
+                leading = if (saved) null else SliverIcons.Download,
             )
             status?.let { SliverText(it, SliverType.Caption, color = SliverColors.TextSecondary) }
             SliverText(

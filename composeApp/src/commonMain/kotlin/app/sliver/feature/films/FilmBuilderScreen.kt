@@ -237,7 +237,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Filmstrip(plan, fraction) { seek = FilmSeek(it) }
             Row(Modifier.fillMaxWidth().padding(top = SliverSpace.S2), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 val at = (fraction * plan.clips).toInt()
-                SliverText("${formatRuntime(at)} / ${formatRuntime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText("${formatRuntime(at)} / ${filmRuntime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
                 SliverText(
                     stripMonths(plan), SliverType.Meta.copy(fontSize = ReelogType.Size.caption, textAlign = TextAlign.End), Modifier.weight(1f), SliverColors.TextTertiary,
                     maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
@@ -288,7 +288,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             )
         }
         PrimaryButton(
-            "${if (editId != null) "Save film" else "Make film"} \u00B7 ${formatRuntime(plan.clips)}",
+            "${if (editId != null) "Save film" else "Make film"} \u00B7 ${filmRuntime(plan.clips)}",
             {
                 lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
                 if (!lowStorage) scope.launch {
@@ -402,43 +402,6 @@ private fun DateChoice(label: String, on: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** Real thumbnails across the film (up to 15) with a white playhead; tap or drag to seek. */
-@Composable
-private fun Filmstrip(plan: FilmPlan, fraction: Float, onSeek: (Float) -> Unit) {
-    val picks = remember(plan) {
-        val n = plan.days.size
-        if (n == 0) emptyList() else List(minOf(15, n)) { i -> plan.days[(i * n / minOf(15, n)).coerceAtMost(n - 1)] }
-    }
-    val seek by androidx.compose.runtime.rememberUpdatedState(onSeek)
-    Box(
-        Modifier.fillMaxWidth().height(36.dp).clip(SliverShapes.R12).background(SliverColors.Surface2)
-            .pointerInput(Unit) { detectTapGestures { seek((it.x / size.width).coerceIn(0f, 1f)) } }
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, _ -> seek((change.position.x / size.width).coerceIn(0f, 1f)) }
-            },
-    ) {
-        Row(Modifier.fillMaxSize()) {
-            picks.forEach { d ->
-                val img = rememberPhoto(d.thumb)
-                Box(Modifier.weight(1f).fillMaxHeight().background(d.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)) {
-                    if (img != null) androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
-                }
-            }
-        }
-        Canvas(Modifier.fillMaxSize()) {
-            val x = (fraction.coerceIn(0f, 1f) * size.width).coerceIn(1.5.dp.toPx(), size.width - 1.5.dp.toPx())
-            drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), 3.dp.toPx())
-        }
-    }
-}
-
-/** "Apr · May · Jun" — the months the film spans, at most 8. */
-private fun stripMonths(plan: FilmPlan): String {
-    val months = plan.days.map { it.date.year to it.date.month.ordinal }.distinct()
-    val pick = if (months.size <= 8) months else List(8) { months[it * (months.size - 1) / 7] }
-    val names = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    return pick.joinToString(" \u00B7 ") { names[it.second] }
-}
 
 private val StampChoices = listOf(StampStyle.PLAIN to "Plain", StampStyle.LED to "Film", StampStyle.CAMCORDER to "Camcorder")
 

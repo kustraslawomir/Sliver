@@ -122,7 +122,7 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLon
     val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
     Column(
         Modifier.width(PosterW).combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = rememberTapGate(onClick))
-            .semantics { contentDescription = "${film.name}, ${formatRuntime(plan.clips)}" },
+            .semantics { contentDescription = "${film.name}, ${filmRuntime(plan.clips)}" },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(

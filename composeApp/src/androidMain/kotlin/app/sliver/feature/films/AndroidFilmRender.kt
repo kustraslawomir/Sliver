@@ -451,7 +451,7 @@ class FilmComposer(
         }
         line("A film by you", 28f, 0.42f, 0xFFA8A29E.toInt())
         line(film.name, 96f, 0.52f, Color.WHITE, bold = true)
-        line("${plan.subtitle()} · ${formatRuntime(plan.clips)}", 28f, 0.60f, 0xFFA8A29E.toInt())
+        line(dotJoin(plan.subtitle(), filmRuntime(plan.clips)), 28f, 0.60f, 0xFFA8A29E.toInt())
         FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }

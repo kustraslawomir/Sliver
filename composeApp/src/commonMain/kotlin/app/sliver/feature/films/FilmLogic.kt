@@ -22,6 +22,9 @@ fun Film.plan(days: Collection<Day>): FilmPlan = buildFilmPlan(days)
 
 fun formatRuntime(seconds: Int): String = "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
 
+/** v1.9 §3.3: a film's length as rendered — one second per clip plus the closing card — the same everywhere. */
+fun filmRuntime(clips: Int): String = formatRuntime(clips + (FILM_TITLE_MS / 1000).toInt())
+
 private val MonthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 private fun LocalDate.short(): String = "$dayOfMonth ${MonthNames[monthNumber - 1]}"
@@ -69,7 +72,7 @@ fun coverIndex(clips: Int, version: Int?): Int {
 
 /** "2:35 · v3 · Kiosk" — length, version when there are several, filter name (nothing when the film has no look). */
 fun posterCaption(clips: Int, version: Int?, look: String?): String =
-    dotJoin(formatRuntime(clips), version?.let { "v$it" }, look?.takeIf { it != "Natural" && it != "None" })
+    dotJoin(filmRuntime(clips), version?.let { "v$it" }, look?.takeIf { it != "Natural" && it != "None" })
 
 /** v1.9 §2: parts joined with " · ", skipping null or blank ones, so a caption never ends in a dangling dot. */
 fun dotJoin(vararg parts: String?): String = parts.filterNot { it.isNullOrBlank() }.joinToString(" \u00B7 ")

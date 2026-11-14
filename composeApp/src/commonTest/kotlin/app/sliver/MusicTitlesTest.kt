@@ -43,9 +43,9 @@ class MusicTitlesTest {
         val c = Film("c", "October", updatedAt = 3)
         assertEquals(mapOf("a" to 1, "b" to 2), filmVersions(listOf(b, c, a)))
         assertNotEquals(coverIndex(155, 1), coverIndex(155, 2))
-        assertEquals("2:35 · v3 · Kiosk", posterCaption(155, 3, "Kiosk"))
-        assertEquals("0:23", posterCaption(23, null, null))
-        assertEquals("2:36 \u00B7 v4", posterCaption(156, 4, "Natural"))
+        assertEquals("2:35 · v3 · Kiosk", posterCaption(153, 3, "Kiosk"))
+        assertEquals("0:25", posterCaption(23, null, null))
+        assertEquals("2:38 \u00B7 v4", posterCaption(156, 4, "Natural"))
         assertEquals("a \u00B7 c", app.sliver.feature.films.dotJoin("a", null, "", " ", "c"))
         assertEquals("", app.sliver.feature.films.dotJoin(null, ""))
     }
