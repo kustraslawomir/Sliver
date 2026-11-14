@@ -67,6 +67,9 @@ fun coverIndex(clips: Int, version: Int?): Int {
     return ((f % 1.0) * clips).toInt().coerceIn(0, clips - 1)
 }
 
-/** "2:35 · v3 · Kiosk" — length, version when there are several, filter name (or Natural). */
+/** "2:35 · v3 · Kiosk" — length, version when there are several, filter name (nothing when the film has no look). */
 fun posterCaption(clips: Int, version: Int?, look: String?): String =
-    listOfNotNull(formatRuntime(clips), version?.let { "v$it" }, look ?: "Natural").joinToString(" \u00B7 ")
+    dotJoin(formatRuntime(clips), version?.let { "v$it" }, look?.takeIf { it != "Natural" && it != "None" })
+
+/** v1.9 §2: parts joined with " · ", skipping null or blank ones, so a caption never ends in a dangling dot. */
+fun dotJoin(vararg parts: String?): String = parts.filterNot { it.isNullOrBlank() }.joinToString(" \u00B7 ")

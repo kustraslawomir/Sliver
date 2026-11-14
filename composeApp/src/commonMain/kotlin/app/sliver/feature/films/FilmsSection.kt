@@ -155,8 +155,8 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLon
         }
         // HubV18: 13 sp, two lines — range / length · version · look.
         Column {
-            SliverText(plan.spanText(), ReelogType.caption, color = SliverColors.TextSecondary, maxLines = 1)
-            SliverText(posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1)
+            SliverText(plan.spanText(), ReelogType.caption, color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            SliverText(posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
     }
 }

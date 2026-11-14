@@ -301,8 +301,9 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 SliverText(f.name, SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), maxLines = 1)
                 SliverText(
-                    "${plan.spanText()} \u00B7 ${clipsText(plan.clips)} \u00B7 ${formatRuntime(plan.clips)}",
+                    dotJoin(plan.spanText(), clipsText(plan.clips), formatRuntime(plan.clips)),
                     SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary, maxLines = 1,
+                    softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
             // Owner: share / edit / delete are icons, not buttons.
