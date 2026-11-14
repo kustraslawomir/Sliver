@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -188,8 +189,11 @@ actual fun FilmPreview(
         player.seekTo(index, (clipFraction * duration).toLong())
         showFrameWhilePaused(player)
     }
+    val visibleNow = rememberUpdatedState(visible)
     LaunchedEffect(Unit) {
         while (true) {
+            // Battery: no polling while the app is hidden; 4 Hz while paused (seeks still show), 30 Hz while playing.
+            if (!visibleNow.value) snapshotFlow { visibleNow.value }.first { it }
             val video = currentVideo.value
             if (video == null) {
                 delay(33)
@@ -214,7 +218,7 @@ actual fun FilmPreview(
                 p.playWhenReady = playing.value
             }
             report.value(index, (video.currentPosition.toFloat() / duration).coerceIn(0f, 1f))
-            delay(33)
+            delay(if (playing.value) 33 else 250)
         }
     }
 

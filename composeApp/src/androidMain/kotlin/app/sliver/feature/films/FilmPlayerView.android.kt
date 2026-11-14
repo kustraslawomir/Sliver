@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -75,10 +77,14 @@ actual fun FilmPlayerView(
         player.playWhenReady = playing && visible
     }
     LaunchedEffect(seek) { seek?.let { player.seekTo(it.ms) } }
+    val visibleNow = rememberUpdatedState(visible)
+    val playingNow = rememberUpdatedState(playing)
     LaunchedEffect(Unit) {
         while (true) {
+            // Battery: no polling while the app is hidden; 4 Hz while paused, 30 Hz while playing.
+            if (!visibleNow.value) snapshotFlow { visibleNow.value }.first { it }
             report.value(player.currentPosition, player.duration.takeIf { it > 0 } ?: 0L)
-            delay(33)
+            delay(if (playingNow.value) 33 else 250)
         }
     }
     AndroidView(
