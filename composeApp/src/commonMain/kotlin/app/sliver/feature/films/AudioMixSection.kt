@@ -1,5 +1,12 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.semantics.selected
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -132,7 +139,7 @@ private fun LayerRow(i: Int, layer: AudioLayer, filmMs: Long, mix: AudioMix, onM
         ) { SliverIcon(if (layer.muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (layer.muted) SliverColors.TextTertiary else SliverColors.TextPrimary, size = 20.dp) }
         Column(Modifier.weight(1f)) {
             SliverText(
-                trackLabel(layer.path) ?: "Audio", SliverType.BodySmall,
+                trackTitle(layer.path), SliverType.BodySmall,
                 color = if (layer.muted) SliverColors.TextTertiary else SliverColors.TextPrimary, maxLines = 1,
             )
             SliverText(layerSummary(layer, filmMs), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
@@ -154,10 +161,10 @@ private fun MixTimeline(mix: AudioMix, clips: List<MixClip>, filmMs: Long, playh
     val lanes = 1 + mix.layers.size
     val seek by rememberUpdatedState(onSeekMs)
     val length by rememberUpdatedState(filmMs)
-    val clipColor = SliverColors.Surface3
-    val mutedColor = SliverColors.LineStrong
-    val layerColor = SliverColors.TextTertiary
-    val layerOff = SliverColors.Surface2
+    val clipColor = SliverColors.TextTertiary.copy(alpha = 0.55f)
+    val mutedColor = SliverColors.TextTertiary
+    val layerColor = SliverColors.TextSecondary
+    val layerOff = SliverColors.BgBase
     val head = SliverColors.TextPrimary
     Canvas(
         Modifier.fillMaxWidth().height(LaneH * lanes + LaneGap * (lanes - 1) + 8.dp)
@@ -203,7 +210,7 @@ private fun MixTimeline(mix: AudioMix, clips: List<MixClip>, filmMs: Long, playh
 @Composable
 fun LayerEditor(layer: AudioLayer, filmMs: Long, playheadMs: Long, onChange: (AudioLayer) -> Unit, onRemove: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText(trackLabel(layer.path) ?: "Audio", SliverType.Title, maxLines = 1)
+        SliverText(trackTitle(layer.path), SliverType.Title, maxLines = 1)
         SliverText("File length ${audioTime(layer.durationMs)}", SliverType.Meta, color = SliverColors.TextTertiary)
 
         ValueRow("Starts in the film at", audioTime(layer.startMs))
@@ -287,28 +294,129 @@ private fun TrimBar(inMs: Long, outMs: Long, durationMs: Long, onChange: (Long, 
     }
 }
 
-/** Pick a file from the app's music library (with its length) or import a new one. */
+/**
+ * Audit v1.8 §5 music list (board phone 4): 64 dp rows with a play/pause preview, a cleaned title, how the track fits
+ * the film, and a check when the track is on the film (an audio layer). The checked row opens its volume. Hold a row to
+ * rename or remove it. Last row: Add music from files.
+ */
 @Composable
-fun AudioLibrary(files: List<String>, durationOf: (String) -> Long, filmMs: Long, notice: String?, onPick: (String) -> Unit, onImport: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
-        SliverText("Add audio layer", SliverType.Title)
+fun MusicList(
+    files: List<String>, durationOf: (String) -> Long, filmMs: Long, mix: AudioMix, onMix: (AudioMix) -> Unit,
+    notice: String?, onImport: () -> Unit, onDone: () -> Unit, onRemoved: () -> Unit,
+) {
+    val preview = rememberTrackPreview()
+    val store = rememberMusicStore()
+    DisposableEffect(Unit) { onDispose { preview.stop() } }
+    var menuFor by remember { mutableStateOf<String?>(null) }
+    var renaming by remember { mutableStateOf<String?>(null) }
+    var confirmRemove by remember { mutableStateOf<String?>(null) }
+    Column(Modifier.heightIn(max = 620.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
+        SliverText("Music", SliverType.Title)
         SliverText("Film length ${audioTime(filmMs)}", SliverType.Meta, color = SliverColors.TextTertiary)
+        if (files.isEmpty()) SliverText("No music yet", SliverType.BodySmall, Modifier.padding(vertical = SliverSpace.S2), SliverColors.TextSecondary)
         files.forEach { path ->
             val d = remember(path) { durationOf(path) }
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(SliverShapes.R12).clickable { onPick(path) }.padding(horizontal = SliverSpace.S2),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+            val index = mix.layers.indexOfFirst { it.path == path }
+            val on = index >= 0
+            fun toggle() {
+                onMix(
+                    if (on) mix.copy(layers = mix.layers.filter { it.path != path })
+                    else mix.copy(layers = mix.layers + AudioLayer(path, d)),
+                )
+            }
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+                    .background(if (on) SliverColors.OnMedia.copy(alpha = 0.06f) else androidx.compose.ui.graphics.Color.Transparent),
             ) {
-                SliverIcon(SliverIcons.Volume2, SliverColors.TextTertiary, size = 18.dp)
-                SliverText(trackLabel(path) ?: path.substringAfterLast('/'), SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextPrimary, maxLines = 1)
-                SliverText(if (d > 0) audioTime(d) else "–", SliverType.Meta, color = SliverColors.TextSecondary)
+                Row(
+                    Modifier.fillMaxWidth().height(64.dp)
+                        .combinedClickable(onLongClick = { menuFor = if (menuFor == path) null else path }, onClick = { if (!on) toggle() })
+                        .padding(horizontal = SliverSpace.S2),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+                ) {
+                    val playing = preview.playing == path
+                    Box(
+                        Modifier.size(40.dp).clip(CircleShape).background(if (playing) SliverColors.TextPrimary else SliverColors.Surface3)
+                            .clickable(role = Role.Button) { preview.toggle(path) }
+                            .semantics { contentDescription = if (playing) "Stop preview" else "Play preview" },
+                        Alignment.Center,
+                    ) {
+                        SliverIcon(if (playing) SliverIcons.Pause else SliverIcons.Play, if (playing) SliverColors.BgBase else SliverColors.TextPrimary, size = 16.dp)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        SliverText(trackTitle(path), SliverType.BodySmall, color = SliverColors.TextPrimary, maxLines = 1)
+                        SliverText(fitCaption(d, filmMs), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
+                    }
+                    // Trailing check (22 dp): on the film or not.
+                    Box(
+                        Modifier.size(44.dp).clickable(role = Role.Checkbox) { toggle() }
+                            .semantics { contentDescription = if (on) "Remove from film" else "Add to film"; selected = on },
+                        Alignment.Center,
+                    ) {
+                        Box(
+                            Modifier.size(22.dp).clip(CircleShape)
+                                .then(if (on) Modifier.background(SliverColors.TextPrimary) else Modifier.border(1.5.dp, SliverColors.TextTertiary, CircleShape)),
+                            Alignment.Center,
+                        ) { if (on) SliverIcon(SliverIcons.Check, SliverColors.BgBase, size = 14.dp) }
+                    }
+                }
+                if (on) {
+                    val layer = mix.layers[index]
+                    Row(
+                        Modifier.fillMaxWidth().padding(start = 64.dp, end = SliverSpace.S3, bottom = SliverSpace.S1),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+                    ) {
+                        SliverText("Volume", SliverType.Meta, color = SliverColors.TextTertiary)
+                        SliverSlider(
+                            layer.volume / 100f,
+                            { v -> onMix(mix.copy(layers = mix.layers.toMutableList().also { it[index] = layer.copy(volume = (v * 100).toInt().coerceIn(0, 100)) })) },
+                            Modifier.weight(1f),
+                        )
+                        SliverText("${layer.volume} %", SliverType.Meta, color = SliverColors.TextTertiary)
+                    }
+                }
+                if (menuFor == path) {
+                    Row(Modifier.padding(start = 56.dp, bottom = SliverSpace.S1), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                        GhostButton("Rename", { renaming = path; menuFor = null })
+                        GhostButton("Remove", { confirmRemove = path; menuFor = null }, destructive = true)
+                    }
+                }
+                if (renaming == path) {
+                    var title by remember(path) { mutableStateOf(trackTitle(path)) }
+                    Column(Modifier.padding(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                        app.sliver.core.ui.SliverTextField(title, { title = it.take(60) }, placeholder = "Track name")
+                        app.sliver.core.ui.PrimaryButton("Save", { store.rename(path, title); renaming = null }, enabled = title.isNotBlank())
+                    }
+                }
+                if (confirmRemove == path) {
+                    Column(Modifier.padding(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
+                        SliverText("Remove \u201C${trackTitle(path)}\u201D from the app? Films using it play without it.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+                        Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                            GhostButton("Remove", {
+                                preview.stop()
+                                onMix(mix.copy(layers = mix.layers.filter { it.path != path }))
+                                store.remove(path); confirmRemove = null; onRemoved()
+                            }, destructive = true)
+                            GhostButton("Cancel", { confirmRemove = null })
+                        }
+                    }
+                }
             }
         }
-        if (files.isEmpty()) SliverText("No audio files yet.", SliverType.BodySmall, color = SliverColors.TextTertiary)
-        GhostButton("Import an audio file…", onImport)
+        Row(
+            Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(16.dp)).clickable(role = Role.Button, onClick = onImport).padding(horizontal = SliverSpace.S2),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+        ) {
+            Box(Modifier.size(40.dp).border(1.dp, SliverColors.LineStrong, CircleShape), Alignment.Center) { SliverIcon(SliverIcons.Plus, SliverColors.TextPrimary, size = 18.dp) }
+            SliverText("Add music from files", SliverType.BodySmall, color = SliverColors.TextPrimary)
+        }
         notice?.let { SliverText(it, SliverType.Caption, color = SliverColors.Error) }
-        Box(Modifier.size(1.dp))
+        SliverText(
+            "Names are cleaned from the file name. Hold a row to rename or remove.",
+            SliverType.Caption, Modifier.padding(vertical = SliverSpace.S2), SliverColors.TextTertiary,
+        )
+        app.sliver.core.ui.PrimaryButton("Done", { preview.stop(); onDone() }, Modifier.fillMaxWidth())
     }
 }
 

@@ -227,7 +227,7 @@ actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit {
 actual fun rememberMusicLibrary(refresh: Any?): List<String> {
     val context = LocalContext.current
     return remember(refresh) {
-        java.io.File(context.filesDir, "music").listFiles().orEmpty().filter { it.isFile && it.length() > 0 }
+        java.io.File(context.filesDir, "music").listFiles().orEmpty().filter { it.isFile && it.length() > 0 && !it.name.startsWith(".") }
             .sortedByDescending { it.lastModified() }.map { it.path }
     }
 }

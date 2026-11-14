@@ -35,3 +35,16 @@ actual suspend fun renderFilterThumbs(
 actual fun rememberMusicLibrary(refresh: Any?): List<String> = emptyList()
 
 actual fun audioDurationMs(path: String): Long = 0L
+
+@Composable
+actual fun rememberTrackPreview(): TrackPreview = object : TrackPreview {
+    override val playing: String? = null
+    override fun toggle(path: String) = TODO("iOS later")
+    override fun stop() = Unit
+}
+
+@Composable
+actual fun rememberMusicStore(): MusicStore = object : MusicStore {
+    override fun rename(path: String, title: String) = TODO("iOS later")
+    override fun remove(path: String) = TODO("iOS later")
+}

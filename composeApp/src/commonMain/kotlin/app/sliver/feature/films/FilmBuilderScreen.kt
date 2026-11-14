@@ -1,5 +1,11 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import app.sliver.core.kit.GlassStyle
+import app.sliver.core.kit.glass
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -115,6 +121,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val filmMs = filmLengthMs(clips.size)
     val mix = options.mix ?: AudioMix()
     var addingLayer by remember { mutableStateOf(false) }
+    var soundOpen by remember { mutableStateOf(false) }
+    var dateSheet by remember { mutableStateOf(false) }
     var editingLayer by remember { mutableStateOf<Int?>(null) }
     var libraryRefresh by remember { mutableStateOf(0) }
     val lookParams = options.look?.toParams(options.intensity, options.grain)
@@ -133,8 +141,6 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val m = options.mix ?: AudioMix()
         val start = if (m.layers.isEmpty()) 0L else playheadMs
         options = options.copy(mix = m.copy(layers = m.layers + AudioLayer(path, audioDurationMs(path), startMs = start)))
-        addingLayer = false
-        editingLayer = m.layers.size
     }
     val pickAudio = rememberAudioPicker {
         when (it) {
@@ -145,8 +151,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
     var adjusting by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
-    // Owner: the whole screen scrolls (preview, timeline and filters stay first).
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState())) {
+    // Owner: the whole screen scrolls (preview, timeline and filters stay first); Make film is a sticky bar (BuilderV18).
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = StickyBarHeight)) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
@@ -154,9 +160,10 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                 SliverText(editing?.name ?: project?.name ?: "New film", SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), maxLines = 1)
+                // BuilderV18: "Story 9:16 · 1 Apr – 13 Nov · 155 clips".
                 SliverText(
-                    if (format == FilmFormat.CINEMA) "Cinema 16:9" else "Story 9:16",
-                    SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
+                    listOfNotNull(if (format == FilmFormat.CINEMA) "Cinema 16:9" else "Story 9:16", plan.spanText().takeIf { plan.clips > 0 }, clipsText(plan.clips)).joinToString(" \u00B7 "),
+                    SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary, maxLines = 1,
                 )
             }
             Spacer(Modifier.size(44.dp))
@@ -164,12 +171,13 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
         // Owner: video, timeline and filters stay on screen together (no scrolling away from the preview).
         val ratio = if (format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
+        // BuilderV18: 9:16 = 164 × 290 dp; 16:9 = full width.
         Box(
-            Modifier.fillMaxWidth().heightIn(max = PreviewMaxHeight).padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S1),
+            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2),
             Alignment.Center,
         ) {
             Box(
-                Modifier.aspectRatio(ratio, matchHeightConstraintsFirst = ratio < 1f).clip(SliverShapes.M)
+                (if (ratio < 1f) Modifier.size(164.dp, 290.dp) else Modifier.fillMaxWidth().aspectRatio(ratio)).clip(SliverShapes.R20)
                     .background(SliverColors.BgVoid)
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -199,7 +207,16 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                         val style = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
                         DateStamp(stampText(plan.days[index].date, style), style = style)
                     }
-                    if (paused && !comparing) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
+                    // Audit v1.8 §4.2: a 56 dp glass play circle instead of the word "Paused"; it fades 600 ms after play.
+                    val playAlpha by androidx.compose.animation.core.animateFloatAsState(
+                        if (paused && !comparing) 1f else 0f,
+                        androidx.compose.animation.core.tween(if (paused) 150 else 300, delayMillis = if (paused) 0 else 600), label = "play",
+                    )
+                    if (playAlpha > 0f) Box(
+                        Modifier.align(Alignment.Center).size(56.dp).alpha(playAlpha)
+                            .glass(GlassStyle.Regular, androidx.compose.foundation.shape.CircleShape, overMedia = true),
+                        Alignment.Center,
+                    ) { SliverIcon(if (paused) SliverIcons.Play else SliverIcons.Pause, SliverColors.OnMedia, size = 24.dp) }
                     IconButton44(
                         { FilmPlayback.muted = !FilmPlayback.muted }, if (FilmPlayback.muted) "Unmute" else "Mute",
                         Modifier.align(Alignment.BottomStart).padding(SliverSpace.S1), overCamera = true,
@@ -210,18 +227,15 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
         Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
             val fraction = if (clips.isEmpty()) 0f else ((position.first + position.second) / clips.size).coerceIn(0f, 1f)
-            val ticks = remember(plan) { scrubberTicks(plan) }
-            Canvas(Modifier.fillMaxWidth().height(6.dp)) {
-                ticks.forEach {
-                    val x = it * size.width
-                    drawLine(SliverColors.LineStrong, Offset(x, 0f), Offset(x, size.height), 2f)
-                }
-            }
-            SliverSlider(fraction, { seek = FilmSeek(it) })
-            Row(Modifier.fillMaxWidth()) {
+            // BuilderV18: a 36 dp filmstrip of real thumbnails with a 3 dp white playhead (replaces the line + ticks).
+            Filmstrip(plan, fraction) { seek = FilmSeek(it) }
+            Row(Modifier.fillMaxWidth().padding(top = SliverSpace.S2), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 val at = (fraction * plan.clips).toInt()
-                SliverText("${clockTime(at)} / ${clockTime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), Modifier.weight(1f), SliverColors.TextTertiary)
-                SliverText("${clipsText(plan.clips)} \u00B7 ${plan.spanText()}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText("${formatRuntime(at)} / ${formatRuntime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText(
+                    stripMonths(plan), SliverType.Meta.copy(fontSize = ReelogType.Size.caption, textAlign = TextAlign.End), Modifier.weight(1f), SliverColors.TextTertiary,
+                    maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
             }
         }
 
@@ -239,63 +253,87 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             Modifier.padding(top = SliverSpace.S2, bottom = SliverSpace.S6),
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
+            // BuilderV18: Sound and Date on screen are rows with a value; the detail lives in sheets.
+            Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
+                Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+                val (soundValue, soundSub) = soundSummary(mix)
+                ValueRow("Sound", soundSub, soundValue) { soundOpen = true }
+                if (mix.layers.isEmpty() && isLegacyTrack(editing?.track)) {
+                    SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, color = SliverColors.TextSecondary)
+                }
+                Box(Modifier.fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+                val current = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
+                ValueRow("Date on screen", null, if (dateOn) StampChoices.first { it.first == current }.second else "Off") { dateSheet = true }
+            }
+
+        }
+    }
+    // BuilderV18 / audit §4.6: sticky Make film over a fade; never cut by the nav bar.
+    Column(
+        Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+            .background(Brush.verticalGradient(0f to SliverColors.BgBase.copy(alpha = 0f), 0.3f to SliverColors.BgBase))
+            .navigationBarsPadding().padding(top = SliverSpace.S6, bottom = SliverSpace.S3),
+        verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
+    ) {
+            if (lowStorage) {
+            SliverText(
+                "$STORAGE_FULL_TITLE. $STORAGE_FULL_BODY", SliverType.Caption,
+                Modifier.padding(horizontal = SliverSpace.Gutter), SliverColors.Error,
+            )
+        }
+        PrimaryButton(
+            "${if (editId != null) "Save film" else "Make film"} \u00B7 ${formatRuntime(plan.clips)}",
+            {
+                lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
+                if (!lowStorage) scope.launch {
+                    val old = editing
+                    val id = old?.id ?: "film-${Clock.System.now().toEpochMilliseconds()}"
+                    val film = options.copy(dateOn = dateOn).toFilm(id, old?.name ?: project?.name ?: "My film", old?.format ?: format)
+                        .let { if (old != null) it.copy(projectId = old.projectId) else it }
+                    films.save(film)
+                    koin.get<FilmRenderer>().start(id)
+                    onSaved(id)
+                }
+            },
+            Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),
+            enabled = clips.isNotEmpty(),
+        )
+        SliverText(
+            "Rendered on your phone, 1080p. Works offline.", SliverType.Caption.copy(textAlign = TextAlign.Center),
+            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), SliverColors.TextTertiary,
+        )
+    }
+    val adjustLook = options.look
+    SliverBottomSheet(soundOpen && !addingLayer && editingLayer == null, onDismiss = { soundOpen = false }) {
+        Column(Modifier.heightIn(max = 640.dp).verticalScroll(rememberScrollState())) {
             AudioMixSection(
                 mix, { options = options.copy(mix = it) },
                 mixClips, filmMs, playheadMs,
                 onSeekMs = { ms -> if (clips.isNotEmpty()) seek = FilmSeek(ms.toFloat() / (clips.size * FILM_FRAME_MS)) },
                 onAddLayer = { addingLayer = true },
                 onEditLayer = { editingLayer = it },
-                modifier = Modifier.padding(horizontal = SliverSpace.Gutter),
             )
-            if (mix.layers.isEmpty() && isLegacyTrack(editing?.track)) {
-                SliverText(LEGACY_TRACK_NOTE, SliverType.Caption, Modifier.padding(horizontal = SliverSpace.Gutter), SliverColors.TextSecondary)
-            }
-
-            Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
-                SwitchRow("Date on screen", dateOn, { dateTouched = true; options = options.copy(dateOn = it) })
-                if (dateOn) {
-                    // Owner: pick the date style; same compact control as Sound.
-                    val current = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
-                    Segmented(
-                        StampChoices.map { it.second }, StampChoices.indexOfFirst { it.first == current }.coerceAtLeast(0),
-                        { options = options.copy(stamp = StampChoices[it].first) }, compact = true,
-                    )
-                }
-            }
-
-            if (lowStorage) {
-                SliverText(
-                    "$STORAGE_FULL_TITLE. $STORAGE_FULL_BODY", SliverType.Caption,
-                    Modifier.padding(horizontal = SliverSpace.Gutter), SliverColors.Error,
-                )
-            }
-            PrimaryButton(
-                "${if (editId != null) "Save film" else "Make film"} \u00B7 ${clockTime(plan.clips)}",
-                {
-                    lowStorage = isStorageLow(koin.get<FileStore>().freeSpaceBytes())
-                    if (!lowStorage) scope.launch {
-                        val old = editing
-                        val id = old?.id ?: "film-${Clock.System.now().toEpochMilliseconds()}"
-                        val film = options.copy(dateOn = dateOn).toFilm(id, old?.name ?: project?.name ?: "My film", old?.format ?: format)
-                            .let { if (old != null) it.copy(projectId = old.projectId) else it }
-                        films.save(film)
-                        koin.get<FilmRenderer>().start(id)
-                        onSaved(id)
-                    }
-                },
-                Modifier.padding(horizontal = SliverSpace.Gutter).fillMaxWidth(),
-                enabled = clips.isNotEmpty(),
-            )
-            SliverText(
-                "Rendered on your phone, 1080p. Works offline.", SliverType.Caption.copy(textAlign = TextAlign.Center),
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), SliverColors.TextTertiary,
-            )
+            PrimaryButton("Done", { soundOpen = false }, Modifier.fillMaxWidth().padding(top = SliverSpace.S4))
         }
     }
-    val adjustLook = options.look
     SliverBottomSheet(addingLayer, onDismiss = { addingLayer = false }) {
         val library = rememberMusicLibrary(libraryRefresh)
-        AudioLibrary(library, ::audioDurationMs, filmMs, notice, onPick = ::addLayer, onImport = pickAudio)
+        MusicList(
+            library, ::audioDurationMs, filmMs, mix, { options = options.copy(mix = it) }, notice,
+            onImport = pickAudio, onDone = { addingLayer = false }, onRemoved = { libraryRefresh++ },
+        )
+    }
+    SliverBottomSheet(dateSheet, onDismiss = { dateSheet = false }) {
+        val current = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
+        Column {
+            SliverText("Date on screen", SliverType.Title, Modifier.padding(bottom = SliverSpace.S2))
+            DateChoice("Off", !dateOn) { dateTouched = true; options = options.copy(dateOn = false); dateSheet = false }
+            StampChoices.forEach { (style, label) ->
+                DateChoice(label, dateOn && current == style) {
+                    dateTouched = true; options = options.copy(dateOn = true, stamp = style); dateSheet = false
+                }
+            }
+        }
     }
     val layerIndex = editingLayer
     val editedLayer = layerIndex?.let { mix.layers.getOrNull(it) }
@@ -323,9 +361,77 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     }
 }
 
-private val PreviewMaxHeight = 300.dp
+private val StickyBarHeight = 120.dp
 
-private val StampChoices = listOf(StampStyle.LED to "Film", StampStyle.PLAIN to "Plain", StampStyle.CAMCORDER to "Camcorder")
+/** BuilderV18 row: title (+ sub line), value and chevron; opens a sheet. */
+@Composable
+private fun ValueRow(title: String, sub: String?, value: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 64.dp).clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .padding(vertical = SliverSpace.S2),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+    ) {
+        Column(Modifier.weight(1f)) {
+            SliverText(title, SliverType.Body)
+            sub?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.TextTertiary, maxLines = 1) }
+        }
+        SliverText(value, SliverType.Body, color = SliverColors.TextSecondary, maxLines = 1)
+        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
+    }
+}
+
+@Composable
+private fun DateChoice(label: String, on: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().height(52.dp).clip(SliverShapes.R12).clickable(role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick)
+            .padding(horizontal = SliverSpace.S2),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SliverText(label, SliverType.Body, Modifier.weight(1f))
+        if (on) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 20.dp)
+    }
+}
+
+/** Real thumbnails across the film (up to 15) with a white playhead; tap or drag to seek. */
+@Composable
+private fun Filmstrip(plan: FilmPlan, fraction: Float, onSeek: (Float) -> Unit) {
+    val picks = remember(plan) {
+        val n = plan.days.size
+        if (n == 0) emptyList() else List(minOf(15, n)) { i -> plan.days[(i * n / minOf(15, n)).coerceAtMost(n - 1)] }
+    }
+    val seek by androidx.compose.runtime.rememberUpdatedState(onSeek)
+    Box(
+        Modifier.fillMaxWidth().height(36.dp).clip(SliverShapes.R12).background(SliverColors.Surface2)
+            .pointerInput(Unit) { detectTapGestures { seek((it.x / size.width).coerceIn(0f, 1f)) } }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, _ -> seek((change.position.x / size.width).coerceIn(0f, 1f)) }
+            },
+    ) {
+        Row(Modifier.fillMaxSize()) {
+            picks.forEach { d ->
+                val img = rememberPhoto(d.thumb)
+                Box(Modifier.weight(1f).fillMaxHeight().background(d.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)) {
+                    if (img != null) androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                }
+            }
+        }
+        Canvas(Modifier.fillMaxSize()) {
+            val x = (fraction.coerceIn(0f, 1f) * size.width).coerceIn(1.5.dp.toPx(), size.width - 1.5.dp.toPx())
+            drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), 3.dp.toPx())
+        }
+    }
+}
+
+/** "Apr · May · Jun" — the months the film spans, at most 8. */
+private fun stripMonths(plan: FilmPlan): String {
+    val months = plan.days.map { it.date.year to it.date.month.ordinal }.distinct()
+    val pick = if (months.size <= 8) months else List(8) { months[it * (months.size - 1) / 7] }
+    val names = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    return pick.joinToString(" \u00B7 ") { names[it.second] }
+}
+
+private val StampChoices = listOf(StampStyle.PLAIN to "Plain", StampStyle.LED to "Film", StampStyle.CAMCORDER to "Camcorder")
 
 /** "02:09" */
 private fun clockTime(seconds: Int) = "${(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}"

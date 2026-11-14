@@ -58,7 +58,7 @@ import app.sliver.data.info
 expect suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPreset>): Map<LookPreset, ImageBitmap>
 
 private val TileW = 64.dp
-private val TileH = 84.dp
+private val TileH = 80.dp
 private val TileShape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
 
 /** Intensity and Grain for [selected], shown in the builder's adjust sheet. */
@@ -90,10 +90,11 @@ fun FilmFilterSection(
         value = thumbsOverride ?: frame?.let { renderFilterThumbs(it, FilterPresets) }.orEmpty()
     }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText(
-            if (onAdjust != null) "Filter \u00B7 hold to adjust" else "Filter \u00B7 whole film",
-            SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
-        )
+        // BuilderV18: "Look" header; the hint stays small next to it.
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+            SliverText("Look", SliverType.Body)
+            if (onAdjust != null) SliverText("hold to adjust", SliverType.Caption, Modifier.padding(bottom = 2.dp), color = SliverColors.TextTertiary)
+        }
         // Owner 14 Nov: groups like a filter app; a tab jumps the strip, the strip moves the tab.
         val strip = rememberLazyListState(initialFirstVisibleItemIndex = selected?.let { FilterPresets.indexOf(it) + 1 } ?: 0)
         val scope = rememberCoroutineScope()
