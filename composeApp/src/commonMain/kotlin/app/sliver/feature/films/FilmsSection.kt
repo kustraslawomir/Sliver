@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import app.sliver.core.ui.IconButton44
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import app.sliver.core.icons.SliverIcons
 import app.sliver.data.pickerLabel
@@ -97,12 +99,16 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
             }
             ReelogButton("Make film", { onNavigate(Route.FilmBuilder) }, kind = ButtonKind.Secondary, small = true, fullWidth = false, leading = HubIcons.Plus)
         }
-        val versions = remember(list) { filmVersions(list) }
+        // v1.9 §5.4: versions of the same film (same name) are one poster "4 versions"; tap opens the newest,
+        // long-press lists them all.
+        val groups = remember(list) { list.groupBy { it.name }.values.toList() }
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                itemsIndexed(list, key = { _, f -> f.id }) { i, film ->
+                itemsIndexed(groups, key = { _, g -> g.first().id }) { i, group ->
+                    val film = group.first()
                     Poster(
-                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size], versions[film.id],
+                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size], null,
+                        versionCount = group.size,
                         onLongClick = { onLongPress(film) },
                     ) {
                         FilmNav.id = film.id
@@ -117,7 +123,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLongClick: () -> Unit, onClick: () -> Unit) {
+private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versionCount: Int = 1, onLongClick: () -> Unit, onClick: () -> Unit) {
     val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
     val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
     Column(
@@ -125,6 +131,11 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLon
             .semantics { contentDescription = "${film.name}, ${filmRuntime(plan.clips)}" },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        // A stack edge behind the poster when it holds several versions.
+        if (versionCount > 1) Box(
+            Modifier.padding(horizontal = 8.dp).fillMaxWidth().height(4.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(SliverColors.LineStrong),
+        )
         Box(
             Modifier.fillMaxWidth().height(PosterH).clip(PosterShape)
                 .background(Brush.verticalGradient(0f to tint, 0.75f to SliverColors.BgVoid, 1f to SliverColors.BgVoid))
@@ -156,33 +167,61 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLon
         // HubV18: 13 sp, two lines — range / length · version · look.
         Column {
             SliverText(plan.spanText(), ReelogType.caption, color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            SliverText(posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            SliverText(if (versionCount > 1) dotJoin("$versionCount versions", filmRuntime(plan.clips)) else posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
     }
 }
 
 /** Sheet for a long-pressed poster; lives at the screen root so it covers the whole window. */
 @Composable
-fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit) {
+fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit, onOpen: (Film) -> Unit = {}) {
     val scope = rememberCoroutineScope()
-    var confirm by remember(film) { mutableStateOf(false) }
-    SliverBottomSheet(film != null && !confirm, onDismiss) {
-        Column {
+    var target by remember(film) { mutableStateOf<Film?>(null) }
+    val all by remember { KoinPlatform.getKoin().get<FilmRepository>().observeAll() }.collectAsState(emptyList())
+    // Every version of this film (same name), newest first, numbered oldest = v1.
+    val versions = remember(all, film) {
+        all.filter { it.name == film?.name }.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt }
+    }
+    SliverBottomSheet(film != null && target == null, onDismiss) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SliverText(film?.name.orEmpty(), SliverType.Headline, Modifier.padding(bottom = SliverSpace.S2))
-            GhostButton("Delete film\u2026", { confirm = true }, Modifier.fillMaxWidth(), destructive = true)
+            if (versions.size > 1) {
+                versions.forEachIndexed { i, v ->
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.R12).clickable { onDismiss(); onOpen(v) },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            SliverText("Version ${versions.size - i}", SliverType.Body)
+                            SliverText(dotJoin(v.look?.pickerLabel, v.renderedAt?.let(::madeOn)), SliverType.Caption, color = SliverColors.TextTertiary)
+                        }
+                        IconButton44({ target = v }, "Delete version ${versions.size - i}") { SliverIcon(SliverIcons.Trash2, SliverColors.Error, size = 18.dp) }
+                    }
+                }
+            } else {
+                GhostButton("Delete film\u2026", { target = film }, Modifier.fillMaxWidth(), destructive = true)
+            }
         }
     }
     // Owner 14 Nov: deleting is never a single tap.
     app.sliver.core.ui.ConfirmSheet(
-        film != null && confirm, "Delete this film?", "The days stay in the project. The copy in your gallery stays too.", "Delete film",
+        target != null, "Delete this film?", "The days stay in the project. The copy in your gallery stays too.", "Delete film",
         {
-            if (film != null) scope.launch {
-                runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(film) }
+            val f = target
+            if (f != null) scope.launch {
+                runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(f) }
                     .onFailure { Notices.show("Couldn't delete this film. Try again.") }
             }
         },
-        onDismiss,
+        { target = null; onDismiss() },
     )
+}
+
+/** "Made 13 Nov, 15:58". */
+private fun madeOn(at: kotlin.time.Instant): String {
+    val t = at.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    return "Made ${t.day} ${months[t.month.ordinal]}, ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}"
 }
 
 

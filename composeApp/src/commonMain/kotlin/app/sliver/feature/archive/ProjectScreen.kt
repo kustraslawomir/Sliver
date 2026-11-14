@@ -132,6 +132,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import app.sliver.feature.films.FilmActionsSheet
 import app.sliver.feature.films.FilmsSection
+import app.sliver.feature.films.FilmNav
 import app.sliver.feature.gallery.rememberAddMedia
 import app.sliver.feature.projects.ProjectAction
 import app.sliver.feature.projects.ProjectsSheet
@@ -339,7 +340,13 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             // Caption counts hours left; refresh once a minute (no animation, ~0 CPU).
             while (true) { delay(60_000); value = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time }
         }
-        if (SheetsOpen.count == 0 && !menuOpen) RecordDock(
+        // v1.9 §5.3: once today is in, the dock shrinks to a 56 dp thumbnail of today (bottom-right).
+        val todayDay = byDate[today]?.takeIf { !it.draft }
+        if (SheetsOpen.count == 0 && !menuOpen && todayDay != null) TodayBubble(
+            todayDay, { openDay(today) },
+            Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 20.dp, bottom = 30.dp),
+        )
+        if (SheetsOpen.count == 0 && !menuOpen && todayDay == null) RecordDock(
             today = byDate[today],
             caption = dockCaption(today, minute.hour, minute.minute),
             backdrop = dockBackdrop,
@@ -350,7 +357,10 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
         ProjectsSheet(projectsOpen, { projectsOpen = false }, backdrop = dockBackdrop)
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
         NoticeSheet(notice) { notice = null }
-        FilmActionsSheet(filmMenu) { filmMenu = null }
+        FilmActionsSheet(filmMenu, { filmMenu = null }) { f ->
+            FilmNav.id = f.id
+            onNavigate(if (f.renderPath != null) Route.FilmPlayer else Route.Export)
+        }
         if (menuOpen) {
             val canLeave = project?.let { canLeaveActive(it, projects) } ?: false
             ProjectMenu(
@@ -481,7 +491,8 @@ private const val SwipePx = 80f
 @Composable
 private fun PeriodRow(year: Boolean, onYear: (Boolean) -> Unit, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        app.sliver.core.kit.ReelogSegmented(listOf("Month", "Year"), if (year) 1 else 0, { onYear(it == 1) }, Modifier.width(168.dp))
+        // v1.9 §5.2: 40 dp tall, 168 dp wide, labels 15/500.
+        app.sliver.core.kit.ReelogSegmented(listOf("Month", "Year"), if (year) 1 else 0, { onYear(it == 1) }, Modifier.width(168.dp), height = 40.dp)
         Box(Modifier.weight(1f))
         NavArrow(HubIcons.Prev, if (year) "Previous year" else "Previous month", canPrev, onPrev)
         NavArrow(HubIcons.Next, if (year) "Next year" else "Next month", canNext, onNext)
@@ -510,9 +521,11 @@ private fun MonthGrid(
         }
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             weeks.forEach { week ->
+                // v1.9 §5.1: a week that is all future is a 28 dp row of numbers, so Films stay in view.
+                val futureOnly = week.all { it == null || it > today }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     week.forEach { date ->
-                        Box(Modifier.weight(1f).height(46.dp)) {
+                        Box(Modifier.weight(1f).height(if (futureOnly) 28.dp else 46.dp)) {
                             if (date != null) DayCell(date, today, start, byDate[date], { onReplace(date) }, { onRemove(date) }) { onCell(date) }
                         }
                     }
@@ -685,7 +698,7 @@ private const val DockGlowMs = 14_000
 /** v1.7 item 5: strong-glass capsule 72 dp, 16 dp from the sides, 30 dp above the nav bar. Content scrolls under it. */
 private val DockCapsule = 68.dp
 /** Scroll padding so the last poster caption sits above the dock (dock + 30 dp gap + 16). */
-private val RecordDockHeight = DockCapsule + 30.dp + 16.dp
+private val RecordDockHeight = DockCapsule + 30.dp + 32.dp
 
 /** Record today dock. No animation on this screen (the old glow burned ~60 % CPU on the idle calendar). */
 @Composable
@@ -738,3 +751,18 @@ private fun RecordDock(
     }
 }
 
+
+/** Today's clip as a 56 dp round thumbnail; tap opens the day. */
+@Composable
+private fun TodayBubble(today: Day, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    val thumb = rememberPhoto(today.thumb)
+    Box(
+        modifier.size(56.dp).shadow(10.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.4f), spotColor = Color.Black.copy(alpha = 0.4f)) // lint-ok: elevation
+            .clip(CircleShape).background(today.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)
+            .border(2.dp, SliverColors.OnMedia, CircleShape)
+            .semantics { contentDescription = "Today is in, open it" }
+            .clickable(role = Role.Button, onClick = rememberTapGate(onOpen)),
+    ) {
+        if (thumb != null) androidx.compose.foundation.Image(thumb, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+    }
+}

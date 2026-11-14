@@ -161,9 +161,10 @@ fun ReelogSegmented(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     overMedia: Boolean = false,
+    height: androidx.compose.ui.unit.Dp = 44.dp,
 ) {
     BoxWithConstraints(
-        modifier.fillMaxWidth().height(44.dp).clip(Pill)
+        modifier.fillMaxWidth().height(height).clip(Pill)
             .then(
                 if (overMedia) Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
                 else Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.10f), Pill),
