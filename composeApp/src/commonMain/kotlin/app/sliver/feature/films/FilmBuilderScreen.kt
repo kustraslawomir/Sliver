@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import app.sliver.core.kit.GlassStyle
 import app.sliver.core.kit.glass
@@ -97,13 +98,17 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val app by remember { settings.settings }.collectAsState(null)
     val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
 
-    var options by remember { mutableStateOf(FilmOptions()) }
-    var dateTouched by remember { mutableStateOf(false) }
-    val editId = remember { FilmNav.takeEditId() }
+    // Unsaved choices survive recreation (theme change, rotation); the film being edited is loaded once.
+    var options by rememberSaveable(stateSaver = FilmOptionsSaver) { mutableStateOf(FilmOptions()) }
+    var dateTouched by rememberSaveable { mutableStateOf(false) }
+    val editId: String? = rememberSaveable { mutableStateOf(FilmNav.takeEditId()) }.value
     var editing by remember { mutableStateOf<Film?>(null) }
+    var loaded by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(editId) {
         val f = editId?.let { films.getFilm(it) } ?: return@LaunchedEffect
         editing = f
+        if (loaded) return@LaunchedEffect
+        loaded = true
         val loadedMix = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { f.audioMix(::audioDurationMs) }
         options = FilmOptions(
             if (isLegacyTrack(f.track)) FilmAudio.ORIGINAL else f.audio, usableTrack(f.track), f.dateOn, f.look, f.lookIntensity, f.lookGrain, f.stampStyle, f.musicVolume,
@@ -117,13 +122,14 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
     val plan = remember(all) { buildFilmPlan(all) }
     val clips = remember(plan) { plan.days.map { FilmClip(it.file, it.keepAudio, it.date.toString()) } }
-    val mixClips = remember(plan) { plan.days.map { MixClip(it.date, it.keepAudio) } }
+    val mixClips = remember(plan) { plan.days.map { MixClip(it.date, it.keepAudio, it.thumb, it.color) } }
     val filmMs = filmLengthMs(clips.size)
     val mix = options.mix ?: AudioMix()
-    var addingLayer by remember { mutableStateOf(false) }
-    var soundOpen by remember { mutableStateOf(false) }
-    var dateSheet by remember { mutableStateOf(false) }
-    var editingLayer by remember { mutableStateOf<Int?>(null) }
+    var addingLayer by rememberSaveable { mutableStateOf(false) }
+    var soundOpen by rememberSaveable { mutableStateOf(false) }
+    var mutedOpen by rememberSaveable { mutableStateOf(false) }
+    var dateSheet by rememberSaveable { mutableStateOf(false) }
+    var editingLayer by rememberSaveable { mutableStateOf<Int?>(null) }
     var libraryRefresh by remember { mutableStateOf(0) }
     val lookParams = options.look?.toParams(options.intensity, options.grain)
 
@@ -304,14 +310,17 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         )
     }
     val adjustLook = options.look
-    SliverBottomSheet(soundOpen && !addingLayer && editingLayer == null, onDismiss = { soundOpen = false }) {
+    SliverBottomSheet(mutedOpen, onDismiss = { mutedOpen = false }) {
+        MutedClipsGrid(mix, { options = options.copy(mix = it) }, mixClips, onDone = { mutedOpen = false })
+    }
+    SliverBottomSheet(soundOpen && !addingLayer && editingLayer == null && !mutedOpen, onDismiss = { soundOpen = false }) {
         Column(Modifier.heightIn(max = 640.dp).verticalScroll(rememberScrollState())) {
             AudioMixSection(
                 mix, { options = options.copy(mix = it) },
                 mixClips, filmMs, playheadMs,
-                onSeekMs = { ms -> if (clips.isNotEmpty()) seek = FilmSeek(ms.toFloat() / (clips.size * FILM_FRAME_MS)) },
                 onAddLayer = { addingLayer = true },
                 onEditLayer = { editingLayer = it },
+                onMutedClips = { mutedOpen = true },
             )
             PrimaryButton("Done", { soundOpen = false }, Modifier.fillMaxWidth().padding(top = SliverSpace.S4))
         }

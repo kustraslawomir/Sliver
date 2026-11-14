@@ -1,5 +1,6 @@
 package app.sliver.core.ui
 
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusRequester
@@ -147,7 +148,7 @@ fun SliverSlider(
 ) {
     var widthPx by remember { mutableStateOf(0) }
     val density = LocalDensity.current
-    val thumbW = 3.dp
+    val thumbW = 24.dp
     fun snap(v: Float): Float {
         val c = v.coerceIn(0f, 1f)
         return if (steps > 0) (c * (steps + 1)).let { kotlin.math.round(it) / (steps + 1) } else c
@@ -165,9 +166,15 @@ fun SliverSlider(
             .pointerInput(steps) { detectDragGestures { change, _ -> onValueChange(fromX(change.position.x)) } },
         contentAlignment = Alignment.CenterStart,
     ) {
-        Box(Modifier.fillMaxWidth().height(2.dp).background(SliverColors.LineStrong))
-        Box(Modifier.fillMaxWidth(value.coerceIn(0f, 1f)).height(2.dp).background(SliverColors.Accent))
-        val thumbX = with(density) { (widthPx * value.coerceIn(0f, 1f)).toDp() } - thumbW / 2
-        Box(Modifier.offset(thumbX.coerceAtLeast(0.dp), 0.dp).size(thumbW, 24.dp).clip(SliverShapes.Xs).background(SliverColors.AccentCore))
+        // v1.9 §1.2: 4 dp track, filled part in ink, 24 dp round thumb (the old 3 dp tick read as broken).
+        val track = androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
+        Box(Modifier.fillMaxWidth().height(4.dp).clip(track).background(SliverColors.LineStrong))
+        Box(Modifier.fillMaxWidth(value.coerceIn(0f, 1f)).height(4.dp).clip(track).background(SliverColors.SliderFill))
+        val widthDp = with(density) { widthPx.toDp() }
+        val thumbX = (with(density) { (widthPx * value.coerceIn(0f, 1f)).toDp() } - thumbW / 2).coerceIn(0.dp, (widthDp - thumbW).coerceAtLeast(0.dp))
+        Box(
+            Modifier.offset(thumbX, 0.dp).size(thumbW).shadow(2.dp, androidx.compose.foundation.shape.CircleShape) // lint-ok: elevation
+                .clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.SliderThumb),
+        )
     }
 }

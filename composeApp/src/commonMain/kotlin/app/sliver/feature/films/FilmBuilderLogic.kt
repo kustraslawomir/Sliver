@@ -38,6 +38,7 @@ fun scrubberTicks(plan: FilmPlan): List<Float> {
 fun dayIndexAt(fraction: Float, count: Int): Int =
     if (count == 0) 0 else (fraction.coerceIn(0f, 1f) * count).toInt().coerceAtMost(count - 1)
 
+@kotlinx.serialization.Serializable
 data class FilmOptions(
     val audio: FilmAudio = FilmAudio.ORIGINAL,
     val track: String? = null,
@@ -63,3 +64,11 @@ fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film {
         musicVolume = if (legacy != null) legacy.third else musicVolume, audioMix = mix?.encode(),
     )
 }
+
+private val optionsJson = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+/** Keeps the builder's unsaved choices across recreation (theme change, rotation, process death). */
+val FilmOptionsSaver = androidx.compose.runtime.saveable.Saver<FilmOptions, String>(
+    save = { optionsJson.encodeToString(FilmOptions.serializer(), it) },
+    restore = { runCatching { optionsJson.decodeFromString(FilmOptions.serializer(), it) }.getOrNull() },
+)

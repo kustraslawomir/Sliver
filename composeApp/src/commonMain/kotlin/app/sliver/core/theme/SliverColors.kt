@@ -48,7 +48,8 @@ object SliverColors {
     val RecordRimWarm = Color(0x8CFF5A3C)
     val PhotoCoreLow = Color(0xFFCFCFC8)
     /** v1.8 §0: secondary buttons on plain screens. */
-    val SecondaryFill get() = if (this.light) Color(0xFFE9E7E1) else Color(0xFF1C1C1F)
+    // A tint, not a solid: #1C1C1F on the dark background and still visible on a #1C1C1F sheet.
+    val SecondaryFill get() = if (this.light) Color.Black.copy(alpha = 0.07f) else Color.White.copy(alpha = 0.08f)
     /** Photo mode disc of the record button: flat off-white. */
     val PhotoCore = Color(0xFFF2F2EE)
     /** Empty project thumbnail. */
@@ -68,6 +69,11 @@ object SliverColors {
     /** v1.8 dialog: body text, filled destructive button and its label. */
     val DialogBody get() = if (this.light) Color(0xFF5E5E58) else Color(0xFFB9B9B3)
     val DestructiveFill = Color(0xFFE5675F)
+    /** v1.9 slider: filled track and thumb. */
+    val SliderFill get() = if (this.light) Color(0xFF141413) else Color(0xFFEDEDE8)
+    val SliderThumb get() = if (this.light) Color(0xFF141413) else Color(0xFFEDEDE8)
+    /** v1.9 audio layer tints (1, 2, 3, then repeat). */
+    val LayerTints get() = listOf(Color(0xFF6E8BFF), Color(0xFFE59A4F), Color(0xFF5FB58A)).map { it.copy(alpha = if (this.light) 0.85f else 0.7f) }
     /** DayV18 "Day 184 · 21:07" over media. */
     val DayMeta = Color(0xFFEDEDE8)
     /** v1.8 text field. */

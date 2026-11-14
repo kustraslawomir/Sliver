@@ -16,7 +16,7 @@ import kotlin.test.assertNotEquals
 class MusicTitlesTest {
     @Test
     fun titlesAreCleaned() {
-        assertEquals("Sub Clair Suspense", cleanTrackTitle("/data/music/1763000000000_sub_clair-suspense-628719 _1_.mp3"))
+        assertEquals("Clair Suspense", cleanTrackTitle("/data/music/1763000000000_sub_clair-suspense-628719 _1_.mp3"))
         assertEquals("Dziurawy Obiad", cleanTrackTitle("dziurawy_obiad (1).m4a"))
         assertEquals("Beyond The Veil Of Light", cleanTrackTitle("beyond-the-veil-of-light.mp3"))
         assertEquals("Track 2", cleanTrackTitle("track 2.wav"))

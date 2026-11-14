@@ -10,6 +10,8 @@ import androidx.compose.runtime.mutableStateMapOf
 fun cleanTrackTitle(fileName: String): String {
     var t = fileName.substringAfterLast('/').replace(Regex("^\\d{10,}_"), "")
     t = t.substringBeforeLast('.', t)
+    // v1.9: stock-library prefixes ("sub_clair…", "sub clair…") are not part of the title.
+    t = t.replace(Regex("^(?i)sub[ _-]+"), "")
     t = t.replace(Regex("\\(\\d+\\)|_\\d+_\\s*$"), " ")
     t = t.replace('_', ' ').replace('-', ' ').replace(Regex("\\s+"), " ").trim()
     val words = t.split(' ').toMutableList()

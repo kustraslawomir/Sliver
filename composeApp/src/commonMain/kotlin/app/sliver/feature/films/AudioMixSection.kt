@@ -1,5 +1,14 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.layout.aspectRatio
+
+import app.sliver.core.theme.ReelogType
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.semantics.selected
 import androidx.compose.runtime.DisposableEffect
@@ -55,14 +64,12 @@ import app.sliver.core.ui.SliverSlider
 import app.sliver.core.ui.SwitchRow
 import kotlinx.datetime.LocalDate
 
-class MixClip(val date: LocalDate, val keepAudio: Boolean)
-
-private val LaneH = 14.dp
-private val LaneGap = 6.dp
+class MixClip(val date: LocalDate, val keepAudio: Boolean, val thumb: String? = null, val color: Int = 0)
 
 /**
- * Owner 14 Nov: sound like an editor. A timeline (clips lane + one lane per audio layer + playhead), the clips' own sound
- * (volume, mute single clips or all), and the audio layers (each opens [onEditLayer]).
+ * v1.9 §1 sound sheet: a real timeline (clips filmstrip + one labelled, tinted bar per layer + playhead; tap a clip to
+ * mute it, tap a bar to edit the layer), the clips' own volume, "Muted clips · N", the layers with a preview button,
+ * and "+ Add music".
  */
 @Composable
 fun AudioMixSection(
@@ -71,82 +78,89 @@ fun AudioMixSection(
     clips: List<MixClip>,
     filmMs: Long,
     playheadMs: Long,
-    onSeekMs: (Long) -> Unit,
     onAddLayer: () -> Unit,
     onEditLayer: (Int) -> Unit,
+    onMutedClips: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val preview = rememberTrackPreview()
+    DisposableEffect(Unit) { onDispose { preview.stop() } }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText("Sound", SliverType.Title)
-        MixTimeline(mix, clips, filmMs, playheadMs, onSeekMs)
+        MixTimeline(mix, onMix, clips, filmMs, playheadMs, onEditLayer)
 
         val clipsMuted = mix.clipVolume == 0
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SliverText("Clip sound", SliverType.BodySmall, Modifier.weight(1f), SliverColors.TextSecondary)
-            SliverText(if (clipsMuted) "Muted" else "${mix.clipVolume}", SliverType.Meta, color = SliverColors.TextSecondary)
+            SliverText("Clip sound", SliverType.Body, Modifier.weight(1f))
+            SliverText(if (clipsMuted) "Muted" else "${mix.clipVolume} %", ReelogType.label.copy(fontWeight = FontWeight.Normal, fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary)
             IconButton44(
                 { onMix(mix.copy(clipVolume = if (clipsMuted) 100 else 0)) }, if (clipsMuted) "Unmute all clips" else "Mute all clips",
             ) { SliverIcon(if (clipsMuted) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.TextPrimary, size = 20.dp) }
         }
         SliverSlider(mix.clipVolume / 100f, { onMix(mix.copy(clipVolume = (it * 100).toInt().coerceIn(0, 100))) })
-        if (!clipsMuted && clips.isNotEmpty()) {
-            SliverText("Tap a clip to mute or unmute it", SliverType.Caption, color = SliverColors.TextTertiary)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
-                clips.forEach { c -> ClipChip(c, mix, onMix) }
+        if (clips.any { it.keepAudio }) {
+            val muted = clips.count { it.keepAudio && it.date.toString() in mix.mutedClips }
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(SliverShapes.R12).clickable(role = Role.Button, onClick = onMutedClips),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SliverText("Muted clips", SliverType.Body, Modifier.weight(1f))
+                SliverText("$muted", ReelogType.label.copy(fontWeight = FontWeight.Normal, fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary)
+                SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, Modifier.padding(start = SliverSpace.S2), size = 18.dp)
             }
         }
 
-        SliverText("Audio layers", SliverType.BodySmall, Modifier.padding(top = SliverSpace.S2), SliverColors.TextSecondary)
+        Box(Modifier.fillMaxWidth().padding(vertical = SliverSpace.S1).height(1.dp).background(SliverColors.LineHairline))
         if (mix.layers.isEmpty()) {
-            SliverText("Add music or any audio file. Layers play together over the clips.", SliverType.Caption, color = SliverColors.TextTertiary)
+            SliverText("Add music from your files. It plays over the clips.", SliverType.BodySmall, color = SliverColors.TextSecondary)
         }
-        mix.layers.forEachIndexed { i, layer -> LayerRow(i, layer, filmMs, mix, onMix, onEditLayer) }
-        GhostButton("Add audio layer", onAddLayer)
+        mix.layers.forEachIndexed { i, layer -> LayerRow(i, layer, filmMs, mix, onMix, onEditLayer, preview) }
+        app.sliver.core.kit.ReelogButton("Add music", onAddLayer, kind = app.sliver.core.kit.ButtonKind.Secondary, leading = SliverIcons.Plus)
+        SliverText("You're responsible for music you add from your files.", SliverType.Caption, color = SliverColors.TextTertiary)
     }
 }
 
 @Composable
-private fun ClipChip(c: MixClip, mix: AudioMix, onMix: (AudioMix) -> Unit) {
-    val key = c.date.toString()
-    val on = c.keepAudio && key !in mix.mutedClips
-    Row(
-        Modifier.height(36.dp).clip(SliverShapes.Pill)
-            .background(if (on) SliverColors.Surface2 else SliverColors.BgBase)
-            .border(1.dp, if (on) SliverColors.LineHairline else SliverColors.LineStrong, SliverShapes.Pill)
-            .clickable(enabled = c.keepAudio, role = Role.Switch) {
-                onMix(mix.copy(mutedClips = if (on) mix.mutedClips + key else mix.mutedClips - key))
+private fun LayerRow(i: Int, layer: AudioLayer, filmMs: Long, mix: AudioMix, onMix: (AudioMix) -> Unit, onEditLayer: (Int) -> Unit, preview: TrackPreview) {
+    var menu by remember { mutableStateOf(false) }
+    Column {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 64.dp).clip(SliverShapes.R12).clickable { onEditLayer(i) },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+        ) {
+            val playing = preview.playing == layer.path
+            Box(
+                Modifier.size(40.dp).clip(CircleShape).background(if (playing) SliverColors.TextPrimary else SliverColors.Surface3)
+                    .clickable(role = Role.Button) { preview.toggle(layer.path) }
+                    .semantics { contentDescription = if (playing) "Stop preview" else "Play preview" },
+                Alignment.Center,
+            ) { SliverIcon(if (playing) SliverIcons.Pause else SliverIcons.Play, if (playing) SliverColors.BgBase else SliverColors.TextPrimary, size = 16.dp) }
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(layerTint(i)))
+                    SliverText(trackTitle(layer.path), SliverType.BodySmall, color = if (layer.muted) SliverColors.TextTertiary else SliverColors.TextPrimary, maxLines = 1)
+                }
+                SliverText(layerSummary(layer, filmMs), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
             }
-            .semantics { contentDescription = "${shortDate(c.date)} sound ${if (on) "on" else "muted"}" }
-            .padding(horizontal = SliverSpace.S2),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        SliverIcon(if (on) SliverIcons.Volume2 else SliverIcons.VolumeX, if (on) SliverColors.TextPrimary else SliverColors.TextTertiary, size = 14.dp)
-        SliverText(shortDate(c.date), SliverType.Meta, color = if (on) SliverColors.TextPrimary else SliverColors.TextTertiary)
+            IconButton44({ menu = !menu }, "More for ${trackTitle(layer.path)}") { SliverIcon(SliverIcons.MoreHorizontal, SliverColors.TextSecondary, size = 20.dp) }
+        }
+        if (menu) {
+            Row(Modifier.padding(start = 52.dp, bottom = SliverSpace.S1), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                GhostButton(if (layer.muted) "Unmute" else "Mute", {
+                    onMix(mix.copy(layers = mix.layers.toMutableList().also { it[i] = layer.copy(muted = !layer.muted) })); menu = false
+                })
+                GhostButton("Remove", {
+                    if (preview.playing == layer.path) preview.stop()
+                    onMix(mix.copy(layers = mix.layers.filterIndexed { j, _ -> j != i })); menu = false
+                }, destructive = true)
+            }
+        }
     }
 }
 
 @Composable
-private fun LayerRow(i: Int, layer: AudioLayer, filmMs: Long, mix: AudioMix, onMix: (AudioMix) -> Unit, onEditLayer: (Int) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.R12).background(SliverColors.Surface2)
-            .clickable { onEditLayer(i) }.padding(end = SliverSpace.S3),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton44(
-            { onMix(mix.copy(layers = mix.layers.toMutableList().also { it[i] = layer.copy(muted = !layer.muted) })) },
-            if (layer.muted) "Unmute layer" else "Mute layer",
-        ) { SliverIcon(if (layer.muted) SliverIcons.VolumeX else SliverIcons.Volume2, if (layer.muted) SliverColors.TextTertiary else SliverColors.TextPrimary, size = 20.dp) }
-        Column(Modifier.weight(1f)) {
-            SliverText(
-                trackTitle(layer.path), SliverType.BodySmall,
-                color = if (layer.muted) SliverColors.TextTertiary else SliverColors.TextPrimary, maxLines = 1,
-            )
-            SliverText(layerSummary(layer, filmMs), SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
-        }
-        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
-    }
-}
+private fun layerTint(i: Int): androidx.compose.ui.graphics.Color = SliverColors.LayerTints.let { it[i % it.size] }
 
 /** "1:12 of 3:40 · from 0:05 · repeats · 80 %" */
 fun layerSummary(layer: AudioLayer, filmMs: Long): String = buildList {
@@ -156,53 +170,76 @@ fun layerSummary(layer: AudioLayer, filmMs: Long): String = buildList {
     if (layer.muted) add("muted") else add("${layer.volume} %")
 }.joinToString(" · ")
 
+/** v1.9 §1.1: filmstrip of the clips (tap = mute/unmute that clip), one labelled bar per layer (tap = edit), playhead. */
 @Composable
-private fun MixTimeline(mix: AudioMix, clips: List<MixClip>, filmMs: Long, playheadMs: Long, onSeekMs: (Long) -> Unit) {
-    val lanes = 1 + mix.layers.size
-    val seek by rememberUpdatedState(onSeekMs)
-    val length by rememberUpdatedState(filmMs)
-    val clipColor = SliverColors.TextTertiary.copy(alpha = 0.55f)
-    val mutedColor = SliverColors.TextTertiary
-    val layerColor = SliverColors.TextSecondary
-    val layerOff = SliverColors.BgBase
-    val head = SliverColors.TextPrimary
-    Canvas(
-        Modifier.fillMaxWidth().height(LaneH * lanes + LaneGap * (lanes - 1) + 8.dp)
-            .semantics { contentDescription = "Sound timeline" }
-            .pointerInput(Unit) {
-                detectTapGestures { seek((it.x / size.width * length).toLong()) }
+private fun MixTimeline(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<MixClip>, filmMs: Long, playheadMs: Long, onEditLayer: (Int) -> Unit) {
+    if (filmMs <= 0) return
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().clip(SliverShapes.R12)) {
+        val w = maxWidth
+        fun x(ms: Long) = w * (ms.coerceIn(0, filmMs).toFloat() / filmMs)
+        val clipsW = w * (clips.size * FILM_FRAME_MS / filmMs.toFloat())
+        val current by rememberUpdatedState(mix)
+        Column(verticalArrangement = Arrangement.spacedBy(LaneGap)) {
+            // Row 1: clips. Sampled thumbnails, muted clips darkened with a crossed speaker.
+            Box(
+                Modifier.width(clipsW).height(StripH).clip(RoundedCornerShape(8.dp)).background(SliverColors.Surface3)
+                    .pointerInput(clips) {
+                        detectTapGestures { p ->
+                            val c = clips.getOrNull((p.x / size.width * clips.size).toInt().coerceIn(0, clips.size - 1)) ?: return@detectTapGestures
+                            if (!c.keepAudio) return@detectTapGestures
+                            val key = c.date.toString()
+                            val m = current
+                            onMix(m.copy(mutedClips = if (key in m.mutedClips) m.mutedClips - key else m.mutedClips + key))
+                        }
+                    }
+                    .semantics { contentDescription = "Clips, tap one to mute it" },
+            ) {
+                val picks = remember(clips) { if (clips.isEmpty()) emptyList() else List(minOf(20, clips.size)) { i -> clips[i * clips.size / minOf(20, clips.size)] } }
+                Row(Modifier.fillMaxSize()) {
+                    picks.forEach { c ->
+                        val img = c.thumb?.let { app.sliver.feature.trim.rememberPhoto(it) }
+                        Box(Modifier.weight(1f).fillMaxSize().background(c.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)) {
+                            if (img != null) androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                        }
+                    }
+                }
+                clips.forEachIndexed { i, c ->
+                    val off = !c.keepAudio || c.date.toString() in mix.mutedClips || mix.clipVolume == 0
+                    if (off) {
+                        val cw = clipsW / clips.size
+                        Box(Modifier.offset(x = cw * i).width(cw).fillMaxHeight().background(Color.Black.copy(alpha = 0.55f)), Alignment.Center) {
+                            if (cw >= 16.dp) SliverIcon(SliverIcons.VolumeX, SliverColors.OnMedia, size = 12.dp)
+                        }
+                    }
+                }
             }
-            .pointerInput(Unit) {
-                detectDragGestures { change, _ -> seek((change.position.x / size.width * length).toLong().coerceIn(0, length)) }
-            },
-    ) {
-        if (filmMs <= 0) return@Canvas
-        val lane = LaneH.toPx()
-        val gap = LaneGap.toPx()
-        val r = CornerRadius(3.dp.toPx())
-        fun x(ms: Long) = ms.toFloat() / filmMs * size.width
-        val top = 4.dp.toPx()
-        clips.forEachIndexed { i, c ->
-            val x0 = x(i * FILM_FRAME_MS)
-            val w = (x(FILM_FRAME_MS) - 1f).coerceAtLeast(1f)
-            val on = c.keepAudio && c.date.toString() !in mix.mutedClips && mix.clipVolume > 0
-            if (on) drawRoundRect(clipColor, Offset(x0, top), Size(w, lane), r)
-            else drawRoundRect(mutedColor, Offset(x0, top + 1f), Size(w, lane - 2f), r, style = Stroke(1.dp.toPx()))
-        }
-        mix.layers.forEachIndexed { i, l ->
-            val y = top + (i + 1) * (lane + gap)
-            val end = l.endMs(filmMs)
-            if (end <= l.startMs) return@forEachIndexed
-            if (l.muted) drawRoundRect(layerColor, Offset(x(l.startMs), y + 1f), Size(x(end) - x(l.startMs), lane - 2f), r, style = Stroke(1.dp.toPx()))
-            else drawRoundRect(layerColor, Offset(x(l.startMs), y), Size(x(end) - x(l.startMs), lane), r)
-            // Repeats are marked where the file starts again.
-            if (l.loop && l.lengthMs > 0) {
-                var t = l.startMs + l.lengthMs
-                while (t < end) { drawLine(layerOff, Offset(x(t), y), Offset(x(t), y + lane), 2f); t += l.lengthMs }
+            // One bar per layer, labelled inside, in its own tint.
+            mix.layers.forEachIndexed { i, l ->
+                val end = l.endMs(filmMs)
+                Box(Modifier.fillMaxWidth().height(LaneH)) {
+                    if (end > l.startMs) {
+                        Box(
+                            Modifier.offset(x = x(l.startMs)).width(x(end) - x(l.startMs)).fillMaxHeight().clip(RoundedCornerShape(6.dp))
+                                .background(layerTint(i).copy(alpha = if (l.muted) 0.25f else layerTint(i).alpha))
+                                .clickable(role = Role.Button) { onEditLayer(i) }
+                                .padding(horizontal = 8.dp),
+                            Alignment.CenterStart,
+                        ) {
+                            SliverText(
+                                trackTitle(l.path), ReelogType.caption.copy(fontWeight = FontWeight.Medium), color = SliverColors.OnMedia,
+                                maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
             }
         }
-        val hx = x(playheadMs.coerceIn(0, filmMs))
-        drawLine(head, Offset(hx, 0f), Offset(hx, size.height), 2.dp.toPx())
+        // Playhead across all rows.
+        val head = SliverColors.TextPrimary
+        Canvas(Modifier.matchParentSize()) {
+            val hx = (playheadMs.coerceIn(0, filmMs).toFloat() / filmMs) * size.width
+            drawLine(head, Offset(hx, 0f), Offset(hx, size.height), 2.dp.toPx())
+        }
     }
 }
 
@@ -425,3 +462,44 @@ private fun Long.roundTo(step: Long) = (this + step / 2) / step * step
 private val Months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 private fun shortDate(d: LocalDate) = "${d.day} ${Months[d.month.ordinal]}"
+
+/** v1.9 §1.3: every clip in a grid; tap to mute or unmute its own sound in this film. */
+@Composable
+fun MutedClipsGrid(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<MixClip>, onDone: () -> Unit) {
+    Column(Modifier.heightIn(max = 620.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        SliverText("Muted clips", SliverType.Title)
+        SliverText("Tap a clip to mute or unmute its own sound in this film.", SliverType.BodySmall, color = SliverColors.TextSecondary)
+        clips.chunked(5).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                row.forEach { c ->
+                    val key = c.date.toString()
+                    val off = !c.keepAudio || key in mix.mutedClips
+                    val img = c.thumb?.let { app.sliver.feature.trim.rememberPhoto(it) }
+                    Box(
+                        Modifier.weight(1f).aspectRatioSquare().clip(RoundedCornerShape(8.dp))
+                            .background(c.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)
+                            .clickable(enabled = c.keepAudio, role = Role.Switch) {
+                                onMix(mix.copy(mutedClips = if (key in mix.mutedClips) mix.mutedClips - key else mix.mutedClips + key))
+                            }
+                            .semantics { contentDescription = "${shortDate(c.date)} sound ${if (off) "muted" else "on"}" },
+                    ) {
+                        if (img != null) androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                        if (off) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)))
+                        Box(Modifier.align(Alignment.TopEnd).padding(3.dp).size(18.dp).clip(CircleShape).background(SliverColors.Scrim), Alignment.Center) {
+                            SliverIcon(if (off) SliverIcons.VolumeX else SliverIcons.Volume2, SliverColors.OnMedia, size = 11.dp)
+                        }
+                        SliverText(shortDate(c.date), ReelogType.caption.copy(fontWeight = FontWeight.Medium), Modifier.align(Alignment.BottomStart).padding(4.dp), color = SliverColors.OnMedia, maxLines = 1)
+                    }
+                }
+                repeat(5 - row.size) { Box(Modifier.weight(1f)) }
+            }
+        }
+        app.sliver.core.ui.PrimaryButton("Done", onDone, Modifier.fillMaxWidth().padding(top = SliverSpace.S2))
+    }
+}
+
+private fun Modifier.aspectRatioSquare() = this.aspectRatio(1f)
+
+private val LaneH = 28.dp
+private val LaneGap = 6.dp
+private val StripH = 36.dp
