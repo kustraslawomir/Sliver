@@ -1,5 +1,9 @@
 package app.sliver.feature.films
 
+import androidx.compose.ui.input.pointer.pointerInput
+
+import androidx.compose.foundation.gestures.detectTapGestures
+
 import app.sliver.core.theme.ReelogType
 
 import app.sliver.core.ui.SliverBottomSheet
@@ -111,6 +115,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     LaunchedEffect(paused) { FilmPlayback.paused = paused }
     OnAppHidden { paused = true }
     var seek by remember { mutableStateOf<FilmSeek?>(null) }
+    var comparing by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf(0 to 0f) }
     val fileStore = remember { koin.get<FileStore>() }
     var notice by remember { mutableStateOf<String?>(null) }
@@ -152,7 +157,14 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         ) {
             Box(
                 Modifier.aspectRatio(ratio, matchHeightConstraintsFirst = ratio < 1f).clip(SliverShapes.M)
-                    .background(SliverColors.BgVoid).clickable { paused = !paused },
+                    .background(SliverColors.BgVoid)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = { paused = !paused },
+                            onLongPress = { comparing = true },
+                            onPress = { tryAwaitRelease(); comparing = false },
+                        )
+                    },
             ) {
                 if (clips.isEmpty()) {
                     SliverText("No clips yet", SliverType.BodySmall, Modifier.align(Alignment.Center), SliverColors.OnMedia.copy(alpha = 0.7f))
@@ -160,14 +172,21 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                     FilmPreview(
                         clips, lookParams, options.audio, options.track, paused, seek,
                         onPosition = { i, f -> position = i to f }, modifier = Modifier.fillMaxSize(),
-                        musicVolume = options.musicVolume,
+                        musicVolume = options.musicVolume, compare = comparing,
                     )
+                    if (comparing && lookParams != null) {
+                        SliverText(
+                            "Original", SliverType.Meta, Modifier.align(Alignment.TopCenter).padding(top = SliverSpace.S2)
+                                .background(SliverColors.BgVoid.copy(alpha = 0.55f), SliverShapes.Pill).padding(horizontal = SliverSpace.S2, vertical = 4.dp),
+                            SliverColors.OnMedia,
+                        )
+                    }
                     val index = position.first.coerceIn(0, clips.size - 1)
                     if (dateOn) {
                         val style = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
                         DateStamp(stampText(plan.days[index].date, style), style = style)
                     }
-                    if (paused) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
+                    if (paused && !comparing) SliverText("Paused", SliverType.Meta, Modifier.align(Alignment.Center), SliverColors.OnMedia)
                     IconButton44(
                         { FilmPlayback.muted = !FilmPlayback.muted }, if (FilmPlayback.muted) "Unmute" else "Mute",
                         Modifier.align(Alignment.BottomStart).padding(SliverSpace.S1), overCamera = true,

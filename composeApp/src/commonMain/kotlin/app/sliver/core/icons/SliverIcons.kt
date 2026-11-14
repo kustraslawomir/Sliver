@@ -64,6 +64,7 @@ object HubIcons {
 
 object SliverIcons {
     val X = lucide("x", "M18 6 6 18", "m6 6 12 12")
+    val Ban = lucide("ban", "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z", "m4.9 4.9 14.2 14.2")
     val ChevronDown = lucide("chevron-down", "m6 9 6 6 6-6")
     val ChevronLeft = lucide("chevron-left", "m15 18-6-6 6-6")
     val ChevronRight = lucide("chevron-right", "m9 18 6-6-6-6")

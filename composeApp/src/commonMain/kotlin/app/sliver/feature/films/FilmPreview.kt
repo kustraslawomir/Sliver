@@ -26,6 +26,8 @@ expect fun FilmPreview(
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
     musicVolume: Int? = null,
+    /** Owner: while held, the preview shows the same moment without the filter (paused) to compare. */
+    compare: Boolean = false,
 )
 
 /** Result of picking a music file: a copy in app-private storage, or a user-facing reason it could not be used. */

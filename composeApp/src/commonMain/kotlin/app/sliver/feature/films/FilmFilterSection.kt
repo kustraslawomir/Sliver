@@ -87,7 +87,8 @@ fun FilmFilterSection(
             SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
         )
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            Tile("None", frame, selected == null, onClick = { onSelect(null) })
+            // Owner: like Prequel, "None" is a plain tile with an icon, not a picture of the film.
+            Tile("None", null, selected == null, onClick = { onSelect(null) }, icon = SliverIcons.Ban)
             FilterPresets.forEach { p ->
                 Tile(
                     p.pickerLabel, thumbs[p], selected == p,
@@ -105,7 +106,10 @@ fun FilmFilterSection(
 }
 
 @Composable
-private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
+private fun Tile(
+    label: String, image: ImageBitmap?, selected: Boolean, onClick: () -> Unit, onLongClick: (() -> Unit)? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+) {
     Column(
         Modifier.width(TileW).combinedClickable(role = Role.RadioButton, onLongClick = onLongClick, onClick = onClick)
             .semantics { this.selected = selected; contentDescription = "$label filter" },
@@ -114,7 +118,9 @@ private fun Tile(label: String, image: ImageBitmap?, selected: Boolean, onClick:
         Box(
             Modifier.size(TileW, TileH).clip(TileShape).background(SliverColors.Surface2)
                 .then(if (selected) Modifier.border(2.dp, SliverColors.Accent, TileShape) else Modifier),
+            Alignment.Center,
         ) {
+            if (icon != null) SliverIcon(icon, if (selected) SliverColors.TextPrimary else SliverColors.TextSecondary, size = 26.dp)
             if (image != null) Image(image, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         }
         SliverText(

@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val MIX_ORIGINAL = 0.5f
+private const val MUSIC_SYNC_SLACK_MS = 250L
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
@@ -49,6 +50,7 @@ actual fun FilmPreview(
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
     musicVolume: Int?,
+    compare: Boolean,
 ) {
     if (LocalInspectionMode.current) {
         Box(modifier.background(SliverColors.Surface3))
@@ -77,6 +79,12 @@ actual fun FilmPreview(
     }
     val music = remember { app.sliver.core.media.newPlayer(context).apply { repeatMode = Player.REPEAT_MODE_ALL } }
     DisposableEffect(Unit) { onDispose { music.release() } }
+    // Hold to compare: one clip, no filter, at the moment the film is paused on (the filtered player keeps its playlist).
+    val clean = remember {
+        app.sliver.core.media.newPlayer(context).apply { setVideoEffects(listOf(androidx.media3.effect.Contrast(0f))); volume = 0f }
+    }
+    DisposableEffect(Unit) { onDispose { clean.release() } }
+    val comparing = compare && look != null
     DisposableEffect(video) {
         onDispose {
             video?.let {
@@ -131,8 +139,27 @@ actual fun FilmPreview(
         music.volume = if (FilmPlayback.muted) 0f else audioPlan(audio, track, musicVolume).musicVolume.takeIf { it > 0f } ?: 1f
     }
     val visible = rememberAppVisible()
-    LaunchedEffect(video, paused, visible) {
-        val play = !paused && visible
+    LaunchedEffect(comparing) {
+        if (!comparing) { clean.stop(); clean.clearMediaItems(); return@LaunchedEffect }
+        val player = video ?: return@LaunchedEffect
+        val clip = clips.getOrNull(player.currentMediaItemIndex) ?: return@LaunchedEffect
+        clean.setMediaItem(MediaItem.fromUri(clip.path), player.currentPosition)
+        clean.prepare()
+        clean.playWhenReady = true
+        val shown = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val l = object : Player.Listener { override fun onRenderedFirstFrame() { shown.complete(Unit) } }
+        clean.addListener(l)
+        kotlinx.coroutines.withTimeoutOrNull(800) { shown.await() }
+        delay(40)
+        clean.removeListener(l)
+        clean.playWhenReady = false
+    }
+    LaunchedEffect(comparing, video) {
+        val player = video ?: return@LaunchedEffect
+        if (!comparing) showFrameWhilePaused(player)
+    }
+    LaunchedEffect(video, paused, visible, comparing) {
+        val play = !paused && visible && !comparing
         video?.let {
             if (play && it.playbackState == Player.STATE_IDLE) it.prepare()
             it.playWhenReady = play
@@ -165,6 +192,12 @@ actual fun FilmPreview(
                 else -> 1f
             }
             val duration = video.duration.takeIf { it > 0 } ?: 1000L
+            // Owner: the music must follow the film when seeking (and when the film loops), as it does in the render.
+            val musicMs = music.duration
+            if (music.mediaItemCount > 0 && musicMs > 0) {
+                val want = musicPositionAt(index, video.currentPosition, musicMs)
+                if (musicDrift(music.currentPosition, want, musicMs) > MUSIC_SYNC_SLACK_MS) music.seekTo(want)
+            }
             report.value(index, (video.currentPosition.toFloat() / duration).coerceIn(0f, 1f))
             delay(33)
         }
@@ -177,7 +210,7 @@ actual fun FilmPreview(
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
         },
-        update = { if (it.player !== video) it.player = video },
+        update = { val p = if (comparing) clean else video; if (it.player !== p) it.player = p },
         modifier = modifier,
     )
 }

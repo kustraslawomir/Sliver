@@ -21,6 +21,7 @@ actual fun FilmPreview(
     onPosition: (index: Int, clipFraction: Float) -> Unit,
     modifier: Modifier,
     musicVolume: Int?,
+    compare: Boolean,
 ) = Box(modifier.background(Color.Black))
 
 @Composable

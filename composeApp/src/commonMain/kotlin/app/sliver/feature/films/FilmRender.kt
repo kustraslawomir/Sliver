@@ -39,3 +39,13 @@ fun fitScale(clipAspect: Float, outAspect: Float): Pair<Float, Float> =
 
 /** True when a clip fills the output without visible bars or cropping worth handling. */
 fun aspectMatches(clipAspect: Float, outAspect: Float): Boolean = kotlin.math.abs(clipAspect / outAspect - 1f) < 0.02f
+
+/** Where a looped music track is when the film is at clip [index], [clipMs] into it (the render starts music at 0). */
+fun musicPositionAt(index: Int, clipMs: Long, musicMs: Long): Long =
+    if (musicMs <= 0) 0L else (index * FILM_FRAME_MS + clipMs).mod(musicMs)
+
+/** Distance between two positions on a looped track of [musicMs]. */
+fun musicDrift(at: Long, want: Long, musicMs: Long): Long {
+    val d = kotlin.math.abs(at - want)
+    return if (musicMs <= 0) d else minOf(d, musicMs - d)
+}
