@@ -35,3 +35,34 @@ Worst composables by unstable parameters (the per-function report covers 209 com
 | archive.AddSheet | 1 |
 
 Release APK (unsigned): 48.75 MB.
+
+## Runtime (debug build of bfc8d6e, emulator tracker13 sdk_gphone64_arm64, 14 Nov)
+
+The Xiaomi was not connected; every number below is from the emulator, which renders in software (most frames count as "janky" there whatever the app does). Use them to compare before/after on the same emulator, not as phone numbers.
+
+| measure | value |
+|---|---|
+| cold start (am start -W, TotalTime) | 1835 / 1827 / 1911 ms (avg 1858) |
+| idle CPU, project screen (top -d 2 -n 5) | 0.0 % ×5 |
+
+Recompositions = debug RecomposeProbe at the top of each composable (counts whole-function recompositions; inner lambda scopes that read state are not counted). Frames = dumpsys gfxinfo after reset.
+
+| flow | recompositions | frames · janky · p90 · p99 |
+|---|---|---|
+| hub_idle_10s | 0 | frames: 0 janky: 0 (0.00%) 90th: 4950ms 99th: 4950ms |
+| hub_scroll_calendar | 0 | frames: 106 janky: 105 (99.06%) 90th: 150ms 99th: 150ms |
+| hub_scroll_films | 0 | frames: 0 janky: 0 (0.00%) 90th: 4950ms 99th: 4950ms |
+| day_playing_6s | 0 | frames: 0 janky: 0 (0.00%) 90th: 4950ms 99th: 4950ms |
+| camera_idle_10s | 0 | frames: 146 janky: 141 (96.58%) 90th: 85ms 99th: 150ms |
+| camera_recording_3s | 0 | frames: 151 janky: 148 (98.01%) 90th: 129ms 99th: 200ms |
+| builder_playing_6s | 0 | frames: 11 janky: 11 (100.00%) 90th: 200ms 99th: 200ms |
+| builder_scrubbing | 0 | frames: 44 janky: 42 (95.45%) 90th: 150ms 99th: 200ms |
+| builder_pick_look | 0 | frames: 112 janky: 109 (97.32%) 90th: 350ms 99th: 450ms |
+| sound_sheet_open_5s | 0 | frames: 5 janky: 5 (100.00%) 90th: 150ms 99th: 150ms |
+| player_playing_6s | 0 | frames: 8 janky: 6 (75.00%) 90th: 300ms 99th: 300ms |
+
+
+Notes:
+- On the emulator the builder preview and the player do not advance (the video stays on one frame), so "playing" flows show almost no frames; they need the Xiaomi.
+- Camera frames are the camera preview (PreviewView COMPATIBLE = TextureView, so each camera frame is an app frame), not UI work.
+- Hub idle: 0 recompositions and 0 frames in 10 s; hub scroll: the hub, month and cells do not recompose.
