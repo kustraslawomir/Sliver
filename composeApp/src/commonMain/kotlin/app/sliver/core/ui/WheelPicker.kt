@@ -57,7 +57,7 @@ fun Wheel(items: List<String>, index: Int, onIndex: (Int) -> Unit, label: String
                 .then(if (onLongPress != null) Modifier.pointerInput(Unit) { detectTapGestures(onLongPress = { onLongPress() }) } else Modifier),
             state = state, flingBehavior = fling, contentPadding = PaddingValues(vertical = ItemH * (Visible / 2)),
         ) {
-            itemsIndexed(items) { i, text ->
+            itemsIndexed(items, key = { i, _ -> i }, contentType = { _, _ -> "wheel" }) { i, text ->
                 val on = i == centred
                 Box(Modifier.fillMaxWidth().height(ItemH), Alignment.Center) {
                     SliverText(

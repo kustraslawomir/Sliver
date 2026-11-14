@@ -118,8 +118,8 @@ fun FilmFilterSection(
         }
         LazyRow(state = strip, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             // Owner: like Prequel, "None" is a plain tile with an icon, not a picture of the film.
-            item { Tile("None", null, selected == null, onClick = { onSelect(null) }, icon = SliverIcons.Ban) }
-            items(FilterPresets) { p ->
+            item(key = "none", contentType = "tile") { Tile("None", null, selected == null, onClick = { onSelect(null) }, icon = SliverIcons.Ban) }
+            items(FilterPresets, key = { it.name }, contentType = { "tile" }) { p ->
                 Tile(
                     p.pickerLabel, thumbs[p], selected == p,
                     onClick = { if (selected == p && onAdjust != null) onAdjust(p) else onSelect(p) },

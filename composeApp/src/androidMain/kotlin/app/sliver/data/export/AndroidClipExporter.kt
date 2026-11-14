@@ -315,8 +315,15 @@ class AndroidClipExporter(private val context: Context) : ClipExporter {
             r.setDataSource(videoPath)
             val frame = r.getFrameAtTime(500_000, MediaMetadataRetriever.OPTION_CLOSEST) ?: error("No frame in export")
             val thumb = Bitmap.createScaledBitmap(frame, THUMB_WIDTH, (THUMB_WIDTH.toFloat() * frame.height / frame.width).toInt().coerceAtLeast(1), true)
-            FileOutputStream(thumbPath).use { thumb.compress(Bitmap.CompressFormat.JPEG, 85, it) }
-            return Bitmap.createScaledBitmap(thumb, 1, 1, true).getPixel(0, 0) or (0xFF shl 24)
+            // STEP 5.5: the full-size frame and the scaled copies are native memory; free them now, not at some later GC.
+            try {
+                FileOutputStream(thumbPath).use { thumb.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+                val pixel = Bitmap.createScaledBitmap(thumb, 1, 1, true)
+                return (pixel.getPixel(0, 0) or (0xFF shl 24)).also { pixel.recycle() }
+            } finally {
+                if (thumb !== frame) thumb.recycle()
+                frame.recycle()
+            }
         } finally {
             r.release()
         }

@@ -196,7 +196,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 // Owner: files added later (e.g. from an iPhone) can replace a saved day's clip.
                 SliverText("Other items from this day", SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.OnMedia)
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                    items(others.size) { i ->
+                    items(others.size, key = { "$it|${others[it].uri}" }, contentType = { "candidate" }) { i ->
                         val c = others[i]
                         CandidateTile(c, false, Modifier.size(64.dp)) {
                             scope.launch {

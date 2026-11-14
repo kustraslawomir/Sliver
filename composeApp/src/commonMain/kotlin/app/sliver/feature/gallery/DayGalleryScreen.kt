@@ -128,21 +128,23 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                         SliverType.BodySmall.copy(textAlign = TextAlign.Center), color = SliverColors.TextTertiary,
                     )
                 }
-                else -> Column(
-                    Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = SliverSpace.Gutter),
+                // Perf STEP 3: lazy rows (same layout: 3 tiles per row, 4 dp between children, 6 dp under each row).
+                else -> androidx.compose.foundation.lazy.LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = SliverSpace.Gutter),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     // Audit v1.8 §6: "Recorded in Reelog" first, then "From your camera · N"; 3 columns of 3:4 tiles.
                     if (sections.first.isNotEmpty()) {
-                        SectionTitle("Recorded in ${app.sliver.core.APP_NAME}", "full recordings")
-                        TileGrid(sections.first, ::open)
-                        Spacer(Modifier.height(SliverSpace.S3))
+                        item(key = "mine-title", contentType = "title") { SectionTitle("Recorded in ${app.sliver.core.APP_NAME}", "full recordings") }
+                        tileRows("mine", sections.first, ::open)
+                        item(key = "mine-gap", contentType = "gap") { Spacer(Modifier.height(SliverSpace.S3)) }
                     }
                     if (shown.isNotEmpty()) {
-                        SectionTitle(if (showAll) "From this day" else "From your camera", "${shown.size}")
-                        TileGrid(shown, ::open)
+                        item(key = "rest-title", contentType = "title") { SectionTitle(if (showAll) "From this day" else "From your camera", "${shown.size}") }
+                        tileRows("rest", shown, ::open)
                     }
-                    Spacer(Modifier.height(SliverSpace.S4))
+                    item(key = "end", contentType = "gap") { Spacer(Modifier.height(SliverSpace.S4)) }
                 }
             }
         }
@@ -170,9 +172,10 @@ private fun SectionTitle(title: String, note: String) {
     }
 }
 
-@Composable
-private fun TileGrid(items: List<DayItem>, onOpen: (DayItem) -> Unit) {
-    items.chunked(3).forEach { row ->
+private fun androidx.compose.foundation.lazy.LazyListScope.tileRows(section: String, items: List<DayItem>, onOpen: (DayItem) -> Unit) {
+    val rows = items.chunked(3)
+    items(rows.size, key = { "$section-$it-${rows[it].first().entry.uri}" }, contentType = { "tiles" }) { r ->
+        val row = rows[r]
         Row(Modifier.fillMaxWidth().padding(bottom = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             row.forEach { item -> DayTile(item, Modifier.weight(1f).aspectRatio(3f / 4f)) { onOpen(item) } }
             repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }

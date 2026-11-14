@@ -105,7 +105,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
         val groups = remember(list) { list.groupBy { it.name }.values.toList() }
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                itemsIndexed(groups, key = { _, g -> g.first().id }) { i, group ->
+                itemsIndexed(groups, key = { _, g -> g.first().id }, contentType = { _, _ -> "poster" }) { i, group ->
                     val film = group.first()
                     Poster(
                         film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size], null,
