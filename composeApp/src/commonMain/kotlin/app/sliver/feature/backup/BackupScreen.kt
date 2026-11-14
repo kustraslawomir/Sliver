@@ -1,5 +1,11 @@
 package app.sliver.feature.backup
 
+import app.sliver.data.backup.driveRoomLine
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import app.sliver.core.APP_NAME
 
 import androidx.compose.foundation.background
@@ -151,38 +157,73 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
                         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = SliverSpace.S6),
                         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4),
                     ) {
+                        // v1.9 §6: grouped cards like Settings — Status / Folder, Clips, Drive / sync switches / Account.
                         StatusCard(ui, copy, onAction = {
                             if (ui == BackupUi.REVOKED) scope.launch { manager.signIn() }
                             else scheduler.schedule(account.wifiOnly, anyNetwork = true)
                         })
-                        InfoRow("Folder", APP_NAME)
-                        InfoRow("Clips", clipsLine(backedUp, statuses.size))
-                        val driveText = quota?.let { driveLine(it.used, it.limit) }
-                        InfoRow("Drive", driveText?.text ?: "Unavailable", warn = driveText?.low == true)
-                        SwitchRow(
-                            "Sync automatically", account.autoBackup,
-                            { on -> scope.launch { repo.update { it.copy(account = it.account.copy(autoBackup = on)) } } },
-                            caption = "New clips go up as you save them",
-                        )
-                        SwitchRow(
-                            "Wi-Fi only", account.wifiOnly,
-                            { on -> scope.launch { repo.update { it.copy(account = it.account.copy(wifiOnly = on)) } } },
-                            caption = "Roughly 2 MB per clip",
-                        )
-                        PrimaryButton(
-                            "Sync now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
-                            Modifier.fillMaxWidth(), enabled = progress == null,
-                        )
+                        BackupGroup {
+                            InfoRow("Folder", APP_NAME, first = true)
+                            InfoRow("Clips", clipsLine(backedUp, statuses.size))
+                            val driveText = quota?.let { driveLine(it.used, it.limit) }
+                            InfoRow("Drive", driveText?.text ?: "Unavailable", warn = driveText?.low == true)
+                            quota?.let { q -> driveRoomLine(q.used, q.limit) }?.let { room ->
+                                val uri = androidx.compose.ui.platform.LocalUriHandler.current
+                                Column(Modifier.padding(horizontal = RowPad).padding(bottom = SliverSpace.S3)) {
+                                    SliverText(room, SliverType.BodySmall, color = SliverColors.TextSecondary)
+                                    Row(
+                                        Modifier.heightIn(min = 44.dp).clickable(role = Role.Button) { runCatching { uri.openUri(DRIVE_STORAGE_URL) } },
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        SliverText("Manage Drive storage", SliverType.Body)
+                                        SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
+                                    }
+                                }
+                            }
+                        }
+                        BackupGroup {
+                            Box(Modifier.padding(horizontal = RowPad)) {
+                                SwitchRow(
+                                    "Sync automatically", account.autoBackup,
+                                    { on -> scope.launch { repo.update { it.copy(account = it.account.copy(autoBackup = on)) } } },
+                                    caption = "New clips go up as you save them",
+                                )
+                            }
+                            Hairline()
+                            Box(Modifier.padding(horizontal = RowPad)) {
+                                SwitchRow(
+                                    "Wi-Fi only", account.wifiOnly,
+                                    { on -> scope.launch { repo.update { it.copy(account = it.account.copy(wifiOnly = on)) } } },
+                                    caption = "Roughly 2 MB per clip",
+                                )
+                            }
+                        }
+                        // v1.9 §6.4: loud only when something is waiting.
+                        if (pending > 0) {
+                            PrimaryButton(
+                                "Sync ${if (pending == 1) "1 clip" else "$pending clips"} now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) },
+                                Modifier.fillMaxWidth(), enabled = progress == null,
+                            )
+                        } else {
+                            SecondaryButton("Sync now", { scheduler.schedule(account.wifiOnly, anyNetwork = true) }, Modifier.fillMaxWidth(), enabled = progress == null)
+                        }
                         // Restore is the first sync now, so there is no separate "Restore from Drive" button.
                         SecondaryButton("Export everything (.zip)", { pickZip("fragments-archive.zip") }, Modifier.fillMaxWidth())
                         exportNote?.let { SliverText(it, SliverType.BodySmall) }
-                        SliverText("Account", SliverType.Caption, Modifier.padding(top = SliverSpace.S4))
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            SliverText(account.email.orEmpty(), SliverType.Body, Modifier.weight(1f), maxLines = 1)
-                            GhostButton("Sign out", { confirmDisconnect = true })
+                        SliverText("Account", SliverType.Caption, Modifier.padding(start = RowPad, top = SliverSpace.S2))
+                        BackupGroup {
+                            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(start = RowPad, end = SliverSpace.S2), verticalAlignment = Alignment.CenterVertically) {
+                                SliverText(account.email.orEmpty(), SliverType.Body, Modifier.weight(1f), maxLines = 1)
+                                GhostButton("Sign out", { confirmDisconnect = true })
+                            }
                         }
-                        SliverText("We keep only your email. Your videos stay in your own Drive.", SliverType.Caption)
-                        GhostButton("Delete account", { showDelete = true; deleteError = false }, destructive = true)
+                        SliverText("We keep only your email. Your videos stay in your own Drive.", SliverType.Caption, Modifier.padding(horizontal = RowPad))
+                        // v1.9 §6.2: same left edge as every row.
+                        Row(
+                            Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = RowPad)
+                                .clickable(role = Role.Button) { showDelete = true; deleteError = false },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) { SliverText("Delete account", SliverType.Body, color = SliverColors.Error) }
                     }
                 }
                 else -> GoogleSignInPanel(skipLabel = "Not now", onFinished = onBack, onRestore = onRestore)
@@ -237,6 +278,20 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     }
 }
 
+private val RowPad = 16.dp
+private const val DRIVE_STORAGE_URL = "https://one.google.com/storage"
+
+/** Settings-style grouped card (radius 18). */
+@Composable
+private fun BackupGroup(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth().clip(GroupShape).background(SliverColors.GroupCard), content = content)
+}
+
+private val GroupShape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp)
+
+@Composable
+private fun Hairline() = Box(Modifier.padding(start = RowPad).fillMaxWidth().height(1.dp).background(SliverColors.LineHairline))
+
 @Composable
 private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
     val dot: Color = when (ui) {
@@ -246,8 +301,7 @@ private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
         BackupUi.FAILED, BackupUi.DRIVE_FULL, BackupUi.REVOKED -> SliverColors.Error
     }
     Column(
-        Modifier.fillMaxWidth().background(SliverColors.Surface1, SliverShapes.M)
-            .border(1.dp, SliverColors.LineHairline, SliverShapes.M).padding(SliverSpace.S4),
+        Modifier.fillMaxWidth().clip(GroupShape).background(SliverColors.GroupCard).padding(RowPad),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
@@ -268,14 +322,15 @@ private fun StatusCard(ui: BackupUi, copy: StatusCopy, onAction: () -> Unit) {
 }
 
 @Composable
-private fun InfoRow(label: String, value: String, warn: Boolean = false) {
+private fun InfoRow(label: String, value: String, warn: Boolean = false, first: Boolean = false) {
+    if (!first) Hairline()
     Row(
-        Modifier.fillMaxWidth().padding(vertical = SliverSpace.S1),
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = RowPad),
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SliverText(label, SliverType.BodySmall, Modifier.weight(1f))
+        SliverText(label, SliverType.Body, Modifier.weight(1f))
         if (warn) SliverIcon(SliverIcons.AlertTriangle, SliverColors.TextPrimary, size = 16.dp)
-        SliverText(value, SliverType.Body, color = if (warn) SliverColors.TextPrimary else SliverColors.TextPrimary)
+        SliverText(value, SliverType.Body, color = SliverColors.TextSecondary)
     }
 }

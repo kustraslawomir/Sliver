@@ -97,3 +97,14 @@ fun driveLine(used: Long, limit: Long?): DriveLine {
     val low = free < DRIVE_LOW_BYTES
     return DriveLine(if (low) "Almost full · ${formatBytes(free)} free" else "${formatBytes(free)} free", low)
 }
+
+/** Roughly what one backed-up clip takes in Drive. */
+const val CLIP_BYTES_ESTIMATE = 2_000_000L
+
+/** v1.9 §6.3: what "almost full" means — "465 MB free · about 230 more clips"; null when Drive isn't low. */
+fun driveRoomLine(used: Long, limit: Long?): String? {
+    if (limit == null) return null
+    val free = (limit - used).coerceAtLeast(0)
+    if (free >= DRIVE_LOW_BYTES) return null
+    return "${formatBytes(free).replace(".0 ", " ")} free \u00B7 about ${free / CLIP_BYTES_ESTIMATE} more clips"
+}
