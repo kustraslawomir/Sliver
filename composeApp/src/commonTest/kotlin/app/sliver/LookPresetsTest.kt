@@ -3,6 +3,7 @@ package app.sliver
 import app.sliver.data.pickerLabel
 import app.sliver.data.candidateNumber
 import app.sliver.data.FilterPresets
+import app.sliver.data.group
 import app.sliver.data.LookPreset
 import app.sliver.data.StampStyle
 import app.sliver.data.db.Film
@@ -23,9 +24,18 @@ class LookPresetsTest {
     }
 
     @Test
-    fun pickerShowsAllFortyByNumber() {
-        assertEquals((1..40).toList(), FilterPresets.map { it.candidateNumber })
-        assertEquals("1 Kiosk", FilterPresets.first().pickerLabel)
+    fun pickerShowsEveryCandidateOnceGroupedCleanFirst() {
+        assertEquals((1..54).toList(), FilterPresets.map { it.candidateNumber!! }.sorted())
+        assertEquals("Clean", FilterPresets.first().pickerLabel)
+        assertEquals(app.sliver.data.FilterGroup.entries, FilterPresets.map { it.group }.distinct())
+        assertEquals(0.0, FilterPresets.first().info.model.grain)
+    }
+
+    @Test
+    fun grainStaysSubtle() {
+        // Owner 14 Nov: filters were far too grainy; only a few lo-fi looks go above half.
+        assertTrue(FilterPresets.count { it.info.model.grain > 0.5 } <= 5)
+        assertTrue(FilterPresets.count { it.info.model.grain == 0.0 } >= 6)
     }
 
     @Test
@@ -39,7 +49,7 @@ class LookPresetsTest {
 
     @Test
     fun defaultGrainComesFromTheModelAndCanBeOverridden() {
-        assertEquals(65, LookPreset.KIOSK.toParams().grain)
+        assertEquals(45, LookPreset.KIOSK.toParams().grain)
         assertEquals(10, LookPreset.KIOSK.toParams(grain = 10).grain)
         assertEquals(60, LookPreset.KIOSK.toParams(60).intensity)
     }

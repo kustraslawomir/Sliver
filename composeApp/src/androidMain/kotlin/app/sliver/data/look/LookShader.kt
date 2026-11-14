@@ -199,7 +199,7 @@ void main() {
     float n0 = rand(cell, 0.0) - 0.5;
     vec3 g = vec3(n0) * (1.0 - uGrainChroma)
       + vec3(rand(cell, 1.7) - 0.5, rand(cell, 3.1) - 0.5, rand(cell, 5.3) - 0.5) * uGrainChroma;
-    c += g * uGrain * 0.35 * w;
+    c += g * uGrain * 0.14 * w;
   }
   gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
 }

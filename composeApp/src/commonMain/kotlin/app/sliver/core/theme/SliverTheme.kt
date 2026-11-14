@@ -49,8 +49,9 @@ fun SliverText(
     color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     softWrap: Boolean = true,
+    overflow: androidx.compose.ui.text.style.TextOverflow = androidx.compose.ui.text.style.TextOverflow.Clip,
 ) {
-    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines)
+    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines, overflow = overflow)
 }
 
 @Composable

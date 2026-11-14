@@ -7,6 +7,10 @@ import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+
+/** Owner 14 Nov: grain was far too strong (±0.35 × amount); same value as the GL shader's 0.14. */
+const val GRAIN_AMPLITUDE = 0.14f
+
 /**
  * CPU port of the one-pass GLSL look shader (androidMain `LookShader`). Used for filter thumbnails in the Film builder
  * and for the contact sheets. Same maths and constants; differences: bilinear taps are written by hand, the grain hash
@@ -151,7 +155,7 @@ object LookRaster {
                     val gr = n0 * (1 - f.grainChroma) + (rand(cx, cy, f.grainSeed, 1.7f) - 0.5f) * f.grainChroma
                     val gg = n0 * (1 - f.grainChroma) + (rand(cx, cy, f.grainSeed, 3.1f) - 0.5f) * f.grainChroma
                     val gb = n0 * (1 - f.grainChroma) + (rand(cx, cy, f.grainSeed, 5.3f) - 0.5f) * f.grainChroma
-                    val a = f.grain * 0.35f * wgt
+                    val a = f.grain * GRAIN_AMPLITUDE * wgt
                     c[0] += gr * a; c[1] += gg * a; c[2] += gb * a
                 }
                 out[y * w + x] = pack(c[0], c[1], c[2])

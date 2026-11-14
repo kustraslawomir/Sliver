@@ -20,9 +20,9 @@ object Candidates {
 
 class LookCandidatesTest {
     @Test
-    fun poolHasFortyNumberedCandidatesInEightFamilies() {
+    fun poolHasNumberedCandidatesInEightFamilies() {
         val all = Candidates.all
-        assertEquals((1..40).toList(), all.map { it.number })
+        assertEquals((1..54).toList(), all.map { it.number })
         assertEquals(all.size, all.map { it.name }.toSet().size, "names are unique")
         assertEquals(8, all.map { it.family }.toSet().size)
     }

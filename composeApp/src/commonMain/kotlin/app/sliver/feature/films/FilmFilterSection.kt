@@ -43,6 +43,14 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.SliverSlider
 import app.sliver.data.FilterPresets
+import app.sliver.data.FilterGroup
+import app.sliver.data.group
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import app.sliver.data.LookPreset
 import app.sliver.data.info
 
@@ -86,10 +94,30 @@ fun FilmFilterSection(
             if (onAdjust != null) "Filter \u00B7 hold to adjust" else "Filter \u00B7 whole film",
             SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)), color = SliverColors.TextTertiary,
         )
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+        // Owner 14 Nov: groups like a filter app; a tab jumps the strip, the strip moves the tab.
+        val strip = rememberLazyListState(initialFirstVisibleItemIndex = selected?.let { FilterPresets.indexOf(it) + 1 } ?: 0)
+        val scope = rememberCoroutineScope()
+        val shownGroup by remember { derivedStateOf { FilterPresets.getOrNull((strip.firstVisibleItemIndex - 1).coerceAtLeast(0))?.group } }
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S1)) {
+            FilterGroup.entries.forEach { g ->
+                val on = g == shownGroup
+                SliverText(
+                    g.label, SliverType.Meta,
+                    Modifier.clip(SliverShapes.Pill).background(if (on) SliverColors.Surface2 else androidx.compose.ui.graphics.Color.Transparent)
+                        .clickable(role = Role.Tab) {
+                            val i = FilterPresets.indexOfFirst { it.group == g }
+                            if (i >= 0) scope.launch { strip.animateScrollToItem(i + 1) }
+                        }
+                        .semantics { this.selected = on }
+                        .padding(horizontal = SliverSpace.S2, vertical = 6.dp),
+                    if (on) SliverColors.TextPrimary else SliverColors.TextTertiary,
+                )
+            }
+        }
+        LazyRow(state = strip, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
             // Owner: like Prequel, "None" is a plain tile with an icon, not a picture of the film.
-            Tile("None", null, selected == null, onClick = { onSelect(null) }, icon = SliverIcons.Ban)
-            FilterPresets.forEach { p ->
+            item { Tile("None", null, selected == null, onClick = { onSelect(null) }, icon = SliverIcons.Ban) }
+            items(FilterPresets) { p ->
                 Tile(
                     p.pickerLabel, thumbs[p], selected == p,
                     onClick = { if (selected == p && onAdjust != null) onAdjust(p) else onSelect(p) },
@@ -125,7 +153,8 @@ private fun Tile(
         }
         SliverText(
             label, SliverType.Caption.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.fillMaxWidth(),
-            color = if (selected) SliverColors.TextPrimary else SliverColors.TextTertiary, maxLines = 1,
+            color = if (selected) SliverColors.TextPrimary else SliverColors.TextTertiary, maxLines = 1, softWrap = false,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
     }
 }

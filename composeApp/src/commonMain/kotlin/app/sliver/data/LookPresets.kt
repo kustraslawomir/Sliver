@@ -20,7 +20,7 @@ val LookPreset.info: LookInfo
                 temp = 0.35, contrast = 0.25, blackLift = 0.07, saturation = 1.05,
                 bands = listOf(1.1, 1.1, 0.95, 1.0, 0.9, 1.0),
                 shadowTint = listOf(-0.03, 0.02, 0.025), highlightTint = listOf(0.03, 0.01, -0.04),
-                grain = 0.65, grainSize = 2.0, grainChroma = 0.7, halation = 0.15, vignette = 0.5, flash = 0.35,
+                grain = 0.45, grainSize = 2.0, grainChroma = 0.7, halation = 0.15, vignette = 0.5, flash = 0.35,
                 softness = 0.5, weave = 0.4, leak = 0.2,
             ),
             StampStyle.LED,
@@ -30,14 +30,14 @@ val LookPreset.info: LookInfo
             LookModel(
                 exposure = -0.3, gamma = listOf(1.15, 1.1, 1.05), contrast = 0.45, saturation = 0.7,
                 shadowTint = listOf(-0.04, 0.03, 0.04),
-                grain = 0.65, grainSize = 2.0, grainChroma = 0.35, halation = 0.6, vignette = 0.75,
+                grain = 0.4, grainSize = 2.0, grainChroma = 0.35, halation = 0.6, vignette = 0.75,
             ),
         )
         LookPreset.SILVER -> LookInfo(
             "Silver", "luts/silver.cube",
             LookModel(
                 mono = listOf(0.5, 0.4, 0.1), gamma = listOf(1.05, 1.05, 1.05), contrast = 0.55,
-                grain = 0.7, grainSize = 2.0, halation = 0.15, vignette = 0.35,
+                grain = 0.5, grainSize = 2.0, halation = 0.15, vignette = 0.35,
             ),
         )
         LookPreset.SUNDAY -> LookInfo(
@@ -52,7 +52,7 @@ val LookPreset.info: LookInfo
             "Tape", "luts/tape.cube",
             LookModel(
                 tint = 0.05, blackLift = 0.05, saturation = 1.15, shadowTint = listOf(0.01, 0.0, 0.03),
-                grain = 0.35, grainSize = 2.0, grainChroma = 0.6, vignette = 0.25, softness = 0.25, weave = 0.6,
+                grain = 0.25, grainSize = 2.0, grainChroma = 0.6, vignette = 0.25, softness = 0.25, weave = 0.6,
                 scanlines = 0.5, chromaBleed = 0.8, fade = 0.2,
             ),
             StampStyle.CAMCORDER,
@@ -61,7 +61,7 @@ val LookPreset.info: LookInfo
             "Halo", "luts/halo.cube",
             LookModel(
                 temp = -0.1, contrast = 0.05, shadowTint = listOf(-0.03, 0.0, 0.05),
-                grain = 0.4, grainSize = 1.75, grainChroma = 0.5, halation = 0.6, bloom = 0.8, vignette = 0.35,
+                grain = 0.25, grainSize = 1.75, grainChroma = 0.5, halation = 0.6, bloom = 0.8, vignette = 0.35,
                 softness = 0.5, fade = 0.1,
             ),
         )
@@ -71,11 +71,26 @@ val LookPreset.info: LookInfo
         }
     }
 
-/** Owner: all 40 candidates in the picker, ordered by their number. */
-val FilterPresets: List<LookPreset> = LookPreset.entries.filter { it != LookPreset.NATURAL }.sortedBy { it.candidateNumber }
+/** Picker groups, in order (owner 14 Nov: think like a filter app — clean everyday looks first, then film, lo-fi, B&W). */
+enum class FilterGroup(val label: String) { EVERYDAY("Everyday"), FILM("Film"), CINEMA("Cinematic"), VINTAGE("Vintage"), LOFI("Lo-fi"), MONO("B&W") }
 
-/** "7 · Kiosk 400" style label used under picker tiles. */
-val LookPreset.pickerLabel: String get() = "${candidateNumber ?: ""} ${info.label}".trim()
+/** Candidate numbers per group, best first. */
+private val GroupOrder: List<Pair<FilterGroup, List<Int>>> = listOf(
+    FilterGroup.EVERYDAY to listOf(41, 53, 51, 44, 46, 45, 8, 54),
+    FilterGroup.FILM to listOf(1, 2, 7, 6, 9, 12, 4, 5, 3, 14),
+    FilterGroup.CINEMA to listOf(42, 50, 43, 10, 11, 33, 13, 34, 35, 39),
+    FilterGroup.VINTAGE to listOf(49, 48, 36, 18, 16, 17, 15, 37),
+    FilterGroup.LOFI to listOf(47, 29, 30, 31, 32, 22, 20, 21, 19, 40),
+    FilterGroup.MONO to listOf(52, 24, 23, 26, 25, 38, 27, 28),
+)
+
+/** Every filter in the picker, grouped by [FilterGroup]. */
+val FilterPresets: List<LookPreset> = GroupOrder.flatMap { (_, numbers) -> numbers.map(::candidatePreset) }
+
+val LookPreset.group: FilterGroup? get() = candidateNumber?.let { n -> GroupOrder.firstOrNull { n in it.second }?.first }
+
+/** Name under a picker tile (no numbers: owner 14 Nov). */
+val LookPreset.pickerLabel: String get() = info.label
 
 /** Preset number in `looks/candidates.json`. */
 val LookPreset.candidateNumber: Int?
