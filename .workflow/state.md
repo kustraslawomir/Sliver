@@ -87,3 +87,10 @@
 - T-record-button-v3: owner's message asked for the simple version (white ring + flat red disc), done instead of the graphite spec in the task file (c34d3fa). QA: qa/v1.7/RecordButtonV3-states.png (rendered off-device; no camera screenshots).
 - T-glass-v1.7 item 10 was already done (8f1f91e).
 - Not installed on the Samsung.
+
+## 14 Nov — v1.8 (T-record-button-v3, T-ui-audit-v1.8, T-ui-screens-v1.8)
+- Record button: owner's simple ring + disc (owner's word over the graphite task file).
+- §0 e57721e, light theme over media bad009a, §1/§8/Settings 3cc2b0c, §2/Hub 24d4126, §3 camera 61ea89b, §4/§5/Builder ff709eb, §6 c4aa0e4, §7 7eb4d88, Day 676c953.
+- Owner's word kept over the boards: 54 named filters with groups (audit wanted 7), audio layers (Sound row opens them), delete project keeps hold-to-delete.
+- Day numbers 13 sp (app minimum) instead of 12. §6 checked by unit test only (emulator gallery has no camera items).
+- QA: qa/v1.8/. Tested on emulator tracker13 only.
