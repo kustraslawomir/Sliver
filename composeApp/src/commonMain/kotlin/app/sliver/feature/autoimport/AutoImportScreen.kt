@@ -274,7 +274,16 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         }
     }
 
-    DatePickerSheet(pickerOpen, from, LocalDate(today.year - 10, 1, 1), today, { fromRaw = it.toString(); pickerOpen = false }, { pickerOpen = false })
+    DatePickerSheet(
+        pickerOpen, from, LocalDate(today.year - 10, 1, 1), today, { fromRaw = it.toString(); pickerOpen = false }, { pickerOpen = false },
+        title = "Fill from",
+        chips = listOfNotNull(
+            "Project start" to start,
+            "1 Jan" to LocalDate(today.year, 1, 1),
+            "30 days ago" to LocalDate.fromEpochDays(today.toEpochDays() - 30),
+        ),
+        confirm = { "Fill from ${it.day} ${app.sliver.feature.archive.MonthLong[it.month.ordinal]}" },
+    )
 }
 
 /** Display-size number with an optional dimmer tail ("64 of 143") and a caption under it. */

@@ -1,5 +1,8 @@
 package app.sliver.core.ui
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.focusRequester
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.animation.animateColorAsState
@@ -63,26 +66,42 @@ fun Chip(
     trailing: ImageVector? = null,
 ) = app.sliver.core.kit.ReelogChip(text, selected, onClick, modifier, trailing = trailing)
 
+/** Audit v1.8 §7 text input: 56 dp, radius 16, #111113 fill, 1 dp edge (#3A3A40, focused #EDEDE8), clear button. */
 @Composable
 fun SliverTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "",
+    autoFocus: Boolean = false,
 ) {
+    val focus = androidx.compose.runtime.remember { androidx.compose.ui.focus.FocusRequester() }
+    var focused by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    if (autoFocus) androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     BasicTextField(
         value, onValueChange,
-        modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.M)
-            .background(SliverColors.Surface1)
-            .border(1.dp, SliverColors.LineStrong, SliverShapes.M)
-            .padding(horizontal = SliverSpace.S4),
+        modifier.fillMaxWidth().heightIn(min = 56.dp).clip(shape)
+            .background(SliverColors.FieldFill)
+            .border(1.dp, if (focused) SliverColors.FieldFocus else SliverColors.FieldEdge, shape)
+            .focusRequester(focus).onFocusChanged { focused = it.isFocused }
+            .padding(start = SliverSpace.S4),
         textStyle = SliverType.Body,
         singleLine = true,
         cursorBrush = SolidColor(SliverColors.TextPrimary),
         decorationBox = { inner ->
-            Box(Modifier.heightIn(min = 56.dp), contentAlignment = Alignment.CenterStart) {
-                if (value.isEmpty()) SliverText(placeholder, SliverType.Body, color = SliverColors.TextTertiary)
-                inner()
+            Row(Modifier.heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    if (value.isEmpty()) SliverText(placeholder, SliverType.Body, color = SliverColors.TextTertiary)
+                    inner()
+                }
+                if (value.isNotEmpty()) {
+                    Box(
+                        Modifier.size(48.dp).clickable(role = androidx.compose.ui.semantics.Role.Button) { onValueChange("") }
+                            .semantics { contentDescription = "Clear" },
+                        Alignment.Center,
+                    ) { SliverIcon(SliverIcons.X, SliverColors.TextTertiary, size = 18.dp) }
+                }
             }
         },
     )

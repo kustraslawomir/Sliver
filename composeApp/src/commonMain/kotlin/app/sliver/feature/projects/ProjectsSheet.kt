@@ -240,7 +240,7 @@ private fun NewProject(
     val clean = cleanProjectName(name)
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
         SheetHeader("New project", onBack)
-        SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name")
+        SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name", autoFocus = true)
         FormatCards(format) { format = it }
         SliverText("Starts today", SliverType.Meta, color = SliverColors.TextTertiary)
         PrimaryButton(
@@ -299,7 +299,7 @@ private fun ProjectMenu(
     Column {
         SheetHeader(project.name, onBack)
         MenuRow("Rename", onRename)
-        MenuRow("Change orientation", onFormat)
+        MenuRow("Film format", onFormat)
         // Owner 14 Nov: archive and delete sit one step deeper (an archived project still shows Unarchive directly).
         var manage by remember { mutableStateOf(false) }
         if (project.archived) MenuRow("Unarchive", onArchive)
@@ -319,7 +319,7 @@ private fun RenameProject(project: Project, busy: Boolean, onBack: () -> Unit, o
     val clean = cleanProjectName(name)
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
         SheetHeader("Rename", onBack)
-        SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name")
+        SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name", autoFocus = true)
         PrimaryButton("Save", { clean?.let(onSave) }, enabled = clean != null && !busy)
     }
 }

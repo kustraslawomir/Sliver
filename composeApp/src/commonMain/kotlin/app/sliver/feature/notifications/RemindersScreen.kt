@@ -1,5 +1,6 @@
 package app.sliver.feature.notifications
 
+import androidx.compose.foundation.horizontalScroll
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
 
@@ -108,7 +109,6 @@ fun RemindersScreen(onBack: () -> Unit) {
     val settings by remember { repo.settings }.collectAsState(null)
     val projects by remember { projectRepo.projects }.collectAsState(emptyList())
     var timeSheet by rememberSaveable { mutableStateOf(false) }
-    var picker by rememberSaveable { mutableStateOf(false) }
     var projectsSheet by rememberSaveable { mutableStateOf(false) }
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}
     val r = s.reminder
@@ -221,30 +221,16 @@ fun RemindersScreen(onBack: () -> Unit) {
             }
         }
 
+        // Audit v1.8 §7 time picker (board phone 3): wheels, presets, "Set 15:55" — no system dialog.
         SliverBottomSheet(timeSheet, { timeSheet = false }) {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                SliverText("When should we remind you?", SliverType.Title.copy(fontSize = ReelogType.Size.headline))
-                Presets.chunked(3).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { (t, name) ->
-                            PresetTile(t, name, r.time == t && !r.followGoldenHour, Modifier.weight(1f)) {
-                                update { it.copy(time = t, followGoldenHour = false) }
-                                timeSheet = false
-                            }
-                        }
-                    }
-                }
-                ReelogButton("Other time…", { picker = true }, kind = ButtonKind.Secondary)
-            }
+            TimeWheelSheet(r.time, r.followGoldenHour, platform.is24Hour,
+                onGolden = { update { it.copy(followGoldenHour = true) }; timeSheet = false },
+                onSet = { t -> update { it.copy(time = t, followGoldenHour = false) }; timeSheet = false },
+            )
         }
         ProjectsPicker(projectsSheet, { projectsSheet = false }, open, watched.map { it.id }.toSet()) { picked ->
             update { it.copy(projects = if (picked.size == open.size) emptySet() else picked) }
         }
-        if (picker) SystemTimePickerDialog(
-            r.time, platform.is24Hour,
-            onConfirm = { t -> update { it.copy(time = t, followGoldenHour = false) }; picker = false; timeSheet = false },
-            onDismiss = { picker = false },
-        )
     }
 }
 
@@ -369,4 +355,39 @@ private fun ProjectsPicker(
 }
 
 @Composable
-expect fun SystemTimePickerDialog(initial: LocalTime, is24Hour: Boolean, onConfirm: (LocalTime) -> Unit, onDismiss: () -> Unit)
+private fun TimeWheelSheet(initial: LocalTime, golden: Boolean, is24Hour: Boolean, onGolden: () -> Unit, onSet: (LocalTime) -> Unit) {
+    var hour by remember { mutableStateOf(initial.hour) }
+    var minute by remember { mutableStateOf(initial.minute) }
+    // Minutes move in 5-min steps; a long press on the minutes switches to 1-min steps.
+    var fine by remember { mutableStateOf(initial.minute % 5 != 0) }
+    val step = if (fine) 1 else 5
+    val minutes = (0 until 60 step step).toList()
+    val hours = if (is24Hour) (0..23).toList() else (1..12).toList()
+    val pm = hour >= 12
+    fun shownHour(h: Int) = if (is24Hour) h else (h % 12).let { if (it == 0) 12 else it }
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SliverText("Remind me at", SliverType.Title.copy(fontSize = ReelogType.Size.headline))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            app.sliver.core.ui.Wheel(
+                hours.map { it.toString().padStart(2, '0') }, hours.indexOf(shownHour(hour)).coerceAtLeast(0),
+                { i -> val h = hours[i]; hour = if (is24Hour) h else (h % 12) + if (pm) 12 else 0 }, "Hour", Modifier.weight(1f),
+            )
+            SliverText(":", ReelogType.display, Modifier.padding(horizontal = 8.dp))
+            app.sliver.core.ui.Wheel(
+                minutes.map { it.toString().padStart(2, '0') }, minutes.indexOf(minute - minute % step).coerceAtLeast(0),
+                { i -> minute = minutes[i] }, "Minute", Modifier.weight(1f), onLongPress = { fine = !fine },
+            )
+            if (!is24Hour) {
+                app.sliver.core.ui.Wheel(listOf("AM", "PM"), if (pm) 1 else 0, { i -> hour = hour % 12 + if (i == 1) 12 else 0 }, "AM or PM", Modifier.weight(0.8f))
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            app.sliver.core.kit.ReelogChip("Golden hour", golden, onGolden, leading = if (golden) SliverIcons.Check else null)
+            listOf(LocalTime(8, 0), LocalTime(20, 0)).forEach { t ->
+                app.sliver.core.kit.ReelogChip(t.label(), !golden && hour == t.hour && minute == t.minute, { hour = t.hour; minute = t.minute })
+            }
+        }
+        val t = LocalTime(hour, minute)
+        app.sliver.core.ui.PrimaryButton("Set ${if (is24Hour) "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}" else "${shownHour(hour)}:${minute.toString().padStart(2, '0')} ${if (pm) "PM" else "AM"}"}", { onSet(t) }, Modifier.fillMaxWidth())
+    }
+}

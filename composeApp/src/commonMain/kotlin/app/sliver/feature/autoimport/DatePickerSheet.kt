@@ -1,5 +1,10 @@
 package app.sliver.feature.autoimport
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,21 +46,32 @@ import kotlinx.datetime.LocalDate
 
 private val Weekdays = listOf("M", "T", "W", "T", "F", "S", "S")
 
-/** Month grid in a bottom sheet; days after [max] and before [min] are disabled. Tokens only, no stock picker look. */
+/**
+ * Audit v1.8 §7 date picker (board phone 2): title + month arrows, "October 2026 · days after today can't be picked",
+ * the app's month grid (44 dp day circles, selected = paper fill, out of range dimmed and disabled), quick chips and a
+ * primary button that names the result. Picking a day selects it; the button confirms.
+ */
 @Composable
-fun DatePickerSheet(visible: Boolean, selected: LocalDate, min: LocalDate, max: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit) {
+fun DatePickerSheet(
+    visible: Boolean, selected: LocalDate, min: LocalDate, max: LocalDate, onPick: (LocalDate) -> Unit, onDismiss: () -> Unit,
+    title: String = "Pick a day",
+    chips: List<Pair<String, LocalDate>> = emptyList(),
+    confirm: (LocalDate) -> String = { "Use ${it.day} ${MonthLong[it.month.ordinal]}" },
+) {
     SliverBottomSheet(visible, onDismiss) {
-        var shown by remember(selected) { mutableStateOf(selected.toYearMonth()) }
+        var picked by remember(selected, visible) { mutableStateOf(selected) }
+        var shown by remember(selected, visible) { mutableStateOf(selected.toYearMonth()) }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                SliverText(title, SliverType.Title, Modifier.weight(1f))
                 IconButton44({ if (canGoPrev(shown, min)) shown = shown.plusMonths(-1) }, "Previous month") {
-                    SliverIcon(SliverIcons.ChevronLeft, if (canGoPrev(shown, min)) SliverColors.TextPrimary else SliverColors.TextDisabled)
+                    SliverIcon(SliverIcons.ChevronLeft, if (canGoPrev(shown, min)) SliverColors.TextPrimary else SliverColors.TextDisabled, size = 20.dp)
                 }
-                SliverText("${MonthLong[shown.month - 1]} ${shown.year}", SliverType.Headline)
                 IconButton44({ if (canGoNext(shown, max)) shown = shown.plusMonths(1) }, "Next month") {
-                    SliverIcon(SliverIcons.ChevronRight, if (canGoNext(shown, max)) SliverColors.TextPrimary else SliverColors.TextDisabled)
+                    SliverIcon(SliverIcons.ChevronRight, if (canGoNext(shown, max)) SliverColors.TextPrimary else SliverColors.TextDisabled, size = 20.dp)
                 }
             }
+            SliverText("${MonthLong[shown.month - 1]} ${shown.year} \u00B7 days after today can't be picked", SliverType.Caption, color = SliverColors.TextTertiary)
             Row(Modifier.fillMaxWidth()) {
                 Weekdays.forEach {
                     SliverText(it, SliverType.Caption.copy(textAlign = TextAlign.Center), Modifier.weight(1f), SliverColors.TextTertiary)
@@ -66,12 +82,20 @@ fun DatePickerSheet(visible: Boolean, selected: LocalDate, min: LocalDate, max: 
             (weeks + List(6 - weeks.size) { List<LocalDate?>(7) { null } }).forEach { week ->
                 Row(Modifier.fillMaxWidth()) {
                     week.forEach { date ->
-                        Box(Modifier.weight(1f).height(44.dp), Alignment.Center) {
-                            if (date != null) DateCell(date, date == selected, date in min..max) { onPick(date) }
+                        Box(Modifier.weight(1f).height(46.dp), Alignment.Center) {
+                            if (date != null) DateCell(date, date == picked, date in min..max) { picked = date }
                         }
                     }
                 }
             }
+            if (chips.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    chips.filter { it.second in min..max }.forEach { (label, date) ->
+                        app.sliver.core.kit.ReelogChip(label, picked == date, { picked = date; shown = date.toYearMonth() })
+                    }
+                }
+            }
+            app.sliver.core.ui.PrimaryButton(confirm(picked), { onPick(picked) }, Modifier.fillMaxWidth().padding(top = 8.dp))
         }
     }
 }
@@ -79,9 +103,8 @@ fun DatePickerSheet(visible: Boolean, selected: LocalDate, min: LocalDate, max: 
 @Composable
 private fun DateCell(date: LocalDate, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
     Box(
-        Modifier.height(40.dp).fillMaxWidth()
-            .clip(SliverShapes.S)
-            .then(if (selected) Modifier.background(SliverColors.AccentTint).border(1.dp, SliverColors.AccentLine, SliverShapes.S) else Modifier)
+        Modifier.size(44.dp).clip(CircleShape)
+            .then(if (selected) Modifier.background(SliverColors.TextPrimary) else Modifier)
             .semantics { this.selected = selected; contentDescription = formatDay(date) }
             .then(if (enabled) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier),
         Alignment.Center,
@@ -89,8 +112,8 @@ private fun DateCell(date: LocalDate, selected: Boolean, enabled: Boolean, onCli
         SliverText(
             date.day.toString(), SliverType.Num.copy(textAlign = TextAlign.Center),
             color = when {
-                !enabled -> SliverColors.TextDisabled
-                selected -> SliverColors.AccentText
+                !enabled -> SliverColors.CellFuture
+                selected -> SliverColors.BgBase
                 else -> SliverColors.TextPrimary
             },
         )

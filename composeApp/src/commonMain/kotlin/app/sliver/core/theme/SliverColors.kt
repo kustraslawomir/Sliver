@@ -65,6 +65,14 @@ object SliverColors {
     val Error get() = if (this.light) Color(0xFFB5301F) else p.error
     val Media = Color.Black
     val OnMedia = Color.White
+    /** v1.8 dialog: body text, filled destructive button and its label. */
+    val DialogBody get() = if (this.light) Color(0xFF5E5E58) else Color(0xFFB9B9B3)
+    val DestructiveFill = Color(0xFFE5675F)
+    /** v1.8 text field. */
+    val FieldFill get() = if (this.light) Color(0xFFF2F0EA) else Color(0xFF111113)
+    val FieldEdge get() = if (this.light) Color(0xFFD6D3CC) else Color(0xFF3A3A40)
+    val FieldFocus get() = if (this.light) Color(0xFF1A1A1A) else Color(0xFFEDEDE8)
+    val OnDestructive = Color(0xFF1A0B0A)
     /** Destructive label over a photo or video (both themes). */
     val ErrorOnMedia = Color(0xFFFF8A80)
     val Scrim = Tokens.Scrim

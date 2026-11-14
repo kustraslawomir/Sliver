@@ -640,7 +640,7 @@ private fun ProjectMenu(
                 .semantics { role = Role.DropdownList },
         ) {
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
-            MenuItem(HubIcons.Shape, "Change orientation", SliverColors.TextPrimary, onShape)
+            MenuItem(HubIcons.Shape, "Film format", SliverColors.TextPrimary, onShape)
             MenuItem(HubIcons.FillDays, "Fill the calendar", SliverColors.TextPrimary, onFill)
             // Owner 14 Nov: archive and delete must not be one tap away; they sit behind a muted last item.
             Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(SliverColors.LineHairline))

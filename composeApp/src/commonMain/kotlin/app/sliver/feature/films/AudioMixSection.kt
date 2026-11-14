@@ -385,7 +385,7 @@ fun MusicList(
                 if (renaming == path) {
                     var title by remember(path) { mutableStateOf(trackTitle(path)) }
                     Column(Modifier.padding(SliverSpace.S2), verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        app.sliver.core.ui.SliverTextField(title, { title = it.take(60) }, placeholder = "Track name")
+                        app.sliver.core.ui.SliverTextField(title, { title = it.take(60) }, placeholder = "Track name", autoFocus = true)
                         app.sliver.core.ui.PrimaryButton("Save", { store.rename(path, title); renaming = null }, enabled = title.isNotBlank())
                     }
                 }
