@@ -145,7 +145,7 @@ private fun Tile(
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S1),
     ) {
         Box(
-            Modifier.size(TileW, TileH).clip(TileShape).background(SliverColors.Surface2)
+            Modifier.size(TileW, TileH).clip(TileShape).background(SliverColors.TileFill)
                 .then(if (selected) Modifier.border(2.dp, SliverColors.Accent, TileShape) else Modifier),
             Alignment.Center,
         ) {

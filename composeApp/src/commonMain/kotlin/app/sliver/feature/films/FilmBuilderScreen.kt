@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import app.sliver.core.kit.GlassStyle
@@ -127,6 +129,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val mix = options.mix ?: AudioMix()
     var addingLayer by rememberSaveable { mutableStateOf(false) }
     var soundOpen by rememberSaveable { mutableStateOf(false) }
+    var barHeight by remember { mutableStateOf(120.dp) }
     var mutedOpen by rememberSaveable { mutableStateOf(false) }
     var dateSheet by rememberSaveable { mutableStateOf(false) }
     var editingLayer by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -158,7 +161,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     var adjusting by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().background(SliverColors.BgBase)) {
     // Owner: the whole screen scrolls (preview, timeline and filters stay first); Make film is a sticky bar (BuilderV18).
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = StickyBarHeight)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = barHeight + 16.dp)) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
             verticalAlignment = Alignment.CenterVertically,
@@ -218,11 +221,12 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                         if (paused && !comparing) 1f else 0f,
                         androidx.compose.animation.core.tween(if (paused) 150 else 300, delayMillis = if (paused) 0 else 600), label = "play",
                     )
+                    // v1.9 §4.1: a filled 56 dp circle (white 85 %, dark icon) — the outline one vanished on bright frames.
                     if (playAlpha > 0f) Box(
                         Modifier.align(Alignment.Center).size(56.dp).alpha(playAlpha)
-                            .glass(GlassStyle.Regular, androidx.compose.foundation.shape.CircleShape, overMedia = true),
+                            .clip(androidx.compose.foundation.shape.CircleShape).background(Color.White.copy(alpha = 0.85f)),
                         Alignment.Center,
-                    ) { SliverIcon(if (paused) SliverIcons.Play else SliverIcons.Pause, SliverColors.OnMedia, size = 24.dp) }
+                    ) { SliverIcon(if (paused) SliverIcons.Play else SliverIcons.Pause, SliverColors.Media, size = 24.dp) }
                     IconButton44(
                         { FilmPlayback.muted = !FilmPlayback.muted }, if (FilmPlayback.muted) "Unmute" else "Mute",
                         Modifier.align(Alignment.BottomStart).padding(SliverSpace.S1), overCamera = true,
@@ -245,7 +249,11 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
             }
         }
 
-        val frame = plan.days.getOrNull(plan.days.size / 2)?.let { rememberPhoto(it.thumb) }
+        // v1.9 §4.3: the Look tiles show the frame under the playhead (your film), refreshed when paused or seeking.
+        var frameIndex by rememberSaveable { mutableStateOf(0) }
+        LaunchedEffect(position.first, paused) { if (paused) frameIndex = position.first }
+        LaunchedEffect(seek) { if (seek != null) { kotlinx.coroutines.delay(400); frameIndex = position.first } }
+        val frame = plan.days.getOrNull(frameIndex.coerceIn(0, (plan.days.size - 1).coerceAtLeast(0)))?.let { rememberPhoto(it.thumb) }
         FilmFilterSection(
             frame, options.look, options.intensity, options.grain,
             onSelect = { options = options.copy(look = it, grain = null) },
@@ -275,10 +283,13 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         }
     }
     // BuilderV18 / audit §4.6: sticky Make film over a fade; never cut by the nav bar.
+    // v1.9 §4.2: the scroll content ends 16 dp above the bar (measured), with a 24 dp fade above it.
+    val density = androidx.compose.ui.platform.LocalDensity.current
     Column(
         Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-            .background(Brush.verticalGradient(0f to SliverColors.BgBase.copy(alpha = 0f), 0.3f to SliverColors.BgBase))
-            .navigationBarsPadding().padding(top = SliverSpace.S6, bottom = SliverSpace.S3),
+            .onSizeChanged { barHeight = with(density) { it.height.toDp() } }
+            .background(Brush.verticalGradient(0f to SliverColors.BgBase.copy(alpha = 0f), 0.18f to SliverColors.BgBase))
+            .navigationBarsPadding().padding(top = 24.dp, bottom = SliverSpace.S3),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
             if (lowStorage) {
@@ -336,9 +347,9 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         val current = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
         Column {
             SliverText("Date on screen", SliverType.Title, Modifier.padding(bottom = SliverSpace.S2))
-            DateChoice("Off", !dateOn) { dateTouched = true; options = options.copy(dateOn = false); dateSheet = false }
+            DateChoice("Off", !dateOn, null) { dateTouched = true; options = options.copy(dateOn = false); dateSheet = false }
             StampChoices.forEach { (style, label) ->
-                DateChoice(label, dateOn && current == style) {
+                DateChoice(label, dateOn && current == style, style) {
                     dateTouched = true; options = options.copy(dateOn = true, stamp = style); dateSheet = false
                 }
             }
@@ -370,7 +381,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     }
 }
 
-private val StickyBarHeight = 120.dp
+private val SampleDate = kotlinx.datetime.LocalDate(2026, 4, 1)
 
 /** BuilderV18 row: title (+ sub line), value and chevron; opens a sheet. */
 @Composable
@@ -391,14 +402,30 @@ private fun ValueRow(title: String, sub: String?, value: String, onClick: () -> 
 }
 
 @Composable
-private fun DateChoice(label: String, on: Boolean, onClick: () -> Unit) {
+private fun DateChoice(label: String, on: Boolean, sample: StampStyle?, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().height(52.dp).clip(SliverShapes.R12).clickable(role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick)
+        Modifier.fillMaxWidth().height(60.dp).clip(SliverShapes.R12).clickable(role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick)
             .padding(horizontal = SliverSpace.S2),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SliverText(label, SliverType.Body, Modifier.weight(1f))
-        if (on) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 20.dp)
+        // v1.9 §4.5: a small sample of the style (European date order, as the owner asked).
+        if (sample != null) {
+            Box(Modifier.padding(end = SliverSpace.S3).size(150.dp, 44.dp).clip(SliverShapes.R12).background(SliverColors.BgVoid), Alignment.Center) {
+                when (sample) {
+                    StampStyle.LED -> DateStamp(stampText(SampleDate, sample), style = sample)
+                    StampStyle.CAMCORDER -> Column(horizontalAlignment = Alignment.Start) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Box(Modifier.size(5.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.Record))
+                            SliverText("REC", SliverType.Stamp, color = Color.White)
+                        }
+                        SliverText(stampText(SampleDate, sample), SliverType.Stamp, color = Color.White, maxLines = 1)
+                    }
+                    else -> SliverText(stampText(SampleDate, sample), SliverType.Stamp, color = Color.White, maxLines = 1)
+                }
+            }
+        }
+        Box(Modifier.size(20.dp)) { if (on) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 20.dp) }
     }
 }
 

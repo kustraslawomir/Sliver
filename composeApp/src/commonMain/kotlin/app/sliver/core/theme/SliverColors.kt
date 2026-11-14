@@ -69,6 +69,8 @@ object SliverColors {
     /** v1.8 dialog: body text, filled destructive button and its label. */
     val DialogBody get() = if (this.light) Color(0xFF5E5E58) else Color(0xFFB9B9B3)
     val DestructiveFill = Color(0xFFE5675F)
+    /** v1.9 §4.4: Look tile fill (also the "None" tile). */
+    val TileFill get() = if (this.light) Color(0xFFE9E7E1) else Color(0xFF1C1C1F)
     /** v1.9 slider: filled track and thumb. */
     val SliderFill get() = if (this.light) Color(0xFF141413) else Color(0xFFEDEDE8)
     val SliderThumb get() = if (this.light) Color(0xFF141413) else Color(0xFFEDEDE8)
