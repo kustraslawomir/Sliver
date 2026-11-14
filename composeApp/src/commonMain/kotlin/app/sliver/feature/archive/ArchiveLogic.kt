@@ -71,3 +71,10 @@ fun dockCaption(today: LocalDate, hour: Int, minute: Int): String {
     val rest = if (left >= 60) "${left / 60} h left" else "${left.coerceAtLeast(1)} min left"
     return "${weekdayName(today)} ${today.day} ${MonthNames[today.month.ordinal]} · $rest"
 }
+
+/** Days in [month] (1..12) of [year]. */
+fun daysInMonth(year: Int, month: Int): Int {
+    val first = LocalDate(year, month, 1)
+    val next = if (month == 12) LocalDate(year + 1, 1, 1) else LocalDate(year, month + 1, 1)
+    return next.toEpochDays().toInt() - first.toEpochDays().toInt()
+}

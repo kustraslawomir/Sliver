@@ -53,3 +53,20 @@ fun yearFilm(year: Int, format: FilmFormat, live: Boolean = true) = Film(
 suspend fun FilmRepository.ensureDefaultFilm(firstDay: LocalDate, format: FilmFormat) {
     if (observeAll().first().isEmpty()) save(yearFilm(firstDay.year, format))
 }
+
+/** Audit v1.8 §2.4: films with the same name are versions ("v2"), numbered oldest first; a unique name has none. */
+fun filmVersions(films: List<Film>): Map<String, Int> =
+    films.groupBy { it.name }.filterValues { it.size > 1 }.values.flatMap { same ->
+        same.sortedBy { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt }.mapIndexed { i, f -> f.id to i + 1 }
+    }.toMap()
+
+/** The cover frame: 10 % into the film; later versions of the same film step further in so posters differ. */
+fun coverIndex(clips: Int, version: Int?): Int {
+    if (clips <= 0) return 0
+    val f = 0.1 + 0.27 * ((version ?: 1) - 1)
+    return ((f % 1.0) * clips).toInt().coerceIn(0, clips - 1)
+}
+
+/** "2:35 · v3 · Kiosk" — length, version when there are several, filter name (or Natural). */
+fun posterCaption(clips: Int, version: Int?, look: String?): String =
+    listOfNotNull(formatRuntime(clips), version?.let { "v$it" }, look ?: "Natural").joinToString(" \u00B7 ")

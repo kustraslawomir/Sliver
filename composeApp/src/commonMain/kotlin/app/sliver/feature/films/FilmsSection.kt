@@ -1,5 +1,8 @@
 package app.sliver.feature.films
 
+import androidx.compose.foundation.layout.size
+import app.sliver.core.icons.SliverIcons
+import app.sliver.data.pickerLabel
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
 
@@ -87,14 +90,19 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
-            SliverText("Films", SliverType.Title, Modifier.weight(1f))
+            // HubV18: "Films 3" + small filled Make film.
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SliverText("Films", SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline)))
+                if (list.isNotEmpty()) SliverText("${list.size}", SliverType.tnum(), Modifier.padding(bottom = 3.dp), color = SliverColors.TextTertiary)
+            }
             ReelogButton("Make film", { onNavigate(Route.FilmBuilder) }, kind = ButtonKind.Secondary, small = true, fullWidth = false, leading = HubIcons.Plus)
         }
+        val versions = remember(list) { filmVersions(list) }
         if (list.isNotEmpty()) {
             LazyRow(contentPadding = PaddingValues(horizontal = SliverSpace.Gutter), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 itemsIndexed(list, key = { _, f -> f.id }) { i, film ->
                     Poster(
-                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size],
+                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size], versions[film.id],
                         onLongClick = { onLongPress(film) },
                     ) {
                         FilmNav.id = film.id
@@ -109,28 +117,34 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> Unit, onClick: () -> Unit) {
+private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, onLongClick: () -> Unit, onClick: () -> Unit) {
     val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
     val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
     Column(
-        Modifier.width(132.dp).combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = rememberTapGate(onClick))
+        Modifier.width(PosterW).combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = rememberTapGate(onClick))
             .semantics { contentDescription = "${film.name}, ${formatRuntime(plan.clips)}" },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(
-            Modifier.fillMaxWidth().height(198.dp).clip(SliverShapes.R14)
+            Modifier.fillMaxWidth().height(PosterH).clip(PosterShape)
                 .background(Brush.verticalGradient(0f to tint, 0.75f to SliverColors.BgVoid, 1f to SliverColors.BgVoid))
-                .border(1.dp, SliverColors.LineHairline, SliverShapes.R14)
         ) {
-            val poster = plan.days.firstOrNull()?.let { rememberPhoto(it.thumb) }
+            // v1.8: each film its own cover (10 % in; versions step further in).
+            val poster = plan.days.getOrNull(coverIndex(plan.days.size, version))?.let { rememberPhoto(it.thumb) }
             if (poster != null) {
                 Image(poster, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.4f to Color.Transparent, 1f to SliverColors.Scrim)))
             }
             Box(Modifier.fillMaxSize().padding(12.dp)) {
-                Column(Modifier.align(Alignment.BottomStart), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    SliverText("A film by you", SliverType.tnum(), color = SliverColors.OnMedia.copy(alpha = 0.7f))
-                    SliverText(film.name, SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline), letterSpacing = (-0.02).em), color = SliverColors.OnMedia)
+                SliverText(
+                    film.name, ReelogType.poster, Modifier.align(Alignment.BottomStart),
+                    color = SliverColors.OnMedia, maxLines = 2,
+                )
+                if (film.renderPath != null && state == RenderState.Idle) {
+                    Box(
+                        Modifier.align(Alignment.TopEnd).size(30.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.Scrim),
+                        Alignment.Center,
+                    ) { SliverIcon(SliverIcons.Play, SliverColors.OnMedia, size = 14.dp) }
                 }
                 when (val s = state) {
                     is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
@@ -139,11 +153,10 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> U
                 }
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            SliverText(plan.spanText(), SliverType.tnum(), color = SliverColors.TextTertiary, maxLines = 1)
-            SliverText("${clipsText(plan.clips)} · ${formatRuntime(plan.clips)}", SliverType.tnum(), color = SliverColors.TextPrimary)
-            // Owner: two films of the same project look identical; when it was made tells them apart.
-            film.renderedAt?.let { SliverText(madeLabel(it), SliverType.tnum(), color = SliverColors.TextTertiary, maxLines = 1) }
+        // HubV18: 13 sp, two lines — range / length · version · look.
+        Column {
+            SliverText(plan.spanText(), ReelogType.caption, color = SliverColors.TextSecondary, maxLines = 1)
+            SliverText(posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1)
         }
     }
 }
@@ -172,9 +185,7 @@ fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit) {
     )
 }
 
-/** "Made 13 Nov, 15:58" in the phone's time zone. */
-private fun madeLabel(at: kotlin.time.Instant): String {
-    val t = at.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-    val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    return "Made ${t.day} ${months[t.month.ordinal]}, ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}"
-}
+
+private val PosterW = 112.dp
+private val PosterH = 142.dp
+private val PosterShape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)

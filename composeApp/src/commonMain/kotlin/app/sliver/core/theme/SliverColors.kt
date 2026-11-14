@@ -69,6 +69,10 @@ object SliverColors {
     val ErrorOnMedia = Color(0xFFFF8A80)
     val Scrim = Tokens.Scrim
     val CellEmpty get() = if (this.light) Color(0xFFECE8E0) else Color(0xFF1C1C20)
+    /** HubV18 cells: empty past day tile and number, future number. */
+    val CellEmptyTile get() = if (this.light) Color(0xFFEAE7E0) else Color(0xFF141416)
+    val CellEmptyNumber get() = if (this.light) Color(0xFF8E8E88) else Color(0xFF6E6E68)
+    val CellFuture get() = if (this.light) Color(0xFFB9B7B0) else Color(0xFF55555A)
     val CellEmptyLine get() = if (this.light) Color(0xFFE2DED6) else Color(0xFF1F1F22)
     /** v1.7: no orange; "now" differs from idle by brightness and its label. */
     val GoldenNow = Color.White
