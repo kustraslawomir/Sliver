@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import androidx.compose.animation.core.LinearEasing
@@ -23,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -93,7 +93,7 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val day = remember { CaptureSession.forDate ?: today }
     var motion by remember { mutableStateOf(Motion.STILL) }
     var saving by remember { mutableStateOf(false) }
-    val project by remember { projects.active }.collectAsState(null)
+    val project by remember { projects.active }.collectAsStateWithLifecycle(null)
     var done by remember { mutableStateOf(false) }
     val photo = rememberPhoto(path)
     var cropX by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -105,7 +105,8 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
         onDispose { if (!done && isTmp(path)) files.delete(path) }
     }
 
-    val progress by rememberInfiniteTransition().animateFloat(
+    // Perf STEP 2: read in graphicsLayer only, so the zoom redraws instead of recomposing the screen every frame.
+    val progress = rememberInfiniteTransition().animateFloat(
         0f, 1f,
         infiniteRepeatable(tween(SECOND_MS.toInt(), easing = LinearEasing), RepeatMode.Restart),
     )
@@ -160,9 +161,12 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
                 .clip(SliverShapes.S).clipToBounds(),
         ) {
             photo?.let {
-                val scale = if (motion == Motion.ZOOM) PhotoMotion.zoomScale(progress) else 1f
+                val zoom = motion == Motion.ZOOM
                 Image(
-                    it, null, Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
+                    it, null, Modifier.fillMaxSize().graphicsLayer {
+                        val scale = if (zoom) PhotoMotion.zoomScale(progress.value) else 1f
+                        scaleX = scale; scaleY = scale
+                    },
                     contentScale = ContentScale.Crop,
                 )
                 if (reframeX) ReframeBandX(cropX) { cropX = it }

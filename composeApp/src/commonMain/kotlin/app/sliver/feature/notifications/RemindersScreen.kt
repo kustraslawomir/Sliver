@@ -1,5 +1,6 @@
 package app.sliver.feature.notifications
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.horizontalScroll
 import app.sliver.core.kit.ButtonKind
 import app.sliver.core.kit.ReelogButton
@@ -26,7 +27,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -106,8 +106,8 @@ fun RemindersScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val platform = rememberSettingsPlatform()
     val controller = rememberPermissionController()
-    val settings by remember { repo.settings }.collectAsState(null)
-    val projects by remember { projectRepo.projects }.collectAsState(emptyList())
+    val settings by remember { repo.settings }.collectAsStateWithLifecycle(null)
+    val projects by remember { projectRepo.projects }.collectAsStateWithLifecycle(emptyList())
     var timeSheet by rememberSaveable { mutableStateOf(false) }
     var projectsSheet by rememberSaveable { mutableStateOf(false) }
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}

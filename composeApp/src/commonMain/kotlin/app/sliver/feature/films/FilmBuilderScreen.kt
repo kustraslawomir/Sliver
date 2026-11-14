@@ -1,5 +1,7 @@
 package app.sliver.feature.films
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,7 +41,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,9 +98,9 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val scope = rememberCoroutineScope()
-    val all by remember { days.observeAll() }.collectAsState(emptyList())
-    val app by remember { settings.settings }.collectAsState(null)
-    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
+    val all by remember { days.observeAll() }.collectAsStateWithLifecycle(emptyList())
+    val app by remember { settings.settings }.collectAsStateWithLifecycle(null)
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsStateWithLifecycle(null)
 
     // Unsaved choices survive recreation (theme change, rotation); the film being edited is loaded once.
     var options by rememberSaveable(stateSaver = FilmOptionsSaver) { mutableStateOf(FilmOptions()) }
@@ -142,14 +143,18 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     OnAppHidden { paused = true }
     var seek by remember { mutableStateOf<FilmSeek?>(null) }
     var comparing by remember { mutableStateOf(false) }
-    var position by remember { mutableStateOf(0 to 0f) }
+    // Perf STEP 2: the preview reports its position ~30×/s. The body never reads it directly — only the clip index and
+    // whole seconds (derived, change once a second) and the draw lambdas below.
+    val positionState = remember { mutableStateOf(0 to 0f) }
+    val clipIndex by remember { derivedStateOf { positionState.value.first } }
+    val atSecond by remember { derivedStateOf { positionState.value.let { (it.first + it.second).toInt() } } }
+    fun playheadMs(): Long = positionState.value.let { ((it.first + it.second) * FILM_FRAME_MS).toLong() }
     val fileStore = remember { koin.get<FileStore>() }
     var notice by remember { mutableStateOf<String?>(null) }
-    val playheadMs = ((position.first + position.second) * FILM_FRAME_MS).toLong()
     // Owner 14 Nov: a new layer starts at the playhead (the first one at the start); imported files stay in the library.
     fun addLayer(path: String) {
         val m = options.mix ?: AudioMix()
-        val start = if (m.layers.isEmpty()) 0L else playheadMs
+        val start = if (m.layers.isEmpty()) 0L else playheadMs()
         options = options.copy(mix = m.copy(layers = m.layers + AudioLayer(path, audioDurationMs(path), startMs = start)))
     }
     val pickAudio = rememberAudioPicker {
@@ -202,7 +207,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                 } else {
                     FilmPreview(
                         clips, lookParams, mix, paused, seek,
-                        onPosition = { i, f -> position = i to f }, modifier = Modifier.fillMaxSize(),
+                        onPosition = { i, f -> positionState.value = i to f }, modifier = Modifier.fillMaxSize(),
                         compare = comparing,
                     )
                     if (comparing && lookParams != null) {
@@ -212,7 +217,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
                             SliverColors.OnMedia,
                         )
                     }
-                    val index = position.first.coerceIn(0, clips.size - 1)
+                    val index = clipIndex.coerceIn(0, clips.size - 1)
                     if (dateOn) {
                         val style = options.stamp ?: options.look?.info?.stamp ?: StampStyle.PLAIN
                         DateStamp(stampText(plan.days[index].date, style), style = style)
@@ -237,12 +242,11 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         }
 
         Column(Modifier.padding(horizontal = SliverSpace.Gutter)) {
-            val fraction = if (clips.isEmpty()) 0f else ((position.first + position.second) / clips.size).coerceIn(0f, 1f)
             // BuilderV18: a 36 dp filmstrip of real thumbnails with a 3 dp white playhead (replaces the line + ticks).
-            Filmstrip(plan, fraction) { seek = FilmSeek(it) }
+            // The playhead is read while drawing, so playback redraws the strip instead of recomposing the screen.
+            Filmstrip(plan, { if (clips.isEmpty()) 0f else positionState.value.let { (it.first + it.second) / clips.size }.coerceIn(0f, 1f) }) { seek = FilmSeek(it) }
             Row(Modifier.fillMaxWidth().padding(top = SliverSpace.S2), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                val at = (fraction * plan.clips).toInt()
-                SliverText("${formatRuntime(at)} / ${filmRuntime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
+                SliverText("${formatRuntime(atSecond.coerceIn(0, plan.clips))} / ${filmRuntime(plan.clips)}", SliverType.Meta.copy(fontSize = ReelogType.Size.caption), color = SliverColors.TextTertiary, maxLines = 1)
                 SliverText(
                     stripMonths(plan), SliverType.Meta.copy(fontSize = ReelogType.Size.caption, textAlign = TextAlign.End), Modifier.weight(1f), SliverColors.TextTertiary,
                     maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
@@ -252,8 +256,8 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
 
         // v1.9 §4.3: the Look tiles show the frame under the playhead (your film), refreshed when paused or seeking.
         var frameIndex by rememberSaveable { mutableStateOf(0) }
-        LaunchedEffect(position.first, paused) { if (paused) frameIndex = position.first }
-        LaunchedEffect(seek) { if (seek != null) { kotlinx.coroutines.delay(400); frameIndex = position.first } }
+        LaunchedEffect(clipIndex, paused) { if (paused) frameIndex = clipIndex }
+        LaunchedEffect(seek) { if (seek != null) { kotlinx.coroutines.delay(400); frameIndex = positionState.value.first } }
         val frame = plan.days.getOrNull(frameIndex.coerceIn(0, (plan.days.size - 1).coerceAtLeast(0)))?.let { rememberPhoto(it.thumb) }
         FilmFilterSection(
             frame, options.look, options.intensity, options.grain,
@@ -329,7 +333,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
         Column(Modifier.heightIn(max = 640.dp).verticalScroll(rememberScrollState())) {
             AudioMixSection(
                 mix, { options = options.copy(mix = it) },
-                mixClips, filmMs, playheadMs,
+                mixClips, filmMs, ::playheadMs,
                 onAddLayer = { addingLayer = true },
                 onEditLayer = { editingLayer = it },
                 onMutedClips = { mutedOpen = true },
@@ -361,7 +365,7 @@ fun FilmBuilderScreen(onBack: () -> Unit, onSaved: (String) -> Unit) {
     SliverBottomSheet(editedLayer != null, onDismiss = { editingLayer = null }) {
         if (editedLayer != null && layerIndex != null) {
             LayerEditor(
-                editedLayer, filmMs, playheadMs,
+                editedLayer, filmMs, ::playheadMs,
                 onChange = { l -> options = options.copy(mix = mix.copy(layers = mix.layers.toMutableList().also { it[layerIndex] = l })) },
                 onRemove = {
                     options = options.copy(mix = mix.copy(layers = mix.layers.filterIndexed { i, _ -> i != layerIndex }))

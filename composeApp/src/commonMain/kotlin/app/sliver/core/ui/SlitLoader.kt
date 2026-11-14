@@ -1,5 +1,6 @@
 package app.sliver.core.ui
 
+import androidx.compose.runtime.State
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -30,17 +31,17 @@ private const val SEGMENT = 0.35f
 @Composable
 fun SlitLoader(modifier: Modifier = Modifier, width: Dp = 120.dp) {
     val reduced = LocalReducedMotion.current
-    val t = if (reduced) 0f else {
-        val transition = rememberInfiniteTransition(label = "slit-loader")
-        val v by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(SWEEP_MS, easing = LinearEasing), RepeatMode.Restart), label = "sweep")
-        v
+    // Perf STEP 2: the sweep is read in the layout phase (no recomposition per frame).
+    val t: State<Float>? = if (reduced) null else {
+        rememberInfiniteTransition(label = "slit-loader")
+            .animateFloat(0f, 1f, infiniteRepeatable(tween(SWEEP_MS, easing = LinearEasing), RepeatMode.Restart), label = "sweep")
     }
-    val start = if (reduced) (1f - SEGMENT) / 2f else -SEGMENT + t * (1f + SEGMENT)
     Box(modifier.width(width).height(2.dp).background(SliverColors.LineHairline, SliverShapes.Pill)) {
         Box(
             Modifier.fillMaxHeight().fillMaxWidth(SEGMENT)
                 .layout { m, c ->
                     val p = m.measure(c)
+                    val start = if (t == null) (1f - SEGMENT) / 2f else -SEGMENT + t.value * (1f + SEGMENT)
                     layout(p.width, p.height) { p.place((start * c.maxWidth / SEGMENT).toInt(), 0) }
                 }
                 .background(SliverColors.Accent, SliverShapes.Pill),

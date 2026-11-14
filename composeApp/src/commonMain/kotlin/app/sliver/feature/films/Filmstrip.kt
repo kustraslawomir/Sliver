@@ -25,7 +25,7 @@ import app.sliver.feature.trim.rememberPhoto
 
 /** Real thumbnails across the film (up to 15) with a white playhead; tap or drag to seek. */
 @Composable
-fun Filmstrip(plan: FilmPlan, fraction: Float, onSeek: (Float) -> Unit) {
+fun Filmstrip(plan: FilmPlan, fraction: () -> Float, onSeek: (Float) -> Unit) {
     app.sliver.core.log.RecomposeProbe("filmstrip")
     val picks = remember(plan) {
         val n = plan.days.size
@@ -48,7 +48,7 @@ fun Filmstrip(plan: FilmPlan, fraction: Float, onSeek: (Float) -> Unit) {
             }
         }
         Canvas(Modifier.fillMaxSize()) {
-            val x = (fraction.coerceIn(0f, 1f) * size.width).coerceIn(1.5.dp.toPx(), size.width - 1.5.dp.toPx())
+            val x = (fraction().coerceIn(0f, 1f) * size.width).coerceIn(1.5.dp.toPx(), size.width - 1.5.dp.toPx())
             drawLine(Color.White, Offset(x, 0f), Offset(x, size.height), 3.dp.toPx())
         }
     }

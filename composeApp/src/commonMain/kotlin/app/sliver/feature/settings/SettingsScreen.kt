@@ -1,4 +1,5 @@
 package app.sliver.feature.settings
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.draw.clip
 
 import app.sliver.core.theme.ReelogType
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,7 +74,7 @@ fun SettingsScreen(onGo: (Route) -> Unit, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val platform = rememberSettingsPlatform()
     val location = rememberPermissionController()
-    val settings by remember { repo.settings }.collectAsState(null)
+    val settings by remember { repo.settings }.collectAsStateWithLifecycle(null)
     var showStores by remember { mutableStateOf(false) }
     val s = settings ?: return Column(Modifier.fillMaxSize().background(SliverColors.BgBase)) {}
 

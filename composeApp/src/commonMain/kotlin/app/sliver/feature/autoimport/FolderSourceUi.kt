@@ -1,5 +1,6 @@
 package app.sliver.feature.autoimport
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,7 +55,7 @@ fun rememberFolderChoice(): FolderChoice {
     val access = remember { koin.get<FolderAccess>() }
     val scope = rememberCoroutineScope()
     var useFolder by rememberSaveable { mutableStateOf(false) }
-    val folder by remember { store.folder }.collectAsState(null)
+    val folder by remember { store.folder }.collectAsStateWithLifecycle(null)
     var tick by remember { mutableStateOf(0) }
     val grantOk = remember(folder, tick) { folder?.let { runCatching { access.isGranted(it.tree) }.getOrDefault(false) } == true }
     val pick = rememberFolderPicker { tree ->

@@ -77,7 +77,7 @@ fun AudioMixSection(
     onMix: (AudioMix) -> Unit,
     clips: List<MixClip>,
     filmMs: Long,
-    playheadMs: Long,
+    playheadMs: () -> Long,
     onAddLayer: () -> Unit,
     onEditLayer: (Int) -> Unit,
     onMutedClips: () -> Unit,
@@ -173,7 +173,7 @@ fun layerSummary(layer: AudioLayer, filmMs: Long): String = buildList {
 
 /** v1.9 §1.1: filmstrip of the clips (tap = mute/unmute that clip), one labelled bar per layer (tap = edit), playhead. */
 @Composable
-private fun MixTimeline(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<MixClip>, filmMs: Long, playheadMs: Long, onEditLayer: (Int) -> Unit) {
+private fun MixTimeline(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<MixClip>, filmMs: Long, playheadMs: () -> Long, onEditLayer: (Int) -> Unit) {
     if (filmMs <= 0) return
     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().clip(SliverShapes.R12)) {
         val w = maxWidth
@@ -238,7 +238,7 @@ private fun MixTimeline(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<Mi
         // Playhead across all rows.
         val head = SliverColors.TextPrimary
         Canvas(Modifier.matchParentSize()) {
-            val hx = (playheadMs.coerceIn(0, filmMs).toFloat() / filmMs) * size.width
+            val hx = (playheadMs().coerceIn(0, filmMs).toFloat() / filmMs) * size.width
             drawLine(head, Offset(hx, 0f), Offset(hx, size.height), 2.dp.toPx())
         }
     }
@@ -246,7 +246,7 @@ private fun MixTimeline(mix: AudioMix, onMix: (AudioMix) -> Unit, clips: List<Mi
 
 /** Edit one layer: where it starts in the film, which part of the file, volume, repeat, remove. */
 @Composable
-fun LayerEditor(layer: AudioLayer, filmMs: Long, playheadMs: Long, onChange: (AudioLayer) -> Unit, onRemove: () -> Unit) {
+fun LayerEditor(layer: AudioLayer, filmMs: Long, playheadMs: () -> Long, onChange: (AudioLayer) -> Unit, onRemove: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
         SliverText(trackTitle(layer.path), SliverType.Title, maxLines = 1)
         SliverText("File length ${audioTime(layer.durationMs)}", SliverType.Meta, color = SliverColors.TextTertiary)
@@ -257,7 +257,7 @@ fun LayerEditor(layer: AudioLayer, filmMs: Long, playheadMs: Long, onChange: (Au
                 if (filmMs > 0) layer.startMs.toFloat() / filmMs else 0f,
                 { onChange(layer.copy(startMs = (it * filmMs).toLong().roundTo(100))) }, Modifier.weight(1f),
             )
-            GhostButton("At playhead", { onChange(layer.copy(startMs = playheadMs.coerceIn(0, filmMs).roundTo(100))) })
+            GhostButton("At playhead", { onChange(layer.copy(startMs = playheadMs().coerceIn(0, filmMs).roundTo(100))) })
         }
 
         val out = layer.outMs ?: layer.durationMs

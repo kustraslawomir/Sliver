@@ -1,4 +1,5 @@
 package app.sliver.feature.archive
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.feature.camera.label
 import app.sliver.core.ui.SheetsOpen
 import kotlinx.coroutines.delay
@@ -53,7 +54,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import app.sliver.data.backup.SyncEngine
@@ -164,17 +164,17 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val days = remember { koin.get<DayRepository>() }
     val settings = remember { koin.get<SettingsRepository>() }
     val today = remember { todayLocal() }
-    val all by remember { days.observeAll() }.collectAsState(emptyList())
-    val app by remember { settings.settings }.collectAsState(null)
+    val all by remember { days.observeAll() }.collectAsStateWithLifecycle(emptyList())
+    val app by remember { settings.settings }.collectAsStateWithLifecycle(null)
     val byDate = remember(all) { all.associateBy { it.date } }
-    val syncing by remember { koin.get<SyncEngine>().progress }.collectAsState()
-    val drafts by remember { days.observeDrafts() }.collectAsState(emptyList())
+    val syncing by remember { koin.get<SyncEngine>().progress }.collectAsStateWithLifecycle()
+    val drafts by remember { days.observeDrafts() }.collectAsStateWithLifecycle(emptyList())
     val calendar = remember(byDate, drafts) { drafts.associateBy { it.date } + byDate }
     val waiting = remember(drafts, all) { toCheck(drafts, all) }
     val autoCount = remember(all) { autoDays(all).size }
     val draftNav = rememberDraftNav()
-    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
-    val projects by remember { koin.get<ProjectRepository>().projects }.collectAsState(emptyList())
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsStateWithLifecycle(null)
+    val projects by remember { koin.get<ProjectRepository>().projects }.collectAsStateWithLifecycle(emptyList())
     // Auto-import can fill days before the project was created: the calendar (and "since") must reach them.
     val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull { it.date }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
 

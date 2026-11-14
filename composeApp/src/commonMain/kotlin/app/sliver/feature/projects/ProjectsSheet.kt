@@ -1,5 +1,6 @@
 package app.sliver.feature.projects
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,9 +73,9 @@ fun ProjectsSheet(
     backdrop: dev.chrisbanes.haze.HazeState? = null,
 ) {
     val repo = remember { KoinPlatform.getKoin().get<ProjectRepository>() }
-    val projects by remember { repo.projects }.collectAsState(emptyList())
-    val stats by remember { repo.stats }.collectAsState(emptyMap())
-    val active by remember { repo.active }.collectAsState(null)
+    val projects by remember { repo.projects }.collectAsStateWithLifecycle(emptyList())
+    val stats by remember { repo.stats }.collectAsStateWithLifecycle(emptyMap())
+    val active by remember { repo.active }.collectAsStateWithLifecycle(null)
     val scope = rememberCoroutineScope()
     val flight = rememberSingleFlight()
     var mode by remember { mutableStateOf<SheetMode>(SheetMode.List) }

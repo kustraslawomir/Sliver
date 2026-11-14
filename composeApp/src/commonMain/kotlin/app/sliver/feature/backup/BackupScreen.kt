@@ -1,5 +1,6 @@
 package app.sliver.feature.backup
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.data.backup.driveRoomLine
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
@@ -24,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -106,10 +106,10 @@ fun BackupScreen(onBack: () -> Unit, onRestore: () -> Unit = {}) {
     val exporter = remember { koin.get<ArchiveExporter>() }
     val scope = rememberCoroutineScope()
 
-    val settings by remember { repo.settings }.collectAsState(null)
-    val statuses by remember { days.observeAll().map { list -> list.map { it.backup } } }.collectAsState(emptyList())
-    val progress by engine.progress.collectAsState()
-    val network by remember { monitor.network }.collectAsState(NetworkKind.UNMETERED)
+    val settings by remember { repo.settings }.collectAsStateWithLifecycle(null)
+    val statuses by remember { days.observeAll().map { list -> list.map { it.backup } } }.collectAsStateWithLifecycle(emptyList())
+    val progress by engine.progress.collectAsStateWithLifecycle()
+    val network by remember { monitor.network }.collectAsStateWithLifecycle(NetworkKind.UNMETERED)
     val account = settings?.account
 
     var quota by remember { mutableStateOf<DriveQuota?>(null) }

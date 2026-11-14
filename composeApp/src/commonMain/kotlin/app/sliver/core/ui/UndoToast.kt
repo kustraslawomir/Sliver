@@ -1,5 +1,6 @@
 package app.sliver.core.ui
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.kit.glass
 
 import app.sliver.core.theme.ReelogType
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,8 +71,8 @@ fun UndoBarAbove(bottom: Dp) {
 
 @Composable
 fun UndoToastHost() {
-    val toast by UndoToasts.current.collectAsState()
-    val bottom by UndoToasts.bottom.collectAsState()
+    val toast by UndoToasts.current.collectAsStateWithLifecycle()
+    val bottom by UndoToasts.bottom.collectAsStateWithLifecycle()
     val t = toast ?: return
     LaunchedEffect(t) {
         delay(UNDO_WINDOW_MS)

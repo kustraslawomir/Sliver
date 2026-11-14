@@ -31,7 +31,7 @@ class RecordButtonShots : ShotTest() {
             Row(horizontalArrangement = Arrangement.spacedBy(28.dp)) {
                 RecordButton(RecordState.VideoIdle, false, true, {}, {}, {})
                 RecordButton(RecordState.Photo, false, true, {}, {}, {})
-                RecordButton(RecordState.Recording, false, true, {}, {}, {}, elapsedMs = 600)
+                RecordButton(RecordState.Recording, false, true, {}, {}, {}, elapsedMs = { 600 })
             }
         }
     }

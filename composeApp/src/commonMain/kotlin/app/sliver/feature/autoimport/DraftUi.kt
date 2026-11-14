@@ -1,5 +1,6 @@
 package app.sliver.feature.autoimport
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.foundation.Image
@@ -23,7 +24,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -174,7 +174,7 @@ fun rememberDraftNav(): DraftNav {
 @Composable
 fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier: Modifier = Modifier) {
     val actions = remember { KoinPlatform.getKoin().get<DraftActions>() }
-    val list by remember { actions.drafts }.collectAsState(emptyList())
+    val list by remember { actions.drafts }.collectAsStateWithLifecycle(emptyList())
     val index = list.indexOfFirst { it.date == ctx.day.date }.coerceAtLeast(0)
     val total = list.size.coerceAtLeast(1)
     val d = ctx.day.date

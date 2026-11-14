@@ -1,5 +1,7 @@
 package app.sliver.feature.camera
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.derivedStateOf
 import app.sliver.core.kit.glass
 
 import app.sliver.core.theme.ReelogType
@@ -61,7 +63,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -139,7 +140,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     val koin = remember { KoinPlatform.getKoin() }
     val repo = remember { koin.get<SettingsRepository>() }
     val files = remember { koin.get<FileStore>() }
-    val saved by remember { repo.settings }.collectAsState(null)
+    val saved by remember { repo.settings }.collectAsStateWithLifecycle(null)
     val cam = saved?.camera ?: return Box(Modifier.fillMaxSize().background(SliverColors.BgVoid))
 
     val engine = rememberCameraEngine()
@@ -147,9 +148,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     val haptics = LocalHapticFeedback.current
     val days = remember { koin.get<DayRepository>() }
     val today = remember { todayLocal() }
-    val todayDay by remember { days.observeDay(today) }.collectAsState(null)
+    val todayDay by remember { days.observeDay(today) }.collectAsStateWithLifecycle(null)
     var flipTurns by remember { mutableIntStateOf(0) }
-    val project by remember { koin.get<ProjectRepository>().active }.collectAsState(null)
+    val project by remember { koin.get<ProjectRepository>().active }.collectAsStateWithLifecycle(null)
     val format = project?.format ?: saved?.newFilmFormat ?: FilmFormat.CINEMA
     val rotation = rememberDeviceRotation()
     SideEffect { engine.deviceDegrees = rotation }
@@ -168,7 +169,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     var ready by remember { mutableStateOf(false) }
     var recording by remember { mutableStateOf(false) }
     var holding by remember { mutableStateOf(false) }
-    var elapsedMs by remember { mutableLongStateOf(0L) }
+    // Perf STEP 2: ticks 10×/s while recording; the screen reads only the derived "long enough" flag, the record
+    // button reads the time while drawing (ring) and in its timer pill.
+    val elapsed = remember { mutableLongStateOf(0L) }
     // Owner decision: mode, lens and light are not remembered; the camera always opens on Video, back lens, 1×, light off.
     var mode by rememberSaveable { mutableStateOf(CameraMode.VIDEO) }
     var lens by rememberSaveable { mutableStateOf(Lens.BACK) }
@@ -188,7 +191,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     LaunchedEffect(recording) {
         val start = Clock.System.now().toEpochMilliseconds()
         while (recording) {
-            elapsedMs = Clock.System.now().toEpochMilliseconds() - start
+            elapsed.longValue = Clock.System.now().toEpochMilliseconds() - start
             delay(100)
         }
     }
@@ -214,7 +217,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
     fun startRecording() {
         if (!storageOk()) return
         haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-        elapsedMs = 0
+        elapsed.longValue = 0
         recording = true
         failed = false
         if (saved?.coachRecordSeen == false) scope.launch { repo.update { it.copy(coachRecordSeen = true) } }
@@ -285,7 +288,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (recording) {
-                    val long = clipLongEnough(elapsedMs)
+                    val long by remember { derivedStateOf { clipLongEnough(elapsed.longValue) } }
                     // v1.7: the timer lives in the pill above the record button.
                     LaunchedEffect(long) { if (long) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
                 } else {
@@ -354,7 +357,7 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
                         }
                     },
                     onHoldEnd = { if (recording) stopRecording() },
-                    elapsedMs = elapsedMs,
+                    elapsedMs = { elapsed.longValue },
                 )
                 if (recording) {
                     Box(Modifier.size(64.dp))

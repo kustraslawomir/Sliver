@@ -1,5 +1,6 @@
 package app.sliver.feature.trim
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.ui.SwitchRow
 import app.sliver.core.log.logDebug
 import app.sliver.core.ui.SlitLoader
@@ -45,7 +46,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -140,7 +140,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val haptics = LocalHapticFeedback.current
 
     val today = remember { todayLocal() }
-    val saved by remember { settings.settings }.collectAsState(null)
+    val saved by remember { settings.settings }.collectAsStateWithLifecycle(null)
 
     val restoredMs = remember { savedState.get<Long>(KEY_START_MS) }
     val navigator = LocalNavigator.current

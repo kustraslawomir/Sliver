@@ -125,7 +125,7 @@ class ScreenShots : ShotTest() {
                 ) {
                     app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.Photo, false, true, {}, {}, {})
                     app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.VideoIdle, false, true, {}, {}, {})
-                    app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.Recording, false, true, {}, {}, {}, elapsedMs = 600)
+                    app.sliver.feature.camera.RecordButton(app.sliver.feature.camera.RecordState.Recording, false, true, {}, {}, {}, elapsedMs = { 600 })
                 }
             }
         }

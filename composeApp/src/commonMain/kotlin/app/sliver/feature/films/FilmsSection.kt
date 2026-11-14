@@ -1,5 +1,6 @@
 package app.sliver.feature.films
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.ui.IconButton44
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
@@ -47,7 +48,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -88,8 +88,8 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
     // Owner: newest film on the left.
-    val list by remember { films.observeAll().map { l -> l.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt } } }.collectAsState(emptyList())
-    val all by remember { days.observeAll() }.collectAsState(emptyList())
+    val list by remember { films.observeAll().map { l -> l.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt } } }.collectAsStateWithLifecycle(emptyList())
+    val all by remember { days.observeAll() }.collectAsStateWithLifecycle(emptyList())
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter), verticalAlignment = Alignment.CenterVertically) {
@@ -126,7 +126,7 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versionCount: Int = 1, onLongClick: () -> Unit, onClick: () -> Unit) {
     val renderer = remember { KoinPlatform.getKoin().get<FilmRenderer>() }
-    val state by remember(film.id) { renderer.state(film.id) }.collectAsState(RenderState.Idle)
+    val state by remember(film.id) { renderer.state(film.id) }.collectAsStateWithLifecycle(RenderState.Idle)
     Column(
         Modifier.width(PosterW).combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = rememberTapGate(onClick))
             .semantics { contentDescription = "${film.name}, ${filmRuntime(plan.clips)}" },
@@ -178,7 +178,7 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versi
 fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit, onOpen: (Film) -> Unit = {}) {
     val scope = rememberCoroutineScope()
     var target by remember(film) { mutableStateOf<Film?>(null) }
-    val all by remember { KoinPlatform.getKoin().get<FilmRepository>().observeAll() }.collectAsState(emptyList())
+    val all by remember { KoinPlatform.getKoin().get<FilmRepository>().observeAll() }.collectAsStateWithLifecycle(emptyList())
     // Every version of this film (same name), newest first, numbered oldest = v1.
     val versions = remember(all, film) {
         all.filter { it.name == film?.name }.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt }

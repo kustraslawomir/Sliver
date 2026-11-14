@@ -1,5 +1,6 @@
 package app.sliver.core.navigation
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
@@ -76,7 +76,7 @@ fun SliverNavHost() {
     // Set during composition, not in a SideEffect, so the incoming screen never paints one frame in the old palette.
     SliverColors.forceDark = dark
 
-    val link by DeepLink.target.collectAsState()
+    val link by DeepLink.target.collectAsStateWithLifecycle()
 
     val onboardingDone by produceState<Boolean?>(null) {
         value = KoinPlatform.getKoin().get<SettingsRepository>().settings.first().onboardingDone

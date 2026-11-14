@@ -1,4 +1,6 @@
 package app.sliver.feature.films
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 
@@ -40,7 +42,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,8 +87,8 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val id = FilmNav.id
     val renderer = remember { koin.get<FilmRenderer>() }
-    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsState(null)
-    val state by remember(id) { renderer.state(id ?: "") }.collectAsState(RenderState.Running(0))
+    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsStateWithLifecycle(null)
+    val state by remember(id) { renderer.state(id ?: "") }.collectAsStateWithLifecycle(RenderState.Running(0))
     val done = rememberUpdatedState(onDone)
 
     LaunchedEffect(state, film?.renderPath) {
@@ -151,8 +152,8 @@ fun ExportScreen(onDone: () -> Unit, onBack: () -> Unit) {
 fun PremiereScreen(onDone: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val id = FilmNav.id
-    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsState(null)
-    val days by remember { koin.get<DayRepository>().observeAll() }.collectAsState(emptyList())
+    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsStateWithLifecycle(null)
+    val days by remember { koin.get<DayRepository>().observeAll() }.collectAsStateWithLifecycle(emptyList())
     val reduced = LocalReducedMotion.current
     val clock = remember { Animatable(if (reduced) PREMIERE_END_MS.toFloat() else 0f) }
     val finish = rememberUpdatedState(onDone)
@@ -194,8 +195,8 @@ fun PremiereScreen(onDone: () -> Unit) {
 fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     val koin = remember { KoinPlatform.getKoin() }
     val id = FilmNav.id
-    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsState(null)
-    val days by remember { koin.get<DayRepository>().observeAll() }.collectAsState(emptyList())
+    val film by remember(id) { koin.get<FilmRepository>().observeFilm(id ?: "") }.collectAsStateWithLifecycle(null)
+    val days by remember { koin.get<DayRepository>().observeAll() }.collectAsStateWithLifecycle(emptyList())
     val share = remember { koin.get<FilmShare>() }
     val scope = rememberCoroutineScope()
 
@@ -206,7 +207,10 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     LaunchedEffect(muted) { FilmPlayback.muted = muted }
     var fullscreen by remember { mutableStateOf(false) }
     var seek by remember { mutableStateOf<PlayerSeek?>(null) }
-    var position by remember { mutableStateOf(0L to 0L) }
+    // Perf STEP 2: position arrives many times a second; the body reads only whole seconds and the duration (derived).
+    val positionState = remember { mutableStateOf(0L to 0L) }
+    val pos by remember { derivedStateOf { positionState.value.first / 1000 * 1000 } }
+    val dur by remember { derivedStateOf { positionState.value.second } }
     var status by remember { mutableStateOf<String?>(null) }
     var saving by remember { mutableStateOf(false) }
     var saved by remember(film?.renderPath) { mutableStateOf(false) }
@@ -223,8 +227,8 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     }
     val plan = remember(f, days) { f.plan(days) }
     val info = remember(path) { filmInfoLine(share.sizeBytes(path)) }
-    val (pos, dur) = position
     val total = dur.takeIf { it > 0 } ?: (plan.clips * FILM_FRAME_MS + FILM_TITLE_MS)
+    val remaining by remember(total) { derivedStateOf { (total - positionState.value.first).coerceAtLeast(0) / 1000 * 1000 } }
     val ratio = if (f.format == FilmFormat.CINEMA) 16f / 9f else 9f / 16f
 
     // Owner: a 9:16 film (Lena) goes full screen upright; only 16:9 films turn sideways (and follow the phone).
@@ -237,14 +241,14 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     fun Controls(modifier: Modifier) {
         Column(modifier) {
             // v1.9 §3.2: the builder's filmstrip scrubber (real thumbnails, white playhead) with the months under it.
-            Filmstrip(plan, (pos.toFloat() / total).coerceIn(0f, 1f)) { seek = PlayerSeek((it * total).toLong()); playing = true }
+            Filmstrip(plan, { (positionState.value.first.toFloat() / total).coerceIn(0f, 1f) }) { seek = PlayerSeek((it * total).toLong()); playing = true }
             Row(Modifier.fillMaxWidth().padding(top = SliverSpace.S2), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverText(clock(pos), SliverType.Meta, color = SliverColors.TextTertiary)
                 SliverText(
                     stripMonths(plan), SliverType.Meta.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), Modifier.weight(1f), SliverColors.TextTertiary,
                     maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
-                SliverText("-" + clock((total - pos).coerceAtLeast(0)), SliverType.Meta, color = SliverColors.TextTertiary)
+                SliverText("-" + clock(remaining), SliverType.Meta, color = SliverColors.TextTertiary)
             }
         }
     }
@@ -270,7 +274,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     @Composable
     fun Video(modifier: Modifier) = FilmPlayerView(
         path, playing, muted, seek,
-        onPosition = { p, d -> position = p to d },
+        onPosition = { p, d -> positionState.value = p to d },
         onEnded = { playing = false },
         modifier = modifier,
     )

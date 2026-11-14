@@ -1,4 +1,5 @@
 package app.sliver.feature.camera
+import androidx.compose.runtime.derivedStateOf
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.ReelogType
 import app.sliver.core.kit.glass
@@ -88,7 +89,7 @@ fun RecordButton(
     onHoldStart: () -> Unit,
     onHoldEnd: () -> Unit,
     modifier: Modifier = Modifier,
-    elapsedMs: Long = 0L,
+    elapsedMs: () -> Long = { 0L },
 ) {
     app.sliver.core.log.RecomposeProbe("recordButton")
     val reduced = LocalReducedMotion.current
@@ -109,7 +110,6 @@ fun RecordButton(
         if (wasRecording && !recording) { flash.snapTo(1f); flash.animateTo(0f, tween(480)) }
         wasRecording = recording
     }
-    val progress = if (recording) (elapsedMs / 1000f).coerceIn(0f, 1f) else 0f
 
     Box(
         modifier.size(Box92)
@@ -138,6 +138,7 @@ fun RecordButton(
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(Box92).alpha(if (enabled) 1f else 0.5f)) {
+            val progress = if (recording) (elapsedMs() / 1000f).coerceIn(0f, 1f) else 0f
             drawRecordButton(white = white, rec = rec, press = press, progress = progress, flash = flash.value)
         }
         if (recording) {
@@ -179,8 +180,8 @@ private fun lerp(a: Float, b: Float, k: Float) = a + (b - a) * k
 
 /** "0.6 s" over black 25 % glass with the red recording dot. */
 @Composable
-private fun RecordTimerPill(elapsedMs: Long, modifier: Modifier = Modifier) {
-    val tenths = (elapsedMs / 100).toInt()
+private fun RecordTimerPill(elapsedMs: () -> Long, modifier: Modifier = Modifier) {
+    val tenths by remember { derivedStateOf { (elapsedMs() / 100).toInt() } }
     Row(
         modifier.height(30.dp).glass(GlassStyle.Regular, RoundedCornerShape(15.dp), overMedia = true).padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

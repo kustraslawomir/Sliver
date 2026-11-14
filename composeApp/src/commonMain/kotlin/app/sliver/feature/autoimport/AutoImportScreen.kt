@@ -1,5 +1,6 @@
 package app.sliver.feature.autoimport
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.theme.ReelogType
 
 import androidx.compose.foundation.Image
@@ -41,7 +42,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,10 +99,10 @@ fun AutoImportScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     val controller = rememberPermissionController()
     val draftNav = rememberDraftNav()
 
-    val run by remember { store.run }.collectAsState(null)
-    val project by remember { projects.active }.collectAsState(null)
-    val rows by remember { combine(days.observeAll(), days.observeDrafts()) { a, d -> (a + d).map { it.date }.toSet() } }.collectAsState(emptySet())
-    val waiting by remember { combine(days.observeDrafts(), days.observeAll(), ::toCheck) }.collectAsState(emptyList())
+    val run by remember { store.run }.collectAsStateWithLifecycle(null)
+    val project by remember { projects.active }.collectAsStateWithLifecycle(null)
+    val rows by remember { combine(days.observeAll(), days.observeDrafts()) { a, d -> (a + d).map { it.date }.toSet() } }.collectAsStateWithLifecycle(emptySet())
+    val waiting by remember { combine(days.observeDrafts(), days.observeAll(), ::toCheck) }.collectAsStateWithLifecycle(emptyList())
     val navigator = LocalNavigator.current
     var sawRunning by rememberSaveable { mutableStateOf(false) }
 

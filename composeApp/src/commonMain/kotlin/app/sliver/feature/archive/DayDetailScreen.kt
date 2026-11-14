@@ -1,5 +1,6 @@
 package app.sliver.feature.archive
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,8 +93,8 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
         LaunchedEffect(Unit) { onBack() }
         return
     }
-    val all by remember { days.observeAll() }.collectAsState(emptyList())
-    val app by remember { settings.settings }.collectAsState(null)
+    val all by remember { days.observeAll() }.collectAsStateWithLifecycle(emptyList())
+    val app by remember { settings.settings }.collectAsStateWithLifecycle(null)
     val day = all.firstOrNull { it.date == current }
     val filled = remember(all) { all.map { it.date } }
     val first = app?.firstDay ?: filled.minOrNull() ?: current
@@ -134,7 +134,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var notice by remember { mutableStateOf<String?>(null) }
     val importStore = remember { koin.get<AutoImportStore>() }
     val draftActions = remember { koin.get<DraftActions>() }
-    val altMap by remember { importStore.alternatives }.collectAsState(emptyMap())
+    val altMap by remember { importStore.alternatives }.collectAsStateWithLifecycle(emptyMap())
     val others = day?.let { altMap[dismissKey(it.projectId, it.date)] }.orEmpty()
 
     fun remove(d: app.sliver.data.db.Day) {

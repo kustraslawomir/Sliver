@@ -1,5 +1,6 @@
 package app.sliver.feature.backup
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.APP_NAME
 
 import app.sliver.core.ui.SlitLoader
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,11 +85,11 @@ fun RestoreScreen(onDone: () -> Unit) {
     var scan by remember { mutableStateOf<RestoreScan?>(null) }
     var failed by remember { mutableStateOf(false) }
     var started by remember { mutableStateOf(false) }
-    val progress by engine.progress.collectAsState()
-    val local by remember { repo.observeAllProjects() }.collectAsState(emptyList())
+    val progress by engine.progress.collectAsStateWithLifecycle()
+    val local by remember { repo.observeAllProjects() }.collectAsStateWithLifecycle(emptyList())
 
     val settingsRepo = remember { koin.get<SettingsRepository>() }
-    val signedIn = remember { settingsRepo.settings }.collectAsState(null).value?.account?.signedIn
+    val signedIn = remember { settingsRepo.settings }.collectAsStateWithLifecycle(null).value?.account?.signedIn
     val scope = rememberCoroutineScope()
     if (signedIn == false) {
         // Restore needs the Google account first; after sign-in this screen continues with the Drive scan.

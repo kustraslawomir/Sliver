@@ -1,7 +1,7 @@
 package app.sliver.core.ui
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +22,6 @@ object Notices {
 
 @Composable
 fun NoticeHost() {
-    val message by Notices.message.collectAsState()
+    val message by Notices.message.collectAsStateWithLifecycle()
     NoticeSheet(message, Notices::clear)
 }
