@@ -130,6 +130,7 @@ kotlin {
     sourceSets {
         commonMain { kotlin.srcDir(generateDesignTokens.map { it.outDir }) }
         commonMain.dependencies {
+            implementation(libs.kotlinx.collections.immutable)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.components.resources)
@@ -190,6 +191,7 @@ kotlin {
 composeCompiler {
     reportsDestination = layout.buildDirectory.dir("compose_compiler")
     metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFiles.add(project.layout.projectDirectory.file("compose-stability.conf"))
 }
 
 dependencies {

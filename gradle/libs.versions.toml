@@ -1,4 +1,5 @@
 [versions]
+collectionsImmutable = "0.4.0"
 leakcanary = "2.14"
 agp = "9.4.1"
 kotlin = "2.4.21"
@@ -26,6 +27,7 @@ roborazzi = "1.79.0"
 # later: coil 3.6.3
 
 [libraries]
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 haze = { module = "dev.chrisbanes.haze:haze", version = "1.6.10" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
