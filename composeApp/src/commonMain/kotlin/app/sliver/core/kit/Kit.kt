@@ -77,7 +77,14 @@ fun ReelogButton(
 ) {
     val source = remember { MutableInteractionSource() }
     val scale = pressScale(source, 0.97f)
-    val (fill, content) = when (kind) {
+    val (fill, content) = if (overMedia && kind != ButtonKind.Primary) {
+        // Over a photo or video text is always light, whatever the theme.
+        Color.Transparent to when {
+            !enabled -> SliverColors.OnMedia.copy(alpha = 0.4f)
+            kind == ButtonKind.Destructive -> SliverColors.ErrorOnMedia
+            else -> SliverColors.OnMedia
+        }
+    } else when (kind) {
         ButtonKind.Primary -> (if (enabled) SliverColors.Accent else ink.copy(alpha = 0.08f)) to
             (if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
         ButtonKind.Secondary -> Color.Transparent to (if (enabled) ink else SliverColors.TextDisabled)

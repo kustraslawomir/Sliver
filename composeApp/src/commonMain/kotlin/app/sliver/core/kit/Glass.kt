@@ -52,7 +52,8 @@ fun Modifier.glass(style: GlassStyle, shape: Shape, overMedia: Boolean = false, 
         else -> Color.White.copy(alpha = if (strong) 0.12f else 0.08f)
     }
     val surface = when {
-        overMedia && !light -> Modifier.background(Color.Black.copy(alpha = 0.22f), shape).background(tint, shape)
+        // Owner 14 Nov (light theme): over a photo or video the glass is always the dark media tint, in both themes.
+        overMedia -> Modifier.background(Color.Black.copy(alpha = 0.28f), shape).background(Color.White.copy(alpha = if (strong) 0.12f else 0.08f), shape)
         state != null && blur -> Modifier.hazeEffect(
             state,
             HazeStyle(

@@ -65,6 +65,8 @@ object SliverColors {
     val Error get() = if (this.light) Color(0xFFB5301F) else p.error
     val Media = Color.Black
     val OnMedia = Color.White
+    /** Destructive label over a photo or video (both themes). */
+    val ErrorOnMedia = Color(0xFFFF8A80)
     val Scrim = Tokens.Scrim
     val CellEmpty get() = if (this.light) Color(0xFFECE8E0) else Color(0xFF1C1C20)
     val CellEmptyLine get() = if (this.light) Color(0xFFE2DED6) else Color(0xFF1F1F22)

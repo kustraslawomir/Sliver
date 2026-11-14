@@ -177,7 +177,7 @@ fun DayDetailScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     val whenText = if (current == today) "Today" else "Day ${dayNumber(current, first)}"
                     SliverText(
                         whenText + (time?.let { " · ${it.hour.toString().padStart(2, '0')}:${it.minute.toString().padStart(2, '0')}" } ?: ""),
-                        ReelogType.label.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextPrimary,
+                        ReelogType.label.copy(fontFeatureSettings = "tnum"), color = SliverColors.OnMedia.copy(alpha = 0.85f),
                     )
                 }
                 IconButton44({ next?.let { show(it) } }, "Next day", overCamera = true) {
