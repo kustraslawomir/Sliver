@@ -1,81 +1,65 @@
 package app.sliver.feature.trim
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.ui.SwitchRow
-import app.sliver.core.log.logDebug
-import app.sliver.core.ui.SlitLoader
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.icons.SliverIcons
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.ui.graphics.Color
-import app.sliver.data.FilmFormat
-import app.sliver.data.db.Film
-import app.sliver.data.repo.FilmRepository
-import app.sliver.feature.camera.cinemaBandFraction
-import app.sliver.feature.camera.cropXFromLeft
-import app.sliver.feature.camera.leftFromCropX
-import app.sliver.feature.camera.storyBandFraction
-import app.sliver.feature.camera.cropYFromTop
-import app.sliver.feature.camera.topFromCropY
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.fillMaxHeight
-import app.sliver.core.ui.LocalWindowSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
+import app.sliver.core.log.logDebug
 import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
-import androidx.lifecycle.SavedStateHandle
-import app.sliver.core.ui.PredictiveBackHandler
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -83,28 +67,36 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Chip
+import app.sliver.core.ui.DateStamp
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.LocalWindowSize
+import app.sliver.core.ui.PredictiveBackHandler
 import app.sliver.core.ui.PrimaryButton
-import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.SlitLoader
 import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
 import app.sliver.core.ui.StripDim
+import app.sliver.core.ui.SwitchRow
 import app.sliver.data.DaySource
+import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
-import app.sliver.data.toParams
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.export.ShortMode
+import app.sliver.data.export.stampText
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
-import app.sliver.core.ui.DateStamp
-import app.sliver.data.export.stampText
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.data.media.MotionPhoto
 import app.sliver.feature.autoimport.CandidateStrip
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
+import app.sliver.feature.camera.cinemaBandFraction
+import app.sliver.feature.camera.cropXFromLeft
+import app.sliver.feature.camera.cropYFromTop
+import app.sliver.feature.camera.leftFromCropX
+import app.sliver.feature.camera.storyBandFraction
+import app.sliver.feature.camera.topFromCropY
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -208,7 +200,7 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     val windowMs = if (short) duration ?: 0 else (SECOND_MS * speed).toLong()
     val reframe = format == FilmFormat.CINEMA && clipAspect < 1f
     val reframeX = format == FilmFormat.STORY && clipAspect > 1f
-    val coach =saved?.coachTrimSeen == false && duration != null && !short
+    val coach = saved?.coachTrimSeen == false && duration != null && !short
 
     fun release(to: Long) {
         startMs = to
@@ -228,7 +220,12 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
 
     var backProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = { backProgress = it }, onBack = { backProgress = 0f; close() })
+    PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = {
+        backProgress = it
+    }, onBack = {
+        backProgress = 0f
+        close()
+    })
 
     fun useSecond() {
         if (saving || !ready || durationMs == null) return
@@ -254,129 +251,165 @@ fun TrimScreen(onNavigate: (Route) -> Unit, savedState: SavedStateHandle) {
     }
 
     Box(
-        Modifier.fillMaxSize().graphicsLayer { (1f - 0.08f * backProgress).let { scaleX = it; scaleY = it } }
+        Modifier.fillMaxSize().graphicsLayer { (1f - 0.08f * backProgress).let {
+            scaleX = it
+            scaleY = it
+        }
+        }
             .background(SliverColors.BgVoid),
     ) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            if (draft != null) app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close) else Row(
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-                SliverText(dayLabel(day, today), SliverType.Meta, color = SliverColors.TextSecondary)
-                IconButton44(
-                    { previewSound = !previewSound; soundTouched = true },
-                    if (previewSound) "Sound on" else "Sound off",
+            if (draft != null) {
+                app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close)
+            } else {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    SliverIcon(
-                        if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX,
-                        if (previewSound) SliverColors.Accent else SliverColors.TextTertiary,
-                    )
+                    IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
+                    SliverText(dayLabel(day, today), SliverType.Meta, color = SliverColors.TextSecondary)
+                    IconButton44(
+                        {
+                            previewSound = !previewSound
+                            soundTouched = true
+                        },
+                        if (previewSound) "Sound on" else "Sound off",
+                    ) {
+                        SliverIcon(
+                            if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX,
+                            if (previewSound) SliverColors.Accent else SliverColors.TextTertiary,
+                        )
+                    }
                 }
             }
 
             val sideBySide = LocalWindowSize.current.sideBySide
+
             @Composable
             fun Preview(m: Modifier) {
-            Box(
-                m.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
-                    .clip(SliverShapes.S).background(SliverColors.Surface1),
-            ) {
-                if (!ready) {
-                    PrepareSkeleton(
-                        prepareProgress(duration != null, ready, thumbs.size, thumbsTotal), info, Modifier.align(Alignment.Center),
-                    )
-                } else if (duration != null) {
-                    ClipPlayer(
-                        path, committedMs, windowMs, Modifier.fillMaxSize(), speed, previewSound, dragging,
-                        scrubMs = if (dragging) startMs else null,
-                    ) {
-                        if (reframe) ReframeBand(cropY, { cropY = it })
-                        if (reframeX) ReframeBandX(cropX, { cropX = it })
-                    }
-                    if (saved?.dateStamp == true) DateStamp(stampText(day))
-                    if (draft != null) {
-                        IconButton44(
-                            { previewSound = !previewSound; soundTouched = true },
-                            // DECISION: top-right, not bottom-right as on the board, so it never covers the date stamp.
-                            if (previewSound) "Sound on" else "Sound off", Modifier.align(Alignment.TopEnd).padding(SliverSpace.S2),
-                            overCamera = true,
-                        ) { SliverIcon(if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX, SliverColors.OnMedia) }
+                Box(
+                    m.padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
+                        .clip(SliverShapes.S).background(SliverColors.Surface1),
+                ) {
+                    if (!ready) {
+                        PrepareSkeleton(
+                            prepareProgress(duration != null, ready, thumbs.size, thumbsTotal),
+                            info,
+                            Modifier.align(Alignment.Center),
+                        )
+                    } else if (duration != null) {
+                        ClipPlayer(
+                            path,
+                            committedMs,
+                            windowMs,
+                            Modifier.fillMaxSize(),
+                            speed,
+                            previewSound,
+                            dragging,
+                            scrubMs = if (dragging) startMs else null,
+                        ) {
+                            if (reframe) ReframeBand(cropY, { cropY = it })
+                            if (reframeX) ReframeBandX(cropX, { cropX = it })
+                        }
+                        if (saved?.dateStamp == true) DateStamp(stampText(day))
+                        if (draft != null) {
+                            IconButton44(
+                                {
+                                    previewSound = !previewSound
+                                    soundTouched = true
+                                },
+                                // DECISION: top-right, not bottom-right as on the board, so it never covers the date stamp.
+                                if (previewSound) "Sound on" else "Sound off",
+                                Modifier.align(Alignment.TopEnd).padding(SliverSpace.S2),
+                                overCamera = true,
+                            ) { SliverIcon(if (previewSound) SliverIcons.Volume2 else SliverIcons.VolumeX, SliverColors.OnMedia) }
+                        }
                     }
                 }
-            }
             }
 
             @Composable
             fun Controls() {
-            if (duration != null && !short) {
-                Box {
-                    Filmstrip(
-                        thumbs, thumbsTotal, duration, startMs, windowMs,
-                        frameState = frameState,
-                        onDragStart = {
-                            dragging = true
-                            frameState = SliverFrameState.Dragging
-                            if (coach) scope.launch { settings.update { it.copy(coachTrimSeen = true) } }
-                        },
-                        onDrag = {
-                            val next = clampStart(it, duration, speed)
-                            if (tickIndex(next) != tickIndex(startMs)) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            startMs = next
-                            custom = true
-                        },
-                        onDragEnd = { release(startMs) },
-                    )
-                    if (coach) {
-                        SliverText(
-                            "Drag to choose your clip.", SliverType.BodySmall,
-                            Modifier.align(Alignment.TopCenter).offset(y = (-28).dp)
-                                .clip(SliverShapes.Pill).background(SliverColors.Surface2)
-                                .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
-                            SliverColors.TextPrimary,
+                if (duration != null && !short) {
+                    Box {
+                        Filmstrip(
+                            thumbs, thumbsTotal, duration, startMs, windowMs,
+                            frameState = frameState,
+                            onDragStart = {
+                                dragging = true
+                                frameState = SliverFrameState.Dragging
+                                if (coach) scope.launch { settings.update { it.copy(coachTrimSeen = true) } }
+                            },
+                            onDrag = {
+                                val next = clampStart(it, duration, speed)
+                                if (tickIndex(next) != tickIndex(startMs)) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                startMs = next
+                                custom = true
+                            },
+                            onDragEnd = { release(startMs) },
                         )
+                        if (coach) {
+                            SliverText(
+                                "Drag to choose your clip.",
+                                SliverType.BodySmall,
+                                Modifier.align(Alignment.TopCenter).offset(y = (-28).dp)
+                                    .clip(SliverShapes.Pill).background(SliverColors.Surface2)
+                                    .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
+                                SliverColors.TextPrimary,
+                            )
+                        }
                     }
                 }
-            }
 
-            Column(
-                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
-                verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
-            ) {
-                if (short) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                        listOf(ShortMode.SLOW_TO_FIT to "Slow to fit", ShortMode.LOOP to "Loop", ShortMode.HOLD_LAST to "Hold last frame")
-                            .forEach { (mode, label) -> Chip(label, shortMode == mode, { shortMode = mode }) }
+                Column(
+                    Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
+                    verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+                ) {
+                    if (short) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                            listOf(ShortMode.SLOW_TO_FIT to "Slow to fit", ShortMode.LOOP to "Loop", ShortMode.HOLD_LAST to "Hold last frame")
+                                .forEach { (mode, label) -> Chip(label, shortMode == mode, { shortMode = mode }) }
+                        }
+                    }
+                    // Owner: mute this clip in films. Separate from the preview speaker, which is only for listening here.
+                    SwitchRow("Sound in film", keepAudio, { keepAudio = it })
+                    if (draft != null) CandidateStrip(draft, draftNav)
+                    PrimaryButton(
+                        if (saving) {
+                            "Saving…"
+                        } else if (!ready) {
+                            "Preparing…"
+                        } else if (saveFailed) {
+                            "Couldn't save. Try again"
+                        } else if (draft != null) "Keep this clip" else "Save clip",
+                        ::useSecond,
+                        enabled = ready && !saving && !draftNav.busy,
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                        if (draft != null) {
+                            GhostButton("Remove day", {
+                                if (!saving) draftNav.askSkip(draft)
+                            }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
+                        } else {
+                            GhostButton(
+                                when { inApp -> "Retake"
+                                    change != null -> "Cancel"
+                                    else -> "Pick another" },
+                                { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                                Modifier.weight(1f),
+                            )
+                        }
                     }
                 }
-                // Owner: mute this clip in films. Separate from the preview speaker, which is only for listening here.
-                SwitchRow("Sound in film", keepAudio, { keepAudio = it })
-                if (draft != null) CandidateStrip(draft, draftNav)
-                PrimaryButton(
-                    if (saving) "Saving…" else if (!ready) "Preparing…" else if (saveFailed) "Couldn't save. Try again"
-                    else if (draft != null) "Keep this clip" else "Save clip",
-                    ::useSecond,
-                    enabled = ready && !saving && !draftNav.busy,
-                )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                    if (draft != null) {
-                        GhostButton("Remove day", { if (!saving) draftNav.askSkip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
-                    } else {
-                        GhostButton(
-                            when { inApp -> "Retake"; change != null -> "Cancel"; else -> "Pick another" },
-                            { if (inApp) onNavigate(Route.Camera) else navigator.back() },
-                            Modifier.weight(1f),
-                        )
-                    }
-                }
-            }
             }
 
             if (sideBySide) {
                 Row(Modifier.weight(1f).fillMaxWidth()) {
                     Preview(Modifier.weight(1f).fillMaxHeight())
-                    Column(Modifier.width(SideColumnWidth).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) { Controls() }
+                    Column(Modifier.width(SideColumnWidth).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
+                        Controls()
+                    }
                 }
             } else {
                 Preview(Modifier.weight(1f).fillMaxWidth())
@@ -417,13 +450,18 @@ private fun Filmstrip(
             progressBarRangeInfo = ProgressBarRangeInfo(start.toFloat(), 0f..maxStart.coerceAtLeast(1f), (maxStart / 100).toInt().coerceAtLeast(1) - 1)
             setProgress { v ->
                 val target = ((v / 100f).roundToInt() * 100L).coerceIn(0, maxStart.toLong())
-                dragStart(); drag(target); dragEnd()
+                dragStart()
+                drag(target)
+                dragEnd()
                 true
             }
         }.pointerInput(secPx) {
             var pos = 0f
             detectHorizontalDragGestures(
-                onDragStart = { pos = start.toFloat(); dragStart() },
+                onDragStart = {
+                    pos = start.toFloat()
+                    dragStart()
+                },
                 onDragEnd = { dragEnd() },
                 onDragCancel = { dragEnd() },
             ) { change, dx ->
@@ -507,8 +545,14 @@ internal fun ReframeBandX(cropX: Float, onCropX: (Float) -> Unit) {
                 .semantics {
                     contentDescription = "Crop area, ${(cropX * 100).roundToInt()} percent from the left"
                     customActions = listOf(
-                        CustomAccessibilityAction("Move crop left") { update((current - 0.1f).coerceIn(0f, 1f)); true },
-                        CustomAccessibilityAction("Move crop right") { update((current + 0.1f).coerceIn(0f, 1f)); true },
+                        CustomAccessibilityAction("Move crop left") {
+                            update((current - 0.1f).coerceIn(0f, 1f))
+                            true
+                        },
+                        CustomAccessibilityAction("Move crop right") {
+                            update((current + 0.1f).coerceIn(0f, 1f))
+                            true
+                        },
                     )
                 }
                 .pointerInput(band) {

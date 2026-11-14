@@ -10,9 +10,9 @@ import app.sliver.data.info
 import app.sliver.data.look.LookRaster
 import app.sliver.data.look.LutGenerator
 import app.sliver.data.look.lookFrame
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 private const val THUMB_W = 144
 private const val THUMB_H = 192
@@ -42,14 +42,18 @@ actual suspend fun renderFilterThumbs(frame: ImageBitmap, presets: List<LookPres
 
 /** Centre-crops [frame] to the thumbnail's 3:4 and scales it down. */
 private fun thumbPixels(frame: ImageBitmap): IntArray {
-    val src = frame.asAndroidBitmap().let { if (it.config == Bitmap.Config.HARDWARE) it.copy(Bitmap.Config.ARGB_8888, false) else it }
+    val src = frame.asAndroidBitmap().let {
+        if (it.config == Bitmap.Config.HARDWARE) it.copy(Bitmap.Config.ARGB_8888, false) else it
+    }
     val target = THUMB_W.toFloat() / THUMB_H
     val cw: Int
     val ch: Int
     if (src.width.toFloat() / src.height > target) {
-        ch = src.height; cw = (ch * target).toInt()
+        ch = src.height;
+        cw = (ch * target).toInt()
     } else {
-        cw = src.width; ch = (cw / target).toInt()
+        cw = src.width;
+        ch = (cw / target).toInt()
     }
     val crop = Bitmap.createBitmap(src, (src.width - cw) / 2, (src.height - ch) / 2, cw, ch)
     val scaled = Bitmap.createScaledBitmap(crop, THUMB_W, THUMB_H, true)

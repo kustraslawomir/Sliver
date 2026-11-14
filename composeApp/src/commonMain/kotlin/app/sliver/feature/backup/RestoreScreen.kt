@@ -1,9 +1,5 @@
 package app.sliver.feature.backup
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.APP_NAME
-
-import app.sliver.core.ui.SlitLoader
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +16,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.APP_NAME
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -32,6 +31,7 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.PrimaryButton
+import app.sliver.core.ui.SlitLoader
 import app.sliver.data.backup.BackupProgress
 import app.sliver.data.backup.RestoreEngine
 import app.sliver.data.backup.RestoreScan
@@ -39,7 +39,6 @@ import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -127,9 +126,13 @@ fun RestoreScreen(onDone: () -> Unit) {
                 SliverText(foundCopy(total), SliverType.Headline)
                 SliverText(
                     "They download in the background. You can keep using the camera. A day you capture here stays as it is.",
-                    SliverType.Body, color = SliverColors.TextSecondary,
+                    SliverType.Body,
+                    color = SliverColors.TextSecondary,
                 )
-                PrimaryButton("Restore all", { started = true; scheduler.start() }, Modifier.fillMaxWidth())
+                PrimaryButton("Restore all", {
+                    started = true
+                    scheduler.start()
+                }, Modifier.fillMaxWidth())
                 GhostButton("Not now", onClick = onDone)
             }
             RestoreStage.NONE -> {
@@ -147,7 +150,8 @@ fun RestoreScreen(onDone: () -> Unit) {
                 SliverText(if (restoring) "Restoring" else "All back", SliverType.DisplayM)
                 SliverText(
                     if (restoring) "${total - missing} of $total clips. It picks up where it left off." else "${foundCopy(total)} restored.",
-                    SliverType.Body, color = SliverColors.TextSecondary,
+                    SliverType.Body,
+                    color = SliverColors.TextSecondary,
                 )
                 val anchor = local.maxByOrNull { it.date }?.date
                 if (anchor != null) Mosaic(anchor, local)

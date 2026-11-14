@@ -1,34 +1,24 @@
 package app.sliver.feature.onboarding
 
-import app.sliver.core.theme.ReelogType
-
-import app.sliver.core.APP_NAME
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import app.sliver.core.ui.SliverTextField
-import app.sliver.feature.projects.cleanProjectName
-import app.sliver.feature.projects.MAX_PROJECT_NAME
-import app.sliver.feature.projects.FormatCards
-import app.sliver.data.repo.ProjectRepository
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -36,31 +26,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.CircleShape
-import app.sliver.core.permissions.PermissionGate
+import app.sliver.core.APP_NAME
 import app.sliver.core.permissions.PermissionKind
 import app.sliver.core.permissions.PermissionStatus
 import app.sliver.core.permissions.rememberPermissionController
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
-import app.sliver.core.time.todayLocal
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
-import app.sliver.core.ui.Chip
+import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.PrimaryButton
-import app.sliver.core.ui.Segmented
+import app.sliver.core.ui.SliverTextField
 import app.sliver.data.FilmFormat
-import app.sliver.data.settings.AppSettings
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.feature.backup.GoogleSignInPanel
-import app.sliver.feature.notifications.NotifKind
-import app.sliver.feature.notifications.label
-import app.sliver.feature.notifications.reminderCopy
+import app.sliver.feature.projects.FormatCards
+import app.sliver.feature.projects.MAX_PROJECT_NAME
+import app.sliver.feature.projects.cleanProjectName
 import kotlinx.coroutines.launch
-import kotlinx.datetime.LocalDate
 import org.koin.mp.KoinPlatform
 
 @Composable
@@ -124,10 +110,14 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
                     Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
                         Box(Modifier.size(22.dp).clip(CircleShape).background(SliverColors.Record))
                     }
-                    SliverText("One clip a day.\nOne film a year.", SliverType.DisplayXL.copy(fontSize = ReelogType.Size.display, lineHeight = ReelogType.lineFor(ReelogType.Size.display)))
+                    SliverText(
+                        "One clip a day.\nOne film a year.",
+                        SliverType.DisplayXL.copy(fontSize = ReelogType.Size.display, lineHeight = ReelogType.lineFor(ReelogType.Size.display))
+                    )
                     SliverText(
                         "Catch a moment, keep the best part. $APP_NAME turns your clips into a film.",
-                        SliverType.Body.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)), Modifier.padding(top = SliverSpace.S5),
+                        SliverType.Body.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)),
+                        Modifier.padding(top = SliverSpace.S5),
                         color = SliverColors.TextSecondary,
                     )
                     PrimaryButton("Start", { index++ }, Modifier.fillMaxWidth().padding(top = SliverSpace.S8))
@@ -141,7 +131,9 @@ fun OnboardingScreen(onFinished: () -> Unit, onRestore: () -> Unit = {}) {
                     SliverTextField(name, { name = it.take(MAX_PROJECT_NAME) }, placeholder = "Project name")
                     FormatCards(format) { format = it }
                     PrimaryButton(
-                        "Create project", ::createProject, Modifier.fillMaxWidth(),
+                        "Create project",
+                        ::createProject,
+                        Modifier.fillMaxWidth(),
                         enabled = cleanProjectName(name) != null && !busy,
                     )
                 }
@@ -175,11 +167,18 @@ private fun CameraStep(controller: app.sliver.core.permissions.PermissionControl
         SliverText("Camera, please.", SliverType.DisplayM)
         SliverText(
             "$APP_NAME only records while you tap or hold. Nothing leaves your phone.",
-            SliverType.Body, color = SliverColors.TextSecondary,
+            SliverType.Body,
+            color = SliverColors.TextSecondary,
         )
         PrimaryButton(
-            "Allow camera", {
-                if (status.isUsable) onDone() else { asked = true; controller.request(PermissionKind.CameraMic) }
+            "Allow camera",
+            {
+                if (status.isUsable) {
+                    onDone()
+                } else {
+                    asked = true
+                    controller.request(PermissionKind.CameraMic)
+                }
             },
             Modifier.fillMaxWidth().padding(top = SliverSpace.S6),
         )

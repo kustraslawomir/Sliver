@@ -1,14 +1,11 @@
 package app.sliver.feature.trim
 
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.ui.draw.clipToBounds
-
-import app.sliver.core.theme.SliverColors
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clipToBounds
+import app.sliver.core.theme.SliverColors
 
 /** Centers content of the given display [aspect] on black: 16:9 fills the width, 9:16 fills the height. */
 @Composable

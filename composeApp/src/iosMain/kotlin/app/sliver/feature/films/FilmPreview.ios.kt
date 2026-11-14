@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import app.sliver.core.log.logDebug
-import app.sliver.data.FilmAudio
 import app.sliver.data.LookParams
 
 // TODO iOS later: AVQueuePlayer preview and UIDocumentPicker for audio.
@@ -23,7 +22,9 @@ actual fun FilmPreview(
 ) = Box(modifier.background(Color.Black))
 
 @Composable
-actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = { logDebug("AudioPicker", "not on iOS yet") }
+actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit = {
+    logDebug("AudioPicker", "not on iOS yet")
+}
 
 // TODO iOS later: Core Image / Metal port of the look shader for filter thumbnails.
 actual suspend fun renderFilterThumbs(

@@ -7,9 +7,9 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 
@@ -34,7 +34,10 @@ fun ReminderSettings.timeOn(date: LocalDate, golden: (LocalDate) -> LocalTime?):
 
 /** First moment after [now] (searching a week ahead) at which [kind] is due, honouring the days mask. */
 fun nextFire(
-    r: ReminderSettings, kind: NotifKind, now: LocalDateTime, golden: (LocalDate) -> LocalTime? = { null },
+    r: ReminderSettings,
+    kind: NotifKind,
+    now: LocalDateTime,
+    golden: (LocalDate) -> LocalTime? = { null },
     handledToday: Set<NotifKind> = emptySet(),
 ): LocalDateTime? {
     if (!r.enabled) return null
@@ -57,13 +60,18 @@ fun nextFire(
 
 /** One alarm for the next reminder, one for the next last call, plus any "on this day" memories within the week. */
 fun planNotifications(
-    s: AppSettings, now: LocalDateTime, withClip: Set<LocalDate>, golden: (LocalDate) -> LocalTime? = { null },
+    s: AppSettings,
+    now: LocalDateTime,
+    withClip: Set<LocalDate>,
+    golden: (LocalDate) -> LocalTime? = { null },
     handledToday: Set<NotifKind> = emptySet(),
 ): List<PlannedNotif> {
     val plan = listOf(NotifKind.REMINDER, NotifKind.LAST_CALL)
         .mapNotNull { k -> nextFire(s.reminder, k, now, golden, handledToday)?.let { PlannedNotif(k, it) } }.toMutableList()
-    if (s.notif.onThisDay) List(HORIZON_DAYS) { now.date.plus(DatePeriod(days = it)) }.forEach { date ->
-        if (date.minus(DatePeriod(months = 1)) in withClip) plan += PlannedNotif(NotifKind.ON_THIS_DAY, LocalDateTime(date, OnThisDayTime))
+    if (s.notif.onThisDay) {
+        List(HORIZON_DAYS) { now.date.plus(DatePeriod(days = it)) }.forEach { date ->
+            if (date.minus(DatePeriod(months = 1)) in withClip) plan += PlannedNotif(NotifKind.ON_THIS_DAY, LocalDateTime(date, OnThisDayTime))
+        }
     }
     return plan.filter { it.kind != NotifKind.ON_THIS_DAY || it.at > now }.sortedBy { it.at }
 }
@@ -91,7 +99,10 @@ fun reminderCopy(kind: NotifKind, date: LocalDate): NotifCopy = when (kind) {
     NotifKind.LAST_CALL -> NotifCopy("Today's clip", "Still time for ${weekdayName(date)}. A few seconds is enough.")
     NotifKind.ON_THIS_DAY -> {
         val then = date.minus(DatePeriod(months = 1))
-        NotifCopy("One month ago today", "${then.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }}, ${then.day} ${then.month.name.lowercase().replaceFirstChar { it.uppercase() }}. Want to see it?")
+        NotifCopy(
+            "One month ago today",
+            "${then.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }}, ${then.day} ${then.month.name.lowercase().replaceFirstChar { it.uppercase() }}. Want to see it?"
+        )
     }
 }
 
@@ -134,7 +145,9 @@ fun parseDeepLink(raw: String?): DeepLinkTarget? = when {
     raw == "gallery" -> DeepLinkTarget.Gallery
     raw == "film-new" -> DeepLinkTarget.MakeFilm
     raw.startsWith("film:") -> DeepLinkTarget.Film(raw.removePrefix("film:"))
-    raw.startsWith("day:") -> runCatching { LocalDate.parse(raw.removePrefix("day:")) }.getOrNull()?.let(DeepLinkTarget::Day)
+    raw.startsWith("day:") -> runCatching {
+        LocalDate.parse(raw.removePrefix("day:"))
+    }.getOrNull()?.let(DeepLinkTarget::Day)
     else -> null
 }
 

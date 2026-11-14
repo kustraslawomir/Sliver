@@ -1,123 +1,98 @@
 package app.sliver.feature.camera
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.derivedStateOf
-import app.sliver.core.kit.glass
-
-import app.sliver.core.theme.ReelogType
-
-import app.sliver.feature.gallery.rememberAddMedia
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import app.sliver.core.theme.LocalReducedMotion
-import app.sliver.core.theme.SliverMotion
-import app.sliver.core.theme.motionSpec
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.icons.SliverIcons
-import androidx.compose.foundation.layout.offset
-import androidx.compose.ui.semantics.selected
-import app.sliver.core.ui.SwitchRow
-import androidx.compose.foundation.Canvas
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.graphics.ImageBitmap
-import app.sliver.data.LookPreset
-import app.sliver.data.info
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.foundation.layout.height
-import app.sliver.core.ui.Chip
-import app.sliver.core.ui.SliverBottomSheet
-import app.sliver.data.FilmFormat
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
+import app.sliver.core.kit.glass
 import app.sliver.core.navigation.Route
 import app.sliver.core.permissions.PermissionGate
 import app.sliver.core.permissions.PermissionKind
+import app.sliver.core.theme.LocalReducedMotion
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
+import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
-import app.sliver.core.theme.SliverShapes
 import app.sliver.core.time.todayLocal
+import app.sliver.core.ui.LocalWindowSize
+import app.sliver.core.ui.MaxContentWidth
+import app.sliver.core.ui.StorageFullOverlay
+import app.sliver.core.ui.isStorageLow
 import app.sliver.core.ui.rememberTapGate
-import app.sliver.feature.archive.ArchiveSession
-import app.sliver.data.repo.DayRepository
-import app.sliver.core.ui.Segmented
-import app.sliver.data.repo.ProjectRepository
+import app.sliver.data.FilmFormat
 import app.sliver.data.files.FileStore
+import app.sliver.data.repo.DayRepository
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.CameraSettings
 import app.sliver.data.settings.Lens
 import app.sliver.data.settings.SettingsRepository
+import app.sliver.feature.gallery.rememberAddMedia
 import kotlinx.coroutines.Job
-import androidx.compose.animation.core.animate
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import app.sliver.core.ui.StorageFullOverlay
-import app.sliver.core.ui.LocalWindowSize
-import app.sliver.core.ui.MaxContentWidth
-import androidx.compose.foundation.layout.widthIn
-import app.sliver.core.ui.isStorageLow
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
 
@@ -274,7 +249,9 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
         Box(
             Modifier.align(Alignment.TopCenter).fillMaxWidth().height(150.dp).background(
                 Brush.verticalGradient(
-                    0f to SliverColors.Media.copy(alpha = 0.7f), 0.55f to SliverColors.Media.copy(alpha = 0.35f), 1f to Color.Transparent,
+                    0f to SliverColors.Media.copy(alpha = 0.7f),
+                    0.55f to SliverColors.Media.copy(alpha = 0.35f),
+                    1f to Color.Transparent,
                 ),
             ),
         )
@@ -302,7 +279,8 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
             }
             if (failed && !recording) {
                 SliverText(
-                    "That recording didn't work. Try again.", SliverType.BodySmall,
+                    "That recording didn't work. Try again.",
+                    SliverType.BodySmall,
                     Modifier.glass(app.sliver.core.kit.GlassStyle.Regular, SliverShapes.Pill, overMedia = true)
                         .padding(horizontal = SliverSpace.S4, vertical = SliverSpace.S2),
                     SliverColors.TextPrimary,
@@ -322,25 +300,36 @@ private fun CameraContent(onNavigate: (Route) -> Unit, addMedia: (kotlinx.dateti
         }
 
         Column(
-            (if (side) Modifier.align(Alignment.CenterEnd).width(SideControlsWidth).statusBarsPadding()
-            else Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth).fillMaxWidth())
+            (
+                if (side) {
+                    Modifier.align(Alignment.CenterEnd).width(SideControlsWidth).statusBarsPadding()
+                } else {
+                    Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth).fillMaxWidth()
+                }
+                )
                 .navigationBarsPadding().padding(bottom = SliverSpace.S4),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3, if (side) Alignment.CenterVertically else Alignment.Top),
         ) {
             Box(Modifier.alpha(if (recording) 0f else 1f)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                ModeWord("Photo", mode == CameraMode.PHOTO) { if (!recording) mode = CameraMode.PHOTO }
-                ModeWord("Video", mode == CameraMode.VIDEO) { if (!recording) mode = CameraMode.VIDEO }
-            }
-            if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
+                Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                    ModeWord("Photo", mode == CameraMode.PHOTO) { if (!recording) mode = CameraMode.PHOTO }
+                    ModeWord("Video", mode == CameraMode.VIDEO) { if (!recording) mode = CameraMode.VIDEO }
+                }
+                if (recording) Box(Modifier.matchParentSize().pointerInput(Unit) { detectTapGestures { } })
             }
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                if (recording) Box(Modifier.size(64.dp)) else CameraAction(SliverIcons.Plus, "Add", "Add media", iconRot) { addMedia(null) }
+                if (recording) {
+                    Box(Modifier.size(64.dp))
+                } else {
+                    CameraAction(SliverIcons.Plus, "Add", "Add media", iconRot) {
+                        addMedia(null)
+                    }
+                }
                 RecordButton(
                     state = when {
                         recording -> RecordState.Recording
@@ -390,14 +379,23 @@ private fun CinemaBandDim() {
 private fun ModeWord(text: String, active: Boolean, onClick: () -> Unit) {
     Column(
         Modifier.defaultMinSize(minHeight = 44.dp)
-            .semantics { selected = active; role = Role.Tab }
+            .semantics {
+                selected = active
+                role = Role.Tab
+            }
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         SliverText(
-            text, SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium, lineHeight = ReelogType.lineFor(ReelogType.Size.label)).overMedia(),
-            color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.8f), maxLines = 1,
+            text,
+            SliverType.Headline.copy(
+                fontSize = ReelogType.Size.label,
+                fontWeight = FontWeight.Medium,
+                lineHeight = ReelogType.lineFor(ReelogType.Size.label)
+            ).overMedia(),
+            color = SliverColors.OnMedia.copy(alpha = if (active) 1f else 0.8f),
+            maxLines = 1,
         )
         Box(Modifier.padding(top = 2.dp).size(4.dp).background(if (active) SliverColors.OnMedia else Color.Transparent, CircleShape))
     }
@@ -408,7 +406,10 @@ private fun CameraAction(icon: ImageVector, label: String, description: String, 
     val turn by animateFloatAsState(rotation, tween(240), label = "action-turn")
     // Audit v1.8 §3.3: 52 dp glass circle, no text label (nothing else in the app labels icon buttons).
     Box(
-        Modifier.size(64.dp).semantics { contentDescription = description; role = Role.Button }
+        Modifier.size(64.dp).semantics {
+            contentDescription = description
+            role = Role.Button
+        }
             .clickable(onClick = rememberTapGate(onClick)),
         Alignment.Center,
     ) {
@@ -431,7 +432,11 @@ private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifi
             val label = formatZoom(if (on) zoom else preset, unit = true)
             Box(
                 Modifier.size(44.dp, 48.dp)
-                    .semantics { contentDescription = "Zoom ${formatZoom(preset, true)}"; selected = on; role = Role.Button }
+                    .semantics {
+                        contentDescription = "Zoom ${formatZoom(preset, true)}"
+                        selected = on
+                        role = Role.Button
+                    }
                     .clickable { onSelect(preset) },
                 Alignment.Center,
             ) {
@@ -440,8 +445,10 @@ private fun ZoomStops(presets: List<Float>, zoom: Float, rotation: Float, modifi
                     Alignment.Center,
                 ) {
                     SliverText(
-                        label, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.SemiBold).overMedia(),
-                        color = SliverColors.OnMedia.copy(alpha = if (on) 1f else 0.85f), maxLines = 1,
+                        label,
+                        SliverType.Meta.copy(fontSize = ReelogType.Size.caption, fontWeight = FontWeight.SemiBold).overMedia(),
+                        color = SliverColors.OnMedia.copy(alpha = if (on) 1f else 0.85f),
+                        maxLines = 1,
                     )
                 }
             }
@@ -476,9 +483,14 @@ private fun CameraRoundButton(onClick: () -> Unit, label: String, icon: @Composa
 private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifier) {
     val color = if (clipOk) SliverColors.Record else SliverColors.TextSecondary
     val reduced = LocalReducedMotion.current
-    val dotAlpha = if (reduced) 1f else {
+    val dotAlpha = if (reduced) {
+        1f
+    } else {
         val t by rememberInfiniteTransition(label = "dot").animateFloat(
-            1f, 0.78f, infiniteRepeatable(tween(800, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)), RepeatMode.Reverse), label = "dot",
+            1f,
+            0.78f,
+            infiniteRepeatable(tween(800, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)), RepeatMode.Reverse),
+            label = "dot",
         )
         t
     }
@@ -489,7 +501,12 @@ private fun TimerPill(time: String, clipOk: Boolean, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2),
     ) {
         Box(Modifier.size(8.dp).alpha(dotAlpha).background(SliverColors.Record, CircleShape))
-        val style = SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
+        val style = SliverType.Body.copy(
+            fontSize = ReelogType.Size.label,
+            lineHeight = ReelogType.lineFor(ReelogType.Size.label),
+            fontWeight = FontWeight.Medium,
+            fontFeatureSettings = "tnum"
+        )
         SliverText(if (clipOk) "$time \u00B7 Clip OK" else time, style, color = color, maxLines = 1)
     }
 }
@@ -499,11 +516,21 @@ private fun GridToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "grid-upright")
     Box(
         Modifier.size(44.dp)
-            .then(if (on) Modifier.clip(CircleShape).background(SliverColors.OnMedia) else Modifier.glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true))
-            .semantics { contentDescription = "Grid"; role = Role.Switch; selected = on }
+            .then(
+                if (on) Modifier.clip(
+                    CircleShape
+                ).background(SliverColors.OnMedia) else Modifier.glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true)
+            )
+            .semantics {
+                contentDescription = "Grid"
+                role = Role.Switch
+                selected = on
+            }
             .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
         Alignment.Center,
-    ) { SliverIcon(SliverIcons.Hash, if (on) SliverColors.Media else SliverColors.OnMedia, Modifier.rotate(turn), size = 20.dp) }
+    ) {
+        SliverIcon(SliverIcons.Hash, if (on) SliverColors.Media else SliverColors.OnMedia, Modifier.rotate(turn), size = 20.dp)
+    }
 }
 
 @Composable
@@ -511,10 +538,18 @@ private fun LightToggle(on: Boolean, rotation: Float, onClick: () -> Unit) {
     val turn by animateFloatAsState(rotation, tween(240), label = "light-upright")
     Box(
         Modifier.size(44.dp).glass(app.sliver.core.kit.GlassStyle.Regular, CircleShape, overMedia = true)
-            .semantics { contentDescription = if (on) "Light on" else "Light off"; role = Role.Switch; selected = on }
+            .semantics {
+                contentDescription = if (on) "Light on" else "Light off"
+                role = Role.Switch
+                selected = on
+            }
             .clickable(role = Role.Switch, onClick = rememberTapGate(onClick)),
         Alignment.Center,
     ) {
-        SliverIcon(if (on) SliverIcons.Zap else SliverIcons.ZapOff, if (on) SliverColors.OnMedia else SliverColors.OnMedia.copy(alpha = 0.7f), Modifier.rotate(turn))
+        SliverIcon(
+            if (on) SliverIcons.Zap else SliverIcons.ZapOff,
+            if (on) SliverColors.OnMedia else SliverColors.OnMedia.copy(alpha = 0.7f),
+            Modifier.rotate(turn)
+        )
     }
 }

@@ -1,9 +1,9 @@
 package app.sliver.di
 
+import androidx.compose.ui.graphics.ImageBitmap
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
-import app.sliver.data.export.ShortMode
 import app.sliver.data.backup.ArchiveExporter
 import app.sliver.data.backup.BackupScheduler
 import app.sliver.data.backup.NetworkKind
@@ -11,6 +11,7 @@ import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.export.ExportedClip
+import app.sliver.data.export.ShortMode
 import app.sliver.feature.autoimport.AutoImportRunner
 import app.sliver.feature.autoimport.MediaScanner
 import app.sliver.feature.films.FilmRenderer
@@ -22,7 +23,6 @@ import app.sliver.feature.gallery.MotionClip
 import app.sliver.feature.notifications.PlannedNotif
 import app.sliver.feature.notifications.ReminderScheduler
 import app.sliver.feature.trim.TrimMedia
-import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -31,12 +31,27 @@ private fun notYet(what: String): Nothing = throw UnsupportedOperationException(
 
 internal object IosClipExporter : ClipExporter {
     override suspend fun exportClip(
-        source: String, startMs: Long, speed: Float, cropX: Float?, cropY: Float?, format: FilmFormat,
-        videoPath: String, thumbPath: String, shortMode: ShortMode, look: LookParams,
+        source: String,
+        startMs: Long,
+        speed: Float,
+        cropX: Float?,
+        cropY: Float?,
+        format: FilmFormat,
+        videoPath: String,
+        thumbPath: String,
+        shortMode: ShortMode,
+        look: LookParams,
     ): ExportedClip = notYet("Clip export")
 
     override suspend fun photoToClip(
-        source: String, motion: Motion, format: FilmFormat, videoPath: String, thumbPath: String, look: LookParams, cropX: Float?, cropY: Float?
+        source: String,
+        motion: Motion,
+        format: FilmFormat,
+        videoPath: String,
+        thumbPath: String,
+        look: LookParams,
+        cropX: Float?,
+        cropY: Float?
     ): ExportedClip = notYet("Photo clip")
 }
 
@@ -51,13 +66,21 @@ internal object IosTrimMedia : TrimMedia {
 
 internal object IosMediaScanner : MediaScanner {
     override suspend fun scan(
-        from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, sniffDays: Set<kotlinx.datetime.LocalDate>, onFound: (Int) -> Unit,
+        from: kotlinx.datetime.LocalDate,
+        to: kotlinx.datetime.LocalDate,
+        zone: kotlinx.datetime.TimeZone,
+        sniffDays: Set<kotlinx.datetime.LocalDate>,
+        onFound: (Int) -> Unit,
     ) = TODO("iOS later")
 }
 
 internal object IosFolderScanner : app.sliver.feature.autoimport.FolderScanner {
     override suspend fun scan(
-        tree: String, from: kotlinx.datetime.LocalDate, to: kotlinx.datetime.LocalDate, zone: kotlinx.datetime.TimeZone, onFound: suspend (Int) -> Unit,
+        tree: String,
+        from: kotlinx.datetime.LocalDate,
+        to: kotlinx.datetime.LocalDate,
+        zone: kotlinx.datetime.TimeZone,
+        onFound: suspend (Int) -> Unit,
     ) = TODO("iOS later")
 }
 

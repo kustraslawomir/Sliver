@@ -90,7 +90,9 @@ fun parseExifDate(raw: String?): LocalDate? {
 fun parseExifMillis(raw: String?, zone: TimeZone): Long? {
     val m = raw?.let { exifPattern.find(it.trim()) } ?: return null
     val (y, mo, d, h, mi, s) = m.destructured
-    return runCatching { LocalDateTime(y.toInt(), mo.toInt(), d.toInt(), h.toInt(), mi.toInt(), s.toInt()).toInstant(zone).toEpochMilliseconds() }
+    return runCatching {
+        LocalDateTime(y.toInt(), mo.toInt(), d.toInt(), h.toInt(), mi.toInt(), s.toInt()).toInstant(zone).toEpochMilliseconds()
+    }
         .getOrNull()
 }
 
@@ -122,8 +124,11 @@ fun formatDay(d: LocalDate) = "${d.day} ${monthNames[d.month.ordinal]} ${d.year}
 // (messengers strip EXIF): the item goes to the day the user chose, with a one-line notice.
 fun checkCaptureDate(captured: CaptureDate, target: LocalDate): AddCheck = when (captured) {
     is CaptureDate.Known ->
-        if (captured.date == target) AddCheck.Allowed
-        else AddCheck.Blocked("This clip was recorded on ${formatDay(captured.date)}. It can only be added to that day.")
+        if (captured.date == target) {
+            AddCheck.Allowed
+        } else {
+            AddCheck.Blocked("This clip was recorded on ${formatDay(captured.date)}. It can only be added to that day.")
+        }
     is CaptureDate.Hint -> AddCheck.AllowedWithNotice("Sent on ${formatDay(captured.date)} — added to ${formatDay(target)}")
     CaptureDate.Unknown -> AddCheck.AllowedWithNotice("Date unknown — added to ${formatDay(target)}")
 }

@@ -43,7 +43,14 @@ fun Filmstrip(plan: FilmPlan, fraction: () -> Float, onSeek: (Float) -> Unit) {
             picks.forEach { d ->
                 val img = rememberPhoto(d.thumb)
                 Box(Modifier.weight(1f).fillMaxHeight().background(d.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)) {
-                    if (img != null) androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                    if (img != null) {
+                        androidx.compose.foundation.Image(
+                            img,
+                            null,
+                            Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    }
                 }
             }
         }

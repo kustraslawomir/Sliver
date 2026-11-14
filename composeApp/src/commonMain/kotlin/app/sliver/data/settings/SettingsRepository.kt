@@ -32,6 +32,7 @@ class DataStoreSettingsRepository(private val store: DataStore<Preferences>) : S
         val newFilmFormat = stringPreferencesKey("newFilmFormat")
         val appearance = stringPreferencesKey("appearance")
         val dateStamp = booleanPreferencesKey("dateStamp")
+
         // New key (owner 13 Nov: default on): the old one was written as false on every settings save, never chosen.
         val saveFullRecordings = booleanPreferencesKey("saveRecordingsToGallery")
         val volumeKeyRecords = booleanPreferencesKey("volumeKeyRecords")

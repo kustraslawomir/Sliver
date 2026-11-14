@@ -3,12 +3,12 @@ package app.sliver.data.export
 import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.os.SystemClock
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withTimeoutOrNull
 import app.sliver.core.log.logDebug
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Luminance-only frame sampler feeding [bestClip]. */
 class FrameSampler {
@@ -18,8 +18,11 @@ class FrameSampler {
         val t0 = SystemClock.elapsedRealtime()
         val fallback = SamplingPlan.fallbackStartMs(durationMs)
         val result = withTimeoutOrNull(SamplingPlan.TIMEOUT_MS) { score(path, durationMs) }
-        if (result == null) logDebug("FrameSampler", "timed out, using middle of ${durationMs}ms clip")
-        else logDebug("FrameSampler", "scored ${durationMs}ms clip in ${SystemClock.elapsedRealtime() - t0}ms")
+        if (result == null) {
+            logDebug("FrameSampler", "timed out, using middle of ${durationMs}ms clip")
+        } else {
+            logDebug("FrameSampler", "scored ${durationMs}ms clip in ${SystemClock.elapsedRealtime() - t0}ms")
+        }
         (result ?: fallback).coerceIn(0, (durationMs - SECOND_MS).coerceAtLeast(0))
     }
 
@@ -53,11 +56,13 @@ class FrameSampler {
     }
 
     private fun luma(r: MediaMetadataRetriever, ms: Long): FloatArray? {
-        val bmp = (if (Build.VERSION.SDK_INT >= 27) {
-            r.getScaledFrameAtTime(ms * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, WIDTH, WIDTH * 9 / 16)
-        } else {
-            r.getFrameAtTime(ms * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-        }) ?: return null
+        val bmp = (
+            if (Build.VERSION.SDK_INT >= 27) {
+                r.getScaledFrameAtTime(ms * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, WIDTH, WIDTH * 9 / 16)
+            } else {
+                r.getFrameAtTime(ms * 1000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+            }
+            ) ?: return null
         val w = bmp.width
         val h = bmp.height
         val px = IntArray(w * h)

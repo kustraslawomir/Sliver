@@ -1,25 +1,21 @@
 package app.sliver.feature.films
 
-import kotlinx.coroutines.flow.first
-import app.sliver.data.look.LookRandom
-import app.sliver.core.theme.SliverColors
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.background
-import app.sliver.core.ui.rememberAppVisible
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -27,11 +23,14 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import app.sliver.data.FilmAudio
+import app.sliver.core.theme.SliverColors
+import app.sliver.core.ui.rememberAppVisible
 import app.sliver.data.LookParams
 import app.sliver.data.look.LookEffects
+import app.sliver.data.look.LookRandom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -78,12 +77,19 @@ actual fun FilmPreview(
     }
     // One player per audio layer; each follows the film's time (see layerPositionAt).
     val layerPlayers = remember { mutableMapOf<String, ExoPlayer>() }
-    DisposableEffect(Unit) { onDispose { layerPlayers.values.forEach { it.release() }; layerPlayers.clear() } }
+    DisposableEffect(Unit) { onDispose {
+        layerPlayers.values.forEach { it.release() }
+        layerPlayers.clear()
+    }
+    }
     val currentMix = rememberUpdatedState(mix)
     val playing = remember { mutableStateOf(false) }
     // Hold to compare: one clip, no filter, at the moment the film is paused on (the filtered player keeps its playlist).
     val clean = remember {
-        app.sliver.core.media.newPlayer(context).apply { setVideoEffects(listOf(androidx.media3.effect.Contrast(0f))); volume = 0f }
+        app.sliver.core.media.newPlayer(context).apply {
+            setVideoEffects(listOf(androidx.media3.effect.Contrast(0f)))
+            volume = 0f
+        }
     }
     DisposableEffect(Unit) { onDispose { clean.release() } }
     val comparing = compare && look != null
@@ -101,6 +107,7 @@ actual fun FilmPreview(
     val currentVideo = rememberUpdatedState(video)
     val pausedNow = rememberUpdatedState(paused)
     val frameShown = remember { kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
+
     // With effects on, a paused player has no frame after prepare or seek; a short play renders it, then it pauses again.
     suspend fun showFrameWhilePaused(player: ExoPlayer) {
         if (!pausedNow.value) return
@@ -140,7 +147,11 @@ actual fun FilmPreview(
     }
     val visible = rememberAppVisible()
     LaunchedEffect(comparing) {
-        if (!comparing) { clean.stop(); clean.clearMediaItems(); return@LaunchedEffect }
+        if (!comparing) {
+            clean.stop()
+            clean.clearMediaItems()
+            return@LaunchedEffect
+        }
         val player = video ?: return@LaunchedEffect
         val clip = clips.getOrNull(player.currentMediaItemIndex) ?: return@LaunchedEffect
         clean.setMediaItem(MediaItem.fromUri(clip.path), player.currentPosition)
@@ -180,7 +191,10 @@ actual fun FilmPreview(
     LaunchedEffect(Unit) {
         while (true) {
             val video = currentVideo.value
-            if (video == null) { delay(33); continue }
+            if (video == null) {
+                delay(33)
+                continue
+            }
             val index = video.currentMediaItemIndex
             val clip = currentClips.value.getOrNull(index)
             val mixNow = currentMix.value
@@ -191,7 +205,10 @@ actual fun FilmPreview(
             mixNow.layers.forEachIndexed { i, layer ->
                 val p = layerPlayers[layerKey(i, layer.path)] ?: return@forEachIndexed
                 val want = layerPositionAt(layer, filmMs)?.takeIf { !layer.muted }
-                if (want == null) { p.playWhenReady = false; return@forEachIndexed }
+                if (want == null) {
+                    p.playWhenReady = false
+                    return@forEachIndexed
+                }
                 p.volume = if (FilmPlayback.muted) 0f else layer.volume / 100f
                 if (kotlin.math.abs(p.currentPosition - want) > MUSIC_SYNC_SLACK_MS) p.seekTo(want)
                 p.playWhenReady = playing.value
@@ -208,7 +225,10 @@ actual fun FilmPreview(
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
             }
         },
-        update = { val p = if (comparing) clean else video; if (it.player !== p) it.player = p },
+        update = {
+            val p = if (comparing) clean else video
+            if (it.player !== p) it.player = p
+        },
         modifier = modifier,
         onRelease = { it.player = null },
     )
@@ -228,7 +248,9 @@ actual fun rememberAudioPicker(onPicked: (PickedAudio) -> Unit): () -> Unit {
 actual fun rememberMusicLibrary(refresh: Any?): List<String> {
     val context = LocalContext.current
     return remember(refresh) {
-        java.io.File(context.filesDir, "music").listFiles().orEmpty().filter { it.isFile && it.length() > 0 && !it.name.startsWith(".") }
+        java.io.File(context.filesDir, "music").listFiles().orEmpty().filter {
+            it.isFile && it.length() > 0 && !it.name.startsWith(".")
+        }
             .sortedByDescending { it.lastModified() }.map { it.path }
     }
 }

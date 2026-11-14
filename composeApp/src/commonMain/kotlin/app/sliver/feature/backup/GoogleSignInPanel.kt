@@ -1,7 +1,5 @@
 package app.sliver.feature.backup
 
-import app.sliver.core.APP_NAME
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.sliver.core.APP_NAME
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
@@ -56,11 +55,17 @@ fun GoogleSignInPanel(
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S4, Alignment.CenterVertically),
     ) {
         SliverText("Back up your clips", SliverType.DisplayM)
-        SliverText("Your clips go to a $APP_NAME folder in your own Google Drive. Nothing else in your Drive is touched.", SliverType.Body, color = SliverColors.TextSecondary)
+        SliverText(
+            "Your clips go to a $APP_NAME folder in your own Google Drive. Nothing else in your Drive is touched.",
+            SliverType.Body,
+            color = SliverColors.TextSecondary
+        )
         if (manager.isFake) SliverText("Demo mode: no Google account is used.", SliverType.BodySmall)
         error?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.Error) }
         Column(Modifier.padding(top = SliverSpace.S6), verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-            PrimaryButton(if (busy) "Signing in…" else "Continue with Google", { signIn(restoreAfter = false) }, Modifier.fillMaxWidth(), enabled = !busy)
+            PrimaryButton(if (busy) "Signing in…" else "Continue with Google", {
+                signIn(restoreAfter = false)
+            }, Modifier.fillMaxWidth(), enabled = !busy)
             GhostButton(skipLabel, onClick = onFinished)
             if (onRestore != null) GhostButton("Welcome back? Restore my clips", onClick = { signIn(restoreAfter = true) })
         }

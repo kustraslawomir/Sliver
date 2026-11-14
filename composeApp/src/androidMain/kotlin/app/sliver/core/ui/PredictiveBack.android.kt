@@ -1,8 +1,8 @@
 package app.sliver.core.ui
 
-import androidx.activity.compose.PredictiveBackHandler as ActivityPredictiveBackHandler
 import androidx.compose.runtime.Composable
 import kotlin.coroutines.cancellation.CancellationException
+import androidx.activity.compose.PredictiveBackHandler as ActivityPredictiveBackHandler
 
 @Composable
 actual fun PredictiveBackHandler(enabled: Boolean, onProgress: (Float) -> Unit, onBack: () -> Unit) {

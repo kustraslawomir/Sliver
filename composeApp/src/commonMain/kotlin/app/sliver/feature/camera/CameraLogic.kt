@@ -1,10 +1,6 @@
 package app.sliver.feature.camera
 
 import app.sliver.data.FilmFormat
-import app.sliver.data.LookPreset
-import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 const val HOLD_THRESHOLD_MS = 300L
 
@@ -83,8 +79,11 @@ const val FOCUS_LOCK_PILL_OFFSET_DP = 58
 
 /** Tap position inside the viewfinder, clamped to its bounds, as 0..1 fractions. */
 fun focusFraction(x: Float, y: Float, width: Float, height: Float): Pair<Float, Float> =
-    if (width <= 0f || height <= 0f) 0.5f to 0.5f
-    else (x / width).coerceIn(0f, 1f) to (y / height).coerceIn(0f, 1f)
+    if (width <= 0f || height <= 0f) {
+        0.5f to 0.5f
+    } else {
+        (x / width).coerceIn(0f, 1f) to (y / height).coerceIn(0f, 1f)
+    }
 
 /** Ring is not drawn past the viewfinder edge: keeps the centre of a ring of [ringDp] fully visible. */
 fun focusRingCenter(x: Float, y: Float, width: Float, height: Float, ringPx: Float): Pair<Float, Float> {

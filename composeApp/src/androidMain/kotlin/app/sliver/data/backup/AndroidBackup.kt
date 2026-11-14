@@ -1,20 +1,20 @@
 package app.sliver.data.backup
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.sliver.data.repo.DayRepository
@@ -22,12 +22,6 @@ import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.notifications.notifyBackupPaused
-import java.io.BufferedOutputStream
-import java.io.File
-import java.util.concurrent.TimeUnit
-import java.util.zip.Deflater
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +30,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
+import java.io.BufferedOutputStream
+import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.zip.Deflater
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 private const val WORK_NAME = "backup"
 private const val PERIODIC_WORK_NAME = "sync-hourly"

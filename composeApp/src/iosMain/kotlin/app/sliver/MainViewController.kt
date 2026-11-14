@@ -10,9 +10,9 @@ import app.sliver.feature.notifications.ReminderCoordinator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
+import kotlin.time.Clock
 
 private val koinStarted by lazy {
     startKoin { modules(commonModule, platformModule) }

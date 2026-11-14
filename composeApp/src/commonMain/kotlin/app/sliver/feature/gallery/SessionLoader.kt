@@ -10,9 +10,19 @@ import kotlinx.datetime.LocalDate
  * Copies [uri] into tmp and fills [CaptureSession] for Edit clip or Photo clip. [asVideo] null = the item's natural kind
  * (a Motion Photo or Live Photo defaults to video); true / false force video or photo for it. [liveVideo] is the .mov half of a Live Photo pair. Null when the item cannot be read.
  */
-suspend fun loadIntoSession(provider: GalleryProvider, files: FileStore, uri: String, forDate: LocalDate?, asVideo: Boolean? = null, liveVideo: String? = null): Route? {
-    val motion = if (liveVideo != null) runCatching { MotionClip(provider.copyToTmp(liveVideo), null) }.getOrNull()
-    else runCatching { provider.extractMotionVideo(uri) }.getOrNull()
+suspend fun loadIntoSession(
+    provider: GalleryProvider,
+    files: FileStore,
+    uri: String,
+    forDate: LocalDate?,
+    asVideo: Boolean? = null,
+    liveVideo: String? = null
+): Route? {
+    val motion = if (liveVideo != null) {
+        runCatching { MotionClip(provider.copyToTmp(liveVideo), null) }.getOrNull()
+    } else {
+        runCatching { provider.extractMotionVideo(uri) }.getOrNull()
+    }
     val wantPhoto = asVideo == false && motion != null
     if (wantPhoto) motion?.let { files.delete(it.path) }
     val video = !wantPhoto && (motion != null || provider.isVideo(uri))

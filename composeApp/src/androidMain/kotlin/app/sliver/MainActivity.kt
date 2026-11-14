@@ -1,18 +1,18 @@
 package app.sliver
 
-import android.graphics.Color
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import app.sliver.feature.notifications.DeepLink
-import app.sliver.feature.notifications.EXTRA_DEEPLINK
-import app.sliver.feature.notifications.parseDeepLink
 import androidx.activity.ComponentActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.activity.result.contract.ActivityResultContracts
-import app.sliver.data.auth.AuthHost
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import app.sliver.data.auth.AuthHost
+import app.sliver.feature.notifications.DeepLink
+import app.sliver.feature.notifications.EXTRA_DEEPLINK
+import app.sliver.feature.notifications.parseDeepLink
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +24,9 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         handleDeepLink(intent)
-        val consent = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { AuthHost.onResult(it.data) }
+        val consent = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            AuthHost.onResult(it.data)
+        }
         AuthHost.launcher = { consent.launch(it) }
         setContent { App() }
     }

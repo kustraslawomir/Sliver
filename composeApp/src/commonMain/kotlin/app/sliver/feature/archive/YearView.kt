@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -37,7 +36,9 @@ fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, start: Lo
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 row.forEach { m ->
                     val ym = YearMonth(year, m)
-                    val filled = remember(byDate, year, m) { byDate.values.count { it.date.year == year && it.date.month.ordinal + 1 == m && !it.draft } }
+                    val filled = remember(byDate, year, m) {
+                        byDate.values.count { it.date.year == year && it.date.month.ordinal + 1 == m && !it.draft }
+                    }
                     val open = LocalDate(year, m, 1).let { it <= today && YearMonth(start.year, start.month.ordinal + 1) <= ym }
                     Column(
                         Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
@@ -47,7 +48,8 @@ fun YearView(year: Int, byDate: Map<LocalDate, Day>, today: LocalDate, start: Lo
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         SliverText(
-                            MonthLong[m - 1].take(3), ReelogType.label,
+                            MonthLong[m - 1].take(3),
+                            ReelogType.label,
                             color = if (open) SliverColors.TextPrimary else SliverColors.TextDisabled,
                         )
                         MiniMonth(year, m, byDate, today, start)

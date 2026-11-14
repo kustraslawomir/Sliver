@@ -11,7 +11,10 @@ fun stampText(date: LocalDate): String = "${date.day} ${ShortMonths[date.month.o
 /** Stamp text for [style], always day first (owner: European order): LED "02 11 '26", camcorder "2 NOV. 2026". */
 fun stampText(date: LocalDate, style: StampStyle): String = when (style) {
     StampStyle.PLAIN -> stampText(date)
-    StampStyle.LED -> "${date.day.toString().padStart(2, '0')} ${date.monthNumber.toString().padStart(2, '0')} '${(date.year % 100).toString().padStart(2, '0')}"
+    StampStyle.LED -> "${date.day.toString().padStart(
+        2,
+        '0'
+    )} ${date.monthNumber.toString().padStart(2, '0')} '${(date.year % 100).toString().padStart(2, '0')}"
     StampStyle.CAMCORDER -> "${date.day} ${ShortMonths[date.month.ordinal]}. ${date.year}"
 }
 
@@ -42,7 +45,10 @@ object SevenSegment {
         for (ch in text) {
             when {
                 ch == ' ' -> x += SPACE * h
-                ch == '\'' -> { out += SegRect(x, 0f, t, 0.3f * h); x += t + GAP * h }
+                ch == '\'' -> {
+                    out += SegRect(x, 0f, t, 0.3f * h)
+                    x += t + GAP * h
+                }
                 Digits.containsKey(ch) -> {
                     val on = Digits.getValue(ch)
                     if ('a' in on) out += SegRect(x + t / 2, 0f, w - t, t)

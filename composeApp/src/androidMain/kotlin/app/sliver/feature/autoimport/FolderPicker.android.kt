@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 actual fun rememberFolderPicker(onPicked: (String) -> Unit): () -> Unit {
-    val launcher = rememberLauncherForActivityResult(OpenDocumentTree()) { uri -> if (uri != null) onPicked(uri.toString()) }
+    val launcher =
+        rememberLauncherForActivityResult(OpenDocumentTree()) { uri -> if (uri != null) onPicked(uri.toString()) }
     return { launcher.launch(null) }
 }

@@ -4,19 +4,27 @@ import app.sliver.data.db.Day
 import app.sliver.feature.archive.MonthLong
 import app.sliver.feature.archive.weekdayName
 import app.sliver.feature.gallery.formatDay
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlin.time.Instant
 
 /** One photo, video or motion photo from the gallery with a real capture time. */
 /** [camera] = taken with the phone's camera (DCIM/Camera…), not saved, received or downloaded. Screenshots never get here. */
-data class MediaEntry(val uri: String, val video: Boolean, val takenAtMs: Long, val durationMs: Long = 0, val motion: Boolean = false, val camera: Boolean = true,
+data class MediaEntry(
+    val uri: String,
+    val video: Boolean,
+    val takenAtMs: Long,
+    val durationMs: Long = 0,
+    val motion: Boolean = false,
+    val camera: Boolean = true,
     /** Folder items only: file name and size (duplicates), and whether the date is just the file's modified time. */
-    val name: String? = null, val sizeBytes: Long = 0, val fileTime: Boolean = false,
+    val name: String? = null,
+    val sizeBytes: Long = 0,
+    val fileTime: Boolean = false,
     /** The short video half of an iOS Live Photo (the still is dropped); ranks with motion photos. */
     val live: Boolean = false,
 )
@@ -38,7 +46,9 @@ fun documentName(uri: String): String? {
 }
 
 /** How a rejected item is remembered: its uri and, when known, its file name. */
-fun dismissTokens(c: DraftCandidate): List<String> = listOfNotNull(c.uri, (c.name ?: documentName(c.uri))?.let { "name:$it" })
+fun dismissTokens(c: DraftCandidate): List<String> = listOfNotNull(c.uri, (c.name ?: documentName(c.uri))?.let {
+    "name:$it"
+})
 
 /**
  * Owner 13 Nov: an item rejected while importing from a folder came back when importing from the gallery (same file,
@@ -56,7 +66,11 @@ fun isCameraPath(relativePath: String?): Boolean = relativePath.orEmpty().lowerc
 /** A gallery item offered for a draft day; stored as JSON on the day. */
 @Serializable
 data class DraftCandidate(
-    val uri: String, val video: Boolean, val durationMs: Long = 0, val motion: Boolean = false, val fileTime: Boolean = false,
+    val uri: String,
+    val video: Boolean,
+    val durationMs: Long = 0,
+    val motion: Boolean = false,
+    val fileTime: Boolean = false,
     val live: Boolean = false,
     /** File name, so a rejected item is recognised whichever way it was found (gallery or folder). */
     val name: String? = null,
@@ -99,7 +113,9 @@ fun mediaTier(e: MediaEntry): Int = when {
 }
 
 fun candidatesOf(entries: List<MediaEntry>): List<DraftCandidate> =
-    rank(entries).take(MAX_CANDIDATES).map { DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime, it.live, it.name) }
+    rank(entries).take(MAX_CANDIDATES).map {
+        DraftCandidate(it.uri, it.video, it.durationMs, it.motion, it.fileTime, it.live, it.name)
+    }
 
 /** A video's 1 s window sits in the middle. */
 fun middleWindowStartMs(durationMs: Long): Long = ((durationMs - 1000) / 2).coerceAtLeast(0)
@@ -109,7 +125,9 @@ private val json = Json { ignoreUnknownKeys = true }
 fun encodeCandidates(list: List<DraftCandidate>): String = json.encodeToString(ListSerializer(DraftCandidate.serializer()), list)
 
 fun decodeCandidates(raw: String?): List<DraftCandidate> =
-    raw?.let { runCatching { json.decodeFromString(ListSerializer(DraftCandidate.serializer()), it) }.getOrNull() }.orEmpty()
+    raw?.let {
+        runCatching { json.decodeFromString(ListSerializer(DraftCandidate.serializer()), it) }.getOrNull()
+    }.orEmpty()
 
 @Serializable
 data class ImportRun(

@@ -1,26 +1,4 @@
 package app.sliver.feature.archive
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.feature.camera.label
-import app.sliver.core.ui.SheetsOpen
-import kotlinx.coroutines.delay
-import androidx.compose.runtime.produceState
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlin.time.Clock
-
-import app.sliver.core.kit.GlassStyle
-import app.sliver.core.kit.glass
-import dev.chrisbanes.haze.hazeSource
-
-import app.sliver.core.kit.ButtonKind
-import app.sliver.core.kit.ReelogButton
-
-import app.sliver.core.theme.ReelogType
-
-import app.sliver.feature.camera.liquidGlow
-import androidx.compose.animation.core.animateFloat
-import app.sliver.core.ui.SecondaryButton
-import app.sliver.core.ui.PrimaryButton
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -28,13 +6,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -56,25 +32,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import app.sliver.data.backup.SyncEngine
-import app.sliver.data.backup.changedOnAnotherPhone
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import app.sliver.feature.camera.overMedia
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
@@ -88,15 +63,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.icons.HubIcons
-import app.sliver.core.icons.SliverIcons
 import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.GlassStyle
+import app.sliver.core.kit.ReelogButton
+import app.sliver.core.kit.glass
 import app.sliver.core.navigation.Route
 import app.sliver.core.permissions.PermissionKind
 import app.sliver.core.permissions.PermissionStatus
 import app.sliver.core.permissions.rememberPermissionController
 import app.sliver.core.theme.LocalReducedMotion
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverShapes
@@ -105,45 +85,50 @@ import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.monthGrid
 import app.sliver.core.time.todayLocal
-import app.sliver.core.ui.EdgeState
-import app.sliver.core.ui.LocalWindowSize
 import app.sliver.core.ui.ClipDrop
+import app.sliver.core.ui.EdgeState
+import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.LocalWindowSize
 import app.sliver.core.ui.MaxContentWidth
 import app.sliver.core.ui.NoticeSheet
+import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.SheetsOpen
 import app.sliver.core.ui.SliverBottomSheet
-import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.rememberTapGate
+import app.sliver.data.backup.SyncEngine
+import app.sliver.data.backup.changedOnAnotherPhone
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.ReviewSheetBody
-import app.sliver.feature.autoimport.dashedOutline
 import app.sliver.feature.autoimport.autoDays
+import app.sliver.feature.autoimport.dashedOutline
 import app.sliver.feature.autoimport.decodeCandidates
-import app.sliver.feature.autoimport.nextDraft
+import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.autoimport.reviewChipLabel
 import app.sliver.feature.autoimport.toCheck
-import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
+import app.sliver.feature.camera.label
+import app.sliver.feature.camera.overMedia
 import app.sliver.feature.films.FilmActionsSheet
-import app.sliver.feature.films.FilmsSection
 import app.sliver.feature.films.FilmNav
+import app.sliver.feature.films.FilmsSection
 import app.sliver.feature.gallery.rememberAddMedia
 import app.sliver.feature.projects.ProjectAction
 import app.sliver.feature.projects.ProjectsSheet
 import app.sliver.feature.projects.canLeaveActive
 import app.sliver.feature.trim.SaveUndo
 import app.sliver.feature.trim.rememberPhoto
+import dev.chrisbanes.haze.hazeSource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 import org.koin.mp.KoinPlatform
+import kotlin.time.Clock
 
 /** Date handed to the Day detail screen until it takes a route argument. */
 object ArchiveSession {
@@ -176,7 +161,9 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     val project by remember { koin.get<ProjectRepository>().active }.collectAsStateWithLifecycle(null)
     val projects by remember { koin.get<ProjectRepository>().projects }.collectAsStateWithLifecycle(emptyList())
     // Auto-import can fill days before the project was created: the calendar (and "since") must reach them.
-    val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull { it.date }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
+    val first = listOfNotNull(project?.startDate ?: app?.firstDay, all.minOfOrNull {
+        it.date
+    }, drafts.minOfOrNull { it.date }).minOrNull() ?: today
 
     val controller = rememberPermissionController()
     val scope = rememberCoroutineScope()
@@ -188,7 +175,11 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     fun show(m: YearMonth) { shownIndex = m.year * 12 + m.month - 1 }
     var addFor by remember { mutableStateOf<LocalDate?>(null) }
     var draftsSheet by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { ArchiveSession.pendingMonth?.let { show(it); ArchiveSession.pendingMonth = null } }
+    LaunchedEffect(Unit) { ArchiveSession.pendingMonth?.let {
+        show(it);
+        ArchiveSession.pendingMonth = null
+    }
+    }
     var projectsOpen by remember { mutableStateOf(false) }
     var projectAction by remember { mutableStateOf<ProjectAction?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -234,7 +225,9 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     LaunchedEffect(changed, project?.id) {
         val id = project?.id ?: return@LaunchedEffect
         val mine = changed.filter { it.substringBefore('|') == id }
-        val text = changedOnAnotherPhone(mine.mapNotNull { runCatching { LocalDate.parse(it.substringAfter('|')) }.getOrNull() })
+        val text = changedOnAnotherPhone(mine.mapNotNull {
+            runCatching { LocalDate.parse(it.substringAfter('|')) }.getOrNull()
+        })
         if (text != null && notice == null) {
             notice = text
             settings.update { s -> s.copy(account = s.account.copy(changedNotices = s.account.changedNotices - mine.toSet())) }
@@ -253,8 +246,13 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                     .fillMaxHeight().navigationBarsPadding(),
             ) {
                 Header(
-                    project?.name.orEmpty(), clipsHeader(all.size, first) + (project?.let { " · " + it.format.label() } ?: ""), menuOpen,
-                    { projectsOpen = true }, { onNavigate(Route.Settings) }, { menuOpen = true }, syncing = syncing != null,
+                    project?.name.orEmpty(),
+                    clipsHeader(all.size, first) + (project?.let { " · " + it.format.label() } ?: ""),
+                    menuOpen,
+                    { projectsOpen = true },
+                    { onNavigate(Route.Settings) },
+                    { menuOpen = true },
+                    syncing = syncing != null,
                 )
                 Column(
                     Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = RecordDockHeight),
@@ -268,16 +266,25 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
 
                         if (all.isEmpty() && app != null) {
                             EdgeState(
-                                "Your year starts today", "Record one clip a day. Your archive fills in here.",
-                                Modifier.fillMaxWidth(), "Record today's clip",
-                            ) { CaptureSession.forDate = null; onNavigate(Route.Camera) }
+                                "Your year starts today",
+                                "Record one clip a day. Your archive fills in here.",
+                                Modifier.fillMaxWidth(),
+                                "Record today's clip",
+                            ) {
+                                CaptureSession.forDate = null;
+                                onNavigate(Route.Camera)
+                            }
                         }
 
                         if (showNudge) {
                             NudgeCard(
                                 onSet = {
                                     scope.launch { settings.update { it.copy(reminder = it.reminder.copy(enabled = true)) } }
-                                    if (controller.status(PermissionKind.Notifications) == PermissionStatus.NotAsked) controller.request(PermissionKind.Notifications)
+                                    if (controller.status(PermissionKind.Notifications) == PermissionStatus.NotAsked) {
+                                        controller.request(
+                                            PermissionKind.Notifications
+                                        )
+                                    }
                                     onNavigate(Route.Reminders)
                                 },
                                 onDismiss = { scope.launch { settings.update { it.copy(nudgeDismissed = true) } } },
@@ -285,39 +292,57 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                         }
 
                         // HubV18: Month/Year segmented + arrows in one row, then the month (22/600) and "23 of 31 days".
-                        val count = remember(all, shown) { all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month && !it.draft } }
+                        val count = remember(all, shown) {
+                            all.count { it.date.year == shown.year && it.date.month.ordinal + 1 == shown.month && !it.draft }
+                        }
                         PeriodRow(
-                            yearMode, { yearMode = it },
+                            yearMode,
+                            { yearMode = it },
                             if (yearMode) shown.year > first.year else canGoPrev(shown, first),
                             if (yearMode) shown.year < today.year else canGoNext(shown, today),
                             onPrev = {
-                                if (yearMode) show(YearMonth(shown.year - 1, shown.month).coerceIn(YearMonth(first.year, first.month.ordinal + 1), today.toYearMonth()))
-                                else show(stepMonth(shown, -1, first, today))
+                                if (yearMode) {
+                                    show(
+                                        YearMonth(shown.year - 1, shown.month).coerceIn(YearMonth(first.year, first.month.ordinal + 1), today.toYearMonth())
+                                    )
+                                } else {
+                                    show(stepMonth(shown, -1, first, today))
+                                }
                             },
                             onNext = {
-                                if (yearMode) show(YearMonth(shown.year + 1, shown.month).coerceIn(YearMonth(first.year, first.month.ordinal + 1), today.toYearMonth()))
-                                else show(stepMonth(shown, 1, first, today))
+                                if (yearMode) {
+                                    show(
+                                        YearMonth(shown.year + 1, shown.month).coerceIn(YearMonth(first.year, first.month.ordinal + 1), today.toYearMonth())
+                                    )
+                                } else {
+                                    show(stepMonth(shown, 1, first, today))
+                                }
                             },
                         )
                         if (yearMode) {
-                            val inYear = remember(all, shown.year) { all.count { it.date.year == shown.year && !it.draft } }
+                            val inYear =
+                                remember(all, shown.year) { all.count { it.date.year == shown.year && !it.draft } }
                             MonthTitle("${shown.year}", "$inYear ${if (inYear == 1) "clip" else "clips"}")
-                            YearView(shown.year, calendar, today, first) { m -> show(m); yearMode = false }
+                            YearView(shown.year, calendar, today, first) { m ->
+                                show(m);
+                                yearMode = false
+                            }
                         } else {
-                        MonthTitle(MonthLong[shown.month - 1], "$count of ${daysInMonth(shown.year, shown.month)} days")
-                        Box(
-                            Modifier.pointerInput(shown, first, today) {
-                                var dx = 0f
-                                detectHorizontalDragGestures(
-                                    onDragStart = { dx = 0f },
-                                    onDragEnd = {
-                                        if (dx > SwipePx) show(stepMonth(shown, -1, first, today))
-                                        else if (dx < -SwipePx) show(stepMonth(shown, 1, first, today))
-                                    },
-                                    onDragCancel = { dx = 0f },
-                                ) { _, delta -> dx += delta }
-                            },
-                        ) { MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay) }
+                            MonthTitle(MonthLong[shown.month - 1], "$count of ${daysInMonth(shown.year, shown.month)} days")
+                            Box(
+                                Modifier.pointerInput(shown, first, today) {
+                                    var dx = 0f
+                                    detectHorizontalDragGestures(
+                                        onDragStart = { dx = 0f },
+                                        onDragEnd = {
+                                            if (dx > SwipePx) {
+                                                show(stepMonth(shown, -1, first, today))
+                                            } else if (dx < -SwipePx) show(stepMonth(shown, 1, first, today))
+                                        },
+                                        onDragCancel = { dx = 0f },
+                                    ) { _, delta -> dx += delta }
+                                },
+                            ) { MonthGrid(shown, calendar, today, first, ::onCell, ::replaceDay, ::removeDay) }
                         }
                     }
                     if (!wide) FilmsSection(onNavigate, { filmMenu = it })
@@ -339,22 +364,33 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
 
         val minute by produceState(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time) {
             // Caption counts hours left; refresh once a minute (no animation, ~0 CPU).
-            while (true) { delay(60_000); value = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time }
+            while (true) {
+                delay(60_000);
+                value = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time
+            }
         }
         // v1.9 §5.3: once today is in, the dock shrinks to a 56 dp thumbnail of today (bottom-right).
         val todayDay = byDate[today]?.takeIf { !it.draft }
-        if (SheetsOpen.count == 0 && !menuOpen && todayDay != null) TodayBubble(
-            todayDay, { openDay(today) },
-            Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 20.dp, bottom = 30.dp),
-        )
-        if (SheetsOpen.count == 0 && !menuOpen && todayDay == null) RecordDock(
-            today = byDate[today],
-            caption = dockCaption(today, minute.hour, minute.minute),
-            backdrop = dockBackdrop,
-            onRecord = { CaptureSession.forDate = null; onNavigate(Route.Camera) },
-            onOpenToday = { openDay(today) },
-            modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth),
-        )
+        if (SheetsOpen.count == 0 && !menuOpen && todayDay != null) {
+            TodayBubble(
+                todayDay,
+                { openDay(today) },
+                Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 20.dp, bottom = 30.dp),
+            )
+        }
+        if (SheetsOpen.count == 0 && !menuOpen && todayDay == null) {
+            RecordDock(
+                today = byDate[today],
+                caption = dockCaption(today, minute.hour, minute.minute),
+                backdrop = dockBackdrop,
+                onRecord = {
+                    CaptureSession.forDate = null;
+                    onNavigate(Route.Camera)
+                },
+                onOpenToday = { openDay(today) },
+                modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = MaxContentWidth),
+            )
+        }
         ProjectsSheet(projectsOpen, { projectsOpen = false }, backdrop = dockBackdrop)
         ProjectsSheet(projectAction != null, { projectAction = null }, action = projectAction)
         NoticeSheet(notice) { notice = null }
@@ -367,10 +403,22 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
             ProjectMenu(
                 canLeave,
                 onDismiss = { menuOpen = false },
-                onRename = { menuOpen = false; projectAction = ProjectAction.Rename },
-                onShape = { menuOpen = false; projectAction = ProjectAction.Format },
-                onFill = { menuOpen = false; onNavigate(Route.FillThePast) },
-                onManage = { menuOpen = false; manageOpen = true },
+                onRename = {
+                    menuOpen = false;
+                    projectAction = ProjectAction.Rename
+                },
+                onShape = {
+                    menuOpen = false;
+                    projectAction = ProjectAction.Format
+                },
+                onFill = {
+                    menuOpen = false;
+                    onNavigate(Route.FillThePast)
+                },
+                onManage = {
+                    menuOpen = false;
+                    manageOpen = true
+                },
             )
         }
         SliverBottomSheet(manageOpen, onDismiss = { manageOpen = false }) {
@@ -378,30 +426,51 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 SliverText("Archive or delete", SliverType.Title)
                 SliverText(
                     "Archive hides the project from your list and keeps everything. You can bring it back from Projects.",
-                    SliverType.BodySmall, color = SliverColors.TextSecondary,
+                    SliverType.BodySmall,
+                    color = SliverColors.TextSecondary,
                 )
                 SecondaryButton("Archive project", {
                     manageOpen = false
                     project?.let { p -> scope.launch { koin.get<ProjectRepository>().setArchived(p.id, true) } }
                 }, Modifier.fillMaxWidth())
                 GhostButton(
-                    "Delete project\u2026", { manageOpen = false; projectAction = ProjectAction.Delete }, Modifier.fillMaxWidth(), destructive = true,
+                    "Delete project\u2026",
+                    {
+                        manageOpen = false;
+                        projectAction = ProjectAction.Delete
+                    },
+                    Modifier.fillMaxWidth(),
+                    destructive = true,
                 )
             }
         }
         SliverBottomSheet(draftsSheet && waiting.isNotEmpty(), onDismiss = { draftsSheet = false }) {
             ReviewSheetBody(
-                drafts.size, autoCount, draftNav.busy,
-                onKeepAll = { draftsSheet = false; draftNav.keepAll() },
-                onRemoveUnchecked = { draftsSheet = false; draftNav.removeUnchecked() },
+                drafts.size,
+                autoCount,
+                draftNav.busy,
+                onKeepAll = {
+                    draftsSheet = false;
+                    draftNav.keepAll()
+                },
+                onRemoveUnchecked = {
+                    draftsSheet = false;
+                    draftNav.removeUnchecked()
+                },
                 // Owner: no day sheet; the editor walks the days itself (previous / next).
-                onWalk = { draftsSheet = false; waiting.firstOrNull()?.let { draftNav.openFirst(onNavigate, it, chain = true) } },
+                onWalk = {
+                    draftsSheet = false;
+                    waiting.firstOrNull()?.let { draftNav.openFirst(onNavigate, it, chain = true) }
+                },
                 days = waiting,
             )
         }
         SliverBottomSheet(addFor != null, onDismiss = { addFor = null }) {
             val date = addFor ?: return@SliverBottomSheet
-            AddSheet(date, { addFor = null; addMedia(date) }, { addFor = null })
+            AddSheet(date, {
+                addFor = null;
+                addMedia(date)
+            }, { addFor = null })
         }
     }
 }
@@ -411,8 +480,13 @@ private val hubTitle get() = ReelogType.title
 
 @Composable
 private fun Header(
-    name: String, line: String, menuOpen: Boolean,
-    onSwitch: () -> Unit, onSettings: () -> Unit, onMore: () -> Unit, syncing: Boolean = false,
+    name: String,
+    line: String,
+    menuOpen: Boolean,
+    onSwitch: () -> Unit,
+    onSettings: () -> Unit,
+    onMore: () -> Unit,
+    syncing: Boolean = false,
 ) {
     Column(Modifier.fillMaxWidth().background(SliverColors.BgBase).statusBarsPadding().padding(top = 11.dp)) {
         Row(
@@ -431,12 +505,34 @@ private fun Header(
             }
             // HubV17: settings gear, then "…" for the project menu; 24 dp Lucide, no backgrounds.
             HubButton(SliverIcons.Settings, "Settings", onSettings, SliverColors.TextPrimary, 24.dp)
-            HubButton(SliverIcons.MoreHorizontal, "Project menu", onMore, SliverColors.TextPrimary, 24.dp, if (menuOpen) SliverColors.Surface3 else Color.Transparent)
+            HubButton(
+                SliverIcons.MoreHorizontal,
+                "Project menu",
+                onMore,
+                SliverColors.TextPrimary,
+                24.dp,
+                if (menuOpen) SliverColors.Surface3 else Color.Transparent
+            )
         }
         // Audit v1.8 §2.1: sync status lives in the subtitle (icon + word), only while syncing.
-        Row(Modifier.padding(start = 20.dp, top = 4.dp, end = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            val sub = SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label), color = SliverColors.TextTertiary)
-            SliverText(line + if (syncing) " \u00B7" else "", sub, Modifier.weight(1f, fill = false), maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        Row(
+            Modifier.padding(start = 20.dp, top = 4.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            val sub = SliverType.Body.copy(
+                fontSize = ReelogType.Size.label,
+                lineHeight = ReelogType.lineFor(ReelogType.Size.label),
+                color = SliverColors.TextTertiary
+            )
+            SliverText(
+                line + if (syncing) " \u00B7" else "",
+                sub,
+                Modifier.weight(1f, fill = false),
+                maxLines = 1,
+                softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
             if (syncing) {
                 SliverIcon(SliverIcons.RotateCcw, SliverColors.TextTertiary, size = 15.dp)
                 SliverText("Syncing", sub, maxLines = 1, softWrap = false)
@@ -475,7 +571,10 @@ private fun NudgeCard(onSet: () -> Unit, onDismiss: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             SliverIcon(HubIcons.Bell, SliverColors.AccentText)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                SliverText("Want a daily nudge?", SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
+                SliverText(
+                    "Want a daily nudge?",
+                    SliverType.Headline.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label))
+                )
                 SliverText("One quiet reminder at a time you choose.", SliverType.Caption, color = SliverColors.TextTertiary)
             }
         }
@@ -493,7 +592,9 @@ private const val SwipePx = 80f
 private fun PeriodRow(year: Boolean, onYear: (Boolean) -> Unit, canPrev: Boolean, canNext: Boolean, onPrev: () -> Unit, onNext: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         // v1.9 §5.2: 40 dp tall, 168 dp wide, labels 15/500.
-        app.sliver.core.kit.ReelogSegmented(listOf("Month", "Year"), if (year) 1 else 0, { onYear(it == 1) }, Modifier.width(168.dp), height = 40.dp)
+        app.sliver.core.kit.ReelogSegmented(listOf("Month", "Year"), if (year) 1 else 0, {
+            onYear(it == 1)
+        }, Modifier.width(168.dp), height = 40.dp)
         Box(Modifier.weight(1f))
         NavArrow(HubIcons.Prev, if (year) "Previous year" else "Previous month", canPrev, onPrev)
         NavArrow(HubIcons.Next, if (year) "Next year" else "Next month", canNext, onNext)
@@ -504,14 +605,25 @@ private fun PeriodRow(year: Boolean, onYear: (Boolean) -> Unit, canPrev: Boolean
 private fun MonthTitle(left: String, right: String) {
     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         SliverText(left, ReelogType.headline, maxLines = 1, softWrap = false)
-        SliverText(right, ReelogType.caption.copy(fontFeatureSettings = "tnum"), Modifier.padding(bottom = 3.dp), color = SliverColors.TextTertiary, maxLines = 1)
+        SliverText(
+            right,
+            ReelogType.caption.copy(fontFeatureSettings = "tnum"),
+            Modifier.padding(bottom = 3.dp),
+            color = SliverColors.TextTertiary,
+            maxLines = 1
+        )
     }
 }
 
 @Composable
 private fun MonthGrid(
-    shown: YearMonth, byDate: Map<LocalDate, Day>, today: LocalDate, start: LocalDate,
-    onCell: (LocalDate) -> Unit, onReplace: (LocalDate) -> Unit, onRemove: (LocalDate) -> Unit,
+    shown: YearMonth,
+    byDate: Map<LocalDate, Day>,
+    today: LocalDate,
+    start: LocalDate,
+    onCell: (LocalDate) -> Unit,
+    onReplace: (LocalDate) -> Unit,
+    onRemove: (LocalDate) -> Unit,
 ) {
     app.sliver.core.log.RecomposeProbe("month")
     val weeks = remember(shown) { monthGrid(shown.year, shown.month).filter { week -> week.any { it != null } } }
@@ -539,7 +651,12 @@ private fun MonthGrid(
 
 @Composable
 private fun DayCell(
-    date: LocalDate, today: LocalDate, start: LocalDate, day: Day?, onReplace: () -> Unit, onRemove: () -> Unit,
+    date: LocalDate,
+    today: LocalDate,
+    start: LocalDate,
+    day: Day?,
+    onReplace: () -> Unit,
+    onRemove: () -> Unit,
     onClick: () -> Unit,
 ) {
     app.sliver.core.log.RecomposeProbe("cell")
@@ -555,8 +672,13 @@ private fun DayCell(
         }
     }
     val state = cellState(date, today, day, start)
-    val autoItems = if (state == CellState.AUTO) remember(day?.draftCandidates) { decodeCandidates(day?.draftCandidates).size.coerceAtLeast(1) } else null
-    val base = Modifier.fillMaxSize().graphicsLayer { scaleX = scale.value; scaleY = scale.value }.clip(CellShape)
+    val autoItems = if (state == CellState.AUTO) remember(day?.draftCandidates) {
+        decodeCandidates(day?.draftCandidates).size.coerceAtLeast(1)
+    } else null
+    val base = Modifier.fillMaxSize().graphicsLayer {
+        scaleX = scale.value;
+        scaleY = scale.value
+    }.clip(CellShape)
     val surface = when (state) {
         CellState.FUTURE -> base
         CellState.EMPTY -> base.background(SliverColors.CellEmptyTile)
@@ -572,12 +694,24 @@ private fun DayCell(
                 else -> ""
             }
             if (day?.draft == true || autoItems != null) {
-                customActions = listOf(CustomAccessibilityAction(if (autoItems != null) "Check day" else "Review draft") { onClick(); true })
+                customActions = listOf(CustomAccessibilityAction(if (autoItems != null) "Check day" else "Review draft") {
+                    onClick();
+                    true
+                })
             } else if (day != null) {
                 customActions = listOf(
-                    CustomAccessibilityAction("Open") { onClick(); true },
-                    CustomAccessibilityAction("Replace clip") { onReplace(); true },
-                    CustomAccessibilityAction("Remove clip") { onRemove(); true },
+                    CustomAccessibilityAction("Open") {
+                        onClick();
+                        true
+                    },
+                    CustomAccessibilityAction("Replace clip") {
+                        onReplace();
+                        true
+                    },
+                    CustomAccessibilityAction("Remove clip") {
+                        onRemove();
+                        true
+                    },
                 )
             }
         }.then(if (state == CellState.FUTURE) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)),
@@ -600,15 +734,27 @@ private fun DayCell(
                 }
                 if (draft || state == CellState.AUTO) {
                     Box(Modifier.fillMaxSize().dashedOutline(if (draft) SliverColors.TextDisabled else SliverColors.OnMedia))
-                    if (draft) SliverText(
-                        "Draft", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), color = SliverColors.OnMedia).overMedia(),
-                        Modifier.align(Alignment.TopStart).padding(top = 4.dp, start = 6.dp),
-                    )
+                    if (draft) {
+                        SliverText(
+                            "Draft",
+                            SliverType.Caption.copy(
+                                fontSize = ReelogType.Size.caption,
+                                lineHeight = ReelogType.lineFor(ReelogType.Size.caption),
+                                color = SliverColors.OnMedia
+                            ).overMedia(),
+                            Modifier.align(Alignment.TopStart).padding(top = 4.dp, start = 6.dp),
+                        )
+                    }
                 }
-                Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))))
+                Box(
+                    Modifier.align(
+                        Alignment.BottomCenter
+                    ).fillMaxWidth().height(22.dp).background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim)))
+                )
                 // Audit v1.8 §2.3: no "+N" badge on cells; other items of the day are offered on the day screen.
                 SliverText(
-                    date.day.toString(), CellNumber.copy(color = SliverColors.OnMedia).overMedia(),
+                    date.day.toString(),
+                    CellNumber.copy(color = SliverColors.OnMedia).overMedia(),
                     Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 4.dp),
                 )
             }
@@ -632,7 +778,12 @@ private fun ReviewRow(label: String, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.size(20.dp).dashedOutline(SliverColors.TextSecondary, 5.dp))
-        SliverText(label, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f), color = SliverColors.TextPrimary)
+        SliverText(
+            label,
+            SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
+            Modifier.weight(1f),
+            color = SliverColors.TextPrimary
+        )
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextTertiary, size = 18.dp)
     }
 }
@@ -640,7 +791,11 @@ private fun ReviewRow(label: String, onClick: () -> Unit) {
 @Composable
 private fun ProjectMenu(
     canLeave: Boolean,
-    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onManage: () -> Unit,
+    onDismiss: () -> Unit,
+    onRename: () -> Unit,
+    onShape: () -> Unit,
+    onFill: () -> Unit,
+    onManage: () -> Unit,
 ) {
     app.sliver.core.ui.BackHandler(onBack = onDismiss)
     Box(Modifier.fillMaxSize().clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss))
@@ -661,10 +816,14 @@ private fun ProjectMenu(
             // Owner 14 Nov: archive and delete must not be one tap away; they sit behind a muted last item.
             Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(SliverColors.LineHairline))
             MenuItem(SliverIcons.MoreHorizontal, "Archive or delete\u2026", SliverColors.TextSecondary, onManage, canLeave)
-            if (!canLeave) SliverText(
-                "Keep at least one open project.", SliverType.Caption, Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                color = SliverColors.TextTertiary,
-            )
+            if (!canLeave) {
+                SliverText(
+                    "Keep at least one open project.",
+                    SliverType.Caption,
+                    Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    color = SliverColors.TextTertiary,
+                )
+            }
         }
     }
 }
@@ -700,6 +859,7 @@ private const val DockGlowMs = 14_000
 
 /** v1.7 item 5: strong-glass capsule 72 dp, 16 dp from the sides, 30 dp above the nav bar. Content scrolls under it. */
 private val DockCapsule = 68.dp
+
 /** Scroll padding so the last poster caption sits above the dock (dock + 30 dp gap + 16). */
 private val RecordDockHeight = DockCapsule + 30.dp + 32.dp
 
@@ -747,20 +907,23 @@ private fun RecordDock(
             SliverText(title, ReelogType.body.copy(fontWeight = FontWeight.SemiBold), maxLines = 1)
             SliverText(
                 if (done) "0:01 · tap to watch or replace" else caption,
-                ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1,
+                ReelogType.caption.copy(fontFeatureSettings = "tnum"),
+                color = SliverColors.TextSecondary,
+                maxLines = 1,
             )
         }
         SliverIcon(SliverIcons.ChevronRight, SliverColors.TextSecondary, size = 22.dp)
     }
 }
 
-
 /** Today's clip as a 56 dp round thumbnail; tap opens the day. */
 @Composable
 private fun TodayBubble(today: Day, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val thumb = rememberPhoto(today.thumb)
     Box(
-        modifier.size(56.dp).shadow(10.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.4f), spotColor = Color.Black.copy(alpha = 0.4f)) // lint-ok: elevation
+        modifier.size(
+            56.dp
+        ).shadow(10.dp, CircleShape, ambientColor = Color.Black.copy(alpha = 0.4f), spotColor = Color.Black.copy(alpha = 0.4f)) // lint-ok: elevation
             .clip(CircleShape).background(today.color.takeIf { it != 0 }?.let(::Color) ?: SliverColors.Surface3)
             .border(2.dp, SliverColors.OnMedia, CircleShape)
             .semantics { contentDescription = "Today is in, open it" }

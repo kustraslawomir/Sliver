@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.Lens
 
@@ -14,19 +13,24 @@ data class ExposureRange(val min: Int, val max: Int, val step: Float)
 interface CameraEngine {
     /** Latest OrientationEventListener degrees; applied as target rotation before each capture. */
     var deviceDegrees: Int
+
     /** Records to [path]; [onResult] gets the path on success. */
     fun startRecording(path: String, onResult: (Result<String>) -> Unit)
     fun stopRecording()
+
     /**
      * AF+AE+AWB at a PreviewView point in px; [lock] keeps it until the next call, otherwise it auto-cancels after 3 s.
      * [onResult] gets true when the camera settled, false when it could not or the request was cancelled.
      */
     fun focus(x: Float, y: Float, lock: Boolean, onResult: (Boolean) -> Unit)
+
     /** Exposure compensation range of the bound camera, or null when unsupported. */
     fun exposureRange(): ExposureRange?
     fun setExposureIndex(index: Int)
+
     /** Zoom ratios reachable on the current lens, below 1× when there is an ultra-wide; null until bound. */
     fun zoomRange(): ClosedFloatingPointRange<Float>?
+
     /** Zoom ratio relative to the main lens (0.6 = ultra-wide); kept across rebinds of the same lens. */
     fun setZoom(ratio: Float)
     fun takePhoto(path: String, onResult: (Result<String>) -> Unit)

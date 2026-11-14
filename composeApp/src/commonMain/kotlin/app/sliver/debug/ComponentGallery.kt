@@ -28,8 +28,8 @@ import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
 import app.sliver.core.ui.PrimaryButton
-import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.SecondaryButton
+import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.SliverBottomSheet
 import app.sliver.core.ui.SliverFrame
 import app.sliver.core.ui.SliverFrameState
@@ -57,10 +57,14 @@ fun ComponentGallery() {
             PrimaryButton("Primary", {})
             PrimaryButton("Disabled", {}, enabled = false)
             SecondaryButton("Secondary", {})
-            Row { GhostButton("Ghost", {}); GhostButton("Delete", {}, destructive = true) }
+            Row {
+                GhostButton("Ghost", {})
+                GhostButton("Delete", {}, destructive = true)
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3), verticalAlignment = Alignment.CenterVertically) {
                 IconButton44({}, "icon") { Box(Modifier.size(16.dp).background(SliverColors.TextPrimary)) }
-                IconButton44({}, "icon over camera", overCamera = true) { Box(Modifier.size(16.dp).background(SliverColors.TextPrimary)) }
+                IconButton44({
+                }, "icon over camera", overCamera = true) { Box(Modifier.size(16.dp).background(SliverColors.TextPrimary)) }
                 Chip("Selected", chip, { chip = !chip })
                 Chip("Idle", !chip, { chip = !chip })
             }

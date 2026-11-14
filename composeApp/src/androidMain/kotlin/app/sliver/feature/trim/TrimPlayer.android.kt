@@ -1,29 +1,28 @@
 package app.sliver.feature.trim
 
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.Image
-import app.sliver.core.theme.SliverColors
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
-import app.sliver.core.ui.rememberAppVisible
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import app.sliver.core.theme.SliverColors
+import app.sliver.core.ui.rememberAppVisible
 import app.sliver.feature.camera.displaySize
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -71,7 +70,11 @@ actual fun TrimPlayer(
         }
         player.addListener(listener)
         scrubPlayer.addListener(listener)
-        onDispose { player.removeListener(listener); scrubPlayer.removeListener(listener); player.release() }
+        onDispose {
+            player.removeListener(listener);
+            scrubPlayer.removeListener(listener);
+            player.release()
+        }
     }
 
     val scrubbing = scrubMs != null

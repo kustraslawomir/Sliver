@@ -39,4 +39,3 @@ fun fitScale(clipAspect: Float, outAspect: Float): Pair<Float, Float> =
 
 /** True when a clip fills the output without visible bars or cropping worth handling. */
 fun aspectMatches(clipAspect: Float, outAspect: Float): Boolean = kotlin.math.abs(clipAspect / outAspect - 1f) < 0.02f
-

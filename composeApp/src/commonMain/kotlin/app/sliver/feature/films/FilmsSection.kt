@@ -1,83 +1,67 @@
 package app.sliver.feature.films
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.ui.IconButton44
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
-import app.sliver.core.icons.SliverIcons
-import app.sliver.data.pickerLabel
-import app.sliver.core.kit.ButtonKind
-import app.sliver.core.kit.ReelogButton
-
-import app.sliver.core.theme.ReelogType
-
-import kotlinx.coroutines.flow.map
-import kotlinx.datetime.toLocalDateTime
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import app.sliver.core.icons.HubIcons
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.ui.rememberTapGate
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
-import app.sliver.core.ui.GhostButton
-import app.sliver.core.ui.Notices
-import app.sliver.core.ui.SliverBottomSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.icons.HubIcons
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
 import app.sliver.core.navigation.Route
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
-import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Badge
-import app.sliver.core.ui.SecondaryButton
-import app.sliver.data.FilmFormat
-import app.sliver.data.db.Day
+import app.sliver.core.ui.GhostButton
+import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.Notices
+import app.sliver.core.ui.SliverBottomSheet
+import app.sliver.core.ui.rememberTapGate
 import app.sliver.data.db.Film
+import app.sliver.data.pickerLabel
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
-import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.trim.rememberPhoto
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
 import org.koin.mp.KoinPlatform
 
 /** Films of the active project, shown under the calendar on the Project screen. */
@@ -88,7 +72,11 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     val films = remember { koin.get<FilmRepository>() }
     val days = remember { koin.get<DayRepository>() }
     // Owner: newest film on the left.
-    val list by remember { films.observeAll().map { l -> l.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt } } }.collectAsStateWithLifecycle(emptyList())
+    val list by remember {
+        films.observeAll().map { l -> l.sortedByDescending {
+            it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt
+        } }
+    }.collectAsStateWithLifecycle(emptyList())
     val all by remember { days.observeAll() }.collectAsStateWithLifecycle(emptyList())
 
     Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -98,7 +86,9 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
                 SliverText("Films", SliverType.Title.copy(fontSize = ReelogType.Size.headline, lineHeight = ReelogType.lineFor(ReelogType.Size.headline)))
                 if (list.isNotEmpty()) SliverText("${list.size}", SliverType.tnum(), Modifier.padding(bottom = 3.dp), color = SliverColors.TextTertiary)
             }
-            ReelogButton("Make film", { onNavigate(Route.FilmBuilder) }, kind = ButtonKind.Secondary, small = true, fullWidth = false, leading = HubIcons.Plus)
+            ReelogButton("Make film", {
+                onNavigate(Route.FilmBuilder)
+            }, kind = ButtonKind.Secondary, small = true, fullWidth = false, leading = HubIcons.Plus)
         }
         // v1.9 §5.4: versions of the same film (same name) are one poster "4 versions"; tap opens the newest,
         // long-press lists them all.
@@ -108,7 +98,10 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
                 itemsIndexed(groups, key = { _, g -> g.first().id }, contentType = { _, _ -> "poster" }) { i, group ->
                     val film = group.first()
                     Poster(
-                        film, film.plan(all), SliverColors.PosterTints[i % SliverColors.PosterTints.size], null,
+                        film,
+                        film.plan(all),
+                        SliverColors.PosterTints[i % SliverColors.PosterTints.size],
+                        null,
                         versionCount = group.size,
                         onLongClick = { onLongPress(film) },
                     ) {
@@ -121,7 +114,6 @@ fun FilmsSection(onNavigate: (Route) -> Unit, onLongPress: (Film) -> Unit) {
     }
 }
 
-
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versionCount: Int = 1, onLongClick: () -> Unit, onClick: () -> Unit) {
@@ -133,10 +125,12 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versi
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // A stack edge behind the poster when it holds several versions.
-        if (versionCount > 1) Box(
-            Modifier.padding(horizontal = 8.dp).fillMaxWidth().height(4.dp)
-                .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(SliverColors.LineStrong),
-        )
+        if (versionCount > 1) {
+            Box(
+                Modifier.padding(horizontal = 8.dp).fillMaxWidth().height(4.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(SliverColors.LineStrong),
+            )
+        }
         Box(
             Modifier.fillMaxWidth().height(PosterH).clip(PosterShape)
                 .background(Brush.verticalGradient(0f to tint, 0.75f to SliverColors.BgVoid, 1f to SliverColors.BgVoid))
@@ -149,8 +143,11 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versi
             }
             Box(Modifier.fillMaxSize().padding(12.dp)) {
                 SliverText(
-                    film.name, ReelogType.poster, Modifier.align(Alignment.BottomStart),
-                    color = SliverColors.OnMedia, maxLines = 2,
+                    film.name,
+                    ReelogType.poster,
+                    Modifier.align(Alignment.BottomStart),
+                    color = SliverColors.OnMedia,
+                    maxLines = 2,
                 )
                 if (film.renderPath != null && state == RenderState.Idle) {
                     Box(
@@ -160,15 +157,34 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versi
                 }
                 when (val s = state) {
                     is RenderState.Running -> Badge("Rendering ${s.percent}%", Modifier.align(Alignment.TopStart), SliverColors.Accent)
-                    RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable { renderer.start(film.id) }, SliverColors.Accent)
+                    RenderState.Failed -> Badge("Try again", Modifier.align(Alignment.TopStart).clickable {
+                        renderer.start(film.id)
+                    }, SliverColors.Accent)
                     RenderState.Idle -> Unit
                 }
             }
         }
         // HubV18: 13 sp, two lines — range / length · version · look.
         Column {
-            SliverText(plan.spanText(), ReelogType.caption, color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            SliverText(if (versionCount > 1) dotJoin("$versionCount versions", filmRuntime(plan.clips)) else posterCaption(plan.clips, version, film.look?.pickerLabel), ReelogType.caption.copy(fontFeatureSettings = "tnum"), color = SliverColors.TextSecondary, maxLines = 1, softWrap = false, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            SliverText(
+                plan.spanText(),
+                ReelogType.caption,
+                color = SliverColors.TextSecondary,
+                maxLines = 1,
+                softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+            SliverText(
+                if (versionCount > 1) dotJoin(
+                    "$versionCount versions",
+                    filmRuntime(plan.clips)
+                ) else posterCaption(plan.clips, version, film.look?.pickerLabel),
+                ReelogType.caption.copy(fontFeatureSettings = "tnum"),
+                color = SliverColors.TextSecondary,
+                maxLines = 1,
+                softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -178,7 +194,9 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, version: Int?, versi
 fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit, onOpen: (Film) -> Unit = {}) {
     val scope = rememberCoroutineScope()
     var target by remember(film) { mutableStateOf<Film?>(null) }
-    val all by remember { KoinPlatform.getKoin().get<FilmRepository>().observeAll() }.collectAsStateWithLifecycle(emptyList())
+    val all by remember {
+        KoinPlatform.getKoin().get<FilmRepository>().observeAll()
+    }.collectAsStateWithLifecycle(emptyList())
     // Every version of this film (same name), newest first, numbered oldest = v1.
     val versions = remember(all, film) {
         all.filter { it.name == film?.name }.sortedByDescending { it.renderedAt?.toEpochMilliseconds() ?: it.updatedAt }
@@ -189,14 +207,19 @@ fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit, onOpen: (Film) -> Unit 
             if (versions.size > 1) {
                 versions.forEachIndexed { i, v ->
                     Row(
-                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.R12).clickable { onDismiss(); onOpen(v) },
+                        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(SliverShapes.R12).clickable {
+                            onDismiss()
+                            onOpen(v)
+                        },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f)) {
                             SliverText("Version ${versions.size - i}", SliverType.Body)
                             SliverText(dotJoin(v.look?.pickerLabel, v.renderedAt?.let(::madeOn)), SliverType.Caption, color = SliverColors.TextTertiary)
                         }
-                        IconButton44({ target = v }, "Delete version ${versions.size - i}") { SliverIcon(SliverIcons.Trash2, SliverColors.Error, size = 18.dp) }
+                        IconButton44({
+                            target = v
+                        }, "Delete version ${versions.size - i}") { SliverIcon(SliverIcons.Trash2, SliverColors.Error, size = 18.dp) }
                     }
                 }
             } else {
@@ -206,15 +229,23 @@ fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit, onOpen: (Film) -> Unit 
     }
     // Owner 14 Nov: deleting is never a single tap.
     app.sliver.core.ui.ConfirmSheet(
-        target != null, "Delete this film?", "The days stay in the project. The copy in your gallery stays too.", "Delete film",
+        target != null,
+        "Delete this film?",
+        "The days stay in the project. The copy in your gallery stays too.",
+        "Delete film",
         {
             val f = target
-            if (f != null) scope.launch {
-                runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(f) }
-                    .onFailure { Notices.show("Couldn't delete this film. Try again.") }
+            if (f != null) {
+                scope.launch {
+                    runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(f) }
+                        .onFailure { Notices.show("Couldn't delete this film. Try again.") }
+                }
             }
         },
-        { target = null; onDismiss() },
+        {
+            target = null
+            onDismiss()
+        },
     )
 }
 
@@ -224,7 +255,6 @@ private fun madeOn(at: kotlin.time.Instant): String {
     val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     return "Made ${t.day} ${months[t.month.ordinal]}, ${t.hour.toString().padStart(2, '0')}:${t.minute.toString().padStart(2, '0')}"
 }
-
 
 private val PosterW = 112.dp
 private val PosterH = 142.dp

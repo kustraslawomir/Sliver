@@ -62,9 +62,18 @@ fun ConfirmSheet(visible: Boolean, title: String, body: String, confirm: String,
                     Box(
                         Modifier.padding(top = 8.dp).fillMaxWidth().heightIn(min = 52.dp).clip(RoundedCornerShape(26.dp))
                             .background(SliverColors.DestructiveFill)
-                            .clickable(role = Role.Button, onClick = rememberTapGate { onDismiss(); onConfirm() }),
+                            .clickable(role = Role.Button, onClick = rememberTapGate {
+                                onDismiss()
+                                onConfirm()
+                            }),
                         Alignment.Center,
-                    ) { SliverText(confirm, ReelogType.body.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold), color = SliverColors.OnDestructive) }
+                    ) {
+                        SliverText(
+                            confirm,
+                            ReelogType.body.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                            color = SliverColors.OnDestructive
+                        )
+                    }
                     Box(
                         Modifier.fillMaxWidth().heightIn(min = 48.dp).clip(RoundedCornerShape(24.dp)).clickable(role = Role.Button, onClick = onDismiss),
                         Alignment.Center,

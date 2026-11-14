@@ -43,8 +43,9 @@ class RestDriveClient(
     override suspend fun ensureFolder(storedId: String?): String {
         if (storedId != null) {
             val r = call(HttpMethod.Get, "/drive/v3/files/$storedId") { parameter("fields", "id,trashed") }
-            if (r.status == HttpStatusCode.NotFound) Unit
-            else {
+            if (r.status == HttpStatusCode.NotFound) {
+                Unit
+            } else {
                 val body = r.checked().json().jsonObject
                 if (body["trashed"]?.jsonPrimitive?.booleanOrNull != true) return storedId
             }
@@ -54,7 +55,10 @@ class RestDriveClient(
         val found = query(q).sortedBy { f -> names.indexOf(f.name) }.firstOrNull()
         if (found != null) return found.id
         val created = call(HttpMethod.Post, "/drive/v3/files") {
-            jsonBody(buildJsonObject { put("name", DRIVE_FOLDER_NAME); put("mimeType", FOLDER_MIME) })
+            jsonBody(buildJsonObject {
+                put("name", DRIVE_FOLDER_NAME)
+                put("mimeType", FOLDER_MIME)
+            })
         }.checked().json().jsonObject
         return created.getValue("id").jsonPrimitive.content
     }

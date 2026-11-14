@@ -2,20 +2,18 @@ package app.sliver.di
 
 import app.sliver.data.auth.AccountDeleter
 import app.sliver.data.auth.AccountManager
-import kotlinx.coroutines.flow.first
 import app.sliver.data.auth.GoogleAuth
 import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.backup.DaoTombstoneStore
-import app.sliver.data.backup.SyncEngine
-import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.backup.DriveClient
-import app.sliver.data.backup.RestoreEngine
 import app.sliver.data.backup.DriveTrashQueue
-import app.sliver.data.backup.SettingsTrashQueue
 import app.sliver.data.backup.InMemoryDriveClient
 import app.sliver.data.backup.RestDriveClient
+import app.sliver.data.backup.RestoreEngine
+import app.sliver.data.backup.SettingsTrashQueue
+import app.sliver.data.backup.SyncEngine
+import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.db.SliverDatabase
-import io.ktor.client.engine.HttpClientEngine
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.DayRepositoryImpl
 import app.sliver.data.repo.FilmRepository
@@ -27,9 +25,11 @@ import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.AutoImportExecutor
 import app.sliver.feature.autoimport.AutoImportStore
 import app.sliver.feature.autoimport.DraftActions
+import app.sliver.feature.films.FilmDeleter
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.trim.SaveUndo
-import app.sliver.feature.films.FilmDeleter
+import io.ktor.client.engine.HttpClientEngine
+import kotlinx.coroutines.flow.first
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

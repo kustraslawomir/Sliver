@@ -42,9 +42,11 @@ actual fun rememberPermissionController(): PermissionController {
                     }
                 }
                 PermissionKind.Notifications -> {
-                    if (notif < 0) UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { s ->
-                        val st = s?.authorizationStatus?.toInt() ?: 0
-                        dispatch_async(dispatch_get_main_queue()) { notif = st }
+                    if (notif < 0) {
+                        UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { s ->
+                            val st = s?.authorizationStatus?.toInt() ?: 0
+                            dispatch_async(dispatch_get_main_queue()) { notif = st }
+                        }
                     }
                     when (notif.toLong()) {
                         UNAuthorizationStatusAuthorized -> PermissionStatus.Granted

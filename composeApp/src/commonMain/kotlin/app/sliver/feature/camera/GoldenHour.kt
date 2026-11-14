@@ -1,9 +1,7 @@
 package app.sliver.feature.camera
 
-import app.sliver.core.theme.ReelogType
-
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,25 +10,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
-import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
 import app.sliver.core.time.GoldenState
 import app.sliver.core.time.goldenState
 import app.sliver.core.time.todayLocal
 import app.sliver.feature.notifications.GoldenHourProvider
-import kotlin.time.Clock
 import kotlinx.coroutines.delay
 import org.koin.mp.KoinPlatform
+import kotlin.time.Clock
 
 fun goldenText(state: GoldenState): String = when (state) {
     is GoldenState.Soon -> "Golden hour in ${state.minutes} min"
@@ -59,8 +55,11 @@ fun GoldenHourLine(enabled: Boolean, modifier: Modifier = Modifier) {
     ) {
         SliverIcon(SliverIcons.Sun, color, size = 16.dp)
         SliverText(
-            goldenText(s), SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
-            color = color, maxLines = 1, softWrap = false,
+            goldenText(s),
+            SliverType.Caption.copy(fontSize = ReelogType.Size.caption, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+            color = color,
+            maxLines = 1,
+            softWrap = false,
         )
     }
 }

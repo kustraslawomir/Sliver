@@ -29,8 +29,11 @@ expect fun rememberGlassBlur(): Boolean
 
 /** The lit edge that makes it read as glass: 1 dp, white 30 % at the top → 6 % at the bottom. */
 internal fun glassEdge(light: Boolean) =
-    if (light) Brush.verticalGradient(listOf(Color.White, Color.White.copy(alpha = 0.7f)))
-    else Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.06f)))
+    if (light) {
+        Brush.verticalGradient(listOf(Color.White, Color.White.copy(alpha = 0.7f)))
+    } else {
+        Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.06f)))
+    }
 
 /**
  * v1.7 glass (GlassKit §2). Over Compose content: Haze backdrop blur (regular 24 dp + white 8 %, strong 32 dp + white
@@ -45,8 +48,16 @@ fun Modifier.glass(style: GlassStyle, shape: Shape, overMedia: Boolean = false, 
     val state = backdrop
     val blur = rememberGlassBlur()
     val strong = style == GlassStyle.Strong
-    val shadow = if (light) shadow(8.dp, shape, ambientColor = Color.Black.copy(alpha = 0.12f), spotColor = Color.Black.copy(alpha = 0.12f)) // lint-ok: elevation
-    else shadow(if (strong) 16.dp else 10.dp, shape, ambientColor = Color.Black.copy(alpha = if (strong) 0.45f else 0.35f), spotColor = Color.Black.copy(alpha = if (strong) 0.45f else 0.35f)) // lint-ok: elevation
+    val shadow = if (light) {
+        shadow(8.dp, shape, ambientColor = Color.Black.copy(alpha = 0.12f), spotColor = Color.Black.copy(alpha = 0.12f)) // lint-ok: elevation
+    } else {
+        shadow(
+            if (strong) 16.dp else 10.dp,
+            shape,
+            ambientColor = Color.Black.copy(alpha = if (strong) 0.45f else 0.35f),
+            spotColor = Color.Black.copy(alpha = if (strong) 0.45f else 0.35f)
+        ) // lint-ok: elevation
+    }
     val tint = when {
         light -> Color.White.copy(alpha = 0.62f)
         else -> Color.White.copy(alpha = if (strong) 0.12f else 0.08f)
@@ -68,6 +79,9 @@ fun Modifier.glass(style: GlassStyle, shape: Shape, overMedia: Boolean = false, 
     }
     // A shadow under see-through glass shows through as a smudge, so media glass has none.
     // v1.8 §0: the lit edge made every icon button read as a grey outlined circle; media glass is tint only now.
-    if (overMedia) clip(shape).then(surface)
-    else then(shadow).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
+    if (overMedia) {
+        clip(shape).then(surface)
+    } else {
+        then(shadow).clip(shape).then(surface).border(1.dp, glassEdge(light), shape)
+    }
 }

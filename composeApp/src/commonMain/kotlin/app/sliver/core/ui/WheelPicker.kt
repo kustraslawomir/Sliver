@@ -41,28 +41,43 @@ private const val Visible = 5
  */
 @Composable
 fun Wheel(items: List<String>, index: Int, onIndex: (Int) -> Unit, label: String, modifier: Modifier = Modifier, onLongPress: (() -> Unit)? = null) {
-    val state = rememberLazyListState(initialFirstVisibleItemIndex = index.coerceIn(0, (items.size - 1).coerceAtLeast(0)))
+    val state =
+        rememberLazyListState(initialFirstVisibleItemIndex = index.coerceIn(0, (items.size - 1).coerceAtLeast(0)))
     val fling = rememberSnapFlingBehavior(state)
     val itemPx = with(LocalDensity.current) { ItemH.toPx() }
-    val centred by remember { derivedStateOf { state.firstVisibleItemIndex + if (state.firstVisibleItemScrollOffset > itemPx / 2) 1 else 0 } }
+    val centred by remember {
+        derivedStateOf { state.firstVisibleItemIndex + if (state.firstVisibleItemScrollOffset > itemPx / 2) 1 else 0 }
+    }
     val report by rememberUpdatedState(onIndex)
     LaunchedEffect(state) {
-        snapshotFlow { state.isScrollInProgress to centred }.filter { !it.first }.distinctUntilChanged().collect { report(it.second.coerceIn(0, items.size - 1)) }
+        snapshotFlow {
+            state.isScrollInProgress to centred
+        }.filter { !it.first }.distinctUntilChanged().collect { report(it.second.coerceIn(0, items.size - 1)) }
     }
-    LaunchedEffect(index, items.size) { if (index != centred && !state.isScrollInProgress) state.animateScrollToItem(index.coerceIn(0, items.size - 1)) }
-    Box(modifier.height(ItemH * Visible).semantics { contentDescription = "$label ${items.getOrNull(centred).orEmpty()}" }, Alignment.Center) {
+    LaunchedEffect(index, items.size) {
+        if (index != centred && !state.isScrollInProgress) state.animateScrollToItem(index.coerceIn(0, items.size - 1))
+    }
+    Box(modifier.height(ItemH * Visible).semantics {
+        contentDescription = "$label ${items.getOrNull(centred).orEmpty()}"
+    }, Alignment.Center) {
         Box(Modifier.fillMaxWidth().height(ItemH).background(SliverColors.TextPrimary.copy(alpha = 0.07f), RoundedCornerShape(12.dp)))
         LazyColumn(
             Modifier.fillMaxWidth().height(ItemH * Visible)
-                .then(if (onLongPress != null) Modifier.pointerInput(Unit) { detectTapGestures(onLongPress = { onLongPress() }) } else Modifier),
-            state = state, flingBehavior = fling, contentPadding = PaddingValues(vertical = ItemH * (Visible / 2)),
+                .then(if (onLongPress != null) Modifier.pointerInput(Unit) {
+                    detectTapGestures(onLongPress = { onLongPress() })
+                } else Modifier),
+            state = state,
+            flingBehavior = fling,
+            contentPadding = PaddingValues(vertical = ItemH * (Visible / 2)),
         ) {
             itemsIndexed(items, key = { i, _ -> i }, contentType = { _, _ -> "wheel" }) { i, text ->
                 val on = i == centred
                 Box(Modifier.fillMaxWidth().height(ItemH), Alignment.Center) {
                     SliverText(
                         text,
-                        (if (on) ReelogType.display.copy(fontSize = ReelogType.Size.display) else ReelogType.title).copy(fontFeatureSettings = "tnum", textAlign = TextAlign.Center),
+                        (if (on) ReelogType.display.copy(
+                            fontSize = ReelogType.Size.display
+                        ) else ReelogType.title).copy(fontFeatureSettings = "tnum", textAlign = TextAlign.Center),
                         color = if (on) SliverColors.TextPrimary else SliverColors.TextDisabled,
                     )
                 }

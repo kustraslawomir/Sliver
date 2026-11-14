@@ -1,0 +1,63 @@
+# Perf STEP 5: default config + these overrides. maxIssues 0: any new issue fails the build.
+build:
+  maxIssues: 0
+
+Compose:
+  ModifierMissing:
+    active: true
+  ModifierReused:
+    active: true
+  ModifierNotUsedAtRoot:
+    active: true
+  ParameterOrder:
+    active: true
+  UnstableCollections:
+    active: true
+  MutableParams:
+    active: true
+  RememberMissing:
+    active: true
+  ViewModelForwarding:
+    active: true
+  CompositionLocalAllowlist:
+    active: true
+    allowedCompositionLocals: LocalGlassState,LocalReducedMotion,LocalNavigator,LocalWindowSize
+  PreviewPublic:
+    active: true
+
+naming:
+  FunctionNaming:
+    # Composables are PascalCase.
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+complexity:
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 8
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotated: ['Composable', 'Preview']
+  WildcardImport:
+    active: true
+  MaxLineLength:
+    # The codebase is written at ~150 columns (wide Compose modifier chains); 160 is the house limit.
+    maxLineLength: 160
+
+formatting:
+  MaximumLineLength:
+    maxLineLength: 160
+  ArgumentListWrapping:
+    maxLineLength: 160
+  ParameterListWrapping:
+    maxLineLength: 160
+  Wrapping:
+    active: true

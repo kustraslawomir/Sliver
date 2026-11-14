@@ -1,9 +1,9 @@
 package app.sliver.feature.films
 
-import app.sliver.data.StampStyle
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookPreset
+import app.sliver.data.StampStyle
 import app.sliver.data.db.Film
 
 const val MAX_DAY_TICKS = 40
@@ -59,7 +59,9 @@ fun FilmOptions.toFilm(id: String, name: String, format: FilmFormat): Film {
     val a = legacy?.first ?: audio
     return Film(
         id = id, name = name, format = format, audio = a,
-        track = (if (legacy != null) legacy.second else usableTrack(track)).takeIf { a != FilmAudio.ORIGINAL }, dateOn = dateOn, look = look,
+        track = (if (legacy != null) legacy.second else usableTrack(track)).takeIf {
+            a != FilmAudio.ORIGINAL
+        }, dateOn = dateOn, look = look,
         lookIntensity = intensity, lookGrain = grain.takeIf { look != null }, stampStyle = stamp,
         musicVolume = if (legacy != null) legacy.third else musicVolume, audioMix = mix?.encode(),
     )

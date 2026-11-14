@@ -1,74 +1,61 @@
 package app.sliver.feature.camera
-import androidx.compose.runtime.derivedStateOf
-import app.sliver.core.theme.SliverText
-import app.sliver.core.theme.ReelogType
-import app.sliver.core.kit.glass
-import app.sliver.core.kit.GlassStyle
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.Canvas
-
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.sliver.core.kit.GlassStyle
+import app.sliver.core.kit.glass
 import app.sliver.core.theme.LocalReducedMotion
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
+import app.sliver.core.theme.SliverText
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 enum class RecordState { Photo, VideoIdle, Recording }
 
@@ -107,13 +94,19 @@ fun RecordButton(
     val flash = remember { Animatable(0f) }
     var wasRecording by remember { mutableStateOf(false) }
     LaunchedEffect(recording) {
-        if (wasRecording && !recording) { flash.snapTo(1f); flash.animateTo(0f, tween(480)) }
+        if (wasRecording && !recording) {
+            flash.snapTo(1f)
+            flash.animateTo(0f, tween(480))
+        }
         wasRecording = recording
     }
 
     Box(
         modifier.size(Box92)
-            .semantics { contentDescription = if (recording) "Stop recording" else "Record"; role = Role.Button }
+            .semantics {
+                contentDescription = if (recording) "Stop recording" else "Record"
+                role = Role.Button
+            }
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput
                 detectTapGestures(onPress = {
@@ -157,7 +150,12 @@ private fun DrawScope.drawRecordButton(white: Boolean, rec: Float, press: Float,
     drawCircle(Color.White.copy(alpha = lerp(1f, 0.35f, rec)), ringR, c, style = Stroke(ringW))
     if (progress > 0f) {
         drawArc(
-            Color.White, -90f, 360f * progress, false, c - Offset(ringR, ringR), Size(2 * ringR, 2 * ringR),
+            Color.White,
+            -90f,
+            360f * progress,
+            false,
+            c - Offset(ringR, ringR),
+            Size(2 * ringR, 2 * ringR),
             style = Stroke(ringW, cap = StrokeCap.Round),
         )
     }
@@ -167,7 +165,9 @@ private fun DrawScope.drawRecordButton(white: Boolean, rec: Float, press: Float,
     val corner = lerp(side / 2f, 8.dp.toPx() * k, rec)
     drawRoundRect(
         if (white) SliverColors.PhotoCore else SliverColors.Record,
-        c - Offset(side / 2f, side / 2f), Size(side, side), CornerRadius(corner),
+        c - Offset(side / 2f, side / 2f),
+        Size(side, side),
+        CornerRadius(corner),
     )
     // Saved: the ring flashes wider for a moment.
     if (flash > 0f) {
@@ -211,10 +211,15 @@ internal fun Modifier.liquidGlow(phase: State<Float>?, strength: State<Float>, c
         val r = base * (1.75f + 0.25f * sin(p * 2 + i * 2f)) * (0.85f + 0.15f * s)
         drawCircle(
             Brush.radialGradient(
-                0f to color.copy(alpha = 0.50f * s), 0.45f to color.copy(alpha = 0.20f * s), 1f to Color.Transparent,
-                center = c, radius = r,
+                0f to color.copy(alpha = 0.50f * s),
+                0.45f to color.copy(alpha = 0.20f * s),
+                1f to Color.Transparent,
+                center = c,
+                radius = r,
             ),
-            radius = r, center = c, blendMode = BlendMode.Plus,
+            radius = r,
+            center = c,
+            blendMode = BlendMode.Plus,
         )
     }
 }

@@ -5,4 +5,6 @@ import app.sliver.core.log.logDebug
 
 // TODO iOS later: PHPickerViewController.
 @Composable
-actual fun rememberMultiMediaPicker(onPicked: (List<String>) -> Unit): () -> Unit = { logDebug("MediaPicker", "not on iOS yet") }
+actual fun rememberMultiMediaPicker(onPicked: (List<String>) -> Unit): () -> Unit = {
+    logDebug("MediaPicker", "not on iOS yet")
+}

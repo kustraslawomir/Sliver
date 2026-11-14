@@ -21,7 +21,10 @@ actual fun rememberMediaThumb(uri: String): ImageBitmap? {
     val context = LocalContext.current
     val thumb by produceState<ImageBitmap?>(null, uri) {
         val key = ThumbCache.keyFor(uri, "#t")
-        ThumbCache.get(key)?.let { value = it.first(); return@produceState }
+        ThumbCache.get(key)?.let {
+            value = it.first();
+            return@produceState
+        }
         value = withContext(Dispatchers.IO) {
             val u = Uri.parse(uri)
             runCatching { context.contentResolver.loadThumbnail(u, Size(EDGE, EDGE), null).asImageBitmap() }.getOrNull()

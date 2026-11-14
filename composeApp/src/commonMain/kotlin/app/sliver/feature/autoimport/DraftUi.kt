@@ -1,8 +1,5 @@
 package app.sliver.feature.autoimport
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.theme.ReelogType
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,24 +8,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
-import app.sliver.feature.archive.MonthLong
-import app.sliver.feature.archive.weekdayName
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,12 +34,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import app.sliver.core.navigation.AppNavigator
 import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -56,6 +52,8 @@ import app.sliver.core.ui.Segmented
 import app.sliver.core.ui.SlitLoader
 import app.sliver.data.db.Day
 import app.sliver.data.files.FileStore
+import app.sliver.feature.archive.MonthLong
+import app.sliver.feature.archive.weekdayName
 import app.sliver.feature.camera.CaptureSession
 import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.gallery.loadIntoSession
@@ -147,7 +145,8 @@ class DraftNav(
             show(draft.day, draft.selectedUri, asVideo)
         } else {
             val uri = CaptureSession.sourceUri ?: return@run
-            val route = loadIntoSession(gallery, files, uri, CaptureSession.forDate, asVideo, CaptureSession.liveVideoUri)
+            val route =
+                loadIntoSession(gallery, files, uri, CaptureSession.forDate, asVideo, CaptureSession.liveVideoUri)
             if (route == null) {
                 Notices.show("Couldn't read that item. Pick another.")
             } else {
@@ -185,13 +184,16 @@ fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier:
                 SliverText(
                     if (!ctx.day.draft && ctx.day.importRunId == null) "Change clip" else draftHeaderTitle(ctx.day.draft, index, total),
                     SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)),
-                    color = SliverColors.TextPrimary, maxLines = 1,
+                    color = SliverColors.TextPrimary,
+                    maxLines = 1,
                 )
                 if (nav.busy) SlitLoader(width = 24.dp)
             }
             SliverText(
-                "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}", SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
-                color = SliverColors.TextTertiary, maxLines = 1,
+                "${weekdayName(d)} ${d.day} ${MonthLong[d.month.ordinal]}",
+                SliverType.BodySmall.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
+                color = SliverColors.TextTertiary,
+                maxLines = 1,
             )
             if (ctx.candidates.firstOrNull { it.uri == ctx.selectedUri }?.fileTime == true) {
                 SliverText(FILE_TIME_NOTE, SliverType.Meta, color = SliverColors.TextTertiary, maxLines = 1)
@@ -206,12 +208,16 @@ fun DraftHeader(ctx: DraftContext, nav: DraftNav, onClose: () -> Unit, modifier:
             IconButton44({ if (next) nav.next(ctx) }, "Next day", Modifier.alpha(if (next) 1f else 0.35f)) {
                 SliverIcon(SliverIcons.ChevronRight, SliverColors.TextPrimary)
             }
-        } else Spacer(Modifier.size(44.dp))
+        } else {
+            Spacer(Modifier.size(44.dp))
+        }
     }
 }
 
 /** Survives the screen rebuild that swapping the source causes, so the strip stays where the user scrolled. */
-private object StripScroll { var day: Any? = null; var index = 0; var offset = 0 }
+private object StripScroll { var day: Any? = null
+    var index = 0
+    var offset = 0 }
 private val strip get() = StripScroll
 
 /** All gallery items of the draft's day; tapping one swaps the source in place. */
@@ -219,17 +225,33 @@ private val strip get() = StripScroll
 fun CandidateStrip(ctx: DraftContext, nav: DraftNav, modifier: Modifier = Modifier) {
     if (ctx.candidates.size < 2) return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-        SliverText("Other items from this day", SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
+        SliverText(
+            "Other items from this day",
+            SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
+            color = SliverColors.TextSecondary
+        )
         val listState = rememberLazyListState(
-            initialFirstVisibleItemIndex = if (strip.day == ctx.day.date) strip.index else ctx.candidates.indexOfFirst { it.uri == ctx.selectedUri }.coerceAtLeast(0),
+            initialFirstVisibleItemIndex = if (strip.day == ctx.day.date) {
+                strip.index
+            } else {
+                ctx.candidates.indexOfFirst { it.uri == ctx.selectedUri }.coerceAtLeast(
+                    0
+                )
+            },
             initialFirstVisibleItemScrollOffset = if (strip.day == ctx.day.date) strip.offset else 0,
         )
         LaunchedEffect(listState, ctx.day.date) {
             snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
-                .collect { (i, o) -> strip.day = ctx.day.date; strip.index = i; strip.offset = o }
+                .collect { (i, o) ->
+                    strip.day = ctx.day.date
+                    strip.index = i
+                    strip.offset = o
+                }
         }
         LazyRow(state = listState, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-            items(ctx.candidates, key = { it.uri }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(76.dp)) { nav.swap(ctx, c.uri) } }
+            items(ctx.candidates, key = {
+                it.uri
+            }) { c -> CandidateTile(c, c.uri == ctx.selectedUri, Modifier.size(76.dp)) { nav.swap(ctx, c.uri) } }
         }
     }
 }
@@ -247,20 +269,25 @@ internal fun CandidateTile(c: DraftCandidate, selected: Boolean, modifier: Modif
     Box(
         modifier.clip(CandidateShape).background(SliverColors.Surface3)
             .then(if (selected) Modifier.border(2.dp, SliverColors.TextPrimary, CandidateShape) else Modifier)
-            .semantics { this.selected = selected; contentDescription = kind }
+            .semantics {
+                this.selected = selected
+                contentDescription = kind
+            }
             .clickable(role = Role.Button, onClick = onClick),
     ) {
         if (thumb != null) Image(thumb, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         if (c.video && !c.motion && !c.live) {
             SliverText(
-                durationLabel(c.durationMs), SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
+                durationLabel(c.durationMs),
+                SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
                 Modifier.align(Alignment.BottomEnd).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )
         }
         if (c.motion || c.live) {
             SliverText(
-                "Motion", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
+                "Motion",
+                SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)),
                 Modifier.align(Alignment.BottomStart).padding(3.dp).clip(SliverShapes.S).background(SliverColors.Scrim).padding(horizontal = 4.dp),
                 SliverColors.OnMedia,
             )
@@ -284,8 +311,11 @@ fun MotionChoice(video: Boolean, nav: DraftNav, modifier: Modifier = Modifier) {
 fun RemoveDayConfirm(nav: DraftNav) {
     val ctx = nav.confirmSkip
     app.sliver.core.ui.ConfirmSheet(
-        ctx != null, "Remove this day?",
+        ctx != null,
+        "Remove this day?",
         "The clip is deleted from the project. The photo or video stays in your gallery.",
-        "Remove day", { ctx?.let(nav::skip) }, { nav.confirmSkip = null },
+        "Remove day",
+        { ctx?.let(nav::skip) },
+        { nav.confirmSkip = null },
     )
 }

@@ -64,11 +64,15 @@ class InMemoryDriveClient : DriveClient {
     var downloadsBeforeFailure: Int? = null
     var limitBytes: Long? = null
 
-    override suspend fun storageQuota() = DriveQuota(entries.values.filter { !it.trashed }.sumOf { it.bytes.size.toLong() }, limitBytes)
+    override suspend fun storageQuota() = DriveQuota(entries.values.filter {
+        !it.trashed
+    }.sumOf { it.bytes.size.toLong() }, limitBytes)
 
     override suspend fun ensureFolder(storedId: String?): String {
         entries[storedId]?.takeIf { !it.trashed }?.let { return it.file.id }
-        ALL_FOLDER_NAMES.firstNotNullOfOrNull { n -> entries.values.firstOrNull { it.file.name == n && it.parent == null && !it.trashed } }
+        ALL_FOLDER_NAMES.firstNotNullOfOrNull { n -> entries.values.firstOrNull {
+            it.file.name == n && it.parent == null && !it.trashed
+        } }
             ?.let { return it.file.id }
         return add(DRIVE_FOLDER_NAME, null, emptyMap(), ByteArray(0), folder = true).id
     }
@@ -105,8 +109,11 @@ class InMemoryDriveClient : DriveClient {
     }
 
     override suspend fun list(folderId: String) =
-        if (entries[folderId]?.trashed == true) emptyList()
-        else entries.values.filter { it.parent == folderId && !it.trashed && !it.folder }.map { it.file }
+        if (entries[folderId]?.trashed == true) {
+            emptyList()
+        } else {
+            entries.values.filter { it.parent == folderId && !it.trashed && !it.folder }.map { it.file }
+        }
 
     override suspend fun download(fileId: String): ByteArray {
         downloadsBeforeFailure?.let { left -> if (left <= 0) throw DriveException(BackupError.OFFLINE) else downloadsBeforeFailure = left - 1 }

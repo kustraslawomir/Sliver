@@ -1,8 +1,5 @@
 package app.sliver.feature.autoimport
 
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -18,23 +15,27 @@ import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.feature.gallery.GalleryProvider
 import app.sliver.feature.trim.TrimMedia
-import kotlin.time.Instant
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlin.time.Instant
 
 /** Reads dated gallery items. Needs the full or partial media permission; with partial access only visible items come back. */
 interface MediaScanner {
     /** Items taken in [from]..[to] (device [zone]); motion photos are only detected on [sniffDays]. */
-    suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>, onFound: (Int) -> Unit = {}): List<MediaEntry>
+    suspend fun scan(from: LocalDate, to: LocalDate, zone: TimeZone, sniffDays: Set<LocalDate>, onFound: (Int) -> Unit = {
+    }): List<MediaEntry>
 }
 
 /** Runs [AutoImportExecutor.run] in the background, surviving app close. */
@@ -89,7 +90,9 @@ class AutoImportStore(private val store: DataStore<Preferences>) {
 
     private suspend fun editDismissed(change: (MutableMap<String, List<String>>) -> Unit) {
         store.edit { prefs ->
-            val m = prefs[dismissedKey]?.let { runCatching { Json.decodeFromString(mapSer, it) }.getOrNull() }.orEmpty().toMutableMap()
+            val m = prefs[dismissedKey]?.let {
+                runCatching { Json.decodeFromString(mapSer, it) }.getOrNull()
+            }.orEmpty().toMutableMap()
             change(m)
             prefs[dismissedKey] = Json.encodeToString(mapSer, m)
         }
@@ -215,7 +218,9 @@ class AutoImportExecutor(
                         lastFilled = if (made != null) maxOf(it.lastFilled ?: date.toString(), date.toString()) else it.lastFilled,
                     )
                 }
-            ) return
+            ) {
+                return
+            }
         }
         store.update(run.id) { it.copy(finished = true, done = done, current = null) }
     }
@@ -238,9 +243,13 @@ class AutoImportExecutor(
 
     private suspend fun scanFolder(run: ImportRun, from: LocalDate, to: LocalDate): List<MediaEntry> {
         val scanner = checkNotNull(folderScanner) { "No folder scanner" }
-        val result = scanner.scan(checkNotNull(run.folder), from, to, zone()) { n -> store.update(run.id) { it.copy(found = n) } }
+        val result = scanner.scan(checkNotNull(run.folder), from, to, zone()) { n -> store.update(run.id) {
+            it.copy(found = n)
+        } }
         val entries = cleanFolderEntries(result.entries)
-        store.update(run.id) { it.copy(unreadable = result.unreadable, truncated = result.truncated, fileTimeDates = entries.count(MediaEntry::fileTime)) }
+        store.update(run.id) {
+            it.copy(unreadable = result.unreadable, truncated = result.truncated, fileTimeDates = entries.count(MediaEntry::fileTime))
+        }
         return entries
     }
 
@@ -272,14 +281,18 @@ class AutoImportExecutor(
                     date = date, source = path, startMs = startMs, speed = 1f, cropY = null, format = format,
                     daySource = if (isPhoto) DaySource.PHOTO else DaySource.GALLERY,
                     takenAt = Instant.fromEpochMilliseconds(pick.takenAtMs), isPhoto = isPhoto,
-                    projectId = run.projectId, draft = !run.keep, draftCandidates = encodeCandidates(candidatesOf(entries) + candidatesOf(seen)), importRunId = run.id,
+                    projectId = run.projectId, draft = !run.keep,
+                    draftCandidates = encodeCandidates(
+                        candidatesOf(entries) + candidatesOf(seen)
+                    ),
+                    importRunId = run.id,
                 ),
             )
             isPhoto
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            logDebug("AutoImport", "draft ${date} failed: $e")
+            logDebug("AutoImport", "draft $date failed: $e")
             null
         } finally {
             tmp?.let(files::delete)

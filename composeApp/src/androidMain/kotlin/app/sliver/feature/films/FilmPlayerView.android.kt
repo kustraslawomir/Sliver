@@ -1,14 +1,11 @@
 package app.sliver.feature.films
 
-import app.sliver.core.theme.SliverColors
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.background
-import app.sliver.core.ui.rememberAppVisible
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -23,9 +21,10 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import app.sliver.core.theme.SliverColors
+import app.sliver.core.ui.rememberAppVisible
 import kotlinx.coroutines.delay
 
 private tailrec fun Context.activity(): Activity? = when (this) {
@@ -60,7 +59,10 @@ actual fun FilmPlayerView(
             }
         }
         player.addListener(listener)
-        onDispose { player.removeListener(listener); player.release() }
+        onDispose {
+            player.removeListener(listener)
+            player.release()
+        }
     }
     LaunchedEffect(path) {
         player.setMediaItem(MediaItem.fromUri(path))

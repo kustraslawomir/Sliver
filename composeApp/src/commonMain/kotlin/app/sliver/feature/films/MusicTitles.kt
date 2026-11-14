@@ -16,7 +16,11 @@ fun cleanTrackTitle(fileName: String): String {
     t = t.replace('_', ' ').replace('-', ' ').replace(Regex("\\s+"), " ").trim()
     val words = t.split(' ').toMutableList()
     // Trailing ids (3+ digits, e.g. "628719") go; short numbers ("Track 2") are part of the name.
-    while (words.size > 1 && words.last().count { it.isDigit() } >= 3 && words.last().count { it.isDigit() } * 2 >= words.last().length) words.removeAt(words.lastIndex)
+    while (words.size > 1 && words.last().count {
+            it.isDigit()
+        } >= 3 && words.last().count { it.isDigit() } * 2 >= words.last().length) words.removeAt(
+        words.lastIndex
+    )
     t = words.joinToString(" ")
     if (t.isBlank()) return "Audio"
     return t.split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.uppercaseChar() } }

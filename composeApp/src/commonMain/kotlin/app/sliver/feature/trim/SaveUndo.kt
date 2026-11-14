@@ -1,7 +1,6 @@
 package app.sliver.feature.trim
 
 import app.sliver.core.AppScope
-import app.sliver.feature.onboarding.FirstClipTimer
 import app.sliver.data.db.Day
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
@@ -9,6 +8,7 @@ import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.films.ensureDefaultFilm
+import app.sliver.feature.onboarding.FirstClipTimer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -59,7 +59,9 @@ class SaveUndo(
         FirstClipTimer.clipSaved()
         // "Also save full recordings to Photos": a new in-app recording also goes to the gallery.
         val fresh = day.original?.takeIf { it != previous?.original }
-        if (fresh != null && settings.settings.first().saveFullRecordings) scope.launch { saver.save(fresh, originalStamp(fresh)) }
+        if (fresh != null && settings.settings.first().saveFullRecordings) scope.launch {
+            saver.save(fresh, originalStamp(fresh))
+        }
         if (previous == null && days.observeAll().first().size == 1) {
             runCatching { films.ensureDefaultFilm(request.date, request.format) }
         }

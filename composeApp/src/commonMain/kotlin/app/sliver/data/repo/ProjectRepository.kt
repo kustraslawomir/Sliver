@@ -8,21 +8,20 @@ import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.db.DayDao
 import app.sliver.data.db.FilmDao
 import app.sliver.data.db.Project
+import app.sliver.data.db.ProjectDao
 import app.sliver.data.db.ProjectStats
 import app.sliver.data.files.FileStore
-import app.sliver.data.db.ProjectDao
 import app.sliver.data.settings.SettingsRepository
-import kotlin.time.Clock
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
+import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 interface ProjectRepository {
     val projects: Flow<List<Project>>
@@ -32,6 +31,7 @@ interface ProjectRepository {
     suspend fun activeId(): String
     suspend fun create(name: String, format: FilmFormat, startDate: LocalDate): Project
     suspend fun setActive(id: String)
+
     /** Adds a project recreated from a backup without making it active. */
     suspend fun restore(project: Project)
     suspend fun rename(id: String, name: String)
@@ -79,7 +79,8 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun create(name: String, format: FilmFormat, startDate: LocalDate): Project {
-        val project = Project(Uuid.random().toString(), name, format, startDate, createdAt = Clock.System.now(), updatedAt = nowMillis())
+        val project =
+            Project(Uuid.random().toString(), name, format, startDate, createdAt = Clock.System.now(), updatedAt = nowMillis())
         dao.upsert(project)
         settings.update { it.copy(activeProjectId = project.id) }
         return project

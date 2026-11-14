@@ -1,7 +1,5 @@
 package app.sliver.core.ui
 
-import app.sliver.core.theme.ReelogType
-
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -28,10 +26,10 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.sliver.core.icons.ReelogWordmark
 import app.sliver.core.icons.WORDMARK_DISC_Y
 import app.sliver.core.theme.LocalReducedMotion
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverMotion
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType

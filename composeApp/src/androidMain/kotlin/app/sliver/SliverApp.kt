@@ -1,22 +1,20 @@
 package app.sliver
 
-import app.sliver.core.AppScope
 import android.app.Application
-import app.sliver.di.commonModule
-import app.sliver.di.platformModule
+import app.sliver.core.AppScope
 import app.sliver.data.backup.BackupCoordinator
 import app.sliver.data.files.FileStore
+import app.sliver.data.repo.DayRepository
+import app.sliver.di.commonModule
+import app.sliver.di.platformModule
 import app.sliver.feature.notifications.ProgressCoordinator
 import app.sliver.feature.notifications.ReminderCoordinator
 import app.sliver.feature.notifications.ensureChannels
-import kotlinx.coroutines.CoroutineScope
+import app.sliver.feature.widget.refreshTodayWidgets
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import app.sliver.data.repo.DayRepository
-import app.sliver.feature.widget.refreshTodayWidgets
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -36,6 +34,8 @@ class SliverApp : Application(), KoinComponent {
     }
 
     private fun startBackground() {
+        // Perf STEP 4: load the permission prefs here, so the first status() read on the main thread hits memory.
+        getSharedPreferences("permissions", MODE_PRIVATE).all
         val store: FileStore by inject()
         ensureChannels(this)
         val golden: app.sliver.feature.notifications.GoldenHourProvider by inject()
@@ -57,7 +57,9 @@ class SliverApp : Application(), KoinComponent {
         val importRunner: app.sliver.feature.autoimport.AutoImportRunner by inject()
         val importer: app.sliver.feature.autoimport.AutoImportExecutor by inject()
         AppScope.launch {
-            runCatching { importer.pruneDismissedDrafts() }.onSuccess { if (it > 0) android.util.Log.i("AutoImport", "removed $it drafts of rejected items") }
+            runCatching {
+                importer.pruneDismissedDrafts()
+            }.onSuccess { if (it > 0) android.util.Log.i("AutoImport", "removed $it drafts of rejected items") }
             if (runCatching { importStore.current()?.finished == false }.getOrDefault(false)) importRunner.start()
         }
         // T-glass-v1.7 10.5: recordings still in tmp are matched to their days first; only then is tmp cleaned.
@@ -65,7 +67,10 @@ class SliverApp : Application(), KoinComponent {
         AppScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             // A failed rescue leaves tmp alone so nothing that could still be matched is deleted.
             runCatching { rescue.run() }
-                .onSuccess { n -> android.util.Log.i("Originals", "rescued $n recording(s)"); store.cleanTmp(System.currentTimeMillis()) }
+                .onSuccess { n ->
+                    android.util.Log.i("Originals", "rescued $n recording(s)")
+                    store.cleanTmp(System.currentTimeMillis())
+                }
                 .onFailure { android.util.Log.w("Originals", "rescue failed, tmp kept", it) }
         }
     }

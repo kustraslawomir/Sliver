@@ -15,7 +15,8 @@ val LookPreset.info: LookInfo
     get() = when (this) {
         LookPreset.NATURAL -> LookInfo("Natural", null, LookModel())
         LookPreset.KIOSK -> LookInfo(
-            "Kiosk", "luts/kiosk.cube",
+            "Kiosk",
+            "luts/kiosk.cube",
             LookModel(
                 temp = 0.35, contrast = 0.25, blackLift = 0.07, saturation = 1.05,
                 bands = listOf(1.1, 1.1, 0.95, 1.0, 0.9, 1.0),
@@ -26,7 +27,8 @@ val LookPreset.info: LookInfo
             StampStyle.LED,
         )
         LookPreset.AFTERHOURS -> LookInfo(
-            "Afterhours", "luts/afterhours.cube",
+            "Afterhours",
+            "luts/afterhours.cube",
             LookModel(
                 exposure = -0.3, gamma = listOf(1.15, 1.1, 1.05), contrast = 0.45, saturation = 0.7,
                 shadowTint = listOf(-0.04, 0.03, 0.04),
@@ -34,14 +36,21 @@ val LookPreset.info: LookInfo
             ),
         )
         LookPreset.SILVER -> LookInfo(
-            "Silver", "luts/silver.cube",
+            "Silver",
+            "luts/silver.cube",
             LookModel(
-                mono = listOf(0.5, 0.4, 0.1), gamma = listOf(1.05, 1.05, 1.05), contrast = 0.55,
-                grain = 0.5, grainSize = 2.0, halation = 0.15, vignette = 0.35,
+                mono = listOf(0.5, 0.4, 0.1),
+                gamma = listOf(1.05, 1.05, 1.05),
+                contrast = 0.55,
+                grain = 0.5,
+                grainSize = 2.0,
+                halation = 0.15,
+                vignette = 0.35,
             ),
         )
         LookPreset.SUNDAY -> LookInfo(
-            "Sunday", "luts/sunday.cube",
+            "Sunday",
+            "luts/sunday.cube",
             LookModel(
                 temp = 0.2, tint = 0.05, contrast = -0.2, blackLift = 0.05, shoulder = 0.5, saturation = 0.88,
                 bands = listOf(1.0, 0.95, 0.85, 0.9, 0.9, 1.0), highlightTint = listOf(0.03, 0.015, -0.02),
@@ -49,7 +58,8 @@ val LookPreset.info: LookInfo
             ),
         )
         LookPreset.TAPE -> LookInfo(
-            "Tape", "luts/tape.cube",
+            "Tape",
+            "luts/tape.cube",
             LookModel(
                 tint = 0.05, blackLift = 0.05, saturation = 1.15, shadowTint = listOf(0.01, 0.0, 0.03),
                 grain = 0.25, grainSize = 2.0, grainChroma = 0.6, vignette = 0.25, softness = 0.25, weave = 0.6,
@@ -58,7 +68,8 @@ val LookPreset.info: LookInfo
             StampStyle.CAMCORDER,
         )
         LookPreset.HALO -> LookInfo(
-            "Halo", "luts/halo.cube",
+            "Halo",
+            "luts/halo.cube",
             LookModel(
                 temp = -0.1, contrast = 0.05, shadowTint = listOf(-0.03, 0.0, 0.05),
                 grain = 0.25, grainSize = 1.75, grainChroma = 0.5, halation = 0.6, bloom = 0.8, vignette = 0.35,
@@ -87,7 +98,9 @@ private val GroupOrder: List<Pair<FilterGroup, List<Int>>> = listOf(
 /** Every filter in the picker, grouped by [FilterGroup]. */
 val FilterPresets: List<LookPreset> = GroupOrder.flatMap { (_, numbers) -> numbers.map(::candidatePreset) }
 
-val LookPreset.group: FilterGroup? get() = candidateNumber?.let { n -> GroupOrder.firstOrNull { n in it.second }?.first }
+val LookPreset.group: FilterGroup? get() = candidateNumber?.let { n -> GroupOrder.firstOrNull {
+    n in it.second
+}?.first }
 
 /** Name under a picker tile (no numbers: owner 14 Nov). */
 val LookPreset.pickerLabel: String get() = info.label
@@ -113,4 +126,6 @@ fun LookPreset.toParams(intensity: Int = 100, grain: Int? = null): LookParams =
 fun app.sliver.data.db.Film.effectiveStamp(): StampStyle = stampStyle ?: look?.info?.stamp ?: StampStyle.PLAIN
 
 /** The film-level filter, or null when the film is clean. */
-fun app.sliver.data.db.Film.lookParams(): LookParams? = look?.takeIf { it != LookPreset.NATURAL }?.toParams(lookIntensity, lookGrain)
+fun app.sliver.data.db.Film.lookParams(): LookParams? = look?.takeIf {
+    it != LookPreset.NATURAL
+}?.toParams(lookIntensity, lookGrain)

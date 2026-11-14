@@ -20,7 +20,12 @@ fun importAudio(context: Context, uri: Uri): PickedAudio {
     return try {
         val input = context.contentResolver.openInputStream(uri) ?: return PickedAudio.Failed(UNREADABLE)
         input.use { src -> out.outputStream().use { src.copyTo(it) } }
-        if (decodes(out)) PickedAudio.Ok(out.path) else { out.delete(); PickedAudio.Failed(UNREADABLE) }
+        if (decodes(out)) {
+            PickedAudio.Ok(out.path)
+        } else {
+            out.delete();
+            PickedAudio.Failed(UNREADABLE)
+        }
     } catch (e: Exception) {
         out.delete()
         PickedAudio.Failed(UNREADABLE)

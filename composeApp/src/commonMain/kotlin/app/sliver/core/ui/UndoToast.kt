@@ -1,30 +1,25 @@
 package app.sliver.core.ui
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.kit.glass
-
-import app.sliver.core.theme.ReelogType
-
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.kit.glass
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -81,22 +76,35 @@ fun UndoToastHost() {
     Box(
         Modifier.fillMaxSize().navigationBarsPadding().padding(start = SliverSpace.Gutter, end = SliverSpace.Gutter, bottom = bottom),
         contentAlignment = Alignment.BottomCenter,
-    ) { UndoBar(t.message, { UndoToasts.dismiss(t); t.onUndo() }) }
+    ) { UndoBar(t.message, {
+        UndoToasts.dismiss(t)
+        t.onUndo()
+    })
+    }
 }
 
 /** v1.7 undo bar: strong glass, radius 14, message left, bold "Undo" right. */
 @Composable
 fun UndoBar(message: String, onUndo: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth().height(52.dp).glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.R14, backdrop = app.sliver.core.kit.LocalGlassState.current).padding(start = 16.dp),
+        modifier.fillMaxWidth().height(
+            52.dp
+        ).glass(app.sliver.core.kit.GlassStyle.Strong, SliverShapes.R14, backdrop = app.sliver.core.kit.LocalGlassState.current).padding(start = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SliverText(
-            message, SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), Modifier.weight(1f),
-            color = SliverColors.TextPrimary, maxLines = 1,
+            message,
+            SliverType.Body.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
+            Modifier.weight(1f),
+            color = SliverColors.TextPrimary,
+            maxLines = 1,
         )
         Box(Modifier.height(48.dp).clickable(role = Role.Button, onClick = onUndo).padding(horizontal = 16.dp), Alignment.Center) {
-            SliverText("Undo", app.sliver.core.theme.ReelogType.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold), color = SliverColors.TextPrimary)
+            SliverText(
+                "Undo",
+                app.sliver.core.theme.ReelogType.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                color = SliverColors.TextPrimary
+            )
         }
     }
 }

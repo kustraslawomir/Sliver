@@ -1,4 +1,11 @@
 [versions]
+baselineprofile = "1.4.1"
+benchmarkMacro = "1.4.1"
+uiautomator = "2.3.0"
+androidxJunit = "1.2.1"
+profileinstaller = "1.4.1"
+detekt = "1.23.8"
+composeRulesDetekt = "0.4.27"
 collectionsImmutable = "0.4.0"
 leakcanary = "2.14"
 agp = "9.4.1"
@@ -27,6 +34,13 @@ roborazzi = "1.79.0"
 # later: coil 3.6.3
 
 [libraries]
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmarkMacro" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+detekt-cli = { module = "io.gitlab.arturbosch.detekt:detekt-cli", version.ref = "detekt" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+compose-rules-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "composeRulesDetekt" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "collectionsImmutable" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 haze = { module = "dev.chrisbanes.haze:haze", version = "1.6.10" }
@@ -73,6 +87,9 @@ compose-ui-test-junit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", v
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.12.1" }
 
 [plugins]
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+androidTest = { id = "com.android.test", version.ref = "agp" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }

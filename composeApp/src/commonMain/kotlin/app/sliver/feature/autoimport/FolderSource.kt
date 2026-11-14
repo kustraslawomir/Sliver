@@ -49,7 +49,13 @@ fun exifMillisWithOffset(raw: String?, offsetRaw: String?, zone: TimeZone): Long
  * only then the file's modified time (a copy sets that to the copy day).
  */
 fun resolveItemDate(
-    exifOriginal: String?, exifDigitized: String?, exifOffset: String?, videoDate: String?, name: String?, lastModified: Long, zone: TimeZone,
+    exifOriginal: String?,
+    exifDigitized: String?,
+    exifOffset: String?,
+    videoDate: String?,
+    name: String?,
+    lastModified: Long,
+    zone: TimeZone,
 ): ResolvedDate? {
     val exif = exifMillisWithOffset(exifOriginal, exifOffset, zone) ?: exifMillisWithOffset(exifDigitized, exifOffset, zone)
     if (exif != null && exif >= YEAR_2000_MS) return ResolvedDate(exif, DateOrigin.EXIF)
@@ -72,7 +78,12 @@ data class Collected(val files: List<FolderNode>, val truncated: Boolean)
 
 /** Breadth-first walk under [maxDepth] and [maxFiles]; a directory that cannot be listed is skipped. */
 suspend fun collectFiles(
-    root: String, lister: FolderLister, maxDepth: Int = MAX_FOLDER_DEPTH, maxFiles: Int = MAX_FOLDER_FILES, onFound: suspend (Int) -> Unit = {},
+    root: String,
+    lister: FolderLister,
+    maxDepth: Int = MAX_FOLDER_DEPTH,
+    maxFiles: Int = MAX_FOLDER_FILES,
+    onFound: suspend (Int) -> Unit = {
+    },
 ): Collected {
     val files = mutableListOf<FolderNode>()
     var level = listOf(root)
@@ -86,7 +97,10 @@ suspend fun collectFiles(
                 if (node.dir) {
                     if (depth < maxDepth) next += node.id else truncated = true
                 } else {
-                    if (files.size >= maxFiles) { truncated = true; break }
+                    if (files.size >= maxFiles) {
+                        truncated = true;
+                        break
+                    }
                     files += node
                 }
             }
@@ -111,7 +125,9 @@ private val VideoExtensions = setOf("mp4", "mov", "m4v", "3gp", "mkv", "webm", "
 private val MediaExtensions = VideoExtensions + setOf("jpg", "jpeg", "png", "heic", "heif", "webp")
 
 /** Two copies of one file (same name and size) in different sub-folders count once. */
-fun dedupeByNameAndSize(entries: List<MediaEntry>): List<MediaEntry> = entries.distinctBy { it.name?.lowercase() to it.sizeBytes }
+fun dedupeByNameAndSize(entries: List<MediaEntry>): List<MediaEntry> = entries.distinctBy {
+    it.name?.lowercase() to it.sizeBytes
+}
 
 /**
  * A Live Photo is a HEIC/JPEG plus a few seconds of video with the same base name. The video is part of the photo, not a clip,
@@ -162,11 +178,17 @@ class FolderSourceStore(private val store: DataStore<Preferences>) {
     suspend fun current(): FolderSource? = folder.first()
 
     suspend fun set(source: FolderSource) {
-        store.edit { it[treeKey] = source.tree; it[nameKey] = source.name }
+        store.edit {
+            it[treeKey] = source.tree;
+            it[nameKey] = source.name
+        }
     }
 
     suspend fun forget() {
-        store.edit { it.remove(treeKey); it.remove(nameKey) }
+        store.edit {
+            it.remove(treeKey);
+            it.remove(nameKey)
+        }
     }
 }
 

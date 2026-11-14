@@ -19,13 +19,19 @@ class AndroidFolderAccess(private val context: Context) : FolderAccess {
     }
 
     override fun release(tree: String) {
-        runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(tree), Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        runCatching {
+            context.contentResolver.releasePersistableUriPermission(Uri.parse(tree), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
     }
 
     override fun isGranted(tree: String): Boolean {
         val uri = Uri.parse(tree)
         return context.contentResolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission } &&
-            runCatching { context.contentResolver.query(rootDocument(uri), arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null, null, null)?.use { it.moveToFirst() } }
+            runCatching {
+                context.contentResolver.query(rootDocument(uri), arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null, null, null)?.use {
+                    it.moveToFirst()
+                }
+            }
                 .getOrNull() == true
     }
 
@@ -47,7 +53,8 @@ class AndroidFolderScanner(private val context: Context) : FolderScanner {
     override suspend fun scan(tree: String, from: LocalDate, to: LocalDate, zone: TimeZone, onFound: suspend (Int) -> Unit): FolderScanResult =
         withContext(Dispatchers.IO) {
             val treeUri = Uri.parse(tree)
-            val collected = collectFiles(DocumentsContract.getTreeDocumentId(treeUri), { children(treeUri, it) }, onFound = onFound)
+            val collected =
+                collectFiles(DocumentsContract.getTreeDocumentId(treeUri), { children(treeUri, it) }, onFound = onFound)
             val media = collected.files.filter { isMediaName(it.name, it.mime) }
             val out = mutableListOf<MediaEntry>()
             var unreadable = 0
@@ -56,7 +63,10 @@ class AndroidFolderScanner(private val context: Context) : FolderScanner {
                 val uri = DocumentsContract.buildDocumentUriUsingTree(treeUri, node.id)
                 val video = isVideoName(node.name, node.mime)
                 val entry = runCatching { read(uri, node, video, zone) }.getOrNull()
-                if (entry == null) { unreadable++; continue }
+                if (entry == null) {
+                    unreadable++;
+                    continue
+                }
                 if (localDateOf(entry.takenAtMs, zone) in from..to) out += entry
             }
             FolderScanResult(out, unreadable, collected.truncated)
@@ -65,8 +75,11 @@ class AndroidFolderScanner(private val context: Context) : FolderScanner {
     private fun children(tree: Uri, dirId: String): List<FolderNode> {
         val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, dirId)
         val columns = arrayOf(
-            DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE,
-            DocumentsContract.Document.COLUMN_SIZE, DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE,
+            DocumentsContract.Document.COLUMN_SIZE,
+            DocumentsContract.Document.COLUMN_LAST_MODIFIED,
         )
         val out = mutableListOf<FolderNode>()
         resolver.query(uri, columns, null, null, null)?.use { c ->
@@ -106,7 +119,14 @@ class AndroidFolderScanner(private val context: Context) : FolderScanner {
         }
         val date = resolveItemDate(original, digitized, offset, videoDate, node.name, node.modified, zone) ?: return null
         return MediaEntry(
-            uri.toString(), video, date.ms, duration, camera = true, name = node.name, sizeBytes = node.size, fileTime = date.origin == DateOrigin.FILE_TIME,
+            uri.toString(),
+            video,
+            date.ms,
+            duration,
+            camera = true,
+            name = node.name,
+            sizeBytes = node.size,
+            fileTime = date.origin == DateOrigin.FILE_TIME,
         )
     }
 }

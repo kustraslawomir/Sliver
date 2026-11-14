@@ -1,7 +1,5 @@
 package app.sliver.feature.films
 
-import app.sliver.data.effectiveStamp
-import app.sliver.data.export.highQualityEncoder
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
@@ -12,35 +10,31 @@ import android.graphics.Typeface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.text.SpannableString
-import android.text.style.AbsoluteSizeSpan
 import android.text.TextPaint
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.CharacterStyle
 import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
-import app.sliver.data.export.stampAnchor
-import app.sliver.data.export.stampText
-import app.sliver.data.export.stampTextPx
+import android.util.Log
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.OverlaySettings
-import androidx.media3.effect.BitmapOverlay
-import androidx.media3.effect.StaticOverlaySettings
-import androidx.media3.effect.TextureOverlay
 import androidx.media3.common.VideoCompositorSettings
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.ChannelMixingAudioProcessor
 import androidx.media3.common.audio.ChannelMixingMatrix
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.BitmapOverlay
 import androidx.media3.effect.Crop
 import androidx.media3.effect.GaussianBlur
 import androidx.media3.effect.OverlayEffect
 import androidx.media3.effect.Presentation
-import androidx.media3.effect.RgbMatrix
+import androidx.media3.effect.StaticOverlaySettings
 import androidx.media3.effect.TextOverlay
+import androidx.media3.effect.TextureOverlay
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.EditedMediaItemSequence
@@ -58,33 +52,33 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import app.sliver.data.FilmAudio
 import app.sliver.data.FilmFormat
 import app.sliver.data.Mismatch
+import app.sliver.data.StampStyle
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
+import app.sliver.data.effectiveStamp
 import app.sliver.data.export.ClipPlanner
-import app.sliver.data.files.FileStore
-import app.sliver.data.look.LookEffects
-import app.sliver.data.repo.DayRepository
-import app.sliver.data.repo.FilmRepository
-import app.sliver.data.settings.SettingsRepository
-import app.sliver.data.StampStyle
-import app.sliver.data.info
-import app.sliver.data.lookParams
 import app.sliver.data.export.LED_DIGIT_DP
 import app.sliver.data.export.LED_ORANGE
 import app.sliver.data.export.SevenSegment
+import app.sliver.data.export.highQualityEncoder
+import app.sliver.data.export.stampAnchor
 import app.sliver.data.export.stampScale
+import app.sliver.data.export.stampText
+import app.sliver.data.export.stampTextPx
+import app.sliver.data.files.FileStore
+import app.sliver.data.info
+import app.sliver.data.look.LookEffects
+import app.sliver.data.lookParams
+import app.sliver.data.repo.DayRepository
+import app.sliver.data.repo.FilmRepository
+import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.ProgressNotifier
 import app.sliver.feature.notifications.notifyFilmReady
 import app.sliver.feature.notifications.progressDue
 import com.google.common.collect.ImmutableList
-import java.io.File
-import java.io.FileOutputStream
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -96,6 +90,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.koin.mp.KoinPlatform
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.time.Clock
 
 private const val KEY_FILM = "film"
@@ -108,7 +106,8 @@ private fun workName(filmId: String) = "film-render-$filmId"
 class AndroidFilmRenderer(private val context: Context) : FilmRenderer {
     override fun start(filmId: String) {
         WorkManager.getInstance(context).enqueueUniqueWork(
-            workName(filmId), ExistingWorkPolicy.KEEP,
+            workName(filmId),
+            ExistingWorkPolicy.KEEP,
             OneTimeWorkRequestBuilder<FilmRenderWorker>().setInputData(workDataOf(KEY_FILM to filmId)).build(),
         )
     }
@@ -144,7 +143,9 @@ class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val koin = KoinPlatform.getKoin()
         months = runCatching {
             val film = koin.get<FilmRepository>().getFilm(id)
-            film?.plan(koin.get<DayRepository>().observeAll().first())?.days?.map { it.date.year * 12 + it.date.monthNumber }?.distinct()?.size
+            film?.plan(koin.get<DayRepository>().observeAll().first())?.days?.map {
+                it.date.year * 12 + it.date.monthNumber
+            }?.distinct()?.size
         }.getOrNull()?.coerceIn(1, 36) ?: 1
         val composer = FilmComposer(applicationContext, koin.get(), koin.get(), koin.get())
         return try {
@@ -180,8 +181,11 @@ class FilmRenderWorker(context: Context, params: WorkerParameters) : CoroutineWo
         lastForeground = System.currentTimeMillis()
         val n = notifier ?: ProgressNotifier(applicationContext, NOTIFICATION_ID, DeepLinkTarget.Camera, CHANNEL, "Film rendering")
         val notification = n.build("Rendering your film", "$percent%", percent, 100, months)
-        val type = if (Build.VERSION.SDK_INT >= 35) ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING
-        else ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        val type = if (Build.VERSION.SDK_INT >= 35) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        }
         return ForegroundInfo(NOTIFICATION_ID, notification, type)
     }
 }
@@ -229,7 +233,9 @@ class FilmComposer(
     private fun compose(film: Film, clips: List<Clip>, card: File, outW: Int, outH: Int): Composition {
         val outAspect = outW.toFloat() / outH
         val mix = film.audioMix(::audioDurationMs).let { m ->
-            m.copy(layers = m.layers.filter { trackAvailable(it.path) }.map { if (it.durationMs > 0) it else it.copy(durationMs = audioDurationMs(it.path)) })
+            m.copy(layers = m.layers.filter {
+                trackAvailable(it.path)
+            }.map { if (it.durationMs > 0) it else it.copy(durationMs = audioDurationMs(it.path)) })
         }
         val filmMs = clips.sumOf { it.durationMs.takeIf { d -> d > 0 } ?: FILM_FRAME_MS } + FILM_TITLE_MS
         val layers = mix.layers.map { it to layerSegments(it, filmMs) }.filter { it.second.isNotEmpty() }
@@ -300,7 +306,9 @@ class FilmComposer(
             clipItem(clip, effects, withAudio = true)
         } + cardItem
         sequences += EditedMediaItemSequence.Builder(main)
-            .experimentalSetForceAudioTrack(layers.isEmpty() || clips.any { mix.clipGain(it.day.date.toString(), it.day.keepAudio) > 0f }).build()
+            .experimentalSetForceAudioTrack(layers.isEmpty() || clips.any {
+                mix.clipGain(it.day.date.toString(), it.day.keepAudio) > 0f
+            }).build()
 
         // Owner 14 Nov: each audio layer is its own sequence: silence until its start, then the trimmed part (repeated).
         for ((layer, parts) in layers) {
@@ -335,7 +343,9 @@ class FilmComposer(
     }
 
     private val stampTypeface: Typeface? by lazy {
-        runCatching { Typeface.createFromAsset(context.assets, "composeResources/sliver.composeapp.generated.resources/font/geist_mono_medium.ttf") }.getOrNull()
+        runCatching {
+            Typeface.createFromAsset(context.assets, "composeResources/sliver.composeapp.generated.resources/font/geist_mono_medium.ttf")
+        }.getOrNull()
     }
 
     /** The LED stamp drawn as lit segments with a soft glow, scaled like the text stamp. */
@@ -344,7 +354,10 @@ class FilmComposer(
         val pad = (h * 0.2f).toInt() + 2
         val bmp = Bitmap.createBitmap(SevenSegment.width(label, h).toInt() + pad * 2, h.toInt() + pad * 2, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
-        val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = LED_ORANGE.toInt(); alpha = 64 }
+        val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = LED_ORANGE.toInt()
+            alpha = 64
+        }
         val lit = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = LED_ORANGE.toInt() }
         val g = h * 0.06f
         for (r in SevenSegment.rects(label, h)) {

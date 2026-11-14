@@ -1,8 +1,5 @@
 package app.sliver.feature.trim
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.icons.SliverIcons
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -21,12 +18,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,9 +33,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import app.sliver.core.navigation.LocalNavigator
 import app.sliver.core.navigation.Route
-import app.sliver.core.ui.PredictiveBackHandler
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -49,26 +47,24 @@ import app.sliver.core.time.todayLocal
 import app.sliver.core.ui.Chip
 import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.IconButton44
+import app.sliver.core.ui.PredictiveBackHandler
 import app.sliver.core.ui.PrimaryButton
 import app.sliver.data.DaySource
+import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
-import app.sliver.data.toParams
 import app.sliver.data.export.PhotoMotion
 import app.sliver.data.export.SECOND_MS
 import app.sliver.data.files.FileStore
-import app.sliver.data.FilmFormat
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.repo.SaveClipRequest
 import app.sliver.data.settings.SettingsRepository
 import app.sliver.feature.autoimport.CandidateStrip
 import app.sliver.feature.autoimport.rememberDraftNav
 import app.sliver.feature.camera.CaptureSession
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.mp.KoinPlatform
 import kotlin.time.Clock
-
 
 /** Decodes a downsampled bitmap of the still at [path] (file path or content URI). */
 @Composable
@@ -100,14 +96,14 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     val photoAspect = photo?.let { it.width.toFloat() / it.height }
     val reframeX = project?.format == FilmFormat.STORY && photoAspect != null && photoAspect > 1f
 
-
     DisposableEffect(Unit) {
         onDispose { if (!done && isTmp(path)) files.delete(path) }
     }
 
     // Perf STEP 2: read in graphicsLayer only, so the zoom redraws instead of recomposing the screen every frame.
     val progress = rememberInfiniteTransition().animateFloat(
-        0f, 1f,
+        0f,
+        1f,
         infiniteRepeatable(tween(SECOND_MS.toInt(), easing = LinearEasing), RepeatMode.Restart),
     )
 
@@ -120,7 +116,12 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     }
 
     var backProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = { backProgress = it }, onBack = { backProgress = 0f; close() })
+    PredictiveBackHandler(enabled = inApp && !discardOpen, onProgress = {
+        backProgress = it
+    }, onBack = {
+        backProgress = 0f;
+        close()
+    })
 
     fun useSecond() {
         if (saving) return
@@ -142,63 +143,81 @@ fun PhotoTrimScreen(onNavigate: (Route) -> Unit) {
     }
 
     Box(
-        Modifier.fillMaxSize().graphicsLayer { (1f - 0.08f * backProgress).let { scaleX = it; scaleY = it } }
+        Modifier.fillMaxSize().graphicsLayer { (1f - 0.08f * backProgress).let {
+            scaleX = it;
+            scaleY = it
+        }
+        }
             .background(SliverColors.BgVoid),
     ) {
-    Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-        if (draft != null) app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close) else Row(
-            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
-            SliverText("For ${dayLabel(day, today).lowercase()}", SliverType.Meta, color = SliverColors.TextSecondary)
-            Box(Modifier.padding(SliverSpace.S6))
-        }
-        ClipFrame(
-            if (reframeX) photoAspect!! else if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
-            Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
-                .clip(SliverShapes.S).clipToBounds(),
-        ) {
-            photo?.let {
-                val zoom = motion == Motion.ZOOM
-                Image(
-                    it, null, Modifier.fillMaxSize().graphicsLayer {
-                        val scale = if (zoom) PhotoMotion.zoomScale(progress.value) else 1f
-                        scaleX = scale; scaleY = scale
-                    },
-                    contentScale = ContentScale.Crop,
-                )
-                if (reframeX) ReframeBandX(cropX) { cropX = it }
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+            if (draft != null) {
+                app.sliver.feature.autoimport.DraftHeader(draft, draftNav, ::close)
+            } else {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = SliverSpace.S3),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    IconButton44(::close, "Close") { SliverIcon(SliverIcons.X, SliverColors.TextPrimary) }
+                    SliverText("For ${dayLabel(day, today).lowercase()}", SliverType.Meta, color = SliverColors.TextSecondary)
+                    Box(Modifier.padding(SliverSpace.S6))
+                }
             }
-        }
-        Column(
-            Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
-            verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
-        ) {
-            if (draft != null) CandidateStrip(draft, draftNav)
-            Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
-                Chip("Still", motion == Motion.STILL, { motion = Motion.STILL })
-                Chip("Slow zoom", motion == Motion.ZOOM, { motion = Motion.ZOOM })
-            }
-            PrimaryButton(
-                if (saving) "Saving..." else if (draft != null) "Keep this clip" else "Save clip", ::useSecond,
-                enabled = photo != null && !saving && !draftNav.busy,
-            )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
-                if (draft != null) {
-                    GhostButton("Remove day", { if (!saving) draftNav.askSkip(draft) }, Modifier.weight(1f), destructive = true, enabled = !saving && !draftNav.busy)
-                } else {
-                    GhostButton(
-                        if (inApp) "Retake" else "Pick another",
-                        { if (inApp) onNavigate(Route.Camera) else navigator.back() },
-                        Modifier.weight(1f),
+            ClipFrame(
+                if (reframeX) photoAspect!! else if (project?.format == FilmFormat.STORY) 9f / 16f else 16f / 9f,
+                Modifier.weight(1f).fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S2)
+                    .clip(SliverShapes.S).clipToBounds(),
+            ) {
+                photo?.let {
+                    val zoom = motion == Motion.ZOOM
+                    Image(
+                        it,
+                        null,
+                        Modifier.fillMaxSize().graphicsLayer {
+                            val scale = if (zoom) PhotoMotion.zoomScale(progress.value) else 1f
+                            scaleX = scale;
+                            scaleY = scale
+                        },
+                        contentScale = ContentScale.Crop,
                     )
+                    if (reframeX) ReframeBandX(cropX) { cropX = it }
+                }
+            }
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = SliverSpace.Gutter, vertical = SliverSpace.S3),
+                verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
+            ) {
+                if (draft != null) CandidateStrip(draft, draftNav)
+                Row(horizontalArrangement = Arrangement.spacedBy(SliverSpace.S2)) {
+                    Chip("Still", motion == Motion.STILL, { motion = Motion.STILL })
+                    Chip("Slow zoom", motion == Motion.ZOOM, { motion = Motion.ZOOM })
+                }
+                PrimaryButton(
+                    if (saving) "Saving..." else if (draft != null) "Keep this clip" else "Save clip",
+                    ::useSecond,
+                    enabled = photo != null && !saving && !draftNav.busy,
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                    if (draft != null) {
+                        GhostButton(
+                            "Remove day",
+                            { if (!saving) draftNav.askSkip(draft) },
+                            Modifier.weight(1f),
+                            destructive = true,
+                            enabled = !saving && !draftNav.busy
+                        )
+                    } else {
+                        GhostButton(
+                            if (inApp) "Retake" else "Pick another",
+                            { if (inApp) onNavigate(Route.Camera) else navigator.back() },
+                            Modifier.weight(1f),
+                        )
+                    }
                 }
             }
         }
-    }
-    app.sliver.feature.autoimport.RemoveDayConfirm(draftNav)
+        app.sliver.feature.autoimport.RemoveDayConfirm(draftNav)
         DiscardSheet(discardOpen, { discardOpen = false }, { onNavigate(Route.Camera) })
     }
 }

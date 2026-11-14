@@ -66,7 +66,12 @@ fun HoldToConfirmButton(text: String, onConfirmed: () -> Unit, modifier: Modifie
             .semantics {
                 contentDescription = "$text. Press and hold"
                 role = Role.Button
-                if (enabled) onLongClick(label = text) { fire(); true }
+                if (enabled) {
+                    onLongClick(label = text) {
+                        fire();
+                        true
+                    }
+                }
             }
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput

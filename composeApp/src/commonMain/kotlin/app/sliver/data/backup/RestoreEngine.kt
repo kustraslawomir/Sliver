@@ -1,6 +1,5 @@
 package app.sliver.data.backup
 
-import app.sliver.data.BackupState
 import app.sliver.data.DaySource
 import app.sliver.data.FilmAudio
 import app.sliver.data.FilmCut
@@ -10,34 +9,20 @@ import app.sliver.data.LookParams
 import app.sliver.data.LookPreset
 import app.sliver.data.Mismatch
 import app.sliver.data.Motion
-import app.sliver.data.db.Day
 import app.sliver.data.db.Film
-import app.sliver.data.db.Project
-import app.sliver.data.repo.ProjectRepository
-import app.sliver.data.files.FileStore
 import app.sliver.data.repo.DayRepository
-import app.sliver.data.repo.FilmRepository
+import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.AppSettings
-import app.sliver.data.settings.SettingsRepository
-import kotlin.coroutines.cancellation.CancellationException
-import kotlin.time.Clock
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -80,9 +65,13 @@ fun parseManifestProject(json: String): ManifestProject? = runCatching {
 fun parseRestoreItem(file: DriveFile): RestoreItem? {
     val p = file.appProperties
     val date = p["sliverDate"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
-    val look = p["look"]?.let { runCatching { Json.decodeFromString(LookParams.serializer(), it) }.getOrNull() } ?: LookParams()
+    val look = p["look"]?.let {
+        runCatching { Json.decodeFromString(LookParams.serializer(), it) }.getOrNull()
+    } ?: LookParams()
     return RestoreItem(
-        file.id, date, look,
+        file.id,
+        date,
+        look,
         p["source"]?.let { runCatching { DaySource.valueOf(it) }.getOrNull() } ?: DaySource.CAMERA,
         p["motion"]?.let { runCatching { Motion.valueOf(it) }.getOrNull() } ?: Motion.STILL,
     )
@@ -168,4 +157,3 @@ class RestoreEngine(
         return error
     }
 }
-

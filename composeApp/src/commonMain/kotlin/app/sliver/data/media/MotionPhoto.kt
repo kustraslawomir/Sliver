@@ -19,7 +19,11 @@ object MotionPhoto {
         if (!Regex("""MotionPhoto\s*=\s*"1"""").containsMatchIn(xmp)) return null
         val ts = presentation.find(xmp)?.groupValues?.get(1)?.toLongOrNull()?.takeIf { it >= 0 }
         val isoBox = isIsoFile(bytes)
-        if (isoBox) return mpvd(bytes)?.let { MotionVideo(it.first, it.second, ts) }?.takeIf { looksLikeMp4(bytes, it.offset, it.length) }
+        if (isoBox) {
+            return mpvd(bytes)?.let {
+                MotionVideo(it.first, it.second, ts)
+            }?.takeIf { looksLikeMp4(bytes, it.offset, it.length) }
+        }
         val length = itemTag.findAll(xmp)
             .map { it.value }
             .firstOrNull { Regex("""Semantic\s*=\s*"MotionPhoto"""").containsMatchIn(it) }

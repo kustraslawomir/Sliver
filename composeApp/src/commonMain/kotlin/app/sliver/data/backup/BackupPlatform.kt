@@ -4,11 +4,11 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.settings.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,9 @@ class BackupCoordinator(
             settings.settings.map { (it.account.signedIn && it.account.autoBackup) to it.account.wifiOnly }
                 .distinctUntilChanged()
                 .collect { (active, wifiOnly) ->
-                    if (!active) scheduler.cancel() else {
+                    if (!active) {
+                        scheduler.cancel()
+                    } else {
                         scheduler.keepSynced(wifiOnly)
                         scheduler.schedule(wifiOnly)
                     }
@@ -53,7 +55,9 @@ class BackupCoordinator(
         scope.launch {
             combine(
                 settings.settings.map { (it.account.signedIn && it.account.autoBackup) to it.account.wifiOnly }.distinctUntilChanged(),
-                days.observeAllProjects().map { list -> list.filter { it.updatedBy.isEmpty() }.let { own -> own.size to (own.maxOfOrNull { it.updatedAt } ?: 0L) } }
+                days.observeAllProjects().map { list -> list.filter {
+                    it.updatedBy.isEmpty()
+                }.let { own -> own.size to (own.maxOfOrNull { it.updatedAt } ?: 0L) } }
                     .distinctUntilChanged(),
             ) { account, _ -> account }
                 .drop(1)

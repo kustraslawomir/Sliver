@@ -19,14 +19,21 @@ private const val RESCUE_END_SLACK_MS = 10_000L
  * goes to one day at most.
  */
 fun matchOriginals(
-    days: List<Day>, recordings: List<TmpRecording>, maxGapMs: Long = RESCUE_MAX_GAP_MS, exists: (String) -> Boolean = { true },
+    days: List<Day>,
+    recordings: List<TmpRecording>,
+    maxGapMs: Long = RESCUE_MAX_GAP_MS,
+    exists: (String) -> Boolean = { true },
 ): List<Pair<Day, TmpRecording>> {
     val used = mutableSetOf<String>()
     val out = mutableListOf<Pair<Day, TmpRecording>>()
-    for (day in days.filter { it.source == DaySource.CAMERA && (it.original == null || !exists(it.original)) && !it.draft }.sortedByDescending { it.takenAt }) {
+    for (day in days.filter {
+        it.source == DaySource.CAMERA && (it.original == null || !exists(it.original)) && !it.draft
+    }.sortedByDescending { it.takenAt }) {
         val saved = day.takenAt.toEpochMilliseconds()
         val rec = recordings
-            .filter { it.path !in used && it.startMs < saved && saved - it.startMs <= maxGapMs && it.endMs <= saved + RESCUE_END_SLACK_MS }
+            .filter {
+                it.path !in used && it.startMs < saved && saved - it.startMs <= maxGapMs && it.endMs <= saved + RESCUE_END_SLACK_MS
+            }
             .maxByOrNull { it.startMs } ?: continue
         used += rec.path
         out += day to rec

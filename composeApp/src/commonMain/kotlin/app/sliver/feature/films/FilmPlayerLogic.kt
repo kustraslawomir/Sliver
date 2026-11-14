@@ -1,7 +1,6 @@
 package app.sliver.feature.films
 
 import app.sliver.core.APP_NAME
-
 import kotlin.math.pow
 
 const val PREMIERE_SLIT_MS = 1000L

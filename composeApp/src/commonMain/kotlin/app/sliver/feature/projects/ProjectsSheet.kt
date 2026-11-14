@@ -1,6 +1,5 @@
 package app.sliver.feature.projects
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
 import app.sliver.core.theme.SliverColors
@@ -91,7 +91,9 @@ fun ProjectsSheet(
                 }
                 else -> projects.firstOrNull { it.id == initialMenuFor }?.let { SheetMode.Menu(it) } ?: SheetMode.List
             }
-        } else SheetMode.List
+        } else {
+            SheetMode.List
+        }
     }
     fun backToList() { if (action != null) onDismiss() else mode = SheetMode.List }
     fun backToMenu(p: Project) { if (action != null) onDismiss() else mode = SheetMode.Menu(p) }
@@ -104,7 +106,9 @@ fun ProjectsSheet(
     SliverBottomSheet(visible, onDismiss, backdrop = backdrop) {
         when (val m = mode) {
             SheetMode.List -> ProjectList(
-                projects, stats, active?.id,
+                projects,
+                stats,
+                active?.id,
                 onPick = { p ->
                     flight.launch(scope) {
                         if (p.archived) repo.setArchived(p.id, false)
@@ -127,7 +131,8 @@ fun ProjectsSheet(
                 },
             )
             is SheetMode.Menu -> ProjectMenu(
-                m.project, canLeaveActive(m.project, projects),
+                m.project,
+                canLeaveActive(m.project, projects),
                 onBack = ::backToList,
                 onRename = { mode = SheetMode.Rename(m.project) },
                 onFormat = { mode = SheetMode.Format(m.project) },
@@ -135,7 +140,8 @@ fun ProjectsSheet(
                 onDelete = { mode = SheetMode.Delete(m.project) },
             )
             is SheetMode.Rename -> RenameProject(
-                m.project, flight.running,
+                m.project,
+                flight.running,
                 onBack = { backToMenu(m.project) },
                 onSave = { name -> run { repo.rename(m.project.id, name) } },
             )
@@ -145,7 +151,9 @@ fun ProjectsSheet(
                 onPick = { format -> run { repo.setFormat(m.project.id, format) } },
             )
             is SheetMode.Delete -> ConfirmDelete(
-                m.project, stats[m.project.id]?.clips ?: 0, flight.running,
+                m.project,
+                stats[m.project.id]?.clips ?: 0,
+                flight.running,
                 onBack = { backToMenu(m.project) },
                 onConfirm = { run { repo.delete(m.project.id) } },
             )
@@ -186,8 +194,11 @@ private fun ProjectList(
             }
         }
         app.sliver.core.kit.ReelogButton(
-            "New project", onNew, Modifier.padding(top = SliverSpace.S2),
-            kind = app.sliver.core.kit.ButtonKind.Secondary, leading = SliverIcons.Plus,
+            "New project",
+            onNew,
+            Modifier.padding(top = SliverSpace.S2),
+            kind = app.sliver.core.kit.ButtonKind.Secondary,
+            leading = SliverIcons.Plus,
         )
     }
 }
@@ -211,8 +222,11 @@ private fun ProjectRow(
         horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3),
     ) {
         Box(Modifier.size(56.dp).clip(ThumbShape).background(SliverColors.ThumbEmpty), Alignment.Center) {
-            if (cover != null) Image(cover, null, Modifier.size(56.dp), contentScale = ContentScale.Crop)
-            else SliverIcon(SliverIcons.Film, SliverColors.TextDisabled, size = 24.dp)
+            if (cover != null) {
+                Image(cover, null, Modifier.size(56.dp), contentScale = ContentScale.Crop)
+            } else {
+                SliverIcon(SliverIcons.Film, SliverColors.TextDisabled, size = 24.dp)
+            }
         }
         Column(Modifier.weight(1f)) {
             SliverText(project.name, SliverType.Headline, maxLines = 1)
@@ -220,7 +234,9 @@ private fun ProjectRow(
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             if (active) SliverIcon(SliverIcons.Check, SliverColors.TextPrimary, size = 20.dp)
-            app.sliver.core.kit.ReelogIconButton(SliverIcons.Pencil, "Edit project", { onMenu(project) }, tint = SliverColors.TextSecondary)
+            app.sliver.core.kit.ReelogIconButton(SliverIcons.Pencil, "Edit project", {
+                onMenu(project)
+            }, tint = SliverColors.TextSecondary)
         }
     }
 }
@@ -275,7 +291,8 @@ fun FormatCards(selected: FilmFormat, onPick: (FilmFormat) -> Unit) {
 private fun MenuRow(label: String, onClick: () -> Unit, destructive: Boolean = false, enabled: Boolean = true) {
     val tap = rememberTapGate(onClick)
     SliverText(
-        label, SliverType.Body,
+        label,
+        SliverType.Body,
         Modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(enabled = enabled, onClick = tap)
             .padding(vertical = SliverSpace.S3),
         when {
@@ -304,7 +321,9 @@ private fun ProjectMenu(
         var manage by remember { mutableStateOf(false) }
         if (project.archived) MenuRow("Unarchive", onArchive)
         if (!manage) {
-            MenuRow(if (project.archived) "Delete\u2026" else "Archive or delete\u2026", { manage = true }, enabled = canLeave || project.archived)
+            MenuRow(if (project.archived) "Delete\u2026" else "Archive or delete\u2026", {
+                manage = true
+            }, enabled = canLeave || project.archived)
         } else {
             if (!project.archived) MenuRow("Archive", onArchive, enabled = canLeave)
             MenuRow("Delete project", onDelete, destructive = true, enabled = canLeave || project.archived)

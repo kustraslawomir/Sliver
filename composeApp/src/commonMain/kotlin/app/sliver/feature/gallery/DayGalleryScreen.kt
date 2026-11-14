@@ -1,13 +1,7 @@
 package app.sliver.feature.gallery
 
-import app.sliver.core.kit.ButtonKind
-import app.sliver.core.kit.ReelogButton
-
-import app.sliver.core.theme.ReelogType
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,9 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,10 +35,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
+import app.sliver.core.kit.ButtonKind
+import app.sliver.core.kit.ReelogButton
 import app.sliver.core.navigation.Route
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -68,8 +62,8 @@ import app.sliver.feature.camera.overMedia
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 import org.koin.mp.KoinPlatform
+import kotlin.time.Instant
 
 /** Board FromThisDay: every photo and video taken on [CaptureSession.forDate] (camera first, never screenshots). */
 @Composable
@@ -86,18 +80,24 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
     var showAll by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     LaunchedEffect(date) {
-        entries = runCatching { rank(scanner.scan(date, date, TimeZone.currentSystemDefault(), setOf(date))) }.getOrDefault(emptyList())
+        entries = runCatching {
+            rank(scanner.scan(date, date, TimeZone.currentSystemDefault(), setOf(date)))
+        }.getOrDefault(emptyList())
     }
     val list = entries
     val sections = remember(list, showAll) {
-        list?.let { l -> dayPickerSections(l, app.sliver.core.APP_NAME).let { (mine, rest) -> mine to rest.filter { showAll || it.entry.camera } } }
+        list?.let { l -> dayPickerSections(l, app.sliver.core.APP_NAME).let { (mine, rest) -> mine to rest.filter {
+            showAll || it.entry.camera
+        } } }
     }
     val shown = sections?.second
     fun open(item: DayItem) {
         if (busy) return
         busy = true
         scope.launch {
-            val route = runCatching { loadIntoSession(gallery, files, item.entry.uri, date, liveVideo = item.liveVideo) }.getOrNull()
+            val route = runCatching {
+                loadIntoSession(gallery, files, item.entry.uri, date, liveVideo = item.liveVideo)
+            }.getOrNull()
             busy = false
             if (route == null) Notices.show("Couldn't read that item. Pick another.") else onNavigate(route)
         }
@@ -108,8 +108,10 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton44(onBack, "Back") { SliverIcon(SliverIcons.ChevronLeft, SliverColors.TextPrimary) }
                 SliverText(
-                    "${weekdayName(date)} ${date.day} ${MonthLong[date.month.ordinal]}", SliverType.Title,
-                    Modifier.padding(start = SliverSpace.S2), maxLines = 1,
+                    "${weekdayName(date)} ${date.day} ${MonthLong[date.month.ordinal]}",
+                    SliverType.Title,
+                    Modifier.padding(start = SliverSpace.S2),
+                    maxLines = 1,
                 )
             }
             Box(Modifier.height(SliverSpace.S4))
@@ -122,10 +124,14 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(SliverSpace.S2, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    SliverText("Nothing from this day", SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body)))
+                    SliverText(
+                        "Nothing from this day",
+                        SliverType.Headline.copy(fontSize = ReelogType.Size.body, lineHeight = ReelogType.lineFor(ReelogType.Size.body))
+                    )
                     SliverText(
                         "Your camera roll has no photos or videos from ${date.day} ${MonthLong[date.month.ordinal]}.",
-                        SliverType.BodySmall.copy(textAlign = TextAlign.Center), color = SliverColors.TextTertiary,
+                        SliverType.BodySmall.copy(textAlign = TextAlign.Center),
+                        color = SliverColors.TextTertiary,
                     )
                 }
                 // Perf STEP 3: lazy rows (same layout: 3 tiles per row, 4 dp between children, 6 dp under each row).
@@ -136,12 +142,16 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
                 ) {
                     // Audit v1.8 §6: "Recorded in Reelog" first, then "From your camera · N"; 3 columns of 3:4 tiles.
                     if (sections.first.isNotEmpty()) {
-                        item(key = "mine-title", contentType = "title") { SectionTitle("Recorded in ${app.sliver.core.APP_NAME}", "full recordings") }
+                        item(key = "mine-title", contentType = "title") {
+                            SectionTitle("Recorded in ${app.sliver.core.APP_NAME}", "full recordings")
+                        }
                         tileRows("mine", sections.first, ::open)
                         item(key = "mine-gap", contentType = "gap") { Spacer(Modifier.height(SliverSpace.S3)) }
                     }
                     if (shown.isNotEmpty()) {
-                        item(key = "rest-title", contentType = "title") { SectionTitle(if (showAll) "From this day" else "From your camera", "${shown.size}") }
+                        item(key = "rest-title", contentType = "title") {
+                            SectionTitle(if (showAll) "From this day" else "From your camera", "${shown.size}")
+                        }
                         tileRows("rest", shown, ::open)
                     }
                     item(key = "end", contentType = "gap") { Spacer(Modifier.height(SliverSpace.S4)) }
@@ -154,7 +164,9 @@ fun DayGalleryScreen(onNavigate: (Route) -> Unit, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
         ) {
             SwitchRow(
-                "Show saved and received too", showAll, { showAll = it },
+                "Show saved and received too",
+                showAll,
+                { showAll = it },
                 caption = "WhatsApp, downloads, other apps. Screenshots never.",
             )
             ReelogButton("Browse all photos", { picker(date) }, kind = ButtonKind.Secondary, leading = SliverIcons.ImageIcon)
@@ -205,7 +217,11 @@ private fun DayTile(item: DayItem, modifier: Modifier, onClick: () -> Unit) {
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(36.dp)
                 .background(Brush.verticalGradient(listOf(Color.Transparent, SliverColors.Scrim))),
         )
-        val label = SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), color = SliverColors.OnMedia).overMedia()
+        val label = SliverType.Meta.copy(
+            fontSize = ReelogType.Size.caption,
+            lineHeight = ReelogType.lineFor(ReelogType.Size.caption),
+            color = SliverColors.OnMedia
+        ).overMedia()
         SliverText(clock, label, Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 5.dp))
         // Badge top-right: video length ("0:12") or "Live".
         val badge = when {
@@ -213,9 +229,12 @@ private fun DayTile(item: DayItem, modifier: Modifier, onClick: () -> Unit) {
             e.video -> durationLabel(e.durationMs)
             else -> null
         }
-        if (badge != null) SliverText(
-            badge, label.copy(fontWeight = FontWeight.SemiBold),
-            Modifier.align(Alignment.TopEnd).padding(6.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim).padding(horizontal = 6.dp, vertical = 2.dp),
-        )
+        if (badge != null) {
+            SliverText(
+                badge,
+                label.copy(fontWeight = FontWeight.SemiBold),
+                Modifier.align(Alignment.TopEnd).padding(6.dp).clip(SliverShapes.Pill).background(SliverColors.Scrim).padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
     }
 }

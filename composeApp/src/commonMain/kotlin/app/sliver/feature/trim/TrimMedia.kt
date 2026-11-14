@@ -6,12 +6,20 @@ import androidx.compose.ui.graphics.ImageBitmap
 
 interface TrimMedia {
     suspend fun durationMs(path: String): Long
+
     /** Displayed width / height of the clip (rotation applied); 1 when unknown. */
     suspend fun aspect(path: String): Float
     suspend fun autoPickMs(path: String, durationMs: Long): Long
     suspend fun fileSizeBytes(path: String): Long
+
     /** Extracts [count] evenly spaced frames; [onEach] fires as each one is ready so a strip can fill in. */
-    suspend fun thumbnails(path: String, durationMs: Long, count: Int, onEach: (ImageBitmap) -> Unit = {}): List<ImageBitmap>
+    suspend fun thumbnails(
+        path: String,
+        durationMs: Long,
+        count: Int,
+        onEach: (ImageBitmap) -> Unit = {
+        }
+    ): List<ImageBitmap>
 }
 
 /**

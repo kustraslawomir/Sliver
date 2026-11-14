@@ -84,12 +84,14 @@ fun ReelogButton(
             kind == ButtonKind.Destructive -> SliverColors.ErrorOnMedia
             else -> SliverColors.OnMedia
         }
-    } else when (kind) {
-        ButtonKind.Primary -> (if (enabled) SliverColors.Accent else ink.copy(alpha = 0.08f)) to
-            (if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
-        ButtonKind.Secondary -> Color.Transparent to (if (enabled) ink else SliverColors.TextDisabled)
-        ButtonKind.Tertiary -> Color.Transparent to (if (enabled) SliverColors.TextSecondary else SliverColors.TextDisabled)
-        ButtonKind.Destructive -> Color.Transparent to (if (enabled) SliverColors.Error else SliverColors.TextDisabled)
+    } else {
+        when (kind) {
+            ButtonKind.Primary -> (if (enabled) SliverColors.Accent else ink.copy(alpha = 0.08f)) to
+                (if (enabled) SliverColors.OnAccent else SliverColors.TextDisabled)
+            ButtonKind.Secondary -> Color.Transparent to (if (enabled) ink else SliverColors.TextDisabled)
+            ButtonKind.Tertiary -> Color.Transparent to (if (enabled) SliverColors.TextSecondary else SliverColors.TextDisabled)
+            ButtonKind.Destructive -> Color.Transparent to (if (enabled) SliverColors.Error else SliverColors.TextDisabled)
+        }
     }
     val surface = when {
         kind == ButtonKind.Destructive && overMedia -> Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
@@ -101,7 +103,10 @@ fun ReelogButton(
     Row(
         modifier.then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = if (small) 44.dp else 56.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .graphicsLayer {
+                scaleX = scale;
+                scaleY = scale
+            }
             .clip(Pill)
             .then(surface)
             .clickable(source, null, enabled = enabled, role = Role.Button, onClick = rememberTapGate(onClick))
@@ -110,7 +115,13 @@ fun ReelogButton(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leading != null) SliverIcon(leading, content, size = if (small) 18.dp else 20.dp)
-        val style = if (small) ReelogType.label else ReelogType.body.copy(fontWeight = if (kind == ButtonKind.Primary) FontWeight.SemiBold else FontWeight.Medium)
+        val style = if (small) {
+            ReelogType.label
+        } else {
+            ReelogType.body.copy(
+                fontWeight = if (kind == ButtonKind.Primary) FontWeight.SemiBold else FontWeight.Medium
+            )
+        }
         SliverText(text, style, color = content, maxLines = 1, softWrap = false)
     }
 }
@@ -136,11 +147,17 @@ fun ReelogChip(
     ) {
         Row(
             Modifier.heightIn(min = 40.dp)
-                .graphicsLayer { scaleX = scale; scaleY = scale }
+                .graphicsLayer {
+                    scaleX = scale;
+                    scaleY = scale
+                }
                 .clip(Pill)
                 .then(
-                    if (selected) Modifier.background(SliverColors.Accent)
-                    else Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.12f), Pill),
+                    if (selected) {
+                        Modifier.background(SliverColors.Accent)
+                    } else {
+                        Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.12f), Pill)
+                    },
                 )
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -166,8 +183,11 @@ fun ReelogSegmented(
     BoxWithConstraints(
         modifier.fillMaxWidth().height(height).clip(Pill)
             .then(
-                if (overMedia) Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
-                else Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.10f), Pill),
+                if (overMedia) {
+                    Modifier.glass(GlassStyle.Regular, Pill, overMedia = true)
+                } else {
+                    Modifier.background(ink.copy(alpha = 0.06f)).border(1.dp, ink.copy(alpha = 0.10f), Pill)
+                },
             )
             .padding(3.dp),
     ) {
@@ -196,7 +216,10 @@ fun ReelogSegmented(
 @Composable
 fun DayToggle(label: String, on: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, description: String = label) {
     Box(
-        modifier.size(48.dp).semantics { selected = on; contentDescription = description }
+        modifier.size(48.dp).semantics {
+            selected = on;
+            contentDescription = description
+        }
             .clickable(role = Role.Checkbox, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -240,7 +263,13 @@ fun ReelogIconButton(
     iconSize: Dp = 24.dp,
     enabled: Boolean = true,
 ) {
-    ReelogIconBox(contentDescription, onClick, modifier, overMedia, enabled) { SliverIcon(icon, if (enabled) tint else SliverColors.TextDisabled, size = iconSize) }
+    ReelogIconBox(
+        contentDescription,
+        onClick,
+        modifier,
+        overMedia,
+        enabled
+    ) { SliverIcon(icon, if (enabled) tint else SliverColors.TextDisabled, size = iconSize) }
 }
 
 @Composable
@@ -261,7 +290,10 @@ fun ReelogIconBox(
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            Modifier.size(44.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+            Modifier.size(44.dp).graphicsLayer {
+                scaleX = scale;
+                scaleY = scale
+            }
                 .then(if (overMedia) Modifier.glass(GlassStyle.Regular, CircleShape, overMedia = true) else Modifier),
             contentAlignment = Alignment.Center,
         ) { content() }

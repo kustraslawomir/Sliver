@@ -8,9 +8,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 private const val MAX_EDGE = 1600
 
@@ -18,8 +18,12 @@ private const val MAX_EDGE = 1600
 actual fun rememberPhoto(path: String): ImageBitmap? {
     val context = LocalContext.current
     val photo by produceState<ImageBitmap?>(null, path) {
-        val key = ThumbCache.keyFor(path)
-        ThumbCache.get(key)?.let { value = it.first(); return@produceState }
+        // Perf STEP 4: the cache key reads the file's modified time — disk, so off the main thread.
+        val key = withContext(Dispatchers.IO) { ThumbCache.keyFor(path) }
+        ThumbCache.get(key)?.let {
+            value = it.first()
+            return@produceState
+        }
         fun decode() = runCatching {
             val uri = if (path.contains("://")) Uri.parse(path) else Uri.fromFile(File(path))
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, info, _ ->

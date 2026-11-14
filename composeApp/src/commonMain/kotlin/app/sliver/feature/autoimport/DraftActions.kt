@@ -15,12 +15,12 @@ import app.sliver.feature.gallery.loadIntoSession
 import app.sliver.feature.onboarding.FirstClipTimer
 import app.sliver.feature.trim.UNDO_WINDOW_MS
 import app.sliver.feature.trim.isTmp
-import kotlin.time.Clock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 /** The draft shown in the editor with the gallery items of its day; [selectedUri] is the one currently loaded. */
 class DraftContext(val day: Day, val candidates: List<DraftCandidate>, val selectedUri: String?, val chain: Boolean = true)

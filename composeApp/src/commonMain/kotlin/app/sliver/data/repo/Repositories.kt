@@ -1,9 +1,6 @@
 package app.sliver.data.repo
 
 import app.sliver.data.DaySource
-import app.sliver.feature.trim.isOriginal
-import app.sliver.feature.trim.isTmp
-import app.sliver.feature.trim.recordingStamp
 import app.sliver.data.FilmFormat
 import app.sliver.data.LookParams
 import app.sliver.data.Motion
@@ -14,14 +11,15 @@ import app.sliver.data.backup.TombstoneStore
 import app.sliver.data.backup.stampDay
 import app.sliver.data.backup.stampFilm
 import app.sliver.data.db.Day
-import app.sliver.data.export.ClipExporter
-import app.sliver.data.export.ShortMode
-import app.sliver.data.files.FileStore
-import kotlin.time.Clock
-import kotlin.time.Instant
 import app.sliver.data.db.DayDao
 import app.sliver.data.db.Film
 import app.sliver.data.db.FilmDao
+import app.sliver.data.export.ClipExporter
+import app.sliver.data.export.ShortMode
+import app.sliver.data.files.FileStore
+import app.sliver.feature.trim.isOriginal
+import app.sliver.feature.trim.isTmp
+import app.sliver.feature.trim.recordingStamp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,6 +27,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.LocalDate
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface DayRepository {
     fun observeRange(from: LocalDate, to: LocalDate): Flow<List<Day>>
@@ -119,8 +119,11 @@ class DayRepositoryImpl(
         val tmpVideo = files.newTmpPath(stamp)
         val tmpThumb = "$tmpVideo.jpg"
         try {
-            val clip = if (isPhoto) exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look, cropX, cropY)
-            else exporter.exportClip(source, startMs, speed, cropX, cropY, format, tmpVideo, tmpThumb, shortMode, look)
+            val clip = if (isPhoto) {
+                exporter.photoToClip(source, motion, format, tmpVideo, tmpThumb, look, cropX, cropY)
+            } else {
+                exporter.exportClip(source, startMs, speed, cropX, cropY, format, tmpVideo, tmpThumb, shortMode, look)
+            }
             val place = places.resolve(source)
             val projectId = request.projectId ?: projects.activeId()
             val file = files.dayPath(projectId, date)
@@ -142,7 +145,10 @@ class DayRepositoryImpl(
                 keepFrom != null -> files.originalPath(keepFrom)
                 else -> null
             }
-            var stamped = stampDay(dao.getByDate(projectId, date), day.copy(original = original, originalStartMs = startMs.takeIf { original != null }), nowMillis())
+            var stamped =
+                stampDay(dao.getByDate(projectId, date), day.copy(original = original, originalStartMs = startMs.takeIf {
+                    original != null
+                }), nowMillis())
             put(stamped)
             if (keepFrom != null && original != null && !files.move(source, original)) {
                 stamped = stamped.copy(original = null, originalStartMs = null)

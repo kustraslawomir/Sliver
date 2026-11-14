@@ -1,13 +1,5 @@
 package app.sliver.core.ui
 
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.focusRequester
-import app.sliver.core.theme.ReelogType
-
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,10 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
-import app.sliver.core.icons.SliverIcon
-import app.sliver.core.icons.SliverIcons
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,23 +25,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import app.sliver.core.icons.SliverIcon
+import app.sliver.core.icons.SliverIcons
 import app.sliver.core.theme.SliverColors
-import app.sliver.core.theme.SliverMotion
-import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
 import app.sliver.core.theme.SliverText
 import app.sliver.core.theme.SliverType
@@ -81,7 +73,8 @@ fun SliverTextField(
     if (autoFocus) androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     val shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     BasicTextField(
-        value, onValueChange,
+        value,
+        onValueChange,
         modifier.fillMaxWidth().heightIn(min = 56.dp).clip(shape)
             .background(SliverColors.FieldFill)
             .border(1.dp, if (focused) SliverColors.FieldFocus else SliverColors.FieldEdge, shape)
@@ -160,7 +153,10 @@ fun SliverSlider(
             .onSizeChanged { widthPx = it.width }
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(value, 0f..1f, steps)
-                setProgress { onValueChange(snap(it)); true }
+                setProgress {
+                    onValueChange(snap(it));
+                    true
+                }
             }
             .pointerInput(steps) { detectTapGestures { onValueChange(fromX(it.x)) } }
             .pointerInput(steps) { detectDragGestures { change, _ -> onValueChange(fromX(change.position.x)) } },
@@ -171,7 +167,9 @@ fun SliverSlider(
         Box(Modifier.fillMaxWidth().height(4.dp).clip(track).background(SliverColors.LineStrong))
         Box(Modifier.fillMaxWidth(value.coerceIn(0f, 1f)).height(4.dp).clip(track).background(SliverColors.SliderFill))
         val widthDp = with(density) { widthPx.toDp() }
-        val thumbX = (with(density) { (widthPx * value.coerceIn(0f, 1f)).toDp() } - thumbW / 2).coerceIn(0.dp, (widthDp - thumbW).coerceAtLeast(0.dp))
+        val thumbX = (with(density) {
+            (widthPx * value.coerceIn(0f, 1f)).toDp()
+        } - thumbW / 2).coerceIn(0.dp, (widthDp - thumbW).coerceAtLeast(0.dp))
         Box(
             Modifier.offset(thumbX, 0.dp).size(thumbW).shadow(2.dp, androidx.compose.foundation.shape.CircleShape) // lint-ok: elevation
                 .clip(androidx.compose.foundation.shape.CircleShape).background(SliverColors.SliderThumb),

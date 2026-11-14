@@ -1,6 +1,7 @@
 package app.sliver.data.backup
 
 import app.sliver.data.BackupState
+import app.sliver.data.LookParams
 import app.sliver.data.db.Day
 import app.sliver.data.db.Film
 import app.sliver.data.db.Project
@@ -10,11 +11,6 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.FilmRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.SettingsRepository
-import kotlin.coroutines.cancellation.CancellationException
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -26,11 +22,14 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
-import app.sliver.data.LookParams
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 fun interface DayFileReader {
     fun read(path: String): ByteArray?
@@ -194,7 +193,9 @@ class SyncEngine(
 
     /** `<id>.json` records and `<id>.deleted.json` tombstones in one Drive folder. */
     private class RecordListing(files: List<DriveFile>) {
-        val live = files.filter { it.name.endsWith(".json") && !it.name.endsWith(DELETED_SUFFIX) }.associateBy { it.name.removeSuffix(".json") }
+        val live = files.filter {
+            it.name.endsWith(".json") && !it.name.endsWith(DELETED_SUFFIX)
+        }.associateBy { it.name.removeSuffix(".json") }
         val gone = files.filter { it.name.endsWith(DELETED_SUFFIX) }.associateBy { it.name.removeSuffix(DELETED_SUFFIX) }
     }
 
@@ -306,7 +307,9 @@ class SyncEngine(
 
     /** The newest file per date. Duplicates (two phones uploading at once) are parked in replaced/ and trashed. */
     private suspend fun tombDays(dirs: ProjectDirs): Map<LocalDate, DriveFile> =
-        drive.list(dirs.deleted).mapNotNull { f -> runCatching { LocalDate.parse(f.name.removeSuffix(".json")) }.getOrNull()?.let { it to f } }.toMap()
+        drive.list(dirs.deleted).mapNotNull { f -> runCatching {
+            LocalDate.parse(f.name.removeSuffix(".json"))
+        }.getOrNull()?.let { it to f } }.toMap()
 
     private suspend fun remoteDays(c: Cycle, p: Project, dirs: ProjectDirs, includeFlat: Boolean): MutableMap<LocalDate, RemoteDay> {
         val out = LinkedHashMap<LocalDate, RemoteDay>()
@@ -362,7 +365,9 @@ class SyncEngine(
                 file = file,
                 thumb = thumb,
                 source = parseDaySource(props["source"]),
-                look = props["look"]?.let { runCatching { Json.decodeFromString(LookParams.serializer(), it) }.getOrNull() } ?: LookParams(),
+                look = props["look"]?.let {
+                    runCatching { Json.decodeFromString(LookParams.serializer(), it) }.getOrNull()
+                } ?: LookParams(),
                 motion = parseMotion(props["motion"]),
                 keepAudio = props["audio"] != "0",
                 speed = props["speed"]?.toFloatOrNull() ?: 1f,
@@ -392,7 +397,9 @@ class SyncEngine(
 
     private suspend fun pullFilms(c: Cycle, p: Project, dirs: ProjectDirs) = with(c) {
         val remote = RecordListing(drive.list(dirs.films))
-        val localTombs = tombstones.all().filter { it.kind == TombstoneKind.FILM && it.projectId == p.id }.associateBy { it.key }
+        val localTombs = tombstones.all().filter {
+            it.kind == TombstoneKind.FILM && it.projectId == p.id
+        }.associateBy { it.key }
         val local = films.observeAllProjects().first().filter { it.projectId == p.id }.associateBy { it.id }
         for ((id, tomb) in remote.gone) {
             note(tomb.stamp)
@@ -429,7 +436,13 @@ class SyncEngine(
                 tombstones.clear(t.kind, t.projectId, t.key)
                 continue
             }
-            drive.upload(projectsDir, "${t.projectId}$DELETED_SUFFIX", recordProps("tomb", t.deletedAt, me), "{}".encodeToByteArray(), remote.gone[t.projectId]?.id)
+            drive.upload(
+                projectsDir,
+                "${t.projectId}$DELETED_SUFFIX",
+                recordProps("tomb", t.deletedAt, me),
+                "{}".encodeToByteArray(),
+                remote.gone[t.projectId]?.id
+            )
             live?.let { drive.trash(it.id) }
             drive.listFolders(root).firstOrNull { it.name == t.projectId }?.let { drive.trash(it.id) }
             tombstones.clear(t.kind, t.projectId, t.key)
@@ -441,7 +454,13 @@ class SyncEngine(
             val r = remote.live[p.id]
             val current = projects.projects.first().firstOrNull { it.id == p.id } ?: continue
             if (r != null && (!current.dirty() || compareVersions(current.stamp(), r.stamp) <= 0)) continue
-            drive.upload(projectsDir, "${p.id}.json", recordProps("project", current.updatedAt, current.stamp().by), projectJson(current).encodeToByteArray(), r?.id)
+            drive.upload(
+                projectsDir,
+                "${p.id}.json",
+                recordProps("project", current.updatedAt, current.stamp().by),
+                projectJson(current).encodeToByteArray(),
+                r?.id
+            )
             remote.gone[p.id]?.let { drive.trash(it.id) }
         }
     }
@@ -471,8 +490,11 @@ class SyncEngine(
             }
             r?.let { drive.trash(it.file.id) }
             drive.upload(
-                dirs.deleted, "$date.json", recordProps("tomb", t.deletedAt, me) + ("sliverDate" to date.toString()),
-                "{}".encodeToByteArray(), gone[date]?.id,
+                dirs.deleted,
+                "$date.json",
+                recordProps("tomb", t.deletedAt, me) + ("sliverDate" to date.toString()),
+                "{}".encodeToByteArray(),
+                gone[date]?.id,
             )
             tombstones.clear(t.kind, t.projectId, t.key)
         }
@@ -505,8 +527,11 @@ class SyncEngine(
     private suspend fun markPushed(sent: Day, fileId: String) {
         val current = days.getDay(sent.projectId, sent.date) ?: return
         days.save(
-            if (current.updatedAt == sent.updatedAt) current.copy(driveFileId = fileId, backup = BackupState.DONE)
-            else current.copy(driveFileId = fileId),
+            if (current.updatedAt == sent.updatedAt) {
+                current.copy(driveFileId = fileId, backup = BackupState.DONE)
+            } else {
+                current.copy(driveFileId = fileId)
+            },
         )
     }
 

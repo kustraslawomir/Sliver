@@ -1,8 +1,7 @@
 package app.sliver.core.permissions
 
-import app.sliver.core.APP_NAME
-
 import androidx.compose.runtime.Composable
+import app.sliver.core.APP_NAME
 
 enum class PermissionKind { CameraMic, Notifications, CoarseLocation, MediaLibrary }
 

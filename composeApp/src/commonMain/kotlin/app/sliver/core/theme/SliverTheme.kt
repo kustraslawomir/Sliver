@@ -1,25 +1,21 @@
 package app.sliver.core.theme
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import org.jetbrains.compose.resources.Font
 import sliver.composeapp.generated.resources.Res
 import sliver.composeapp.generated.resources.geist_medium
 import sliver.composeapp.generated.resources.geist_mono_medium
 import sliver.composeapp.generated.resources.geist_mono_regular
 import sliver.composeapp.generated.resources.geist_regular
 import sliver.composeapp.generated.resources.geist_semibold
-import org.jetbrains.compose.resources.Font
-import androidx.compose.ui.unit.dp
 
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
@@ -51,7 +47,14 @@ fun SliverText(
     softWrap: Boolean = true,
     overflow: androidx.compose.ui.text.style.TextOverflow = androidx.compose.ui.text.style.TextOverflow.Clip,
 ) {
-    BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), softWrap = softWrap, maxLines = maxLines, overflow = overflow)
+    BasicText(
+        text,
+        modifier,
+        if (color == Color.Unspecified) style else style.copy(color = color),
+        softWrap = softWrap,
+        maxLines = maxLines,
+        overflow = overflow
+    )
 }
 
 @Composable
@@ -64,4 +67,3 @@ fun SliverText(
 ) {
     BasicText(text, modifier, if (color == Color.Unspecified) style else style.copy(color = color), maxLines = maxLines)
 }
-

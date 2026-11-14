@@ -4,7 +4,6 @@ import app.sliver.data.FilmFormat
 import app.sliver.data.db.Project
 import app.sliver.data.db.ProjectStats
 import app.sliver.feature.archive.MonthNames
-import app.sliver.feature.camera.label
 
 const val MAX_PROJECT_NAME = 40
 

@@ -1,14 +1,14 @@
 package app.sliver.feature.camera
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.ui.input.pointer.AwaitPointerEventScope
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,30 +18,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.foundation.gestures.verticalDrag
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
@@ -127,7 +126,11 @@ fun FocusOverlay(
                         return@awaitEachGesture
                     }
                     val (cx, cy) = focusRingCenter(
-                        down.position.x, down.position.y, size.width.toFloat(), size.height.toFloat(), with(density) { FOCUS_RING_START_DP.dp.toPx() },
+                        down.position.x,
+                        down.position.y,
+                        size.width.toFloat(),
+                        size.height.toFloat(),
+                        with(density) { FOCUS_RING_START_DP.dp.toPx() },
                     )
                     val tapId = (focus?.tap ?: 0) + 1
                     focus = FocusState(cx, cy, tapId)
@@ -157,7 +160,13 @@ fun FocusOverlay(
             ExposureSlider(
                 visible = sliderVisible || f.locked, locked = f.locked, range = r, index = evIndex,
                 centerX = f.x, centerY = f.y, width = size.width.toFloat(), height = size.height.toFloat(),
-                onIndex = { if (it != evIndex) { evIndex = it; onExposure(it); haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove) } },
+                onIndex = {
+                    if (it != evIndex) {
+                        evIndex = it
+                        onExposure(it)
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                },
                 onTouch = { interaction++ },
             )
         }
@@ -166,7 +175,8 @@ fun FocusOverlay(
 
 @Composable
 private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibility: Float) {
-    val ringSize = remember(f.tap) { Animatable(if (reduced) FOCUS_RING_END_DP.toFloat() else FOCUS_RING_START_DP.toFloat()) }
+    val ringSize =
+        remember(f.tap) { Animatable(if (reduced) FOCUS_RING_END_DP.toFloat() else FOCUS_RING_START_DP.toFloat()) }
     val opacity = remember(f.tap) { Animatable(1f) }
     LaunchedEffect(f.tap) {
         if (!reduced) ringSize.animateTo(FOCUS_RING_END_DP.toFloat(), tween(220, easing = SliverMotion.EaseStandard))
@@ -200,9 +210,15 @@ private fun FocusRing(f: FocusState, reduced: Boolean, center: Offset, visibilit
                 },
             ) {
                 SliverText(
-                    "AE/AF lock", SliverType.Body.copy(fontSize = TextUnit(12f, TextUnitType.Sp), lineHeight = TextUnit(16f, TextUnitType.Sp), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                    "AE/AF lock",
+                    SliverType.Body.copy(
+                        fontSize = TextUnit(12f, TextUnitType.Sp),
+                        lineHeight = TextUnit(16f, TextUnitType.Sp),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    ),
                     Modifier.background(SliverColors.Accent, CircleShape).padding(horizontal = 10.dp, vertical = 4.dp),
-                    SliverColors.OnAccent, maxLines = 1,
+                    SliverColors.OnAccent,
+                    maxLines = 1,
                 )
             }
         }
@@ -264,7 +280,8 @@ private fun ExposureSlider(
             contentAlignment = Alignment.Center,
         ) { SliverIcon(SliverIcons.Sun, tint, size = 18.dp) }
         SliverText(
-            formatEv(index, range.step), SliverType.Meta.overMedia(),
+            formatEv(index, range.step),
+            SliverType.Meta.overMedia(),
             Modifier.layout { m, c ->
                 val p = m.measure(c.copy(minWidth = 0, minHeight = 0, maxWidth = Constraints.Infinity, maxHeight = Constraints.Infinity))
                 val gap = 22.dp.roundToPx()
@@ -272,7 +289,8 @@ private fun ExposureSlider(
                 val y = ((trackPx - thumb.toPx()) * fraction + (thumb.toPx() - p.height) / 2f).roundToInt()
                 layout(0, 0) { p.place(x, y) }
             }.mediaPlate(),
-            SliverColors.OnMedia, maxLines = 1,
+            SliverColors.OnMedia,
+            maxLines = 1,
         )
     }
 }

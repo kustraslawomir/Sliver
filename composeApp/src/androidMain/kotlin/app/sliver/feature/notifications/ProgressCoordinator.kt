@@ -1,8 +1,8 @@
 package app.sliver.feature.notifications
 
 import android.content.Context
-import app.sliver.data.backup.SyncEngine
 import app.sliver.data.backup.BackupProgress
+import app.sliver.data.backup.SyncEngine
 import app.sliver.feature.autoimport.AutoImportStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -21,9 +21,13 @@ class ProgressCoordinator(
     private val autoImport: AutoImportStore,
 ) {
     fun start(scope: CoroutineScope) {
-        mirror(scope, backup.progress, ProgressNotifier(context, 9201, DeepLinkTarget.Backup), "Syncing with Drive") { "${it.done} of ${it.total} clips" }
+        mirror(scope, backup.progress, ProgressNotifier(context, 9201, DeepLinkTarget.Backup), "Syncing with Drive") {
+            "${it.done} of ${it.total} clips"
+        }
         val fill = autoImport.run.map { r -> r?.takeIf { !it.finished }?.let { BackupProgress(it.done, it.total) } }
-        mirror(scope, fill, ProgressNotifier(context, FILL_NOTIFICATION_ID, DeepLinkTarget.FillThePast), "Importing drafts") { "${it.done} of ${it.total} days" }
+        mirror(scope, fill, ProgressNotifier(context, FILL_NOTIFICATION_ID, DeepLinkTarget.FillThePast), "Importing drafts") {
+            "${it.done} of ${it.total} days"
+        }
     }
 
     private fun mirror(

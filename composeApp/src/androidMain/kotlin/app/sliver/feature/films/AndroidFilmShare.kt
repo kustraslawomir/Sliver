@@ -1,16 +1,15 @@
 package app.sliver.feature.films
 
-import app.sliver.core.APP_NAME
-
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
-import java.io.File
+import app.sliver.core.APP_NAME
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class AndroidFilmShare(private val context: Context) : FilmShare {
     override fun share(path: String, name: String) {
@@ -54,7 +53,9 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media.DISPLAY_NAME),
             "${MediaStore.Video.Media.RELATIVE_PATH} LIKE ? AND ${MediaStore.Video.Media.SIZE} = ? AND ${MediaStore.Video.Media.IS_PENDING} = 0",
             arrayOf("${Environment.DIRECTORY_MOVIES}/$APP_NAME%", size.toString()), null,
-        )?.use { c -> generateSequence { if (c.moveToNext()) c.getString(0) else null }.any { it.lowercase().startsWith(base) } } ?: false
+        )?.use { c -> generateSequence {
+            if (c.moveToNext()) c.getString(0) else null
+        }.any { it.lowercase().startsWith(base) } } ?: false
     }.getOrDefault(false)
 
     /** Owner: a film rendered again does not overwrite the old one: "Lena", "Lena 2", "Lena 3"… in Movies/<app>. */
@@ -63,8 +64,11 @@ class AndroidFilmShare(private val context: Context) : FilmShare {
         val taken = HashSet<String>()
         runCatching {
             context.contentResolver.query(
-                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media.DISPLAY_NAME),
-                "${MediaStore.Video.Media.RELATIVE_PATH} LIKE ?", arrayOf("${Environment.DIRECTORY_MOVIES}/$APP_NAME%"), null,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Video.Media.DISPLAY_NAME),
+                "${MediaStore.Video.Media.RELATIVE_PATH} LIKE ?",
+                arrayOf("${Environment.DIRECTORY_MOVIES}/$APP_NAME%"),
+                null,
             )?.use { c -> while (c.moveToNext()) c.getString(0)?.let { taken += it.substringBeforeLast('.').lowercase() } }
         }
         return filmFileName(base, taken)

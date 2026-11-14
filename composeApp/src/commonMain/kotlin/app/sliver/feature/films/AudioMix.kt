@@ -30,11 +30,16 @@ data class AudioMix(
     val layers: List<AudioLayer> = emptyList(),
 )
 
-private val mixJson = Json { ignoreUnknownKeys = true; encodeDefaults = false }
+private val mixJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = false
+}
 
 fun AudioMix.encode(): String = mixJson.encodeToString(this)
 
-fun decodeAudioMix(text: String?): AudioMix? = text?.let { runCatching { mixJson.decodeFromString<AudioMix>(it) }.getOrNull() }
+fun decodeAudioMix(text: String?): AudioMix? = text?.let {
+    runCatching { mixJson.decodeFromString<AudioMix>(it) }.getOrNull()
+}
 
 /** Films saved before layers: Music = clips silent + the track at full volume, Mix = clips + the track at 30 %. */
 fun Film.audioMix(durationOf: (String) -> Long = { 0L }): AudioMix {
@@ -53,7 +58,9 @@ fun AudioMix.legacyAudio(): Triple<FilmAudio, String?, Int?> {
 }
 
 /** Length of the used part of the file. */
-val AudioLayer.lengthMs: Long get() = ((outMs ?: durationMs).coerceAtMost(durationMs.takeIf { it > 0 } ?: Long.MAX_VALUE) - inMs).coerceAtLeast(0)
+val AudioLayer.lengthMs: Long get() = ((outMs ?: durationMs).coerceAtMost(durationMs.takeIf {
+    it > 0
+} ?: Long.MAX_VALUE) - inMs).coerceAtLeast(0)
 
 /** Film time where the layer stops: the film's end when it repeats, otherwise after one pass. */
 fun AudioLayer.endMs(filmMs: Long): Long = if (loop) filmMs else (startMs + lengthMs).coerceAtMost(filmMs)

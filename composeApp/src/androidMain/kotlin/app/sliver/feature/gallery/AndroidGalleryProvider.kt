@@ -40,7 +40,9 @@ class AndroidGalleryProvider(private val context: Context, private val files: Fi
     }
 
     private fun exifMillis(uri: Uri, zone: TimeZone): Long? = runCatching {
-        resolver.openInputStream(uri)?.use { parseExifMillis(ExifInterface(it).getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL), zone) }
+        resolver.openInputStream(uri)?.use {
+            parseExifMillis(ExifInterface(it).getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL), zone)
+        }
     }.getOrNull()
 
     private fun displayName(uri: Uri): String? = runCatching {

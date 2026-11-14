@@ -6,11 +6,11 @@ import app.sliver.data.db.Film
 import app.sliver.data.files.FileStore
 import app.sliver.data.repo.FilmRepository
 import app.sliver.feature.trim.UNDO_WINDOW_MS
-import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 /**
  * Deleting a film acts now and can be undone for [windowMs]: the row goes immediately, the rendered file is parked in tmp

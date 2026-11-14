@@ -1,25 +1,16 @@
 package app.sliver.feature.camera
 
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalInspectionMode
-import app.sliver.core.theme.SliverColors
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.background
-import app.sliver.core.log.logDebug
 import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.content.Context
-import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Size
 import android.hardware.camera2.CameraCharacteristics
+import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraInfo
-import androidx.camera.core.DynamicRange
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.DynamicRange
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -34,24 +25,25 @@ import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
-import android.view.Surface
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import app.sliver.core.log.logDebug
+import app.sliver.core.theme.SliverColors
 import app.sliver.data.settings.CameraMode
 import app.sliver.data.settings.Lens
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.hypot
@@ -88,7 +80,9 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         logDebug(TAG, "startFocusAndMetering called lock=$lock")
         val future = cam.cameraControl.startFocusAndMetering(action)
         future.addListener({
-            val ok = runCatching { future.get().isFocusSuccessful }.onFailure { logDebug(TAG, "focus future failed: $it") }.getOrDefault(false)
+            val ok = runCatching {
+                future.get().isFocusSuccessful
+            }.onFailure { logDebug(TAG, "focus future failed: $it") }.getOrDefault(false)
             logDebug(TAG, "startFocusAndMetering result: focusSuccessful=$ok lock=$lock")
             onResult(ok)
         }, executor)
@@ -184,7 +178,13 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         ultraWide = if (b.lens == Lens.BACK && mainMin >= 1f) findUltraWide(provider, main) else null
         onUltraWide = ultraWide != null && zoom < 1f
         val uwId = ultraWide?.id?.takeIf { onUltraWide }
-        val selector = if (uwId == null) mainSelector else CameraSelector.Builder().addCameraFilter { infos -> infos.filter { cameraId(it) == uwId } }.build()
+        val selector = if (uwId == null) {
+            mainSelector
+        } else {
+            CameraSelector.Builder().addCameraFilter { infos -> infos.filter {
+                cameraId(it) == uwId
+            } }.build()
+        }
         val info = if (uwId == null) main else provider.getCameraInfo(selector)
 
         val displayRotation = b.view.display?.rotation ?: Surface.ROTATION_0
@@ -216,7 +216,10 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
         if (b.mode == CameraMode.VIDEO) camera?.cameraControl?.enableTorch(b.torch)
         camera?.cameraControl?.setExposureCompensationIndex(0)
         applyZoom()
-        logDebug(TAG, "bind: mode=${b.mode} lens=${b.lens} zoom=$zoom range=${zoomRange()} ultraWide=${ultraWide?.ratio} on=$onUltraWide exposureRange=${exposureRange()}")
+        logDebug(
+            TAG,
+            "bind: mode=${b.mode} lens=${b.lens} zoom=$zoom range=${zoomRange()} ultraWide=${ultraWide?.ratio} on=$onUltraWide exposureRange=${exposureRange()}"
+        )
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -252,8 +255,11 @@ class AndroidCameraEngine(private val context: Context) : CameraEngine {
                 if (event is VideoRecordEvent.Finalize) {
                     recording = null
                     onResult(
-                        if (event.hasError()) Result.failure(event.cause ?: IllegalStateException("record error ${event.error}"))
-                        else Result.success(path),
+                        if (event.hasError()) {
+                            Result.failure(event.cause ?: IllegalStateException("record error ${event.error}"))
+                        } else {
+                            Result.success(path)
+                        },
                     )
                 }
             }
@@ -323,4 +329,3 @@ actual fun CameraPreview(
     }
     AndroidView({ view }, modifier)
 }
-

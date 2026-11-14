@@ -1,14 +1,5 @@
 package app.sliver.feature.notifications
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.horizontalScroll
-import app.sliver.core.kit.ButtonKind
-import app.sliver.core.kit.ReelogButton
-
-import app.sliver.core.theme.ReelogType
-
-import app.sliver.core.APP_NAME
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,16 +19,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -45,12 +35,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.sliver.core.APP_NAME
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
+import app.sliver.core.kit.ReelogButton
 import app.sliver.core.permissions.PermissionKind
 import app.sliver.core.permissions.PermissionStatus
 import app.sliver.core.permissions.rememberPermissionController
+import app.sliver.core.theme.ReelogType
 import app.sliver.core.theme.SliverColors
 import app.sliver.core.theme.SliverShapes
 import app.sliver.core.theme.SliverSpace
@@ -72,8 +65,12 @@ import org.koin.mp.KoinPlatform
 private val DayLetters = listOf("M", "T", "W", "T", "F", "S", "S")
 private val DayNames = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 private val Presets = listOf(
-    LocalTime(7, 30) to "Morning", LocalTime(12, 30) to "Lunch", LocalTime(17, 30) to "After work",
-    LocalTime(19, 0) to "Evening", LocalTime(20, 0) to "Default", LocalTime(21, 30) to "Late",
+    LocalTime(7, 30) to "Morning",
+    LocalTime(12, 30) to "Lunch",
+    LocalTime(17, 30) to "After work",
+    LocalTime(19, 0) to "Evening",
+    LocalTime(20, 0) to "Default",
+    LocalTime(21, 30) to "Late",
 )
 
 fun LocalTime.label() = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
@@ -157,19 +154,30 @@ fun RemindersScreen(onBack: () -> Unit) {
                 Row(
                     Modifier.clickable(role = Role.Button) { timeSheet = true }
                         .semantics { contentDescription = "Reminder time, ${shownTime.label()}. Change" },
-                    verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     SliverText(
                         (if (todaySun != null) "≈" else "") + shownTime.label(),
                         ReelogType.clock,
                     )
-                    SliverText("Change", SliverType.Body.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium), Modifier.padding(bottom = 8.dp), color = SliverColors.AccentText)
+                    SliverText(
+                        "Change",
+                        SliverType.Body.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.Medium),
+                        Modifier.padding(bottom = 8.dp),
+                        color = SliverColors.AccentText
+                    )
                 }
                 if (r.followGoldenHour) {
                     SliverText(
-                        if (todaySun != null) "Today: ${shownTime.label()}, $GOLDEN_LEAD_MINUTES min before golden hour. Moves with the sun."
-                        else "Location isn't available, so the fixed time is used.",
-                        SliverType.Caption, Modifier.padding(top = 6.dp), color = SliverColors.AccentText,
+                        if (todaySun != null) {
+                            "Today: ${shownTime.label()}, $GOLDEN_LEAD_MINUTES min before golden hour. Moves with the sun."
+                        } else {
+                            "Location isn't available, so the fixed time is used."
+                        },
+                        SliverType.Caption,
+                        Modifier.padding(top = 6.dp),
+                        color = SliverColors.AccentText,
                     )
                 }
 
@@ -184,17 +192,26 @@ fun RemindersScreen(onBack: () -> Unit) {
                 SliverText(daysNote(r.days), SliverType.Caption, Modifier.padding(top = 8.dp), color = SliverColors.TextTertiary)
 
                 Label("Be smart about it", Modifier.padding(top = 24.dp, bottom = 2.dp))
-                SwitchLine("Skip days that are done", "No reminder if today already has a clip.", r.skipIfDone, { on -> update { it.copy(skipIfDone = on) } })
+                SwitchLine("Skip days that are done", "No reminder if today already has a clip.", r.skipIfDone, { on -> update {
+                    it.copy(skipIfDone = on)
+                } })
                 SwitchLine(
-                    "One last call at ${LastCallTime.label()}", "A second, quieter reminder if the day is still empty.",
-                    r.lastCall, { on -> update { it.copy(lastCall = on) } },
+                    "One last call at ${LastCallTime.label()}",
+                    "A second, quieter reminder if the day is still empty.",
+                    r.lastCall,
+                    { on -> update { it.copy(lastCall = on) } },
                 )
                 SwitchLine(
                     "Follow golden hour",
                     "Remind me $GOLDEN_LEAD_MINUTES min before the evening light, instead of a fixed time. Uses approximate location.",
-                    r.followGoldenHour, { on ->
+                    r.followGoldenHour,
+                    { on ->
                         update { it.copy(followGoldenHour = on) }
-                        if (on && controller.status(PermissionKind.CoarseLocation) == PermissionStatus.NotAsked) controller.request(PermissionKind.CoarseLocation)
+                        if (on && controller.status(PermissionKind.CoarseLocation) == PermissionStatus.NotAsked) {
+                            controller.request(
+                                PermissionKind.CoarseLocation
+                            )
+                        }
                     },
                 )
 
@@ -216,16 +233,27 @@ fun RemindersScreen(onBack: () -> Unit) {
                 NotifPreview(shownTime.label(), reminderCopy(NotifKind.REMINDER, today).body)
                 SliverText(
                     "The picture is yesterday's clip. \"Tomorrow\" just dismisses it, nothing is counted.",
-                    SliverType.Caption.copy(fontSize = ReelogType.Size.caption), Modifier.padding(top = 8.dp), color = SliverColors.TextTertiary,
+                    SliverType.Caption.copy(fontSize = ReelogType.Size.caption),
+                    Modifier.padding(top = 8.dp),
+                    color = SliverColors.TextTertiary,
                 )
             }
         }
 
         // Audit v1.8 §7 time picker (board phone 3): wheels, presets, "Set 15:55" — no system dialog.
         SliverBottomSheet(timeSheet, { timeSheet = false }) {
-            TimeWheelSheet(r.time, r.followGoldenHour, platform.is24Hour,
-                onGolden = { update { it.copy(followGoldenHour = true) }; timeSheet = false },
-                onSet = { t -> update { it.copy(time = t, followGoldenHour = false) }; timeSheet = false },
+            TimeWheelSheet(
+                r.time,
+                r.followGoldenHour,
+                platform.is24Hour,
+                onGolden = {
+                    update { it.copy(followGoldenHour = true) };
+                    timeSheet = false
+                },
+                onSet = { t ->
+                    update { it.copy(time = t, followGoldenHour = false) };
+                    timeSheet = false
+                },
             )
         }
         ProjectsPicker(projectsSheet, { projectsSheet = false }, open, watched.map { it.id }.toSet()) { picked ->
@@ -242,14 +270,21 @@ private fun Hairline() = Box(Modifier.fillMaxWidth().height(1.dp).background(Sli
 
 @Composable
 private fun Label(text: String, modifier: Modifier = Modifier) {
-    SliverText(text, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), modifier, color = SliverColors.TextTertiary)
+    SliverText(
+        text,
+        SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
+        modifier,
+        color = SliverColors.TextTertiary
+    )
 }
 
 @Composable
 private fun SwitchLine(title: String, caption: String, checked: Boolean, onChange: (Boolean) -> Unit, minHeight: androidx.compose.ui.unit.Dp = 66.dp) {
     Row(
         Modifier.fillMaxWidth().heightIn(min = minHeight)
-            .semantics { toggleableState = if (checked) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off }
+            .semantics {
+                toggleableState = if (checked) androidx.compose.ui.state.ToggleableState.On else androidx.compose.ui.state.ToggleableState.Off
+            }
             .clickable(role = Role.Switch) { onChange(!checked) }.padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -294,8 +329,10 @@ private fun PermOffRow(onTurnOn: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         SliverIcon(SliverIcons.Bell, SliverColors.PermBannerIcon, size = 18.dp)
         SliverText(
-            "Notifications are off for $APP_NAME in Android settings.", SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
-            Modifier.weight(1f), color = SliverColors.PermBannerText,
+            "Notifications are off for $APP_NAME in Android settings.",
+            SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)),
+            Modifier.weight(1f),
+            color = SliverColors.PermBannerText,
         )
         ReelogButton("Turn on", onTurnOn, small = true, fullWidth = false)
     }
@@ -313,15 +350,45 @@ private fun NotifPreview(time: String, body: String) {
             Box(Modifier.size(2.dp, 13.dp).clip(SliverShapes.Pill).background(SliverColors.AccentText))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            SliverText("$APP_NAME · $time", SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption)))
-            SliverText("Today's clip", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
+            SliverText(
+                "$APP_NAME · $time",
+                SliverType.Caption.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption))
+            )
+            SliverText(
+                "Today's clip",
+                SliverType.Headline.copy(
+                    fontSize = ReelogType.Size.label,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = ReelogType.lineFor(ReelogType.Size.label)
+                )
+            )
             SliverText(body, SliverType.BodySmall.copy(fontSize = ReelogType.Size.label, lineHeight = ReelogType.lineFor(ReelogType.Size.label)))
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                SliverText("Record", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.AccentText)
-                SliverText("Tomorrow", SliverType.Headline.copy(fontSize = ReelogType.Size.label, fontWeight = FontWeight.SemiBold, lineHeight = ReelogType.lineFor(ReelogType.Size.label)), color = SliverColors.TextSecondary)
+                SliverText(
+                    "Record",
+                    SliverType.Headline.copy(
+                        fontSize = ReelogType.Size.label,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = ReelogType.lineFor(ReelogType.Size.label)
+                    ),
+                    color = SliverColors.AccentText
+                )
+                SliverText(
+                    "Tomorrow",
+                    SliverType.Headline.copy(
+                        fontSize = ReelogType.Size.label,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = ReelogType.lineFor(ReelogType.Size.label)
+                    ),
+                    color = SliverColors.TextSecondary
+                )
             }
         }
-        Box(Modifier.size(52.dp).clip(SliverShapes.S).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(SliverColors.NotifThumbFrom, SliverColors.NotifThumbTo))))
+        Box(
+            Modifier.size(
+                52.dp
+            ).clip(SliverShapes.S).background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(SliverColors.NotifThumbFrom, SliverColors.NotifThumbTo)))
+        )
     }
 }
 
@@ -369,25 +436,55 @@ private fun TimeWheelSheet(initial: LocalTime, golden: Boolean, is24Hour: Boolea
         SliverText("Remind me at", SliverType.Title.copy(fontSize = ReelogType.Size.headline))
         Row(verticalAlignment = Alignment.CenterVertically) {
             app.sliver.core.ui.Wheel(
-                hours.map { it.toString().padStart(2, '0') }, hours.indexOf(shownHour(hour)).coerceAtLeast(0),
-                { i -> val h = hours[i]; hour = if (is24Hour) h else (h % 12) + if (pm) 12 else 0 }, "Hour", Modifier.weight(1f),
+                hours.map { it.toString().padStart(2, '0') },
+                hours.indexOf(shownHour(hour)).coerceAtLeast(0),
+                { i ->
+                    val h = hours[i];
+                    hour = if (is24Hour) h else (h % 12) + if (pm) 12 else 0
+                },
+                "Hour",
+                Modifier.weight(1f),
             )
             SliverText(":", ReelogType.display, Modifier.padding(horizontal = 8.dp))
             app.sliver.core.ui.Wheel(
-                minutes.map { it.toString().padStart(2, '0') }, minutes.indexOf(minute - minute % step).coerceAtLeast(0),
-                { i -> minute = minutes[i] }, "Minute", Modifier.weight(1f), onLongPress = { fine = !fine },
+                minutes.map { it.toString().padStart(2, '0') },
+                minutes.indexOf(minute - minute % step).coerceAtLeast(0),
+                { i -> minute = minutes[i] },
+                "Minute",
+                Modifier.weight(1f),
+                onLongPress = { fine = !fine },
             )
             if (!is24Hour) {
-                app.sliver.core.ui.Wheel(listOf("AM", "PM"), if (pm) 1 else 0, { i -> hour = hour % 12 + if (i == 1) 12 else 0 }, "AM or PM", Modifier.weight(0.8f))
+                app.sliver.core.ui.Wheel(
+                    listOf("AM", "PM"),
+                    if (pm) 1 else 0,
+                    { i -> hour = hour % 12 + if (i == 1) 12 else 0 },
+                    "AM or PM",
+                    Modifier.weight(0.8f)
+                )
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             app.sliver.core.kit.ReelogChip("Golden hour", golden, onGolden, leading = if (golden) SliverIcons.Check else null)
             listOf(LocalTime(8, 0), LocalTime(20, 0)).forEach { t ->
-                app.sliver.core.kit.ReelogChip(t.label(), !golden && hour == t.hour && minute == t.minute, { hour = t.hour; minute = t.minute })
+                app.sliver.core.kit.ReelogChip(t.label(), !golden && hour == t.hour && minute == t.minute, {
+                    hour = t.hour;
+                    minute = t.minute
+                })
             }
         }
         val t = LocalTime(hour, minute)
-        app.sliver.core.ui.PrimaryButton("Set ${if (is24Hour) "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}" else "${shownHour(hour)}:${minute.toString().padStart(2, '0')} ${if (pm) "PM" else "AM"}"}", { onSet(t) }, Modifier.fillMaxWidth())
+        app.sliver.core.ui.PrimaryButton(
+            "Set ${if (is24Hour) {
+                "${hour.toString().padStart(
+                    2,
+                    '0'
+                )}:${minute.toString().padStart(2, '0')}"
+            } else {
+                "${shownHour(hour)}:${minute.toString().padStart(2, '0')} ${if (pm) "PM" else "AM"}"
+            }}",
+            { onSet(t) },
+            Modifier.fillMaxWidth()
+        )
     }
 }

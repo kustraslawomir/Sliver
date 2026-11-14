@@ -113,5 +113,7 @@ fun isVariableFrameRate(timesUs: List<Long>): Boolean {
     if (gaps.size < 3) return false
     val sorted = gaps.sorted()
     val median = sorted[sorted.size / 2]
-    return sorted.last() - sorted.first() > median / 4 && sorted.count { kotlin.math.abs(it - median) > median / 4 } > gaps.size / 10
+    return sorted.last() - sorted.first() > median / 4 && sorted.count {
+        kotlin.math.abs(it - median) > median / 4
+    } > gaps.size / 10
 }

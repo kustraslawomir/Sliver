@@ -11,6 +11,8 @@ import app.sliver.data.backup.DayFileReader
 import app.sliver.data.backup.NetworkMonitor
 import app.sliver.data.backup.RestoreScheduler
 import app.sliver.data.backup.RestoredDayWriter
+import app.sliver.data.db.Migration10To11
+import app.sliver.data.db.Migration11To12
 import app.sliver.data.db.Migration2To3
 import app.sliver.data.db.Migration3To4
 import app.sliver.data.db.Migration4To5
@@ -19,8 +21,6 @@ import app.sliver.data.db.Migration6To7
 import app.sliver.data.db.Migration7To8
 import app.sliver.data.db.Migration8To9
 import app.sliver.data.db.Migration9To10
-import app.sliver.data.db.Migration10To11
-import app.sliver.data.db.Migration11To12
 import app.sliver.data.db.SliverDatabase
 import app.sliver.data.export.ClipExporter
 import app.sliver.data.files.FileStore
@@ -70,13 +70,19 @@ actual val platformModule: Module = module {
     single<GoogleAuth> { FakeGoogleAuth() }
     single<DayFileReader> { DayFileReader(::readFileBytes) }
     // DECISION: no thumbnail extraction yet; returning 0 means "no colour", like the Android failure path.
-    single<RestoredDayWriter> { RestoredDayWriter { bytes, videoPath, _ -> writeFileBytes(videoPath, bytes); 0 } }
+    single<RestoredDayWriter> { RestoredDayWriter { bytes, videoPath, _ ->
+        writeFileBytes(videoPath, bytes)
+        0
+    }
+    }
     single<RestoreScheduler> { IosJobs }
     single<BackupScheduler> { IosJobs }
     single<NetworkMonitor> { IosNetworkMonitor }
     single<ArchiveExporter> { IosArchiveExporter }
     single<FilmShare> { IosFilmShare }
-    single<app.sliver.feature.trim.RecordingSaver> { object : app.sliver.feature.trim.RecordingSaver { override suspend fun save(path: String, stampMillis: Long): Boolean = TODO("iOS later") } }
+    single<app.sliver.feature.trim.RecordingSaver> {
+        object : app.sliver.feature.trim.RecordingSaver { override suspend fun save(path: String, stampMillis: Long): Boolean = TODO("iOS later") }
+    }
     single<HttpClientEngine> { Darwin.create() }
     single<GalleryProvider> { IosGalleryProvider }
     single { PreferenceDataStoreFactory.createWithPath { "${documentsDir()}/settings.preferences_pb".toPath() } }

@@ -23,7 +23,9 @@ class AndroidGoldenHour(private val context: Context) : GoldenHourProvider {
     override fun refresh() {
         if (!allowed()) return
         val lm = context.getSystemService(LocationManager::class.java)
-        val last = runCatching { lm.getProviders(true).mapNotNull { lm.getLastKnownLocation(it) }.maxByOrNull { it.time } }.getOrNull() ?: return
+        val last = runCatching {
+            lm.getProviders(true).mapNotNull { lm.getLastKnownLocation(it) }.maxByOrNull { it.time }
+        }.getOrNull() ?: return
         prefs.edit().putFloat("lat", (round(last.latitude * 10) / 10).toFloat()).putFloat("lon", (round(last.longitude * 10) / 10).toFloat()).apply()
     }
 }

@@ -1,12 +1,9 @@
 package app.sliver.feature.archive
 
-import app.sliver.data.FilmFormat
 import app.sliver.data.db.Day
 import app.sliver.feature.autoimport.isAuto
-import app.sliver.feature.camera.label
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 

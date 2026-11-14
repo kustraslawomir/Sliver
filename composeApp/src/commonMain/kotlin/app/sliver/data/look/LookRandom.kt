@@ -60,10 +60,16 @@ object LookRandom {
         val pulse = 0.8f + 0.2f * sin(2 * PI.toFloat() * timeSec / (period * 0.7f) + phase)
         return LeakState(
             strength = (0.45 + 0.4 * hash01(seed, -7)).toFloat() * pulse,
-            x = when (edge) { 0 -> 0f; 1 -> 1f; else -> pos },
-            y = when (edge) { 2 -> 0f; 3 -> 1f; else -> pos },
+            x = when (edge) { 0 -> 0f;
+                1 -> 1f;
+                else -> pos },
+            y = when (edge) { 2 -> 0f;
+                3 -> 1f;
+                else -> pos },
             radius = (0.35 + 0.25 * hash01(seed, -8)).toFloat(),
-            r = 1f, g = 0.42f - 0.27f * mix, b = 0.1f + 0.02f * mix,
+            r = 1f,
+            g = 0.42f - 0.27f * mix,
+            b = 0.1f + 0.02f * mix,
         )
     }
 }

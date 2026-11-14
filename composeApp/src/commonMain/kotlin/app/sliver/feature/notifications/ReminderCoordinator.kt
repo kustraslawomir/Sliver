@@ -1,13 +1,12 @@
 package app.sliver.feature.notifications
 
+import app.sliver.core.time.goldenWindows
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
 import app.sliver.data.repo.ProjectRepository
 import app.sliver.data.settings.AppSettings
 import app.sliver.data.settings.ReminderSettings
 import app.sliver.data.settings.SettingsRepository
-import app.sliver.core.time.goldenWindows
-import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -22,6 +21,7 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 /** Replaces every pending local notification with [plan]. */
 interface ReminderScheduler {
@@ -67,7 +67,9 @@ class ReminderCoordinator(
 
     private fun plan(s: AppSettings, all: List<Day>) {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        scheduler.schedule(planNotifications(s, now, all.map { it.date }.toSet(), golden::eveningGoldenHour, log.handled(now.date)))
+        scheduler.schedule(planNotifications(s, now, all.map {
+            it.date
+        }.toSet(), golden::eveningGoldenHour, log.handled(now.date)))
     }
 
     /** Whether today has a clip in the projects the reminder watches (every open project when none are picked). */

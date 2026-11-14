@@ -25,8 +25,10 @@ object ReelogType {
     val headline get() = Base.copy(fontSize = Size.headline, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).em)
     val body get() = Base.copy(fontSize = Size.body, lineHeight = 24.sp, fontWeight = FontWeight.Normal)
     val label get() = Base.copy(fontSize = Size.label, lineHeight = 20.sp, fontWeight = FontWeight.Medium)
+
     /** HubV18 film poster title, 20/600. */
     val poster get() = Base.copy(fontSize = 20.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.02).em)
+
     /** Calendar day number: the board asks 12/500; 13 sp is the app's minimum text size. */
     val cellNumber get() = Base.copy(fontSize = Size.caption, lineHeight = 16.sp, fontWeight = FontWeight.Medium, fontFeatureSettings = "tnum")
     val caption get() = Base.copy(fontSize = Size.caption, lineHeight = 18.sp, fontWeight = FontWeight.Normal, color = SliverColors.TextTertiary)
@@ -35,15 +37,24 @@ object ReelogType {
     val clock get() = display.copy(fontSize = 64.sp, lineHeight = 68.sp, fontFeatureSettings = "tnum")
 
     /** Burned-in / on-video date stamp: the only mono text. */
-    val stamp get() = Base.copy(fontSize = Size.caption, lineHeight = 18.sp, fontWeight = FontWeight.Medium, fontFamily = SliverFonts.Mono, letterSpacing = 1.44.sp, color = SliverColors.TextSecondary)
+    val stamp get() = Base.copy(
+        fontSize = Size.caption,
+        lineHeight = 18.sp,
+        fontWeight = FontWeight.Medium,
+        fontFamily = SliverFonts.Mono,
+        letterSpacing = 1.44.sp,
+        color = SliverColors.TextSecondary
+    )
 
     /** Sizes of the scale, for `.copy(fontSize = …)` on an existing style. */
     object Size {
         val display = 40.sp
         val title = 28.sp
         val headline = 22.sp
+
         /** DayV18 day title. */
         val dayTitle = 24.sp
+
         /** DayV18 action tile label. */
         val tileLabel = 14.sp
         val body = 17.sp

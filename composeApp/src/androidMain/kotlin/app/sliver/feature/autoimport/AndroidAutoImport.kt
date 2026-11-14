@@ -2,20 +2,20 @@ package app.sliver.feature.autoimport
 
 import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
 import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
-import app.sliver.feature.notifications.DeepLinkTarget
-import app.sliver.feature.notifications.FILL_NOTIFICATION_ID
-import app.sliver.feature.notifications.ProgressNotifier
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.sliver.data.media.MotionPhoto
+import app.sliver.feature.notifications.DeepLinkTarget
+import app.sliver.feature.notifications.FILL_NOTIFICATION_ID
+import app.sliver.feature.notifications.ProgressNotifier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -77,19 +77,30 @@ class AndroidMediaScanner(private val context: Context) : MediaScanner {
 
     private fun query(base: Uri, video: Boolean, lo: Long, hi: Long, each: (Uri, Long, Long, Boolean, String?) -> Unit) {
         val projection = arrayOf(
-            MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DATE_TAKEN,
+            MediaStore.MediaColumns._ID,
+            MediaStore.MediaColumns.DATE_TAKEN,
             if (video) MediaStore.Video.Media.DURATION else MediaStore.MediaColumns._ID,
-            MediaStore.MediaColumns.RELATIVE_PATH, MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.RELATIVE_PATH,
+            MediaStore.MediaColumns.DISPLAY_NAME,
         )
         runCatching {
             context.contentResolver.query(
-                base, projection, "${MediaStore.MediaColumns.DATE_TAKEN} >= ? AND ${MediaStore.MediaColumns.DATE_TAKEN} < ?",
-                arrayOf(lo.toString(), hi.toString()), "${MediaStore.MediaColumns.DATE_TAKEN} ASC",
+                base,
+                projection,
+                "${MediaStore.MediaColumns.DATE_TAKEN} >= ? AND ${MediaStore.MediaColumns.DATE_TAKEN} < ?",
+                arrayOf(lo.toString(), hi.toString()),
+                "${MediaStore.MediaColumns.DATE_TAKEN} ASC",
             )?.use { c ->
                 while (c.moveToNext()) {
                     val path = c.getString(3)
                     if (app.sliver.feature.autoimport.isScreenCapture(path, c.getString(4)) || isDemoMedia(path)) continue
-                    each(ContentUris.withAppendedId(base, c.getLong(0)), c.getLong(1), if (video) c.getLong(2) else 0L, app.sliver.feature.autoimport.isCameraPath(path), c.getString(4))
+                    each(
+                        ContentUris.withAppendedId(base, c.getLong(0)),
+                        c.getLong(1),
+                        if (video) c.getLong(2) else 0L,
+                        app.sliver.feature.autoimport.isCameraPath(path),
+                        c.getString(4)
+                    )
                 }
             }
         }

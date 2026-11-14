@@ -1,6 +1,5 @@
 package app.sliver.feature.notifications
 
-import app.sliver.R
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,23 +8,24 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import app.sliver.MainActivity
+import app.sliver.R
 import app.sliver.core.time.todayLocal
 import app.sliver.data.settings.SettingsRepository
-import kotlinx.coroutines.flow.first
-import android.graphics.BitmapFactory
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.koin.mp.KoinPlatform
 
 private const val CH_REMINDERS = "daily_reminder"
@@ -56,7 +56,8 @@ fun canNotify(context: Context) = Build.VERSION.SDK_INT < 33 ||
     ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
 fun openTargetIntent(context: Context, requestCode: Int, target: DeepLinkTarget): PendingIntent = PendingIntent.getActivity(
-    context, requestCode,
+    context,
+    requestCode,
     Intent(context, MainActivity::class.java)
         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         .putExtra(EXTRA_DEEPLINK, target.encode()),
@@ -92,7 +93,8 @@ private fun postReminder(context: Context, kind: NotifKind, date: LocalDate, thu
     val copy = reminderCopy(kind, date)
     val record = openTargetIntent(context, id, DeepLinkTarget.Camera)
     val tomorrow = PendingIntent.getBroadcast(
-        context, id,
+        context,
+        id,
         Intent(context, ReminderDismissReceiver::class.java).putExtra(EXTRA_NOTIF_ID, id),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
@@ -141,7 +143,8 @@ class AndroidReminderScheduler(private val context: Context) : ReminderScheduler
     private fun code(kind: NotifKind, date: LocalDate) = kind.ordinal * HORIZON_DAYS + (date.toEpochDays() % HORIZON_DAYS).toInt()
 
     private fun intent(kind: NotifKind, date: LocalDate, flags: Int) = PendingIntent.getBroadcast(
-        context, code(kind, date),
+        context,
+        code(kind, date),
         Intent(context, ReminderReceiver::class.java).putExtra(EXTRA_KIND, kind.name).putExtra(EXTRA_DATE, date.toString()),
         flags or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -150,7 +153,10 @@ class AndroidReminderScheduler(private val context: Context) : ReminderScheduler
         val today = todayLocal()
         for (kind in NotifKind.entries) for (i in 0 until HORIZON_DAYS) {
             val date = today.plus(DatePeriod(days = i))
-            intent(kind, date, PendingIntent.FLAG_NO_CREATE)?.let { alarms.cancel(it); it.cancel() }
+            intent(kind, date, PendingIntent.FLAG_NO_CREATE)?.let {
+                alarms.cancel(it);
+                it.cancel()
+            }
         }
         val zone = TimeZone.currentSystemDefault()
         plan.forEach { p ->

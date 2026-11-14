@@ -3,16 +3,10 @@ package app.sliver.core.theme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
-import app.sliver.core.theme.generated.TokenText
-import app.sliver.core.theme.generated.Tokens
 
 object SliverFonts {
     var Sans by mutableStateOf<FontFamily?>(null)
@@ -26,6 +20,7 @@ object SliverType {
     val DisplayM get() = ReelogType.title
     val Title get() = ReelogType.headline
     val DisplayS get() = Title
+
     /** List rows and row titles: 17 sp. */
     val Headline get() = ReelogType.body.copy(fontWeight = FontWeight.Medium)
     val Body get() = ReelogType.body
@@ -33,6 +28,7 @@ object SliverType {
     val Caption get() = ReelogType.caption
     val Num get() = ReelogType.label.tabular()
     val Meta get() = ReelogType.caption.copy(fontWeight = FontWeight.Medium, color = SliverColors.TextSecondary).tabular()
+
     /** Caption-size Geist with tabular figures: grid and poster labels. */
     fun tnum(tracking: TextUnit = TextUnit.Unspecified, color: Color = SliverColors.TextPrimary) =
         ReelogType.caption.copy(color = color, letterSpacing = tracking).tabular()

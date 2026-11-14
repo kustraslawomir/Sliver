@@ -1,6 +1,5 @@
 package app.sliver.feature.autoimport
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sliver.core.APP_NAME
 import app.sliver.core.icons.SliverIcon
 import app.sliver.core.icons.SliverIcons
@@ -57,7 +57,9 @@ fun rememberFolderChoice(): FolderChoice {
     var useFolder by rememberSaveable { mutableStateOf(false) }
     val folder by remember { store.folder }.collectAsStateWithLifecycle(null)
     var tick by remember { mutableStateOf(0) }
-    val grantOk = remember(folder, tick) { folder?.let { runCatching { access.isGranted(it.tree) }.getOrDefault(false) } == true }
+    val grantOk = remember(folder, tick) {
+        folder?.let { runCatching { access.isGranted(it.tree) }.getOrDefault(false) } == true
+    }
     val pick = rememberFolderPicker { tree ->
         scope.launch {
             runCatching {
@@ -69,7 +71,11 @@ fun rememberFolderChoice(): FolderChoice {
         }
     }
     return FolderChoice(
-        useFolder, { useFolder = it }, folder, grantOk, pick,
+        useFolder,
+        { useFolder = it },
+        folder,
+        grantOk,
+        pick,
         forget = {
             scope.launch {
                 folder?.let { access.release(it.tree) }
@@ -96,7 +102,9 @@ fun FolderSourcePicker(choice: FolderChoice) {
 private fun FolderCard(choice: FolderChoice) {
     val folder = choice.folder
     Column(
-        Modifier.fillMaxWidth().clip(SliverShapes.R12).background(SliverColors.Surface1).border(1.dp, SliverColors.LineStrong, SliverShapes.R12).padding(SliverSpace.S4),
+        Modifier.fillMaxWidth().clip(
+            SliverShapes.R12
+        ).background(SliverColors.Surface1).border(1.dp, SliverColors.LineStrong, SliverShapes.R12).padding(SliverSpace.S4),
         verticalArrangement = Arrangement.spacedBy(SliverSpace.S3),
     ) {
         if (folder == null) {
@@ -106,7 +114,9 @@ private fun FolderCard(choice: FolderChoice) {
         } else {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
                 SliverIcon(if (choice.grantOk) SliverIcons.Folder else SliverIcons.AlertTriangle, SliverColors.TextPrimary)
-                SliverText(folder.name.ifEmpty { "Folder" }, SliverType.Headline, Modifier.weight(1f), color = SliverColors.TextPrimary, maxLines = 1)
+                SliverText(folder.name.ifEmpty {
+                    "Folder"
+                }, SliverType.Headline, Modifier.weight(1f), color = SliverColors.TextPrimary, maxLines = 1)
             }
             if (!choice.grantOk) {
                 SliverText("$APP_NAME lost access to this folder. Choose it again to continue.", SliverType.BodySmall, color = SliverColors.TextSecondary)
@@ -131,6 +141,8 @@ fun FolderRunNotes(run: ImportRun) {
             else -> null
         }
         empty?.let { SliverText(it, SliverType.BodySmall, color = SliverColors.TextSecondary) }
-        folderSummary(run.unreadable, run.fileTimeDates, run.truncated).forEach { SliverText(it, SliverType.BodySmall, color = SliverColors.TextSecondary) }
+        folderSummary(run.unreadable, run.fileTimeDates, run.truncated).forEach {
+            SliverText(it, SliverType.BodySmall, color = SliverColors.TextSecondary)
+        }
     }
 }

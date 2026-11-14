@@ -5,9 +5,9 @@ import android.location.Geocoder
 import android.media.ExifInterface
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class AndroidPlaceResolver(private val context: Context) : PlaceResolver {
     override suspend fun resolve(source: String): String? = withContext(Dispatchers.IO) {

@@ -17,7 +17,6 @@ import app.sliver.data.repo.DayRepository
 import app.sliver.feature.notifications.DeepLinkTarget
 import app.sliver.feature.notifications.EXTRA_DEEPLINK
 import app.sliver.feature.notifications.encode
-import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +26,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import org.koin.mp.KoinPlatform
+import java.io.File
 
 private const val ACTION_MIDNIGHT = "app.sliver.widget.MIDNIGHT"
 private const val THUMB_MAX_PX = 400
@@ -72,7 +72,8 @@ suspend fun refreshTodayWidgets(context: Context) {
 
 private fun scheduleMidnight(context: Context, atMillis: Long) {
     val pi = PendingIntent.getBroadcast(
-        context, 0,
+        context,
+        0,
         Intent(context, TodayWidget::class.java).setAction(ACTION_MIDNIGHT),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
