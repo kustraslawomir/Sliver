@@ -152,18 +152,24 @@ private fun Poster(film: Film, plan: FilmPlan, tint: Color, onLongClick: () -> U
 @Composable
 fun FilmActionsSheet(film: Film?, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
-    SliverBottomSheet(film != null, onDismiss) {
+    var confirm by remember(film) { mutableStateOf(false) }
+    SliverBottomSheet(film != null && !confirm, onDismiss) {
         Column {
             SliverText(film?.name.orEmpty(), SliverType.Headline, Modifier.padding(bottom = SliverSpace.S2))
-            GhostButton("Delete film", {
-                onDismiss()
-                if (film != null) scope.launch {
-                    runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(film) }
-                        .onFailure { Notices.show("Couldn't delete this film. Try again.") }
-                }
-            }, Modifier.fillMaxWidth(), destructive = true)
+            GhostButton("Delete film\u2026", { confirm = true }, Modifier.fillMaxWidth(), destructive = true)
         }
     }
+    // Owner 14 Nov: deleting is never a single tap.
+    app.sliver.core.ui.ConfirmSheet(
+        film != null && confirm, "Delete this film?", "The days stay in the project. The copy in your gallery stays too.", "Delete film",
+        {
+            if (film != null) scope.launch {
+                runCatching { KoinPlatform.getKoin().get<FilmDeleter>().delete(film) }
+                    .onFailure { Notices.show("Couldn't delete this film. Try again.") }
+            }
+        },
+        onDismiss,
+    )
 }
 
 /** "Made 13 Nov, 15:58" in the phone's time zone. */

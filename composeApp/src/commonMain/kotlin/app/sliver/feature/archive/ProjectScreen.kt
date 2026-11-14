@@ -111,6 +111,7 @@ import app.sliver.core.ui.ClipDrop
 import app.sliver.core.ui.MaxContentWidth
 import app.sliver.core.ui.NoticeSheet
 import app.sliver.core.ui.SliverBottomSheet
+import app.sliver.core.ui.GhostButton
 import app.sliver.core.ui.rememberTapGate
 import app.sliver.data.db.Day
 import app.sliver.data.repo.DayRepository
@@ -195,6 +196,7 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
     var projectsOpen by remember { mutableStateOf(false) }
     var projectAction by remember { mutableStateOf<ProjectAction?>(null) }
     var menuOpen by remember { mutableStateOf(false) }
+    var manageOpen by remember { mutableStateOf(false) }
 
     val wide = !LocalWindowSize.current.isCompact
     var paneDay by rememberSaveable { mutableStateOf<String?>(null) }
@@ -347,12 +349,24 @@ fun ProjectScreen(onNavigate: (Route) -> Unit) {
                 onRename = { menuOpen = false; projectAction = ProjectAction.Rename },
                 onShape = { menuOpen = false; projectAction = ProjectAction.Format },
                 onFill = { menuOpen = false; onNavigate(Route.FillThePast) },
-                onArchive = {
-                    menuOpen = false
-                    project?.let { p -> scope.launch { koin.get<ProjectRepository>().setArchived(p.id, true) } }
-                },
-                onDelete = { menuOpen = false; projectAction = ProjectAction.Delete },
+                onManage = { menuOpen = false; manageOpen = true },
             )
+        }
+        SliverBottomSheet(manageOpen, onDismiss = { manageOpen = false }) {
+            Column(verticalArrangement = Arrangement.spacedBy(SliverSpace.S3)) {
+                SliverText("Archive or delete", SliverType.Title)
+                SliverText(
+                    "Archive hides the project from your list and keeps everything. You can bring it back from Projects.",
+                    SliverType.BodySmall, color = SliverColors.TextSecondary,
+                )
+                SecondaryButton("Archive project", {
+                    manageOpen = false
+                    project?.let { p -> scope.launch { koin.get<ProjectRepository>().setArchived(p.id, true) } }
+                }, Modifier.fillMaxWidth())
+                GhostButton(
+                    "Delete project\u2026", { manageOpen = false; projectAction = ProjectAction.Delete }, Modifier.fillMaxWidth(), destructive = true,
+                )
+            }
         }
         SliverBottomSheet(draftsSheet && waiting.isNotEmpty(), onDismiss = { draftsSheet = false }) {
             ReviewSheetBody(
@@ -590,7 +604,7 @@ private fun ReviewRow(label: String, onClick: () -> Unit) {
 @Composable
 private fun ProjectMenu(
     canLeave: Boolean,
-    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onArchive: () -> Unit, onDelete: () -> Unit,
+    onDismiss: () -> Unit, onRename: () -> Unit, onShape: () -> Unit, onFill: () -> Unit, onManage: () -> Unit,
 ) {
     app.sliver.core.ui.BackHandler(onBack = onDismiss)
     Box(Modifier.fillMaxSize().clickable(remember { MutableInteractionSource() }, null, onClick = onDismiss))
@@ -608,8 +622,9 @@ private fun ProjectMenu(
             MenuItem(HubIcons.Rename, "Rename", SliverColors.TextPrimary, onRename)
             MenuItem(HubIcons.Shape, "Change orientation", SliverColors.TextPrimary, onShape)
             MenuItem(HubIcons.FillDays, "Fill the calendar", SliverColors.TextPrimary, onFill)
-            MenuItem(HubIcons.Archive, "Archive project", SliverColors.TextPrimary, onArchive, canLeave)
-            MenuItem(HubIcons.Trash, "Delete project", SliverColors.Error, onDelete, canLeave)
+            // Owner 14 Nov: archive and delete must not be one tap away; they sit behind a muted last item.
+            Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(SliverColors.LineHairline))
+            MenuItem(SliverIcons.MoreHorizontal, "Archive or delete\u2026", SliverColors.TextSecondary, onManage, canLeave)
             if (!canLeave) SliverText(
                 "Keep at least one open project.", SliverType.Caption, Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 color = SliverColors.TextTertiary,

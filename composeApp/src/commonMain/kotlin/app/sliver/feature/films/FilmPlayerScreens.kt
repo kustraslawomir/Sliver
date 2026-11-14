@@ -211,6 +211,7 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
     var saving by remember { mutableStateOf(false) }
     var saved by remember(film?.renderPath) { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var moreOpen by remember { mutableStateOf(false) }
 
     val f = film
     val path = f?.renderPath
@@ -307,7 +308,8 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
             // Owner: share / edit / delete are icons, not buttons.
             IconButton44({ share.share(path, f.name) }, "Share film") { SliverIcon(SliverIcons.Share, SliverColors.TextPrimary, size = 20.dp) }
             IconButton44(onEdit, "Edit film") { SliverIcon(SliverIcons.Pencil, SliverColors.TextPrimary, size = 20.dp) }
-            IconButton44({ confirmDelete = true }, "Delete film") { SliverIcon(SliverIcons.Trash2, SliverColors.Error, size = 20.dp) }
+            // Owner 14 Nov: delete is not a top-bar icon any more; it lives under More.
+            IconButton44({ moreOpen = true }, "More") { SliverIcon(SliverIcons.MoreHorizontal, SliverColors.TextPrimary, size = 20.dp) }
         }
         // The video takes the room that is left, so the buttons are always on screen (a 9:16 film pushed them off).
         Box(Modifier.weight(1f).fillMaxWidth(), Alignment.Center) {
@@ -344,6 +346,12 @@ fun FilmPlayerScreen(onBack: () -> Unit, onEdit: () -> Unit) {
                 info, SliverType.Meta.copy(fontSize = ReelogType.Size.caption, lineHeight = ReelogType.lineFor(ReelogType.Size.caption), textAlign = androidx.compose.ui.text.style.TextAlign.Center),
                 Modifier.fillMaxWidth(), color = SliverColors.TextTertiary,
             )
+        }
+    }
+    app.sliver.core.ui.SliverBottomSheet(moreOpen, onDismiss = { moreOpen = false }) {
+        Column {
+            SliverText(f.name, SliverType.Headline, Modifier.padding(bottom = SliverSpace.S2))
+            app.sliver.core.ui.GhostButton("Delete film\u2026", { moreOpen = false; confirmDelete = true }, Modifier.fillMaxWidth(), destructive = true)
         }
     }
     app.sliver.core.ui.ConfirmSheet(

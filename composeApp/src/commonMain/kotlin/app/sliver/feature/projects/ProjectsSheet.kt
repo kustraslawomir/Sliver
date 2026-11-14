@@ -300,8 +300,15 @@ private fun ProjectMenu(
         SheetHeader(project.name, onBack)
         MenuRow("Rename", onRename)
         MenuRow("Change orientation", onFormat)
-        MenuRow(if (project.archived) "Unarchive" else "Archive", onArchive, enabled = canLeave || project.archived)
-        MenuRow("Delete project", onDelete, destructive = true, enabled = canLeave)
+        // Owner 14 Nov: archive and delete sit one step deeper (an archived project still shows Unarchive directly).
+        var manage by remember { mutableStateOf(false) }
+        if (project.archived) MenuRow("Unarchive", onArchive)
+        if (!manage) {
+            MenuRow(if (project.archived) "Delete\u2026" else "Archive or delete\u2026", { manage = true }, enabled = canLeave || project.archived)
+        } else {
+            if (!project.archived) MenuRow("Archive", onArchive, enabled = canLeave)
+            MenuRow("Delete project", onDelete, destructive = true, enabled = canLeave || project.archived)
+        }
         if (!canLeave) SliverText("This is your only open project.", SliverType.Caption)
     }
 }
